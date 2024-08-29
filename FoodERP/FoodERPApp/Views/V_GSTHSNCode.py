@@ -171,8 +171,8 @@ class GetGSTHSNCodeDetailsView(CreateAPIView):
                 
                 else:
                         #---- transaction_logNew 7 in m_transactiontype for Data Not available
-                        log_entry = create_transaction_logNew(request, 0, 0, "Get MRP Details:"+"MRP Details Not available", 7, 0)
-                        return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'MRP Details not available', 'Data': []})
+                        log_entry = create_transaction_logNew(request, 0, 0, "Get GST Details:"+"GST Details Not available", 7, 0)
+                        return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'GST Details not available', 'Data': []})
                 
         except Exception as e:
             # ---- Exception 33 for Exception in m_transactiontype
