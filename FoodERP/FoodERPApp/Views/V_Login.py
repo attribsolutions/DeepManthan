@@ -546,21 +546,30 @@ class GetUserDetailsView(APIView):
                 employee = user.Employee
                 company = employee.Company
                 companygroup = company.CompanyGroup
-                
-               
-            
+                  
+                # Get PartyName
+                PartyData=M_Users.objects.raw(f'''select m.id,m.LoginName,p.id,p.Name as PartyName,p.AlternateContactNo from M_Users as m
+                                left Join MC_EmployeeParties as ep on m.Employee_id=ep.Employee_id
+                                left join M_Parties as p on ep.Party_id=p.id where m.id={UserId}''')
+                #End
+                  
                 a = list()
-                a.append({
-                    "UserID": UserId,
-                    "UserName":user.LoginName,
-                    "EmployeeID": employee.id,
-                    "EmployeeName": employee.Name,
-                    "EmpMobileNumber": employee.Mobile,
-                    "CompanyID": company.id,
-                    "CompanyName": company.Name,
-                    "IsSCMCompany": company.IsSCM,
-                    "CompanyGroup": companygroup.id
-                })
+                
+                if PartyData:
+                    for p in PartyData:
+                        
+                        a.append({
+                            "UserID": UserId,
+                            "UserName":user.LoginName,
+                            "EmployeeID": employee.id,
+                            "EmployeeName": employee.Name,
+                            "EmpMobileNumber": employee.Mobile,
+                            "CompanyID": company.id,
+                            "CompanyName": company.Name,
+                            "IsSCMCompany": company.IsSCM,
+                            "CompanyGroup": companygroup.id,
+                            "AlternateContactNo":p.AlternateContactNo
+                        })
                 
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': a[0]})
         except Exception as e:
