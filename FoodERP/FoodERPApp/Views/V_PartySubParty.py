@@ -96,7 +96,8 @@ class PartySubPartyViewSecond(CreateAPIView):
                         "PartyType": a['Party']['PartyType']['id'],
                         "IsVendor": a['Party']['PartyType']['IsVendor'],
                         "Route": a['Route']['id'],
-                        "Creditlimit": a['Creditlimit']
+                        "Creditlimit": a['Creditlimit'],
+                        "PartyTypeName" : a['Party']['PartyType']['Name']
                     }) 
 
                 for a in SubPartySerializer:
@@ -108,7 +109,8 @@ class PartySubPartyViewSecond(CreateAPIView):
                         "PartyType": a['SubParty']['PartyType']['id'],
                         "IsVendor": a['SubParty']['PartyType']['IsVendor'],
                         "Route": a['Route']['id'],
-                        "Creditlimit": a['Creditlimit']
+                        "Creditlimit": a['Creditlimit'],
+                        "PartyTypeName" : a['Party']['PartyType']['Name']                        
                     })
                 
                 log_entry = create_transaction_logNew(request, PartySerializer,0,'',175,0)               

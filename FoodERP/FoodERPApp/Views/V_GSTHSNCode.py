@@ -140,6 +140,7 @@ class GetGSTHSNCodeDetailsView(CreateAPIView):
      
     @transaction.atomic()
     def post(self, request):
+        
         GSTHSNData=JSONParser().parse(request)
         try:
              with transaction.atomic():
@@ -152,7 +153,8 @@ class GetGSTHSNCodeDetailsView(CreateAPIView):
 
                 query = f'''
                    SELECT M_GSTHSNCode.id,M_GSTHSNCode.EffectiveDate,M_GSTHSNCode.GSTPercentage,M_GSTHSNCode.HSNCode,M_GSTHSNCode.CommonID,C_Companies.Name CompanyName,M_Items.Name as ItemName 
-                   FROM M_GSTHSNCode left join C_Companies on C_Companies.id = M_GSTHSNCode.Company_id left join m_items on M_Items.id=M_GSTHSNCode.Item_id
+                   FROM M_GSTHSNCode left join C_Companies on C_Companies.id = M_GSTHSNCode.Company_id 
+                   left join M_Items on M_Items.id=M_GSTHSNCode.Item_id
                    where M_GSTHSNCode.IsDeleted=0  
                    AND M_GSTHSNCode.EffectiveDate='{EffectiveDate}' AND M_GSTHSNCode.CommonID=%s
                     -- group by EffectiveDate,Party_id,Division_id,CommonID 
@@ -171,8 +173,8 @@ class GetGSTHSNCodeDetailsView(CreateAPIView):
                 
                 else:
                         #---- transaction_logNew 7 in m_transactiontype for Data Not available
-                        log_entry = create_transaction_logNew(request, 0, 0, "Get MRP Details:"+"MRP Details Not available", 7, 0)
-                        return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'MRP Details not available', 'Data': []})
+                        log_entry = create_transaction_logNew(request, 0, 0, "Get GST Details:"+"GST Details Not available", 7, 0)
+                        return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'GST Details not available', 'Data': []})
                 
         except Exception as e:
             # ---- Exception 33 for Exception in m_transactiontype
