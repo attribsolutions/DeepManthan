@@ -152,14 +152,15 @@ class GetGSTHSNCodeDetailsView(CreateAPIView):
 
                 query = f'''
                    SELECT M_GSTHSNCode.id,M_GSTHSNCode.EffectiveDate,M_GSTHSNCode.GSTPercentage,M_GSTHSNCode.HSNCode,M_GSTHSNCode.CommonID,C_Companies.Name CompanyName,M_Items.Name as ItemName 
-                   FROM M_GSTHSNCode left join C_Companies on C_Companies.id = M_GSTHSNCode.Company_id left join M_Items on M_Items.id=M_GSTHSNCode.Item_id
+                   FROM M_GSTHSNCode left join C_Companies on C_Companies.id = M_GSTHSNCode.Company_id 
+                   left join M_Items on M_Items.id=M_GSTHSNCode.Item_id
                    where M_GSTHSNCode.IsDeleted=0  
                    AND M_GSTHSNCode.EffectiveDate='{EffectiveDate}' AND M_GSTHSNCode.CommonID=%s
                     -- group by EffectiveDate,Party_id,Division_id,CommonID 
                     Order BY EffectiveDate Desc
                 '''   
                 
-                GSTHSNQuery = M_GSTHSNCode.objects.raw(query, [CommonID])   
+                GSTHSNQuery = M_GSTHSNCode.objects.raw(query, [CommonID])  
                 
                 if list(GSTHSNQuery):
                      
