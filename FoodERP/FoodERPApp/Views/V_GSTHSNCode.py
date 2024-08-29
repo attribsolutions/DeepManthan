@@ -140,6 +140,7 @@ class GetGSTHSNCodeDetailsView(CreateAPIView):
      
     @transaction.atomic()
     def post(self, request):
+        
         GSTHSNData=JSONParser().parse(request)
         try:
              with transaction.atomic():
