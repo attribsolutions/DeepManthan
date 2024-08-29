@@ -23,8 +23,9 @@ class M_MRPsSerializerSecond(serializers.Serializer):
      
     
 class MRPListDetailsSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
+    id = serializers.IntegerField() 
     EffectiveDate = serializers.DateField()
+    MRP = serializers.DecimalField(max_digits=20, decimal_places=2)
     CommonID = serializers.IntegerField()
     CompanyName = serializers.CharField(max_length=100)
     ItemName = serializers.CharField(max_length=100)
