@@ -211,7 +211,7 @@ Party,party.Name PartyName,party.GSTIN PartyGSTIN,party.MobileNo PartyMobileNo,M
 custaddr.FSSAINo CustomerFSSAI ,custaddr.Address CustomerAddress,
 partyaddr.FSSAINo PartyFSSAI,partyaddr.Address PartyAddress,MC_PartyBanks.BranchName,MC_PartyBanks.IFSC,MC_PartyBanks.AccountNo,M_Bank.Name BankName,MC_PartyBanks.IsDefault,custstate.Name CustState,partystate.Name PartyState
 ,IU.AckNo, IU.Irn, IU.QRCodeUrl, IU.EInvoicePdf, IU.EwayBillNo, IU.EwayBillUrl, IU.EInvoiceCreatedBy, IU.EInvoiceCreatedOn, IU.EwayBillCreatedBy, IU.EwayBillCreatedOn, IU.EInvoiceCanceledBy, IU.EInvoiceCanceledOn, IU.EwayBillCanceledBy, IU.EwayBillCanceledOn, 
-IU.EInvoiceIsCancel, IU.EwayBillIsCancel,c.name as CompanyName,u.LoginName as CashierName
+IU.EInvoiceIsCancel, IU.EwayBillIsCancel,c.name as CompanyName,u.LoginName as CashierName,Party.AlternateContactNo
 FROM SweetPOS.T_SPOSInvoices SPOSInv
 join FoodERP.M_Parties cust on cust.id=SPOSInv.Customer
 join FoodERP.M_Parties party on party.id=SPOSInv.Party 
@@ -373,9 +373,11 @@ WHERE SPOSInv.Invoice_id = {a.id}''')
                             "DriverName":a.DriverName,
                             "VehicleNo": a.VehicleNumber,
                             "CreatedOn" : a.CreatedOn,
-                            # Add Company Name and CashierName
+                            # Add Company Name, CashierName, AlternateContactNo
                             "CompanyName":a.CompanyName,
                             "CashierName" :a.CashierName,
+                            "AlternateContactNo":a.AlternateContactNo,
+                            # End Add Extra Fields
                             "InvoiceItems": InvoiceItemDetails,
                             "InvoicesReferences": InvoiceReferenceDetails,
                             "InvoiceUploads" : InvoiceUploads,
