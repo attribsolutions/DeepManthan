@@ -169,7 +169,7 @@ class GetMRPListDetailsView(CreateAPIView):
                     return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'EffectiveDate and CommonID are required and CommonID must not be 0.', 'Data': []})
 
                 query = f'''
-                   SELECT M_MRPMaster.id,M_MRPMaster.EffectiveDate,M_MRPMaster.CommonID,C_Companies.Name CompanyName,i.Name as ItemName
+                   SELECT M_MRPMaster.id,M_MRPMaster.EffectiveDate,M_MRPMaster.MRP,M_MRPMaster.CommonID,C_Companies.Name CompanyName,i.Name as ItemName
                         FROM M_MRPMaster 
                         left join C_Companies on C_Companies.id = M_MRPMaster.Company_id 
                         left join M_Parties a on a.id = M_MRPMaster.Division_id 
