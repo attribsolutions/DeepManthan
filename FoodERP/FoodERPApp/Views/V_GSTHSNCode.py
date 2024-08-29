@@ -159,7 +159,7 @@ class GetGSTHSNCodeDetailsView(CreateAPIView):
                     Order BY EffectiveDate Desc
                 '''   
                 
-                GSTHSNQuery = M_GSTHSNCode.objects.raw(query, [CommonID])  
+                GSTHSNQuery = M_GSTHSNCode.objects.raw(query, [CommonID])   
                 
                 if list(GSTHSNQuery):
                      
