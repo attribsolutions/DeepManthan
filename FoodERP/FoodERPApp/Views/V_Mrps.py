@@ -163,11 +163,22 @@ class GetMRPListDetailsView(CreateAPIView):
              with transaction.atomic():
                 EffectiveDate = MRPListData.get('EffectiveDate')
                 CommonID = MRPListData.get('CommonID')  
-                  
+                GroupTypeid = 1
+                
                 # Check for EffectiveDate and CommonID conditions ... CommonID is 0 or > 0
                 if not EffectiveDate or CommonID is None: 
                     return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'EffectiveDate and CommonID are required and CommonID must not be 0.', 'Data': []})
-
+ 
+                joinsforgroupsubgroup = f'''
+                LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = i.id AND MC_ItemGroupDetails.GroupType_id = {GroupTypeid}
+                LEFT JOIN M_Group ON M_Group.id = MC_ItemGroupDetails.Group_id 
+                LEFT JOIN MC_SubGroup ON MC_SubGroup.id = MC_ItemGroupDetails.SubGroup_id
+                '''  
+                
+                orderby = f'''
+                    ORDER BY M_Group.Sequence, MC_SubGroup.Sequence,i.Sequence
+                '''  
+                
                 query = f'''
                    SELECT M_MRPMaster.id,M_MRPMaster.EffectiveDate,M_MRPMaster.MRP,M_MRPMaster.CommonID,C_Companies.Name CompanyName,i.Name as ItemName
                         FROM M_MRPMaster 
@@ -175,11 +186,12 @@ class GetMRPListDetailsView(CreateAPIView):
                         left join M_Parties a on a.id = M_MRPMaster.Division_id 
                         left join M_Parties on M_Parties.id = M_MRPMaster.Party_id 
                         left join M_Items i on M_MRPMaster.Item_id=i.id
+                        {joinsforgroupsubgroup}
                         where M_MRPMaster.IsDeleted=0  
                         AND M_MRPMaster.EffectiveDate='{EffectiveDate}' AND M_MRPMaster.CommonID=%s
                         -- group by EffectiveDate,Party_id,Division_id,CommonID 
-                        Order BY EffectiveDate Desc
-                '''   
+                        {orderby}
+                '''    
                 
                 MRPListDataQuery = M_MRPMaster.objects.raw(query, [CommonID])  
                
