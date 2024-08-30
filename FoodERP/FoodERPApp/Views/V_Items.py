@@ -94,6 +94,14 @@ class M_ItemsFilterView(CreateAPIView):
                 CompanyGroupID =Logindata['CompanyGroup'] 
                 IsSCMCompany = Logindata['IsSCMCompany'] 
                 
+                party_instance = M_Parties.objects.get(id=PartyID) 
+                PartyType = party_instance.PartyType 
+                
+                if PartyType == 19:
+                    GroupType_id = 5
+                else:
+                    GroupType_id = 1
+
                 #for log
                 if PartyID == '':
                         x = 0
@@ -104,7 +112,20 @@ class M_ItemsFilterView(CreateAPIView):
                     company_queryset=C_Companies.objects.filter(CompanyGroup=CompanyGroupID)
                     company_ids = [company.id for company in company_queryset]
                     # query = M_Items.objects.select_related().filter(IsSCM=1,Company__in=Company).order_by('Sequence')
-                    query= M_Items.objects.raw('''SELECT M_Items.id,M_Items.Name, M_Items.ShortName, M_Items.Sequence, M_Items.BarCode, M_Items.SAPItemCode, M_Items.isActive, M_Items.IsSCM, M_Items.CanBeSold, M_Items.CanBePurchase, M_Items.BrandName, M_Items.Tag, M_Items.CreatedBy, M_Items.CreatedOn, M_Items.UpdatedBy, M_Items.UpdatedOn, M_Items.Breadth, M_Items.Grammage, M_Items.Height, M_Items.Length, M_Items.StoringCondition, M_Items.BaseUnitID_id, M_Items.Company_id, M_Items.Budget,C_Companies.Name AS CompanyName, M_Units.Name AS BaseUnitName FROM M_Items JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id JOIN C_Companies ON C_Companies.id = M_Items.Company_id WHERE M_Items.IsSCM=1 AND  M_Items.Company_id IN %s Order By Sequence ASC''',([tuple(company_ids)]))    
+                    query= M_Items.objects.raw('''SELECT M_Items.id,M_Items.Name, M_Items.ShortName, M_Items.Sequence, M_Items.BarCode, M_Items.SAPItemCode,
+                                               M_Items.isActive, M_Items.IsSCM, M_Items.CanBeSold, M_Items.CanBePurchase, M_Items.BrandName, M_Items.Tag,
+                                               M_Items.CreatedBy, M_Items.CreatedOn, M_Items.UpdatedBy, M_Items.UpdatedOn, M_Items.Breadth, M_Items.Grammage,
+                                               M_Items.Height, M_Items.Length, M_Items.StoringCondition, M_Items.BaseUnitID_id, M_Items.Company_id, 
+                                               M_Items.Budget,C_Companies.Name AS CompanyName, M_Units.Name AS BaseUnitName 
+                                               FROM M_Items 
+                                               JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id 
+                                               JOIN C_Companies ON C_Companies.id = M_Items.Company_id 
+                                               left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id= %s
+                                               left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
+                                               left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
+                                               left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
+                                               WHERE M_Items.IsSCM=1 AND  M_Items.Company_id IN %s 
+                                               ORDER BY M_Group.Sequence,MC_SubGroup.Sequence,MC_ItemGroupDetails.ItemSequence ASC ASC''',([GroupType_id],[tuple(company_ids)]))    
                 else:
                     # CustomPrint("Dhruti")
                     # query = M_Items.objects.select_related().filter(Company=CompanyID).order_by('Sequence')
@@ -119,7 +140,12 @@ class M_ItemsFilterView(CreateAPIView):
                                                M_Units.Name AS BaseUnitName FROM M_Items 
                                                JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id 
                                                JOIN C_Companies ON C_Companies.id = M_Items.Company_id 
-                                               WHERE M_Items.Company_id=%s Order By Sequence ASC''',([CompanyID]))
+                                               left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id= %s
+                                               left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
+                                               left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
+                                               left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
+                                               WHERE M_Items.Company_id=%s 
+                                               ORDER BY M_Group.Sequence,MC_SubGroup.Sequence,MC_ItemGroupDetails.ItemSequence ASC''',([GroupType_id],[CompanyID]))
                     # CustomPrint(query.query)
                 if not query:
                     log_entry = create_transaction_logNew(request, Logindata, x, "Items Not available",102,0)

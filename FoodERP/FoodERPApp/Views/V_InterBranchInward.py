@@ -84,9 +84,9 @@ class InterBranchInwardListFilterView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        Inwarddata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Inwarddata = JSONParser().parse(request)
                 FromDate = Inwarddata['FromDate']
                 ToDate = Inwarddata['ToDate']
                 Customer = Inwarddata['Customer']

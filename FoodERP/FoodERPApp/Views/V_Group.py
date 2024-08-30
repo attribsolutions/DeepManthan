@@ -273,6 +273,12 @@ class UpdateGroupSubGroupSequenceView(CreateAPIView):
 
                     if item_group_detail:
                         item_group_detail.ItemSequence = Item_Sequence
+                        
+                        # Update SubGroupID if it is provided
+                        if SubGroup_ID is not None: 
+                            item_group_detail.SubGroup = SubGroup_Data[SubGroup_ID]  # Update the SubGroup field
+                        # End Update 
+                        
                         item_group_detail.save()
 
             log_entry = create_transaction_logNew(request,SequenceData, 0,'',394,0)
