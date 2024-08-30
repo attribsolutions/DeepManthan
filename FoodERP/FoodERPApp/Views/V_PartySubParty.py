@@ -96,7 +96,8 @@ class PartySubPartyViewSecond(CreateAPIView):
                         "PartyType": a['Party']['PartyType']['id'],
                         "IsVendor": a['Party']['PartyType']['IsVendor'],
                         "Route": a['Route']['id'],
-                        "Creditlimit": a['Creditlimit']
+                        "Creditlimit": a['Creditlimit'],
+                        "PartyTypeName" : a['Party']['PartyType']['Name']
                     }) 
 
                 for a in SubPartySerializer:
@@ -108,7 +109,8 @@ class PartySubPartyViewSecond(CreateAPIView):
                         "PartyType": a['SubParty']['PartyType']['id'],
                         "IsVendor": a['SubParty']['PartyType']['IsVendor'],
                         "Route": a['Route']['id'],
-                        "Creditlimit": a['Creditlimit']
+                        "Creditlimit": a['Creditlimit'],
+                        "PartyTypeName" : a['Party']['PartyType']['Name']                        
                     })
                 
                 log_entry = create_transaction_logNew(request, PartySerializer,0,'',175,0)               
@@ -145,7 +147,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                                     PartyName=F('Party__Name'),
                                     GSTIN = F('Party__GSTIN'),
                                     PAN= F('Party__PAN'),
-                                    PartyTypeID=F('Party__SkyggeID'),
+                                    PartyTypeID=F('Party__PartyType'),
                                     SkyggeID=F('Party__SkyggeID'),
                                     FSSAINo=F('Party__PartyAddress__FSSAINo'),
                                     FSSAIExipry=F('Party__PartyAddress__FSSAIExipry'),
@@ -161,7 +163,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
         PartyName=F('Party__Name'),
         GSTIN = F('Party__GSTIN'),
         PAN= F('Party__PAN'),
-        PartyTypeID=F('Party__SkyggeID'),
+        PartyTypeID=F('SubParty__PartyType'),
         SkyggeID=F('Party__SkyggeID'),
         FSSAINo=F('Party__PartyAddress__FSSAINo'),
         FSSAIExipry=F('Party__PartyAddress__FSSAIExipry'),
@@ -179,7 +181,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
         PartyName=F('SubParty__Name'),
         GSTIN = F('SubParty__GSTIN'),
         PAN= F('SubParty__PAN'),
-        PartyTypeID=F('SubParty__SkyggeID'),
+        PartyTypeID=F('SubParty__PartyType'),
         SkyggeID=F('SubParty__SkyggeID'),
         FSSAINo=F('SubParty__PartyAddress__FSSAINo'),
         FSSAIExipry=F('SubParty__PartyAddress__FSSAIExipry'),
@@ -193,7 +195,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
         PartyName=F('SubParty__Name'),
         GSTIN = F('SubParty__GSTIN'),
         PAN= F('SubParty__PAN'),
-        PartyTypeID=F('SubParty__SkyggeID'),
+        PartyTypeID=F('SubParty__PartyType'),
         SkyggeID=F('SubParty__SkyggeID'),
         FSSAINo=F('SubParty__PartyAddress__FSSAINo'),
         FSSAIExipry=F('SubParty__PartyAddress__FSSAIExipry'),
@@ -211,7 +213,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
         PartyName=F('SubParty__Name'),
         GSTIN = F('SubParty__GSTIN'),
         PAN= F('SubParty__PAN'),
-        PartyTypeID=F('SubParty__SkyggeID'),
+        PartyTypeID=F('SubParty__PartyType'),
         SkyggeID=F('SubParty__SkyggeID'),
         FSSAINo=F('SubParty__PartyAddress__FSSAINo'),
         FSSAIExipry=F('SubParty__PartyAddress__FSSAIExipry'),
@@ -227,7 +229,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                                     PartyName=F('Party__Name'),
                                     GSTIN = F('Party__GSTIN'),
                                     PAN= F('Party__PAN'),
-                                    PartyTypeID=F('Party__SkyggeID'),
+                                    PartyTypeID=F('Party__PartyType'),
                                     SkyggeID=F('Party__SkyggeID'),
                                     FSSAINo=F('Party__PartyAddress__FSSAINo'),
                                     FSSAIExipry=F('Party__PartyAddress__FSSAIExipry'),
@@ -241,7 +243,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                                     PartyName=F('SubParty__Name'),
                                     GSTIN = F('SubParty__GSTIN'),
                                     PAN= F('SubParty__PAN'),
-                                    PartyTypeID=F('SubParty__SkyggeID'),
+                                    PartyTypeID=F('SubParty__PartyType'),
                                     SkyggeID=F('SubParty__SkyggeID'),
                                     FSSAINo=F('SubParty__PartyAddress__FSSAINo'),
                                     FSSAIExipry=F('SubParty__PartyAddress__FSSAIExipry'),
