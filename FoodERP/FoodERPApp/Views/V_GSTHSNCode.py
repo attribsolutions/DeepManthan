@@ -30,14 +30,14 @@ class M_GstHsnCodeView(CreateAPIView):
                     GstHsndata_Serializer = M_GstHsnCodeSerializer(GstHsndata, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': GstHsndata_Serializer})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
     
     
     @transaction.atomic()
     def post(self, request):
+        GstHsnCodedata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                GstHsnCodedata = JSONParser().parse(request)
                 a=MaxValueMaster(M_GSTHSNCode,'CommonID')
                 jsondata=a.GetMaxValue() 
                 additionaldata= list()
@@ -52,7 +52,7 @@ class M_GstHsnCodeView(CreateAPIView):
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_GstHsncodeSerializer.errors,'Data' :[]})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 
@@ -131,7 +131,7 @@ class GETGstHsnDetails(CreateAPIView):
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':ItemList })
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})    
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})    
            
            
   
@@ -140,6 +140,7 @@ class GetGSTHSNCodeDetailsView(CreateAPIView):
      
     @transaction.atomic()
     def post(self, request):
+        
         GSTHSNData=JSONParser().parse(request)
         try:
              with transaction.atomic():
@@ -152,7 +153,8 @@ class GetGSTHSNCodeDetailsView(CreateAPIView):
 
                 query = f'''
                    SELECT M_GSTHSNCode.id,M_GSTHSNCode.EffectiveDate,M_GSTHSNCode.GSTPercentage,M_GSTHSNCode.HSNCode,M_GSTHSNCode.CommonID,C_Companies.Name CompanyName,M_Items.Name as ItemName 
-                   FROM M_GSTHSNCode left join C_Companies on C_Companies.id = M_GSTHSNCode.Company_id left join m_items on M_Items.id=M_GSTHSNCode.Item_id
+                   FROM M_GSTHSNCode left join C_Companies on C_Companies.id = M_GSTHSNCode.Company_id 
+                   left join M_Items on M_Items.id=M_GSTHSNCode.Item_id
                    where M_GSTHSNCode.IsDeleted=0  
                    AND M_GSTHSNCode.EffectiveDate='{EffectiveDate}' AND M_GSTHSNCode.CommonID=%s
                     -- group by EffectiveDate,Party_id,Division_id,CommonID 
