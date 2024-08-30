@@ -408,7 +408,7 @@ urlpatterns = [
             url(r'PartySettings/([0-9]+)/([0-9]+)$',PartiesSettingsDetailsView.as_view()),
             url(r'PartySettings$',PartiesSettingsDetailsView.as_view()),
             url(r'PartyStockEntry$',StockEntryPageView.as_view()),
-            url(r'PartyLiveStock$',ShowOBatchWiseLiveStockView.as_view()),
+            url(r'PartyLiveStock$',ShowOBatchWiseLiveStockView.as_view()),  #For Current Stock Report
             url(r'AllGSTReportsExport$', AllGSTReportsDownloadView.as_view()),
             
  # Get Stock Entry List 
@@ -476,14 +476,14 @@ urlpatterns = [
             # url(r'GetMRPListDetails$',GetMRPListDetailsView.as_view()),
 
 #DiscountMaster
-            url(r'DiscountMasterSave$',DiscountMasterSaveView.as_view()),
+            url(r'DiscountMasterSave$',DiscountMasterSaveView.as_view()), #Discount Master Save button
             # url(r'DiscountMaster/([0-9]+)$',DiscountMasterView.as_view()),
             # url(r'GetDiscount$',GetDiscountView.as_view()),
-            url(r'DiscountMaster$',DiscountMastergo.as_view()),
-            url(r'DiscountMasterr/([0-9]+)$',DiscountMastergo.as_view()),
-            url(r'DiscountMasterFilter$',DiscountMasterFilter.as_view()),
-            url(r'DiscountPartyType/([0-9]+)$',DiscountPartyTypeView.as_view()),
-            url(r'DiscountCustomer/([0-9]+)/([0-9]+)/([0-9]+)$',DiscountCustomerView.as_view()),
+            url(r'DiscountMaster$',DiscountMastergo.as_view()), #Discount Master Go button
+            url(r'DiscountMasterr/([0-9]+)$',DiscountMastergo.as_view()), #Discount List -> Delete Button
+            url(r'DiscountMasterFilter$',DiscountMasterFilter.as_view()), #Discount List -> Go Button (list after save discount to items)
+            url(r'DiscountPartyType/([0-9]+)$',DiscountPartyTypeView.as_view()), #Discount Master page -> New Button
+            url(r'DiscountCustomer/([0-9]+)/([0-9]+)/([0-9]+)$',DiscountCustomerView.as_view()), #Discount Master->PriceList Dropdown
 
 # CategoryTypes
             url(r'CategoryTypes/([0-9]+)$', CategoryTypeViewSecond.as_view()),

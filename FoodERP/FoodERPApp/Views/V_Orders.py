@@ -526,10 +526,13 @@ class T_OrdersViewSecond(CreateAPIView):
                                 ).select_related('Group', 'SubGroup').annotate(
                                     GroupName=F('Group__Name'),
                                     SubGroupName=F('SubGroup__Name')).order_by('Group__Sequence', 'SubGroup__Sequence','ItemSequence').values('GroupName', 'SubGroupName')
+                                CustomPrint(q1.query)
                                 if q1.exists():
                                     Group = q1[0]['GroupName']
-                                    SubGroup = q1[0]['SubGroupName']
-                                
+                                    SubGroup = q1[0]['SubGroupName']  
+                                else:                              
+                                    Group = ""
+                                    SubGroup = "" 
                                 OrderItemDetails.append({
                                     "id": b['id'],
                                     "Item": b['Item']['id'],
@@ -566,6 +569,7 @@ class T_OrdersViewSecond(CreateAPIView):
                                     "Group": Group,
                                     "SubGroup": SubGroup,
                                 })
+                                
                         
                         inward = 0
                         for c in a['OrderReferences']:

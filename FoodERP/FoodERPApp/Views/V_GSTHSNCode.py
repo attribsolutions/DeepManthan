@@ -30,14 +30,14 @@ class M_GstHsnCodeView(CreateAPIView):
                     GstHsndata_Serializer = M_GstHsnCodeSerializer(GstHsndata, many=True).data
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': GstHsndata_Serializer})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
     
     
     @transaction.atomic()
     def post(self, request):
+        GstHsnCodedata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                GstHsnCodedata = JSONParser().parse(request)
                 a=MaxValueMaster(M_GSTHSNCode,'CommonID')
                 jsondata=a.GetMaxValue() 
                 additionaldata= list()
@@ -52,7 +52,7 @@ class M_GstHsnCodeView(CreateAPIView):
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_GstHsncodeSerializer.errors,'Data' :[]})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 
@@ -131,7 +131,7 @@ class GETGstHsnDetails(CreateAPIView):
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':ItemList })
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})    
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})    
            
            
   
