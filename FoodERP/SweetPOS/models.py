@@ -267,10 +267,27 @@ class M_SPOSRateMaster(models.Model):
         db_table="M_SPOSRateMaster"
 
 
+# class M_ConsumerMobile(models.Model):    
+#     Mobile = models.CharField(max_length=100)
+#     IsLinkToBill = models.BooleanField(default=False)
+    
+
+#     class Meta:
+#         db_table = "M_ConsumerMobile"
+
 class M_ConsumerMobile(models.Model):    
     Mobile = models.CharField(max_length=100)
     IsLinkToBill = models.BooleanField(default=False)
     MacID   = models.CharField(max_length=200)
 
     class Meta:
-        db_table = "M_ConsumerMobile"
+        db_table = "M_ConsumerMobile"        
+
+class M_SweetPOSMachine(models.Model):
+    Party = models.IntegerField()
+    MacID = models.CharField(max_length=200)
+    MachineRole = models.IntegerField()
+    IsServer = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = "M_SweetPOSMachine"        
