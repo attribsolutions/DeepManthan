@@ -369,6 +369,7 @@ class RoleAccessViewAddPage(RetrieveAPIView):
                 "RoleAccess_IsMultipleInvoicePrint":0,
                 "RoleAccess_IsShowOnMenuForList":0,
                 "RoleAccess_IsShowOnMenuForMaster":0,
+                "RoleAccess_DeletedUpload":0,
                 **{f"{key}": value for key, value in PageAccess.items()}                   
             })
              
