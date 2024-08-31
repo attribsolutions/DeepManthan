@@ -119,3 +119,72 @@ class SPOSLog_inView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, SPOSLog_in_data,0,'SweetPOSLogin:'+str(e),33,0)
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
+        
+class MachineRoleSaveView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    
+    @transaction.atomic()
+    def post(self, request):
+        MachineRole_Data = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                MachineRole_serializer = MachineRoleSerializer(data=MachineRole_Data)
+                if MachineRole_serializer.is_valid():
+                    MachineRole = MachineRole_serializer.save()
+                    LastInsertID = MachineRole.id
+                    log_entry = create_transaction_logNew(request, MachineRole_Data, MachineRole_Data['Party'], '', 416, LastInsertID)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Machine Role Save Successfully','TransactionID':LastInsertID, 'Data':[]})
+                else:
+                    log_entry = create_transaction_logNew(request, MachineRole_Data, 0, 'MachineRoleSave:'+str(MachineRole_serializer.errors), 34, 0)
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  MachineRole_serializer.errors, 'Data':[]})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, MachineRole_Data, 0, 'MachineRoleSave:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
+        
+class MachineRoleListView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    @transaction.atomic()
+    def post(self, request):
+        MachineRole_Data = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                Party = MachineRole_Data['Party']
+                query = M_SweetPOSMachine.objects.filter(Party=Party)
+                if query:
+                    MachineRole_serializer = MachineRoleSerializer(query, many=True).data
+                    log_entry = create_transaction_logNew(request, MachineRole_Data, Party, '', 417, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :MachineRole_serializer})
+                log_entry = create_transaction_logNew(request, MachineRole_Data, 0, 'Machine Role not available', 417, 0)
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Machine Role not available', 'Data' : []})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, MachineRole_Data, 0, 'Machine Role List:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data':[]})
+
+
+class MachineRoleUpdateView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    
+    @transaction.atomic()
+    def put(self, request,id=0):
+        MachineRole_Data = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                MachineRoleByID = M_SweetPOSMachine.objects.get(id=id)
+                MachineRole_Serializer = MachineRoleSerializer(MachineRoleByID, data=MachineRole_Data)
+                if MachineRole_Serializer.is_valid():
+                    if MachineRole_Serializer.validated_data:
+                        MachineRole_Serializer.validated_data.pop('MacID')
+                    MachineRole_Serializer.save()
+                    log_entry = create_transaction_logNew(request, MachineRole_Data, MachineRole_Data['Party'], '', 418, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Machine Role Updated Successfully','Data' :[]})
+                else:
+                    log_entry = create_transaction_logNew(request, MachineRole_Data, 0, 'Machine Role Update:'+str(MachineRole_Serializer.errors), 34, 0)
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': MachineRole_Serializer.errors, 'Data' :[]})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, MachineRole_Data, 0, 'Machine Role Update:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})   
+
+  
+
