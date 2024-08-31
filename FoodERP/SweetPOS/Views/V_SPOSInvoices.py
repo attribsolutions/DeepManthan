@@ -629,7 +629,7 @@ class MobileNumberSaveView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Mobile_serializer, 0, 'Mobile Number not available', 412, 0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Mobile Number not available', 'Data' : []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0, 'Get All Mobile Number:'+str(e), 408, 0)
+            log_entry = create_transaction_logNew(request, 0, 0, 'Get All Mobile Number:'+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data':[]})
         
 
@@ -653,6 +653,6 @@ class MobileNumberUpdateView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Mobile_Serializer.errors, 'Data' :[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Mobile_Data, 0, 'Consumer Mobile Update:'+str(e), 412, 0)
+            log_entry = create_transaction_logNew(request, Mobile_Data, 0, 'Consumer Mobile Update:'+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})   
 
