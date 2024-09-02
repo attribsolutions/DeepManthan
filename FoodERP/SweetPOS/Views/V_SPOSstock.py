@@ -35,7 +35,7 @@ class StockView(CreateAPIView):
               
                 for a in FranchiseStockdata['StockItems']:
                     BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], Party,0)
-
+                    # print(a['Item'],a['Unit'])
                     if IsStockAdjustment:
                         UnitwiseQuantityConversionobject = UnitwiseQuantityConversion( a['Item'], a['Quantity'], a['Unit'], 0, 0, 0, 0 )
                     else:
@@ -73,11 +73,11 @@ class StockView(CreateAPIView):
                     "IsStockAdjustment" : IsStockAdjustment
                     })
           
-                    StockEntrySerializer = SPOSstockSerializer(data=T_SPOS_StockEntryList, many=True)
+                StockEntrySerializer = SPOSstockSerializer(data=T_SPOS_StockEntryList, many=True)
                        
-                    if StockEntrySerializer.is_valid():
-                        StockEntrySerializer.save()
-                  
+                if StockEntrySerializer.is_valid():
+                    StockEntrySerializer.save()
+                
                     log_entry = create_transaction_logNew(request, FranchiseStockdata, FranchiseStockdata['PartyID'],'Franchise Items Save Successfully',87,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Stock Save Successfully', 'Data': []})
                 else:
@@ -86,7 +86,7 @@ class StockView(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': StockEntrySerializer.errors, 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, FranchiseStockdata, 0,'FranchiseStockEntrySave:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':Exception(e), 'Data': []})
 
 
 
