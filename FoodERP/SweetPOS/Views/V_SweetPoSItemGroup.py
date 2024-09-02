@@ -109,7 +109,7 @@ class ItemListView(CreateAPIView):
                     Ratelist=list()
                     Ratelist.append({
                             "Rate": row.Rate,
-                            "POSRateType": 1,
+                            "POSRateType": 174,
                             "IsChangeRateToDefault": False,
                             "EffectiveFrom":row.RateEffectiveDate
                     })
