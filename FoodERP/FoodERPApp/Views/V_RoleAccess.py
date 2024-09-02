@@ -324,7 +324,7 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0,0,'RoleAccessDelete:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]}) 
-
+ 
 class RoleAccessViewAddPage(RetrieveAPIView):
     
     permission_classes = (IsAuthenticated,)
@@ -346,32 +346,59 @@ class RoleAccessViewAddPage(RetrieveAPIView):
                 string = x['Name']
                 stringID = x['id']
                 PageAccess[f"PageAccess_{string}"] = stringID  
+            
+            # For Role Access
+            rolepageaccessquery =  H_PageAccess.objects.raw('''SELECT H_PageAccess.Name,ifnull(MC_RolePageAccess.PageAccess_id,0) id from H_PageAccess left JOIN MC_RolePageAccess ON MC_RolePageAccess.PageAccess_id=H_PageAccess.id left join MC_PagePageAccess on MC_PagePageAccess.Access_id=H_PageAccess.id AND MC_PagePageAccess.Page_id=%s group by Name,id order by Sequence  ''', [pageid])
+            RolePageAccessSerializer = MC_RolePageAccessSerializerNewUpdated(rolepageaccessquery,  many=True).data
+            
+            RoleAccess={}
+            for x in RolePageAccessSerializer:
+                string = x['Name']
+                stringID = x['id']
+                RoleAccess[f"RoleAccess_{string}"] = stringID
+           # End Role Access 
                  
-            Moduledata.append ({
+            # Moduledata.append ({
+                RoleAccessData = {
                 "ModuleID": a['moduleid'],
                 "ModuleName": a['ModuleName'],
                 "PageID": a['id'],
                 "RelatedPageID": a['RelatedPageID'],
                 "PageName": a['PageName'],
                 "PageType" : a['PageType'],
-                "RoleAccess_IsShowOnMenu": 0,
-                "RoleAccess_IsSave": 0,
-                "RoleAccess_IsView": 0,
-                "RoleAccess_IsEdit": 0,
-                "RoleAccess_IsDelete": 0,
-                "RoleAccess_IsEditSelf": 0,
-                "RoleAccess_IsDeleteSelf": 0,
-                "RoleAccess_IsPrint": 0,
-                "RoleAccess_IsTopOfTheDivision": 0,
-                "RoleAccess_Pdfdownload": 0,
-                "RoleAccess_Exceldownload": 0,
-                "RoleAccess_IsCopy": 0,
-                "RoleAccess_IsMultipleInvoicePrint":0,
+                # "RoleAccess_IsShowOnMenu": 0,
+                # "RoleAccess_IsSave": 0,
+                # "RoleAccess_IsView": 0,
+                # "RoleAccess_IsEdit": 0,
+                # "RoleAccess_IsDelete": 0,
+                # "RoleAccess_IsEditSelf": 0,
+                # "RoleAccess_IsDeleteSelf": 0,
+                # "RoleAccess_IsPrint": 0,
+                # "RoleAccess_IsTopOfTheDivision": 0,
+                # "RoleAccess_Pdfdownload": 0,
+                # "RoleAccess_Exceldownload": 0,
+                # "RoleAccess_IsCopy": 0,
+                # "RoleAccess_IsMultipleInvoicePrint":0,
                 "RoleAccess_IsShowOnMenuForList":0,
                 "RoleAccess_IsShowOnMenuForMaster":0,
-                "RoleAccess_DeletedUpload":0,
+                **{f"{key}": value for key, value in RoleAccess.items()},
                 **{f"{key}": value for key, value in PageAccess.items()}                   
-            })
+            }
+            
+            RoleAccessData.pop("RoleAccess_E-WayBillUpload", None)
+            RoleAccessData.pop("RoleAccess_E-WayBillcancel", None)
+            RoleAccessData.pop("RoleAccess_E-WayBillPrint", None)
+            RoleAccessData.pop("RoleAccess_E-InvoiceUpload", None)
+            RoleAccessData.pop("RoleAccess_E-Invoicecancel", None)
+            RoleAccessData.pop("RoleAccess_E-InvoicePrint", None)
+            RoleAccessData.pop("RoleAccess_Upload", None)
+            RoleAccessData.pop("RoleAccess_UpdateDetails", None)
+            RoleAccessData.pop("RoleAccess_FranchisesOrderPrint", None)
+            RoleAccessData.pop("RoleAccess_SendToSAP", None)
+            RoleAccessData.pop("RoleAccess_Import", None)
+            RoleAccessData.pop("RoleAccess_DeletedUpload", None)  
+             
+            Moduledata.append(RoleAccessData)
              
         response = {
             "StatusCode": 200,
@@ -381,7 +408,8 @@ class RoleAccessViewAddPage(RetrieveAPIView):
         }
         log_entry = create_transaction_logNew(request, 0,0,"RoleAccessAddPage",132,0)
         return Response(response)    
-
+    
+    
 class RoleAccessGetPagesOnModule(RetrieveAPIView):
     
     permission_classes = (IsAuthenticated,)
