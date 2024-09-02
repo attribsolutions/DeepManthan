@@ -129,9 +129,9 @@ class MachineTypeSaveView(CreateAPIView):
         try:
             with transaction.atomic():
                 for a in MachineType_Data:
-                    query = M_SweetPOSMachine.objects.filter(MacID=a['MacID']).first()
+                    query = M_SweetPOSMachine.objects.filter(MacID=a['MacID'])
                     if query:
-                        MachineType_serializer = MachineTypeSerializer(query,data=a)
+                        MachineType_serializer = MachineTypeSerializer(query[0],data=a)
                     else:
                         MachineType_serializer = MachineTypeSerializer(data=a)
 
