@@ -33,9 +33,9 @@ urlpatterns = [
     url(r'SPOSRateSave$', RateSaveView.as_view()),
     url(r'SPOSMobileLinkToBill$', MobileNumberSaveView.as_view()),
     url(r'SPOSMobileUpdate/([0-9]+)$', MobileNumberUpdateView.as_view()),
-    url(r'SPOSMachineRoleSave$', MachineRoleSaveView.as_view()),
-    url(r'SPOSMachineRoleList$', MachineRoleListView.as_view()),
-    url(r'SPOSMachineRoleUpdate/([0-9]+)$', MachineRoleUpdateView.as_view()),
+    url(r'SPOSMachineTypeSave$', MachineTypeSaveView.as_view()),
+    url(r'SPOSMachineTypeList$', MachineTypeListView.as_view()),
+    # url(r'SPOSMachineRoleUpdate/([0-9]+)$', MachineRoleUpdateView.as_view()),
 
     #User
     url(r'SPOSUsers$', SweetPOSUsersView.as_view()),

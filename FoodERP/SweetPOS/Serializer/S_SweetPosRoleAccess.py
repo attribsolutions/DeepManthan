@@ -40,7 +40,7 @@ class SPOSLog_inSerializer(serializers.ModelSerializer):
             model = M_SweetPOSLogin
             fields = '__all__'
 
-class MachineRoleSerializer(serializers.ModelSerializer):
+class MachineTypeSerializer(serializers.ModelSerializer):
         class Meta:
             model = M_SweetPOSMachine
             fields = '__all__'
