@@ -342,10 +342,12 @@ class RoleAccessViewAddPage(RetrieveAPIView):
             PageAccessSerializer = M_PageAccessSerializerAddPage(pageaccessquery,many=True).data
             
             PageAccess={}
+            RoleAccess={}
             for x in PageAccessSerializer:
                 string = x['Name']
                 stringID = x['id']
-                PageAccess[f"PageAccess_{string}"] = stringID  
+                PageAccess[f"PageAccess_{string}"] = stringID 
+                RoleAccess[f"RoleAccess_{string}"] = 0  
                  
             Moduledata.append ({
                 "ModuleID": a['moduleid'],
@@ -354,23 +356,24 @@ class RoleAccessViewAddPage(RetrieveAPIView):
                 "RelatedPageID": a['RelatedPageID'],
                 "PageName": a['PageName'],
                 "PageType" : a['PageType'],
-                "RoleAccess_IsShowOnMenu": 0,
-                "RoleAccess_IsSave": 0,
-                "RoleAccess_IsView": 0,
-                "RoleAccess_IsEdit": 0,
-                "RoleAccess_IsDelete": 0,
-                "RoleAccess_IsEditSelf": 0,
-                "RoleAccess_IsDeleteSelf": 0,
-                "RoleAccess_IsPrint": 0,
-                "RoleAccess_IsTopOfTheDivision": 0,
-                "RoleAccess_Pdfdownload": 0,
-                "RoleAccess_Exceldownload": 0,
-                "RoleAccess_IsCopy": 0,
-                "RoleAccess_IsMultipleInvoicePrint":0,
-                "RoleAccess_IsShowOnMenuForList":0,
-                "RoleAccess_IsShowOnMenuForMaster":0,
-                "RoleAccess_DeletedUpload":0,
-                **{f"{key}": value for key, value in PageAccess.items()}                   
+                # "RoleAccess_IsShowOnMenu": 0,
+                # "RoleAccess_IsSave": 0,
+                # "RoleAccess_IsView": 0,
+                # "RoleAccess_IsEdit": 0,
+                # "RoleAccess_IsDelete": 0,
+                # "RoleAccess_IsEditSelf": 0,
+                # "RoleAccess_IsDeleteSelf": 0,
+                # "RoleAccess_IsPrint": 0,
+                # "RoleAccess_IsTopOfTheDivision": 0,
+                # "RoleAccess_Pdfdownload": 0,
+                # "RoleAccess_Exceldownload": 0,
+                # "RoleAccess_IsCopy": 0,
+                # "RoleAccess_IsMultipleInvoicePrint":0,
+                # "RoleAccess_IsShowOnMenuForList":0,
+                # "RoleAccess_IsShowOnMenuForMaster":0,
+                # "RoleAccess_DeletedUpload":0,
+                **{f"{key}": value for key, value in PageAccess.items()} ,
+                **{f"{key}": value for key, value in RoleAccess.items()}                   
             })
              
         response = {
