@@ -119,3 +119,61 @@ class SPOSLog_inView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, SPOSLog_in_data,0,'SweetPOSLogin:'+str(e),33,0)
             raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
+        
+class MachineTypeSaveView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    
+    @transaction.atomic()
+    def post(self, request):
+        MachineType_Data = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                for a in MachineType_Data:
+                    query = M_SweetPOSMachine.objects.filter(MacID=a['MacID'])
+                    if query:
+                        MachineType_serializer = MachineTypeSerializer(query[0],data=a)
+                    else:
+                        MachineType_serializer = MachineTypeSerializer(data=a)
+
+                    if MachineType_serializer.is_valid():
+                        MachineType = MachineType_serializer.save()
+                        LastInsertID = MachineType.id
+                    
+                log_entry = create_transaction_logNew(request, MachineType_Data, MachineType_Data[0]['Party'], '', 416, LastInsertID)        
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Machine Type Save Successfully','TransactionID':LastInsertID, 'Data':[]})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'MachineTypeSave:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]})
+        
+class MachineTypeListView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    @transaction.atomic()
+    def post(self, request):
+        MachineType_Data = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                Party = MachineType_Data['Party']
+                query = M_SweetPOSMachine.objects.raw('''Select A.id, A.Party, A.MacID, A.MachineRole ,  B.Name MachineTypeName, A.IsServer
+                        From SweetPOS.M_SweetPOSMachine A 
+                        JOIN  FoodERP.M_GeneralMaster B on B.id = A.MachineRole
+                        WHERE A.Party = %s''',[Party])
+                
+                MachineTypeList= list()
+                for a in query:
+                    MachineTypeList.append({
+                        "id": a.id,
+                        "Party": a.Party,
+                        "MacID": a.MacID,
+                        "MachineType": a.MachineRole,
+                        "MachineTypeName": a.MachineTypeName,
+                        "IsServer": a.IsServer
+                    })
+                    log_entry = create_transaction_logNew(request, MachineType_Data, Party, '', 417, 0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :MachineTypeList})
+            log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'Machine Role not available', 417, 0)
+            return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Machine Role not available', 'Data' : []})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'Machine Role List:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data':[]})
+
+
