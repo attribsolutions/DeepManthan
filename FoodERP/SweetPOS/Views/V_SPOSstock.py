@@ -258,7 +258,7 @@ class StockOutReportView(CreateAPIView):
                         "StockoutTime": a.StockoutTime
 
                     })
-                log_entry = create_transaction_logNew(request, StockData, StockData[0]['Party'], '', 419, 0)
+                log_entry = create_transaction_logNew(request, StockData, StockData['Party'], '', 419, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': StockOutDataList})
         except Exception as e:
             log_entry = create_transaction_logNew(request, StockData, 0, 'SPOS StockOut Report:'+str(e), 33, 0)
