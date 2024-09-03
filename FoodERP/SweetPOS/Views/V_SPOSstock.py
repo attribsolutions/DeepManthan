@@ -171,13 +171,14 @@ class SPOSStockAdjustmentView(CreateAPIView):
         try:
             with transaction.atomic():
                 query=O_SPOSDateWiseLiveStock.objects.raw('''SELECT D.id, D.Item, M_Items.Name AS ItemName,D.StockDate,D.ClosingBalance Quantity, M_Units.id AS UnitID, M_Units.Name AS UnitName, 
-                                                            (SELECT  MRPValue FROM SweetPOS.T_SPOSStock WHERE StockDate = CURRENT_DATE  AND Item = %s and Party=%s ORDER BY id DESC LIMIT 1)MRP,
-                                                            (SELECT  BatchCode FROM SweetPOS.T_SPOSStock WHERE StockDate = CURRENT_DATE  AND Item = %s and Party=%s ORDER BY id DESC LIMIT 1)BatchCode
+                                                            (SELECT  MRPValue FROM SweetPOS.T_SPOSStock WHERE StockDate = '2024-08-31'  AND Item = %s and Party=%s ORDER BY id DESC LIMIT 1)MRP,
+                                                            (SELECT  BatchCode FROM SweetPOS.T_SPOSStock WHERE StockDate = '2024-08-31'  AND Item = %s and Party=%s ORDER BY id DESC LIMIT 1)BatchCode
                                                             FROM SweetPOS.O_SPOSDateWiseLiveStock D
                                                             JOIN FoodERP.M_Items ON M_Items.id = D.Item
                                                             JOIN FoodERP.M_Units ON M_Units.id = D.Unit
-                                                            WHERE D.StockDate = CURRENT_DATE  and D.Item=%s and D.Party=%s
-                                                            ''',([id],[Party],[id],[Party],[id],[Party]))                                                      
+                                                            WHERE D.StockDate = '2024-08-31'  and D.Item=%s and D.Party=%s
+                                                            ''',([id],[Party],[id],[Party],[id],[Party]))   
+                print(query)                                                   
                 if query:
                     BatchCodelist = list()
                     for a in query:
