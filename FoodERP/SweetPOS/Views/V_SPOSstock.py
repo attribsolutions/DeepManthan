@@ -221,3 +221,46 @@ class SPOSStockAdjustmentView(CreateAPIView):
             log_entry = create_transaction_logNew(request,0, 0,'GETStockAdjustment:'+str(),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
+
+class StockOutReportView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def post(self, request):
+        StockData = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                FromDate = StockData['FromDate']
+                ToDate = StockData['ToDate']
+                Party = StockData['Party']
+
+                StockOutReportQuery = T_SPOSStockOut.objects.raw('''SELECT A.id, A.StockDate , A.Item ItemID, B.Name, M_Group.Name "Group", MC_SubGroup.Name SubGroup, A.Party, M_Parties.Name PartyName, A.CreatedBy, A.CreatedOn StockoutTime
+                            FROM SweetPOS.T_SPOSStockOut A 
+                            JOIN FoodERP.M_Items B ON B.id = A.Item
+                            JOIN FoodERP.M_Parties ON M_Parties.id = A.Party
+                            LEFT JOIN FoodERP.MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id=B.id AND MC_ItemGroupDetails.GroupType_id = 5
+                            LEFT JOIN FoodERP.M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
+                            LEFT JOIN FoodERP.MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
+                            WHERE A.StockDate BETWEEN %s AND %s AND A.Party=%s''',[FromDate,ToDate,Party])
+                
+                StockOutDataList = list()
+
+                for a in StockOutReportQuery:
+                    StockOutDataList.append({
+                        "id": a.id,
+                        "ItemID": a.ItemID,
+                        "ItemName": a.Name,
+                        "Group": a.Group,
+                        "SubGroup": a.SubGroup,
+                        "Party": a.Party,
+                        "PartyName": a.PartyName,
+                        "CreatedBy": a.CreatedBy,
+                        "StockoutTime": a.StockoutTime
+
+                    })
+                log_entry = create_transaction_logNew(request, StockData, StockData[0]['Party'], '', 419, 0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': StockOutDataList})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, StockData, 0, 'SPOS StockOut Report:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+               
