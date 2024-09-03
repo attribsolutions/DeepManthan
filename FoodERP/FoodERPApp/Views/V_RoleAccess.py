@@ -342,21 +342,14 @@ class RoleAccessViewAddPage(RetrieveAPIView):
             PageAccessSerializer = M_PageAccessSerializerAddPage(pageaccessquery,many=True).data
             
             PageAccess={}
+            RoleAccess={}
             for x in PageAccessSerializer:
                 string = x['Name']
                 stringID = x['id']
-                PageAccess[f"PageAccess_{string}"] = stringID  
-            
-            # For Role Access
-            rolepageaccessquery =  H_PageAccess.objects.raw('''SELECT H_PageAccess.Name,ifnull(MC_RolePageAccess.PageAccess_id,0) id from H_PageAccess left JOIN MC_RolePageAccess ON MC_RolePageAccess.PageAccess_id=H_PageAccess.id left join MC_PagePageAccess on MC_PagePageAccess.Access_id=H_PageAccess.id AND MC_PagePageAccess.Page_id=%s group by Name,id order by Sequence  ''', [pageid])
-            RolePageAccessSerializer = MC_RolePageAccessSerializerNewUpdated(rolepageaccessquery,  many=True).data
-            
-            RoleAccess={}
-            for x in RolePageAccessSerializer:
-                string = x['Name']
-                stringID = x['id']
-                RoleAccess[f"RoleAccess_{string}"] = stringID
-           # End Role Access 
+
+                PageAccess[f"PageAccess_{string}"] = stringID 
+                RoleAccess[f"RoleAccess_{string}"] = 0  
+
                  
             # Moduledata.append ({
                 RoleAccessData = {
@@ -379,26 +372,14 @@ class RoleAccessViewAddPage(RetrieveAPIView):
                 # "RoleAccess_Exceldownload": 0,
                 # "RoleAccess_IsCopy": 0,
                 # "RoleAccess_IsMultipleInvoicePrint":0,
-                "RoleAccess_IsShowOnMenuForList":0,
-                "RoleAccess_IsShowOnMenuForMaster":0,
-                **{f"{key}": value for key, value in RoleAccess.items()},
-                **{f"{key}": value for key, value in PageAccess.items()}                   
-            }
-            
-            RoleAccessData.pop("RoleAccess_E-WayBillUpload", None)
-            RoleAccessData.pop("RoleAccess_E-WayBillcancel", None)
-            RoleAccessData.pop("RoleAccess_E-WayBillPrint", None)
-            RoleAccessData.pop("RoleAccess_E-InvoiceUpload", None)
-            RoleAccessData.pop("RoleAccess_E-Invoicecancel", None)
-            RoleAccessData.pop("RoleAccess_E-InvoicePrint", None)
-            RoleAccessData.pop("RoleAccess_Upload", None)
-            RoleAccessData.pop("RoleAccess_UpdateDetails", None)
-            RoleAccessData.pop("RoleAccess_FranchisesOrderPrint", None)
-            RoleAccessData.pop("RoleAccess_SendToSAP", None)
-            RoleAccessData.pop("RoleAccess_Import", None)
-            RoleAccessData.pop("RoleAccess_DeletedUpload", None)  
-             
-            Moduledata.append(RoleAccessData)
+
+                # "RoleAccess_IsShowOnMenuForList":0,
+                # "RoleAccess_IsShowOnMenuForMaster":0,
+                # "RoleAccess_DeletedUpload":0,
+                **{f"{key}": value for key, value in PageAccess.items()} ,
+                **{f"{key}": value for key, value in RoleAccess.items()}                   
+            })
+
              
         response = {
             "StatusCode": 200,
