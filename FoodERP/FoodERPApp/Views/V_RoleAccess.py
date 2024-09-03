@@ -324,7 +324,7 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0,0,'RoleAccessDelete:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]}) 
- 
+
 class RoleAccessViewAddPage(RetrieveAPIView):
     
     permission_classes = (IsAuthenticated,)
@@ -346,13 +346,10 @@ class RoleAccessViewAddPage(RetrieveAPIView):
             for x in PageAccessSerializer:
                 string = x['Name']
                 stringID = x['id']
-
                 PageAccess[f"PageAccess_{string}"] = stringID 
                 RoleAccess[f"RoleAccess_{string}"] = 0  
-
                  
-            # Moduledata.append ({
-                RoleAccessData = {
+            Moduledata.append ({
                 "ModuleID": a['moduleid'],
                 "ModuleName": a['ModuleName'],
                 "PageID": a['id'],
@@ -372,14 +369,12 @@ class RoleAccessViewAddPage(RetrieveAPIView):
                 # "RoleAccess_Exceldownload": 0,
                 # "RoleAccess_IsCopy": 0,
                 # "RoleAccess_IsMultipleInvoicePrint":0,
-
                 # "RoleAccess_IsShowOnMenuForList":0,
                 # "RoleAccess_IsShowOnMenuForMaster":0,
                 # "RoleAccess_DeletedUpload":0,
                 **{f"{key}": value for key, value in PageAccess.items()} ,
                 **{f"{key}": value for key, value in RoleAccess.items()}                   
             })
-
              
         response = {
             "StatusCode": 200,
@@ -389,8 +384,7 @@ class RoleAccessViewAddPage(RetrieveAPIView):
         }
         log_entry = create_transaction_logNew(request, 0,0,"RoleAccessAddPage",132,0)
         return Response(response)    
-    
-    
+
 class RoleAccessGetPagesOnModule(RetrieveAPIView):
     
     permission_classes = (IsAuthenticated,)
