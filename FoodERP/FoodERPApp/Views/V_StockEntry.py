@@ -394,7 +394,7 @@ class StockEntryItemsView(CreateAPIView):
 
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id''')
-                orderby=('''Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence''')
+                orderby=(f'''Order By M_Group.Sequence,MC_SubGroup.Sequence,{seq}''')
                 
                 Itemquery = MC_PartyItems.objects.raw(f'''SELECT M_Items.id, M_Items.Name AS ItemName,
                                                             ROUND(GetTodaysDateMRP(M_Items.id, CURDATE(), 2, 0, 0), 2) AS MRPValue,
