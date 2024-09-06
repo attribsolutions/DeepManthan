@@ -15,6 +15,25 @@ class M_GstHsnCodeView(CreateAPIView):
     # authentication__Class = JSONWebTokenAuthentication 
     
     @transaction.atomic()
+    def get(self, request):
+        try:
+            with transaction.atomic():
+                # add Comment on 22 M_GSTHSNCode.CommonID > 0
+                # GstHsndata = M_GSTHSNCode.objects.raw('''SELECT M_GSTHSNCode.id,M_GSTHSNCode.EffectiveDate,M_GSTHSNCode.Company_id,M_GSTHSNCode.CommonID,M_GSTHSNCode.CreatedBy,M_GSTHSNCode.CreatedOn,C_Companies.Name CompanyName  FROM M_GSTHSNCode left join C_Companies on C_Companies.id = M_GSTHSNCode.Company_id where M_GSTHSNCode.CommonID > 0 AND M_GSTHSNCode.IsDeleted=0  group by EffectiveDate,CommonID Order BY EffectiveDate Desc''')
+                
+                GstHsndata = M_GSTHSNCode.objects.raw('''SELECT M_GSTHSNCode.id,M_GSTHSNCode.EffectiveDate,M_GSTHSNCode.Company_id,M_GSTHSNCode.CommonID,M_GSTHSNCode.CreatedBy,M_GSTHSNCode.CreatedOn,C_Companies.Name CompanyName  FROM M_GSTHSNCode left join C_Companies on C_Companies.id = M_GSTHSNCode.Company_id where M_GSTHSNCode.IsDeleted=0  group by EffectiveDate,CommonID Order BY EffectiveDate Desc''')
+                
+                # CustomPrint(str(MRPdata.query))
+                if not GstHsndata:
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'GST And HSNCode Not available', 'Data': []})
+                else:
+                    GstHsndata_Serializer = M_GstHsnCodeSerializer(GstHsndata, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': GstHsndata_Serializer})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+    
+    
+    @transaction.atomic()
     def post(self, request):
         GstHsnCodedata = JSONParser().parse(request)
         try:
@@ -161,31 +180,3 @@ class GetGSTHSNCodeDetailsView(CreateAPIView):
             # ---- Exception 33 for Exception in m_transactiontype
             log_entry = create_transaction_logNew(request, 0, 0, "Get MRP Details:"+ str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []}) 
-        
-
-class GstHsnListView(CreateAPIView): 
-    permission_classes = (IsAuthenticated,)
-    # authentication__Class = JSONWebTokenAuthentication 
-    
-    @transaction.atomic()
-    def post(self, request):
-        GSTListData = JSONParser().parse(request)
-        try:
-            with transaction.atomic():
-                FromDate = GSTListData['FromDate']
-                ToDate = GSTListData['ToDate']
-                # add Comment on 22 M_GSTHSNCode.CommonID > 0
-                # GstHsndata = M_GSTHSNCode.objects.raw('''SELECT M_GSTHSNCode.id,M_GSTHSNCode.EffectiveDate,M_GSTHSNCode.Company_id,M_GSTHSNCode.CommonID,M_GSTHSNCode.CreatedBy,M_GSTHSNCode.CreatedOn,C_Companies.Name CompanyName  FROM M_GSTHSNCode left join C_Companies on C_Companies.id = M_GSTHSNCode.Company_id where M_GSTHSNCode.CommonID > 0 AND M_GSTHSNCode.IsDeleted=0  group by EffectiveDate,CommonID Order BY EffectiveDate Desc''')
-                
-                GstHsndata = M_GSTHSNCode.objects.raw('''SELECT M_GSTHSNCode.id,M_GSTHSNCode.EffectiveDate,M_GSTHSNCode.Company_id,M_GSTHSNCode.CommonID,M_GSTHSNCode.CreatedBy,M_GSTHSNCode.CreatedOn,C_Companies.Name CompanyName  FROM M_GSTHSNCode left join C_Companies on C_Companies.id = M_GSTHSNCode.Company_id where M_GSTHSNCode.IsDeleted=0 AND EffectiveDate BETWEEN %s AND %s group by EffectiveDate,CommonID Order BY EffectiveDate Desc''',[FromDate,ToDate])
-                
-                # CustomPrint(str(MRPdata.query))
-                if not GstHsndata:
-                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'GST And HSNCode Not available', 'Data': []})
-                else:
-                    GstHsndata_Serializer = M_GstHsnCodeSerializer(GstHsndata, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': GstHsndata_Serializer})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
-    
-    
