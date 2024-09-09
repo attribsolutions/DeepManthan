@@ -148,7 +148,7 @@ class M_MarginsListView(CreateAPIView):
                 # CustomPrint(str(MRPdata.query))
                 if not Margindata:
                     log_entry = create_transaction_logNew(request, 0, 0, "MarginList Not available",114,0)
-                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Margin Not available', 'Data': []})
                 else:
                     Margindata_Serializer = M_MarginsSerializerSecond(Margindata, many=True).data
                     log_entry = create_transaction_logNew(request,Margindata_Serializer, 0,'Margin List',114,0)
@@ -179,9 +179,7 @@ class GetMarginListDetailsView(CreateAPIView):
                         group by EffectiveDate,Margin,ItemName,CommonID,IsDeleted 
                         ORDER BY M_Group.Sequence, MC_SubGroup.Sequence,M_Items.Sequence''',[EffectiveDate,CommonID])
 
-                MarginList = [] 
                 if query:
-
                     List = []
                     ItemCount = query[0].ItemCount
                     for a in query:
@@ -193,7 +191,7 @@ class GetMarginListDetailsView(CreateAPIView):
                             "ItemName": a.ItemName
                         })
                     
-                    MarginList.append({
+                    MarginList = ({
                         "ItemCount":ItemCount,
                         "MarginList": List
                     })
@@ -202,7 +200,7 @@ class GetMarginListDetailsView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': MarginList})
                 else:
                     log_entry = create_transaction_logNew(request, 0, 0, "Get Margin Details:"+"Margin Details Not available", 420, 0)
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'MRP Details not available', 'Data': []})
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Margin Details not available', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, "Get Margin Details:"+ str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})

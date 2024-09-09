@@ -159,7 +159,6 @@ class GetMRPListDetailsView(CreateAPIView):
                         GROUP BY M_MRPMaster.id, M_MRPMaster.EffectiveDate, M_MRPMaster.MRP, M_MRPMaster.CommonID, C_Companies.Name, i.Name
                         ORDER BY M_Group.Sequence, MC_SubGroup.Sequence,i.Sequence''',[EffectiveDate,CommonID])    
                 
-                MRPList = []
                 if query:
                     List = []
                     ItemCount = query[0].ItemCount
@@ -173,7 +172,7 @@ class GetMRPListDetailsView(CreateAPIView):
                             "ItemName": a.ItemName
                         })
                     
-                    MRPList.append({
+                    MRPList = ({
                         "ItemCount":ItemCount,
                         "MRPList": List
                     })
