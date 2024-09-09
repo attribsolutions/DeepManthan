@@ -528,17 +528,20 @@ urlpatterns = [
             url(r'Mrps/([0-9]+)$',M_MRPsViewSecond.as_view()),
             url(r'DeleteMrpOnList/([0-9]+)$',M_MRPsViewThird.as_view()),
             url(r'MrpsListDetails$',GetMRPListDetailsView.as_view()), 
+            url(r'MrpsListFilter$',M_MRPsListViewSecond.as_view()),
     
 # Margins
             url(r'Margins$',M_MarginsView.as_view()),
             url(r'Margins/([0-9]+)$', M_MarginsViewSecond.as_view()),
             url(r'DeleteMarginOnList/([0-9]+)$', M_MarginsViewThird.as_view()),
+            url(r'MarginsListFilter$',M_MarginsListView.as_view()),
     
 # GstHsnCode 
             url(r'GstHsnCode$',M_GstHsnCodeView.as_view()),
             url(r'GstHsnCode/([0-9]+)$', M_GSTHSNCodeViewSecond.as_view()),
             url(r'DeleteGstHsnCodeOnList/([0-9]+)$', M_GSTHSNCodeViewThird.as_view()),
             url(r'GetGSTHSNCodeDetails$',GetGSTHSNCodeDetailsView.as_view()),
+            url(r'GstHsnListFilter$',GstHsnListView.as_view()),
     
 # GetMRP 
             
