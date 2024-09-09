@@ -60,7 +60,7 @@ class SweetPosRoleAccessView(CreateAPIView):
                         obj.save(using='sweetpos_db')
                         
 
-                log_entry = create_transaction_logNew(request, SPOSRoleAccessdata,SPOSRoleAccessdata['Party'],'',346,0)    
+                log_entry = create_transaction_logNew(request, SPOSRoleAccessdata,SPOSRoleAccessdata[0]['Party'],'',346,0)    
 
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'SweetPosRoleAccess Save Successfully', 'Data':[]}) 
         except Exception as e:
