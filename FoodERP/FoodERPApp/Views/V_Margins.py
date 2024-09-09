@@ -17,24 +17,6 @@ class M_MarginsView(CreateAPIView):
     # authentication__Class = JSONWebTokenAuthentication
     
     @transaction.atomic()
-    def get(self, request):
-        try:
-            with transaction.atomic():
-                Margindata = M_MarginMaster.objects.raw('''SELECT M_MarginMaster.id,M_MarginMaster.EffectiveDate,M_MarginMaster.Company_id,M_MarginMaster.PriceList_id,M_MarginMaster.CreatedBy,M_MarginMaster.CreatedOn,M_MarginMaster.Party_id,M_MarginMaster.CommonID,C_Companies.Name CompanyName, M_PriceList.Name PriceListName,M_Parties.Name PartyName  FROM M_MarginMaster  left join C_Companies on C_Companies.id = M_MarginMaster.Company_id left join M_PriceList  on M_PriceList.id = M_MarginMaster.PriceList_id left join M_Parties on M_Parties.id = M_MarginMaster.Party_id where M_MarginMaster.CommonID>0 AND M_MarginMaster.IsDeleted=0 group by EffectiveDate,Party_id,PriceList_id,CommonID Order BY EffectiveDate Desc''')
-                # CustomPrint(str(MRPdata.query))
-                if not Margindata:
-                    log_entry = create_transaction_logNew(request, 0, 0, "MarginList Not available",114,0)
-                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
-                else:
-                    Margindata_Serializer = M_MarginsSerializerSecond(Margindata, many=True).data
-                    log_entry = create_transaction_logNew(request,Margindata_Serializer, 0,'Margin List',114,0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Margindata_Serializer})
-        except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'MarginList:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-    
-    
-    @transaction.atomic()
     def post(self, request):
         try:
             with transaction.atomic():
@@ -148,4 +130,29 @@ class M_MarginsViewThird(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Margin used in another table', 'Data': []}) 
         log_entry = create_transaction_logNew(request, {'MarginID':id}, 0,'MarginID:'+str(id),118,0)
         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Margin Deleted Successfully','DeleteID':id,'Data':[]})
+
+
+class M_MarginsListView(CreateAPIView):
     
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+    def post(self, request):
+        MarginListdata = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                FromDate = MarginListdata['FromDate']
+                ToDate = MarginListdata['ToDate']
+                Margindata = M_MarginMaster.objects.raw('''SELECT M_MarginMaster.id,M_MarginMaster.EffectiveDate,M_MarginMaster.Company_id,M_MarginMaster.PriceList_id,M_MarginMaster.CreatedBy,M_MarginMaster.CreatedOn,M_MarginMaster.Party_id,M_MarginMaster.CommonID,C_Companies.Name CompanyName, M_PriceList.Name PriceListName,M_Parties.Name PartyName  FROM M_MarginMaster  left join C_Companies on C_Companies.id = M_MarginMaster.Company_id left join M_PriceList  on M_PriceList.id = M_MarginMaster.PriceList_id left join M_Parties on M_Parties.id = M_MarginMaster.Party_id where M_MarginMaster.CommonID>0 AND M_MarginMaster.IsDeleted=0 AND EffectiveDate BETWEEN %s AND %s group by EffectiveDate,Party_id,PriceList_id,CommonID Order BY EffectiveDate Desc''',[FromDate,ToDate])
+                # CustomPrint(str(MRPdata.query))
+                if not Margindata:
+                    log_entry = create_transaction_logNew(request, 0, 0, "MarginList Not available",114,0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
+                else:
+                    Margindata_Serializer = M_MarginsSerializerSecond(Margindata, many=True).data
+                    log_entry = create_transaction_logNew(request,Margindata_Serializer, 0,'Margin List',114,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Margindata_Serializer})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'MarginList:'+str(Exception(e)),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})   
