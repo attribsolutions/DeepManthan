@@ -159,12 +159,12 @@ class GetMRPListDetailsView(CreateAPIView):
                         GROUP BY M_MRPMaster.id, M_MRPMaster.EffectiveDate, M_MRPMaster.MRP, M_MRPMaster.CommonID, C_Companies.Name, i.Name
                         ORDER BY M_Group.Sequence, MC_SubGroup.Sequence,i.Sequence''',[EffectiveDate,CommonID])    
                 
-                ItemListData = []
+                MRPList = []
                 if query:
-                    ItemList = []
+                    List = []
                     ItemCount = query[0].ItemCount
                     for a in query:
-                        ItemList.append({
+                        List.append({
                             "id": a.id,
                             "EffectiveDate": a.EffectiveDate,
                             "MRP": a.MRP,
@@ -173,13 +173,13 @@ class GetMRPListDetailsView(CreateAPIView):
                             "ItemName": a.ItemName
                         })
                     
-                    ItemListData.append({
+                    MRPList.append({
                         "ItemCount":ItemCount,
-                        "ItemList": ItemList
+                        "ItemList": List
                     })
 
                     log_entry = create_transaction_logNew(request, MRPListData, 0, '', 406, 0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemListData})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': MRPList})
                 else:
                         log_entry = create_transaction_logNew(request, 0, 0, "Get MRP Details:"+"MRP Details Not available", 7, 0)
                         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'MRP Details not available', 'Data': []})
