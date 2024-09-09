@@ -29,3 +29,4 @@ class MRPListDetailsSerializer(serializers.Serializer):
     CommonID = serializers.IntegerField()
     CompanyName = serializers.CharField(max_length=100)
     ItemName = serializers.CharField(max_length=100)
+    ItemCount = serializers.IntegerField()

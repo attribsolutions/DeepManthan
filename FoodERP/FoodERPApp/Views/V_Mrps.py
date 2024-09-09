@@ -160,7 +160,7 @@ class GetMRPListDetailsView(CreateAPIView):
                 '''  
                 
                 query = f'''
-                   SELECT M_MRPMaster.id,M_MRPMaster.EffectiveDate,M_MRPMaster.MRP,M_MRPMaster.CommonID,C_Companies.Name CompanyName,i.Name as ItemName
+                   SELECT M_MRPMaster.id,M_MRPMaster.EffectiveDate,M_MRPMaster.MRP,M_MRPMaster.CommonID,C_Companies.Name CompanyName,i.Name as ItemName, SUM(COUNT(i.id)) OVER () AS ItemCount
                         FROM M_MRPMaster 
                         left join C_Companies on C_Companies.id = M_MRPMaster.Company_id 
                         left join M_Parties a on a.id = M_MRPMaster.Division_id 
@@ -169,7 +169,7 @@ class GetMRPListDetailsView(CreateAPIView):
                         {joinsforgroupsubgroup}
                         where M_MRPMaster.IsDeleted=0  
                         AND M_MRPMaster.EffectiveDate='{EffectiveDate}' AND M_MRPMaster.CommonID=%s
-                         
+                        GROUP BY M_MRPMaster.id, M_MRPMaster.EffectiveDate, M_MRPMaster.MRP, M_MRPMaster.CommonID, C_Companies.Name, i.Name
                         {orderby}
                 '''    
                 
