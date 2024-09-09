@@ -137,7 +137,6 @@ class GetGSTHSNCodeDetailsView(CreateAPIView):
                     GROUP BY M_GSTHSNCode.id, M_GSTHSNCode.EffectiveDate, M_GSTHSNCode.GSTPercentage, M_GSTHSNCode.CommonID, C_Companies.Name, M_Items.Name
                     Order BY EffectiveDate Desc''',[EffectiveDate,CommonID])   
                 
-                GSTList = []
                 if query:
                         List = []
                         ItemCount = query[0].ItemCount
@@ -151,9 +150,9 @@ class GetGSTHSNCodeDetailsView(CreateAPIView):
                                 "HSNCode": a.HSNCode,
                                 "CompanyName" : a.CompanyName
                             })
-                        GSTList.append({
+                        GSTList = ({
                             "ItemCount":ItemCount,
-                            "MarginList": List
+                            "GSTHSNList": List
                         })
                         log_entry = create_transaction_logNew(request, GSTHSNData, 0, '', 408, 0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': GSTList})
@@ -161,7 +160,7 @@ class GetGSTHSNCodeDetailsView(CreateAPIView):
                         log_entry = create_transaction_logNew(request, 0, 0, "Get GST Details:"+"GST Details Not available", 408, 0)
                         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'GST Details not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, GSTHSNData, 0, "Get MRP Details:"+ str(e), 33, 0)
+            log_entry = create_transaction_logNew(request, GSTHSNData, 0, "Get GST Details:"+ str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []}) 
         
 
