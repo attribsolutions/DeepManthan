@@ -175,7 +175,7 @@ class GetMRPListDetailsView(CreateAPIView):
                     
                     MRPList.append({
                         "ItemCount":ItemCount,
-                        "ItemList": List
+                        "MRPList": List
                     })
 
                     log_entry = create_transaction_logNew(request, MRPListData, 0, '', 406, 0)

@@ -535,6 +535,7 @@ urlpatterns = [
             url(r'Margins/([0-9]+)$', M_MarginsViewSecond.as_view()),
             url(r'DeleteMarginOnList/([0-9]+)$', M_MarginsViewThird.as_view()),
             url(r'MarginsListFilter$',M_MarginsListView.as_view()),
+            url(r'MarginListDetails$',GetMarginListDetailsView.as_view()),
     
 # GstHsnCode 
             url(r'GstHsnCode$',M_GstHsnCodeView.as_view()),
