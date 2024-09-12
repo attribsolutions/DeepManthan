@@ -500,7 +500,10 @@ urlpatterns = [
             url(r'Group$', GroupView.as_view()),
             url(r'GetGroupByGroupTypeID/([0-9]+)$', GetGroupByGroupTypeID.as_view()),
             url(r'DetailsOfsubgroups_groups/([0-9]+)$', DetailsOfSubgroups_GroupsView.as_view()), #GET by GroupTypeID
-            url(r'UpdateGroupSubGroupSequence$', UpdateGroupSubGroupSequenceView.as_view()),  #POST
+            url(r'UpdateGroupSubGroupSequence$', UpdateGroupSubGroupSequenceView.as_view()),  
+            url(r'DetailsOfsubgroups_groupsNEW$', DetailsOfSubgroups_GroupsViewNEW.as_view()),
+            url(r'UpdateGroupSubGroupSequenceNew$', UpdateGroupSubGroupSequenceViewNew.as_view()),
+            
             
             
 # SubGroups
