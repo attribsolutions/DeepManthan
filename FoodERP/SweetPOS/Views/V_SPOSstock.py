@@ -35,22 +35,29 @@ class StockView(CreateAPIView):
               
                 for a in FranchiseStockdata['StockItems']:
                     BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], Party,0)
-                    # print(a['Item'],a['Unit'])
-                    if IsStockAdjustment:
+                    
+                    query3 = None
+                    query4 = None
+                    
+                    if Mode == 2: #Mode 2 is for stock adjustment
                         UnitwiseQuantityConversionobject = UnitwiseQuantityConversion( a['Item'], a['Quantity'], a['Unit'], 0, 0, 0, 0 )
                     else:
                         UnitwiseQuantityConversionobject = UnitwiseQuantityConversion( a['Item'], a['Quantity'], 0, a['Unit'], 0, 0, 0)
 
                     BaseUnitQuantity=UnitwiseQuantityConversionobject.GetBaseUnitQuantity()
+                 
                     Item=a['Item']
                     if Mode == 2:
-                        query3 = T_SPOSStock.objects.filter(Party=Party).aggregate(total=Sum('BaseUnitQuantity'))
+                        query3 = O_SPOSDateWiseLiveStock.objects.filter(Party=Party,Item=Item,StockDate=date.today()).values('ClosingBalance')
                     else:
-                        query3 = T_SPOSStock.objects.filter(Party=Party,id=a['BatchCodeID']).aggregate(total=Sum('BaseUnitQuantity'))
-                    if query3['total']:
-                        totalstock=float(query3['total'])
+                        query4 = T_SPOSStock.objects.filter(Party=Party,id=a['BatchCodeID'],).aggregate(total=Sum('BaseUnitQuantity'))
+                        
+                    if query3 and query3.exists():
+                        totalstock = float(query3[0]['ClosingBalance'])
+                    elif query4 and query4['total']:
+                        totalstock = float(query4['total'])
                     else:
-                        totalstock=0
+                        totalstock = 0
 
                     a['BatchCode'] = BatchCode
                     a['StockDate'] = date.today()
@@ -72,8 +79,9 @@ class StockView(CreateAPIView):
                     "Difference" : round(BaseUnitQuantity,3)-totalstock,
                     "IsStockAdjustment" : IsStockAdjustment
                     })
-          
+                    
                 StockEntrySerializer = SPOSstockSerializer(data=T_SPOS_StockEntryList, many=True)
+               
                        
                 if StockEntrySerializer.is_valid():
                     StockEntrySerializer.save()
