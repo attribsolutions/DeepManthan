@@ -175,5 +175,43 @@ class MachineTypeListView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'Machine Role List:'+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data':[]})
+        
+        
+
+class SPOSLoginDetailsView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    
+    @transaction.atomic()
+    def post(self, request):
+        LoginData = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                FromDate = LoginData['FromDate']
+                ToDate = LoginData['ToDate']
+                DivisionID = LoginData['DivisionID']
+
+                SPOSLoginDetailsQuery = M_SweetPOSLogin.objects.raw('''SELECT M_SweetPOSLogin.id,UserName,DivisionID,ClientID,MacID,ExePath,ExeVersion,CreatedOn FROM SweetPOS.M_SweetPOSLogin WHERE CreatedOn BETWEEN %s AND %s AND DivisionID=%s''',[FromDate,ToDate,DivisionID])
+                SPOSLoginDetailsList = list()
+
+                for a in SPOSLoginDetailsQuery:
+                    SPOSLoginDetailsList.append({
+                        "id": a.id,
+                        "UserName": a.UserName,
+                        "DivisionID": a.DivisionID,
+                        "ClientID": a.ClientID,
+                        "MacID": a.MacID,
+                        "ExePath": a.ExePath,
+                        "ExeVersion": a.ExeVersion,
+                        "CreatedOn": a.CreatedOn
+                    })
+                    
+                log_entry = create_transaction_logNew(request, LoginData, 0, 'SPOSLoginDetails', 421, 0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SPOSLoginDetailsList})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, LoginData, 0, 'SPOSLoginDetails:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+               
+
+
 
 
