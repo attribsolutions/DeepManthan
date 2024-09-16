@@ -184,13 +184,20 @@ class SPOSStockAdjustmentView(CreateAPIView):
             with transaction.atomic():
                 query=O_SPOSDateWiseLiveStock.objects.raw('''SELECT D.id, D.Item, M_Items.Name AS ItemName, D.StockDate, D.ClosingBalance AS Quantity, 
                                                             M_Units.id AS UnitID, M_Units.Name AS UnitName,
-                                                            (SELECT  MRPValue FROM SweetPOS.T_SPOSStock WHERE StockDate = CURRENT_DATE  AND Item = %s and Party=%s ORDER BY id DESC LIMIT 1)MRP,
-                                                            (SELECT  BatchCode FROM SweetPOS.T_SPOSStock WHERE StockDate = CURRENT_DATE  AND Item = %s and Party=%s ORDER BY id DESC LIMIT 1)BatchCode
+                                                            (SELECT MRP FROM SweetPOS.T_SPOSStock 
+                                                                WHERE StockDate = (SELECT MAX(StockDate) FROM SweetPOS.T_SPOSStock WHERE Item = %s AND Party = %s)
+                                                                AND Item = %s AND Party = %s ORDER BY id DESC LIMIT 1) AS MRP,
+                                                            (SELECT BatchCode FROM SweetPOS.T_SPOSStock 
+                                                                WHERE StockDate = (SELECT MAX(StockDate) FROM SweetPOS.T_SPOSStock WHERE Item = %s AND Party = %s)
+                                                                AND Item = %s AND Party = %s ORDER BY id DESC LIMIT 1) AS BatchCode,
+                                                            (SELECT MRPValue FROM SweetPOS.T_SPOSStock 
+                                                                WHERE StockDate = (SELECT MAX(StockDate) FROM SweetPOS.T_SPOSStock WHERE Item = %s AND Party = %s)
+                                                                AND Item = %s AND Party = %s ORDER BY id DESC LIMIT 1) AS MRPValue
                                                             FROM SweetPOS.O_SPOSDateWiseLiveStock D
                                                             JOIN FoodERP.M_Items ON M_Items.id = D.Item
                                                             JOIN FoodERP.M_Units ON M_Units.id = D.Unit
                                                             WHERE D.StockDate = CURRENT_DATE
-                                                            AND D.Item = %s AND D.Party = %s ''',([id],[Party],[id],[Party],[id],[Party]))   
+                                                            AND D.Item = %s AND D.Party = %s ''',([id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party]))   
                                                        
                 if query:
                     BatchCodelist = list()
@@ -219,8 +226,8 @@ class SPOSStockAdjustmentView(CreateAPIView):
                             'MRP':  a.MRP,
                             'SystemBatchDate':  a.StockDate,
                             'SystemBatchCode':  a.BatchCode,
-                            'MRPValue': "",
-                            'MRPID':  "",
+                            'MRPValue': a.MRPValue,
+                            'MRPID': a.MRP,
                             'GSTID':  "",
                             'GSTPercentage':  "",
                             'UnitID':  a.UnitID,
