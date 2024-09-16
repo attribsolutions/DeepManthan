@@ -185,7 +185,7 @@ class SPOSStockAdjustmentView(CreateAPIView):
         try:
             with transaction.atomic():
                 query=O_SPOSDateWiseLiveStock.objects.raw('''SELECT D.id, D.Item, M_Items.Name AS ItemName, D.StockDate, D.ClosingBalance AS Quantity, 
-                                                            M_Units.id AS UnitID, M_Units.Name AS UnitName,
+                                                            M_Units.id AS UnitID, M_Units.Name AS UnitName,M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName,
                                                             (SELECT MRP FROM SweetPOS.T_SPOSStock 
                                                                 WHERE StockDate = (SELECT MAX(StockDate) FROM SweetPOS.T_SPOSStock WHERE Item = %s AND Party = %s)
                                                                 AND Item = %s AND Party = %s ORDER BY id DESC LIMIT 1) AS MRP,
@@ -198,8 +198,13 @@ class SPOSStockAdjustmentView(CreateAPIView):
                                                             FROM SweetPOS.O_SPOSDateWiseLiveStock D
                                                             JOIN FoodERP.M_Items ON M_Items.id = D.Item
                                                             JOIN FoodERP.M_Units ON M_Units.id = D.Unit
+                                                            LEFT JOIN FoodERP.MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id AND MC_ItemGroupDetails.GroupType_id = 5
+                                                            LEFT JOIN FoodERP.M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
+                                                            LEFT JOIN FoodERP.M_Group ON M_Group.id = MC_ItemGroupDetails.Group_id
+                                                            LEFT JOIN FoodERP.MC_SubGroup ON MC_SubGroup.id = MC_ItemGroupDetails.SubGroup_id
                                                             WHERE D.StockDate = CURRENT_DATE
-                                                            AND D.Item = %s AND D.Party = %s ''',([id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party]))   
+                                                            AND D.Item = %s AND D.Party = %s 
+                                                            ORDER BY FoodERP.M_Group.Sequence, FoodERP.MC_SubGroup.Sequence, FoodERP.MC_ItemGroupDetails.ItemSequence''',([id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party]))   
                                                        
                 if query:
                     BatchCodelist = list()
@@ -221,6 +226,8 @@ class SPOSStockAdjustmentView(CreateAPIView):
                             'id':  a.id,
                             'Item':  a.Item,
                             'ItemName':  a.ItemName,
+                            'GroupName': a.GroupName,
+                            'SubGroupName' : a.SubGroupName,
                             'OriginalBaseUnitQuantity': a.Quantity,
                             'BaseUnitQuantity': a.Quantity,
                             'BatchDate': a.StockDate,
