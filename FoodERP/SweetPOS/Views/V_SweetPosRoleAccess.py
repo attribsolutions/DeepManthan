@@ -6,7 +6,7 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from rest_framework.parsers import JSONParser
-
+from datetime import datetime
 from rest_framework import status
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
@@ -186,8 +186,10 @@ class SPOSLoginDetailsView(CreateAPIView):
         LoginData = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                FromDate = LoginData['FromDate']
-                ToDate = LoginData['ToDate']
+                FromDateStr = LoginData['FromDate']
+                ToDateStr = LoginData['ToDate']
+                FromDate = datetime.strptime(FromDateStr, '%Y-%m-%d %H:%M:%S')
+                ToDate = datetime.strptime(ToDateStr, '%Y-%m-%d %H:%M:%S')
                 DivisionID = LoginData['DivisionID']
 
                 SPOSLoginDetailsQuery = M_SweetPOSLogin.objects.raw('''SELECT M_SweetPOSLogin.id,UserName,DivisionID,ClientID,MacID,ExePath,ExeVersion,CreatedOn FROM SweetPOS.M_SweetPOSLogin WHERE CreatedOn BETWEEN %s AND %s AND DivisionID=%s''',[FromDate,ToDate,DivisionID])
