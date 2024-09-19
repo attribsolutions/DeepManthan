@@ -286,8 +286,9 @@ class M_ConsumerMobile(models.Model):
 class M_SweetPOSMachine(models.Model):
     Party = models.IntegerField()
     MacID = models.CharField(max_length=200)
-    MachineRole = models.IntegerField()
+    MachineRole = models.IntegerField(null=True,blank=True )
     IsServer = models.BooleanField(default=False)
+    ClientID =  models.IntegerField()
 
     class Meta:
         db_table = "M_SweetPOSMachine"        
