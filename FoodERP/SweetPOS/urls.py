@@ -22,6 +22,7 @@ urlpatterns = [
     # Master APIs IN Projects Add Page ,List Page
     url(r'SPOSroleaccess$', SweetPosRoleAccessView.as_view()),
     url(r'Lspos$', SPOSLog_inView.as_view()),
+    url(r'SpoS_login_Detail$', SPOSLoginDetailsView.as_view()),
     url(r'ItemGroupandSubgroup$', ItemGroupandSubgroupView.as_view()),
     url(r'ItemList/([0-9]+)$', ItemListView.as_view()),
     url(r'InsertSweetPOSSaleList$', SPOSInvoiceView.as_view()),
