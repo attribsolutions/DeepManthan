@@ -32,8 +32,23 @@ class StockView(CreateAPIView):
                 IsAllStockZero = FranchiseStockdata['IsAllStockZero']
 
                 T_SPOS_StockEntryList = list()
-              
+
                 for a in FranchiseStockdata['StockItems']:
+                    # Get groupname and subgroupname via subquery
+                    GroupAndSubgroupName = MC_ItemGroupDetails.objects.filter(
+                        Item_id=a['Item'],
+                        GroupType_id=5
+                    ).select_related('Group', 'SubGroup').order_by(
+                        'Group__Sequence', 'SubGroup__Sequence', 'ItemSequence'
+                    ).values('Group__Name', 'SubGroup__Name').first()
+
+                    if GroupAndSubgroupName:
+                        a['GroupName'] = GroupAndSubgroupName['Group__Name']
+                        a['SubGroupName'] = GroupAndSubgroupName['SubGroup__Name']
+                    else:
+                        a['GroupName'] = None
+                        a['SubGroupName'] = None
+                                    
                     BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], Party,0)
                     
                     query3 = None
@@ -77,7 +92,9 @@ class StockView(CreateAPIView):
                     "BatchCodeID" : a['BatchCodeID'],
                     "IsSaleable" : 1,
                     "Difference" : round(BaseUnitQuantity,3)-totalstock,
-                    "IsStockAdjustment" : IsStockAdjustment
+                    "IsStockAdjustment" : IsStockAdjustment,
+                    "GroupName": a['GroupName'],
+                    "SubGroupName": a['SubGroupName']
                     })
                     
                 StockEntrySerializer = SPOSstockSerializer(data=T_SPOS_StockEntryList, many=True)
@@ -241,6 +258,7 @@ class SPOSStockAdjustmentView(CreateAPIView):
                             'UnitName':  a.UnitName,
                             'UnitOptions' : ItemUnitDetails
                         })
+                        
                     log_entry = create_transaction_logNew(request,0, Party,BatchCodelist,407,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BatchCodelist})
                 else:
