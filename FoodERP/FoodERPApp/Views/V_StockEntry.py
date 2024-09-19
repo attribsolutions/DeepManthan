@@ -23,9 +23,10 @@ class StockEntryPageView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        StockEntrydata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                StockEntrydata = JSONParser().parse(request)
+               
                 Party = StockEntrydata['PartyID']
                 CreatedBy = StockEntrydata['CreatedBy']
                 StockDate = StockEntrydata['Date']
@@ -134,11 +135,16 @@ class StockEntryPageView(CreateAPIView):
                         log_entry = create_transaction_logNew(request, StockEntrydata, 0,'PartyStockEntrySave:'+str(StockEntry_OLiveBatchesSerializer.errors),34,0)
                         transaction.set_rollback(True)
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': StockEntry_OLiveBatchesSerializer.errors, 'Data': []})
-                log_entry = create_transaction_logNew(request, StockEntrydata, Party,'',87,0)
-                return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Party Stock Entry Save Successfully', 'Data': []})
+                    
+                if Mode == 1:
+                    log_entry = create_transaction_logNew(request, StockEntrydata, Party, 'Stock Save Successfully', 87, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Stock Save Successfully', 'Data': []})  
+                else:
+                    log_entry = create_transaction_logNew(request, StockEntrydata, Party, 'Stock Adjustment Save Successfully', 87, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Stock Adjustment Save Successfully', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'PartyStockEntrySave:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, StockEntrydata, 0,'PartyStockEntrySave:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
         
         
@@ -390,13 +396,7 @@ class StockEntryItemsView(CreateAPIView):
                     GroupTypeid = 1
                     seq=(f'M_Items.Sequence')
                 
-                joinsforgroupsubgroup=(f'''left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id={GroupTypeid}
-
-left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
-left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id''')
-                orderby=(f'''Order By M_Group.Sequence,MC_SubGroup.Sequence,{seq}''')
-                
-                Itemquery = MC_PartyItems.objects.raw(f'''SELECT M_Items.id, M_Items.Name AS ItemName,
+                Itemquery = MC_PartyItems.objects.raw(f'''SELECT M_Items.id, M_Items.Name AS ItemName,M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName,
                                                             ROUND(GetTodaysDateMRP(M_Items.id, CURDATE(), 2, 0, 0), 2) AS MRPValue,
                                                             ROUND(GetTodaysDateRate(M_Items.id, CURDATE(), %s, 0, 2), 2) AS RateValue,
                                                             ROUND(GSTHsnCodeMaster(M_Items.id, CURDATE(), 2), 2) AS GSTPercentage,
@@ -405,8 +405,12 @@ left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id''')
                                                             GetTodaysDateRate(M_Items.id, CURDATE(),  %s, 0, 1) AS Rate
                                                             FROM M_Items 
                                                             JOIN MC_PartyItems ON MC_PartyItems.Item_id = M_Items.id
-                                                            {joinsforgroupsubgroup}
-                                                            WHERE MC_PartyItems.Party_id = %s {orderby}''', ([PartyID],[PartyID],[PartyID]))
+                                                            left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id= %s
+                                                            left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
+                                                            left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
+                                                            left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
+                                                            WHERE MC_PartyItems.Party_id = %s 
+                                                            Order By M_Group.Sequence,MC_SubGroup.Sequence,{seq}''', ([PartyID],[PartyID],[GroupTypeid],[PartyID]))
              
                 if not Itemquery:
                     log_entry = create_transaction_logNew(request, Logindata, 0, 'Franchise Items Not available', 102, 0)
@@ -415,6 +419,8 @@ left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id''')
                 FranchiseItemsList = [{
                     "Item": item.id,
                     "ItemName": item.ItemName,
+                    'GroupName': item.GroupName,
+                    'SubGroupName' : item.SubGroupName,
                     "ItemUnitDetails": [{
                         "Unit": unit.id,
                         "BaseUnitQuantity": unit.BaseUnitQuantity,  
