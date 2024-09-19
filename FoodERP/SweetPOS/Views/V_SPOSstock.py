@@ -85,16 +85,20 @@ class StockView(CreateAPIView):
                        
                 if StockEntrySerializer.is_valid():
                     StockEntrySerializer.save()
-                
-                    log_entry = create_transaction_logNew(request, FranchiseStockdata, FranchiseStockdata['PartyID'],'Franchise Items Save Successfully',87,0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Stock Save Successfully', 'Data': []})
+                    
+                    if Mode == 2:
+                        log_entry = create_transaction_logNew(request, FranchiseStockdata, Party, 'FranchiseStock Adjustment Save Successfully', 87, 0)
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'FranchiseStock Adjustment Save Successfully', 'Data': []})
+                    else:
+                        log_entry = create_transaction_logNew(request, FranchiseStockdata, Party, 'FranchiseItems Stock Save Successfully', 87, 0)
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'FranchiseItems Stock Save Successfully', 'Data': []})
                 else:
                     log_entry = create_transaction_logNew(request, FranchiseStockdata, 0,'FranchiseStockEntrySave:'+str(StockEntrySerializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': StockEntrySerializer.errors, 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, FranchiseStockdata, 0,'FranchiseStockEntrySave:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data': []})
 
 
 
@@ -112,6 +116,7 @@ class SPOSStockReportView(CreateAPIView):
                 PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
                 UnitName = M_Units.objects.filter(id=Unit).values("Name")
                 unitname = UnitName[0]['Name']
+                print('aaaaa')
                 StockreportQuery = O_SPOSDateWiseLiveStock.objects.raw('''
                 SELECT 1 as id,A.Item_id,A.Unit,
                 FoodERP.UnitwiseQuantityConversion(A.Item_id,ifnull(OpeningBalance,0),0,A.Unit,0,%s,0)OpeningBalance,
@@ -133,11 +138,11 @@ class SPOSStockReportView(CreateAPIView):
 
                 JOIN FoodERP.M_Items ON M_Items.id=O_SPOSDateWiseLiveStock.Item
                 join FoodERP.M_Units on M_Units.id= O_SPOSDateWiseLiveStock.Unit
-                left join FoodERP.MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
-                left JOIN FoodERP.M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
+                left join FoodERP.MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id = 5
+                left JOIN FoodERP.M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
                 left JOIN FoodERP.M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
                 left JOIN FoodERP.MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
-                 WHERE M_GroupType.id = 5 AND StockDate BETWEEN %s AND %s AND Party=%s GROUP BY Item,M_GroupType.id,M_Group.id,MC_SubGroup.id) A
+                 WHERE StockDate BETWEEN %s AND %s AND Party=%s GROUP BY Item,Unit,M_GroupType.id,M_Group.id,MC_SubGroup.id) A
 
                 left JOIN (SELECT O_SPOSDateWiseLiveStock.Item, OpeningBalance FROM O_SPOSDateWiseLiveStock WHERE O_SPOSDateWiseLiveStock.StockDate = %s AND O_SPOSDateWiseLiveStock.Party=%s) B
                 ON A.Item_id = B.Item
@@ -150,8 +155,9 @@ class SPOSStockReportView(CreateAPIView):
                 WHERE Party =%s AND StockDate BETWEEN %s AND %s
                 GROUP BY Item) D
                 ON A.Item_id = D.Item ''', ([Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [unitname], [FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate]))
+                # print(StockreportQuery)
                 serializer = SPOSStockReportSerializer(StockreportQuery, many=True).data
-
+                
                 StockData = list()
                 StockData.append({
                     "FromDate": FromDate,
@@ -179,18 +185,26 @@ class SPOSStockAdjustmentView(CreateAPIView):
         try:
             with transaction.atomic():
                 query=O_SPOSDateWiseLiveStock.objects.raw('''SELECT D.id, D.Item, M_Items.Name AS ItemName, D.StockDate, D.ClosingBalance AS Quantity, 
-                                                                M_Units.id AS UnitID, M_Units.Name AS UnitName,
-                                                                (SELECT MRPValue FROM SweetPOS.T_SPOSStock 
-                                                                    WHERE StockDate = (SELECT MAX(StockDate) FROM SweetPOS.T_SPOSStock WHERE Item = %s AND Party = %s)
-                                                                    AND Item = %s AND Party = %s ORDER BY id DESC LIMIT 1) AS MRP,
-                                                                (SELECT BatchCode FROM SweetPOS.T_SPOSStock 
-                                                                    WHERE StockDate = (SELECT MAX(StockDate) FROM SweetPOS.T_SPOSStock WHERE Item = %s AND Party = %s)
-                                                                    AND Item = %s AND Party = %s ORDER BY id DESC LIMIT 1) AS BatchCode
+                                                            M_Units.id AS UnitID, M_Units.Name AS UnitName,M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName,
+                                                            (SELECT MRP FROM SweetPOS.T_SPOSStock 
+                                                                WHERE StockDate = (SELECT MAX(StockDate) FROM SweetPOS.T_SPOSStock WHERE Item = %s AND Party = %s)
+                                                                AND Item = %s AND Party = %s ORDER BY id DESC LIMIT 1) AS MRP,
+                                                            (SELECT BatchCode FROM SweetPOS.T_SPOSStock 
+                                                                WHERE StockDate = (SELECT MAX(StockDate) FROM SweetPOS.T_SPOSStock WHERE Item = %s AND Party = %s)
+                                                                AND Item = %s AND Party = %s ORDER BY id DESC LIMIT 1) AS BatchCode,
+                                                            (SELECT MRPValue FROM SweetPOS.T_SPOSStock 
+                                                                WHERE StockDate = (SELECT MAX(StockDate) FROM SweetPOS.T_SPOSStock WHERE Item = %s AND Party = %s)
+                                                                AND Item = %s AND Party = %s ORDER BY id DESC LIMIT 1) AS MRPValue
                                                             FROM SweetPOS.O_SPOSDateWiseLiveStock D
                                                             JOIN FoodERP.M_Items ON M_Items.id = D.Item
                                                             JOIN FoodERP.M_Units ON M_Units.id = D.Unit
-                                                            WHERE D.StockDate = (SELECT MAX(StockDate) FROM SweetPOS.T_SPOSStock WHERE Item = %s AND Party = %s)
-                                                            AND D.Item = %s AND D.Party = %s''',([id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party]))   
+                                                            LEFT JOIN FoodERP.MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id AND MC_ItemGroupDetails.GroupType_id = 5
+                                                            LEFT JOIN FoodERP.M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
+                                                            LEFT JOIN FoodERP.M_Group ON M_Group.id = MC_ItemGroupDetails.Group_id
+                                                            LEFT JOIN FoodERP.MC_SubGroup ON MC_SubGroup.id = MC_ItemGroupDetails.SubGroup_id
+                                                            WHERE D.StockDate = CURRENT_DATE
+                                                            AND D.Item = %s AND D.Party = %s 
+                                                            ORDER BY FoodERP.M_Group.Sequence, FoodERP.MC_SubGroup.Sequence, FoodERP.MC_ItemGroupDetails.ItemSequence''',([id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party]))   
                                                        
                 if query:
                     BatchCodelist = list()
@@ -212,6 +226,8 @@ class SPOSStockAdjustmentView(CreateAPIView):
                             'id':  a.id,
                             'Item':  a.Item,
                             'ItemName':  a.ItemName,
+                            'GroupName': a.GroupName,
+                            'SubGroupName' : a.SubGroupName,
                             'OriginalBaseUnitQuantity': a.Quantity,
                             'BaseUnitQuantity': a.Quantity,
                             'BatchDate': a.StockDate,
@@ -219,8 +235,8 @@ class SPOSStockAdjustmentView(CreateAPIView):
                             'MRP':  a.MRP,
                             'SystemBatchDate':  a.StockDate,
                             'SystemBatchCode':  a.BatchCode,
-                            'MRPValue': "",
-                            'MRPID':  "",
+                            'MRPValue': a.MRPValue,
+                            'MRPID': a.MRP,
                             'GSTID':  "",
                             'GSTPercentage':  "",
                             'UnitID':  a.UnitID,
@@ -229,8 +245,9 @@ class SPOSStockAdjustmentView(CreateAPIView):
                         })
                     log_entry = create_transaction_logNew(request,0, Party,BatchCodelist,407,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BatchCodelist})
-                log_entry = create_transaction_logNew(request,0, Party,'Stock Not available',407,0)
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Stock Not available', 'Data': []})
+                else:
+                    log_entry = create_transaction_logNew(request, 0, Party, 'Please Process Your Stock', 407, 0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Please Process Your Stock', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request,0, 0,'GETStockAdjustment:'+str(),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
