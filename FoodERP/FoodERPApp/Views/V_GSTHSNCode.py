@@ -13,26 +13,7 @@ from ..models import *
 class M_GstHsnCodeView(CreateAPIView): 
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication 
-    
-    @transaction.atomic()
-    def get(self, request):
-        try:
-            with transaction.atomic():
-                # add Comment on 22 M_GSTHSNCode.CommonID > 0
-                # GstHsndata = M_GSTHSNCode.objects.raw('''SELECT M_GSTHSNCode.id,M_GSTHSNCode.EffectiveDate,M_GSTHSNCode.Company_id,M_GSTHSNCode.CommonID,M_GSTHSNCode.CreatedBy,M_GSTHSNCode.CreatedOn,C_Companies.Name CompanyName  FROM M_GSTHSNCode left join C_Companies on C_Companies.id = M_GSTHSNCode.Company_id where M_GSTHSNCode.CommonID > 0 AND M_GSTHSNCode.IsDeleted=0  group by EffectiveDate,CommonID Order BY EffectiveDate Desc''')
-                
-                GstHsndata = M_GSTHSNCode.objects.raw('''SELECT M_GSTHSNCode.id,M_GSTHSNCode.EffectiveDate,M_GSTHSNCode.Company_id,M_GSTHSNCode.CommonID,M_GSTHSNCode.CreatedBy,M_GSTHSNCode.CreatedOn,C_Companies.Name CompanyName  FROM M_GSTHSNCode left join C_Companies on C_Companies.id = M_GSTHSNCode.Company_id where M_GSTHSNCode.IsDeleted=0  group by EffectiveDate,CommonID Order BY EffectiveDate Desc''')
-                
-                # CustomPrint(str(MRPdata.query))
-                if not GstHsndata:
-                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'GST And HSNCode Not available', 'Data': []})
-                else:
-                    GstHsndata_Serializer = M_GstHsnCodeSerializer(GstHsndata, many=True).data
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': GstHsndata_Serializer})
-        except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
-    
-    
+     
     @transaction.atomic()
     def post(self, request):
         GstHsnCodedata = JSONParser().parse(request)
@@ -134,7 +115,6 @@ class GETGstHsnDetails(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})    
            
            
-  
 class GetGSTHSNCodeDetailsView(CreateAPIView):
     permission_classes = (IsAuthenticated,) 
      
@@ -144,39 +124,67 @@ class GetGSTHSNCodeDetailsView(CreateAPIView):
         GSTHSNData=JSONParser().parse(request)
         try:
              with transaction.atomic():
-                EffectiveDate = GSTHSNData.get('EffectiveDate')
-                CommonID = GSTHSNData.get('CommonID')  
-                  
-                # Check for EffectiveDate and CommonID conditions ... CommonID is 0 or > 0
-                if not EffectiveDate or CommonID is None: 
-                    return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'EffectiveDate and CommonID are required and CommonID must not be 0.', 'Data': []})
-
-                query = f'''
-                   SELECT M_GSTHSNCode.id,M_GSTHSNCode.EffectiveDate,M_GSTHSNCode.GSTPercentage,M_GSTHSNCode.HSNCode,M_GSTHSNCode.CommonID,C_Companies.Name CompanyName,M_Items.Name as ItemName 
+                EffectiveDate = GSTHSNData['EffectiveDate']
+                CommonID = GSTHSNData['CommonID']
+                
+                query = M_GSTHSNCode.objects.raw('''
+                   SELECT M_GSTHSNCode.id,M_GSTHSNCode.EffectiveDate,M_GSTHSNCode.GSTPercentage,M_GSTHSNCode.HSNCode,M_GSTHSNCode.CommonID,C_Companies.Name CompanyName,M_Items.Name as ItemName, SUM(COUNT(M_Items.id)) OVER () AS ItemCount 
                    FROM M_GSTHSNCode left join C_Companies on C_Companies.id = M_GSTHSNCode.Company_id 
                    left join M_Items on M_Items.id=M_GSTHSNCode.Item_id
                    where M_GSTHSNCode.IsDeleted=0  
-                   AND M_GSTHSNCode.EffectiveDate='{EffectiveDate}' AND M_GSTHSNCode.CommonID=%s
+                   AND M_GSTHSNCode.EffectiveDate=%s AND M_GSTHSNCode.CommonID=%s
                     -- group by EffectiveDate,Party_id,Division_id,CommonID 
-                    Order BY EffectiveDate Desc
-                '''   
+                    GROUP BY M_GSTHSNCode.id, M_GSTHSNCode.EffectiveDate, M_GSTHSNCode.GSTPercentage, M_GSTHSNCode.CommonID, C_Companies.Name, M_Items.Name
+                    Order BY EffectiveDate Desc''',[EffectiveDate,CommonID])   
                 
-                GSTHSNQuery = M_GSTHSNCode.objects.raw(query, [CommonID])  
-                
-                if list(GSTHSNQuery):
-                     
-                        GSTHSNdata_Serializer = MRPGSTHSNSerializer(GSTHSNQuery, many=True).data
-                    
-                        # ---- transaction_logNew add 408 in m_transactiontype and TransactionCategory from m_generalmaster
-                        log_entry = create_transaction_logNew(request, GSTHSNdata_Serializer, 0, '', 408, 0)
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': GSTHSNdata_Serializer})
-                
+                if query:
+                        List = []
+                        ItemCount = query[0].ItemCount
+                        for a in query:
+                            List.append({
+                                "id": a.id,
+                                "EffectiveDate": a.EffectiveDate,
+                                "GSTPercentage": a.GSTPercentage,
+                                "CommonID": a.CommonID,
+                                "ItemName": a.ItemName,
+                                "HSNCode": a.HSNCode,
+                                "CompanyName" : a.CompanyName
+                            })
+                        GSTList = ({
+                            "ItemCount":ItemCount,
+                            "GSTHSNList": List
+                        })
+                        log_entry = create_transaction_logNew(request, GSTHSNData, 0, '', 408, 0)
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': GSTList})
                 else:
-                        #---- transaction_logNew 7 in m_transactiontype for Data Not available
-                        log_entry = create_transaction_logNew(request, 0, 0, "Get GST Details:"+"GST Details Not available", 7, 0)
+                        log_entry = create_transaction_logNew(request, 0, 0, "Get GST Details:"+"GST Details Not available", 408, 0)
                         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'GST Details not available', 'Data': []})
-                
         except Exception as e:
-            # ---- Exception 33 for Exception in m_transactiontype
-            log_entry = create_transaction_logNew(request, 0, 0, "Get MRP Details:"+ str(e), 33, 0)
+            log_entry = create_transaction_logNew(request, GSTHSNData, 0, "Get GST Details:"+ str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []}) 
+        
+
+class GstHsnListView(CreateAPIView): 
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication 
+    
+    @transaction.atomic()
+    def post(self, request):
+        GSTListData = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                FromDate = GSTListData['FromDate']
+                ToDate = GSTListData['ToDate']
+                # add Comment on 22 M_GSTHSNCode.CommonID > 0
+                # GstHsndata = M_GSTHSNCode.objects.raw('''SELECT M_GSTHSNCode.id,M_GSTHSNCode.EffectiveDate,M_GSTHSNCode.Company_id,M_GSTHSNCode.CommonID,M_GSTHSNCode.CreatedBy,M_GSTHSNCode.CreatedOn,C_Companies.Name CompanyName  FROM M_GSTHSNCode left join C_Companies on C_Companies.id = M_GSTHSNCode.Company_id where M_GSTHSNCode.CommonID > 0 AND M_GSTHSNCode.IsDeleted=0  group by EffectiveDate,CommonID Order BY EffectiveDate Desc''')
+                
+                GstHsndata = M_GSTHSNCode.objects.raw('''SELECT M_GSTHSNCode.id,M_GSTHSNCode.EffectiveDate,M_GSTHSNCode.Company_id,M_GSTHSNCode.CommonID,M_GSTHSNCode.CreatedBy,M_GSTHSNCode.CreatedOn,C_Companies.Name CompanyName  FROM M_GSTHSNCode left join C_Companies on C_Companies.id = M_GSTHSNCode.Company_id where M_GSTHSNCode.IsDeleted=0 AND EffectiveDate BETWEEN %s AND %s group by EffectiveDate,CommonID Order BY EffectiveDate Desc''',[FromDate,ToDate])
+                
+                # CustomPrint(str(MRPdata.query))
+                if not GstHsndata:
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'GST And HSNCode Not available', 'Data': []})
+                else:
+                    GstHsndata_Serializer = M_GstHsnCodeSerializer(GstHsndata, many=True).data
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': GstHsndata_Serializer})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
