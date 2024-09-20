@@ -6,7 +6,7 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from rest_framework.parsers import JSONParser
-
+from datetime import datetime
 from rest_framework import status
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
@@ -60,7 +60,7 @@ class SweetPosRoleAccessView(CreateAPIView):
                         obj.save(using='sweetpos_db')
                         
 
-                log_entry = create_transaction_logNew(request, SPOSRoleAccessdata,SPOSRoleAccessdata['Party'],'',346,0)    
+                log_entry = create_transaction_logNew(request, SPOSRoleAccessdata,SPOSRoleAccessdata[0]['Party'],'',346,0)    
 
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'SweetPosRoleAccess Save Successfully', 'Data':[]}) 
         except Exception as e:
@@ -140,7 +140,7 @@ class MachineTypeSaveView(CreateAPIView):
                         LastInsertID = MachineType.id
                     
                 log_entry = create_transaction_logNew(request, MachineType_Data, MachineType_Data[0]['Party'], '', 416, LastInsertID)        
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Machine Type Save Successfully','TransactionID':LastInsertID, 'Data':[]})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Machine Type Save Successfully', 'TransactionID':LastInsertID, 'Data':[]})
         except Exception as e:
             log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'MachineTypeSave:'+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]})
@@ -153,7 +153,7 @@ class MachineTypeListView(CreateAPIView):
         try:
             with transaction.atomic():
                 Party = MachineType_Data['Party']
-                query = M_SweetPOSMachine.objects.raw('''Select A.id, A.Party, A.MacID, A.MachineRole ,  B.Name MachineTypeName, A.IsServer
+                query = M_SweetPOSMachine.objects.raw('''Select A.id, A.Party, A.MacID, A.MachineRole ,  B.Name MachineTypeName, A.IsServer, A.ClientID
                         From SweetPOS.M_SweetPOSMachine A 
                         JOIN  FoodERP.M_GeneralMaster B on B.id = A.MachineRole
                         WHERE A.Party = %s''',[Party])
@@ -166,7 +166,8 @@ class MachineTypeListView(CreateAPIView):
                         "MacID": a.MacID,
                         "MachineType": a.MachineRole,
                         "MachineTypeName": a.MachineTypeName,
-                        "IsServer": a.IsServer
+                        "IsServer": a.IsServer,
+                        "ClientID": a.ClientID
                     })
                     log_entry = create_transaction_logNew(request, MachineType_Data, Party, '', 417, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :MachineTypeList})
@@ -175,5 +176,45 @@ class MachineTypeListView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'Machine Role List:'+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data':[]})
+        
+        
+
+class SPOSLoginDetailsView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    
+    @transaction.atomic()
+    def post(self, request):
+        LoginData = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                FromDateStr = LoginData['FromDate']
+                ToDateStr = LoginData['ToDate']
+                FromDate = datetime.strptime(FromDateStr, '%Y-%m-%d %H:%M:%S')
+                ToDate = datetime.strptime(ToDateStr, '%Y-%m-%d %H:%M:%S')
+                DivisionID = LoginData['DivisionID']
+
+                SPOSLoginDetailsQuery = M_SweetPOSLogin.objects.raw('''SELECT M_SweetPOSLogin.id,UserName,DivisionID,ClientID,MacID,ExePath,ExeVersion,CreatedOn FROM SweetPOS.M_SweetPOSLogin WHERE CreatedOn BETWEEN %s AND %s AND DivisionID=%s''',[FromDate,ToDate,DivisionID])
+                SPOSLoginDetailsList = list()
+
+                for a in SPOSLoginDetailsQuery:
+                    SPOSLoginDetailsList.append({
+                        "id": a.id,
+                        "UserName": a.UserName,
+                        "DivisionID": a.DivisionID,
+                        "ClientID": a.ClientID,
+                        "MacID": a.MacID,
+                        "ExePath": a.ExePath,
+                        "ExeVersion": a.ExeVersion,
+                        "CreatedOn": a.CreatedOn
+                    })
+                    
+                log_entry = create_transaction_logNew(request, LoginData, 0, 'SPOSLoginDetails', 421, 0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SPOSLoginDetailsList})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, LoginData, 0, 'SPOSLoginDetails:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+               
+
+
 
 

@@ -17,26 +17,6 @@ class M_MRPsView(CreateAPIView):
     # authentication__Class = JSONWebTokenAuthentication
     
     @transaction.atomic()
-    def get(self, request):
-        try:
-            with transaction.atomic():
-                # M_MRPMaster.CommonID >0 Comment on 21-08-2024
-                # MRPdata = M_MRPMaster.objects.raw('''SELECT M_MRPMaster.id,M_MRPMaster.EffectiveDate,M_MRPMaster.Company_id,M_MRPMaster.Division_id,M_MRPMaster.Party_id,M_MRPMaster.CreatedBy,M_MRPMaster.CreatedOn,M_MRPMaster.CommonID,C_Companies.Name CompanyName,a.Name DivisionName,M_Parties.Name PartyName  FROM M_MRPMaster left join C_Companies on C_Companies.id = M_MRPMaster.Company_id left join M_Parties a on a.id = M_MRPMaster.Division_id left join M_Parties on M_Parties.id = M_MRPMaster.Party_id where M_MRPMaster.CommonID >0 AND M_MRPMaster.IsDeleted=0   group by EffectiveDate,Party_id,Division_id,CommonID Order BY EffectiveDate Desc''')
-               
-                MRPdata = M_MRPMaster.objects.raw('''SELECT M_MRPMaster.id,M_MRPMaster.EffectiveDate,M_MRPMaster.Company_id,M_MRPMaster.Division_id,M_MRPMaster.Party_id,M_MRPMaster.CreatedBy,M_MRPMaster.CreatedOn,M_MRPMaster.CommonID,C_Companies.Name CompanyName,a.Name DivisionName,M_Parties.Name PartyName  FROM M_MRPMaster left join C_Companies on C_Companies.id = M_MRPMaster.Company_id left join M_Parties a on a.id = M_MRPMaster.Division_id left join M_Parties on M_Parties.id = M_MRPMaster.Party_id where M_MRPMaster.IsDeleted=0   group by EffectiveDate,Party_id,Division_id,CommonID Order BY EffectiveDate Desc''')
-                
-                if not MRPdata:
-                    log_entry = create_transaction_logNew(request, 0, 0, "MRP Not available",119,0)
-                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'MRP Not available', 'Data': []})
-                else:
-                    MRPdata_Serializer = M_MRPsSerializerSecond(MRPdata, many=True).data
-                    log_entry = create_transaction_logNew(request, MRPdata_Serializer, 0,'',119,0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': MRPdata_Serializer})
-        except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'SingleGET MRP:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
-    
-    @transaction.atomic()
     def post(self, request):
         try:
             with transaction.atomic():
@@ -160,59 +140,79 @@ class GetMRPListDetailsView(CreateAPIView):
     def post(self, request):
         MRPListData=JSONParser().parse(request)
         try:
-             with transaction.atomic():
-                EffectiveDate = MRPListData.get('EffectiveDate')
-                CommonID = MRPListData.get('CommonID')  
-                GroupTypeid = 1
-                
-                # Check for EffectiveDate and CommonID conditions ... CommonID is 0 or > 0
-                if not EffectiveDate or CommonID is None: 
-                    return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'EffectiveDate and CommonID are required and CommonID must not be 0.', 'Data': []})
- 
-                joinsforgroupsubgroup = f'''
-                LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = i.id AND MC_ItemGroupDetails.GroupType_id = {GroupTypeid}
-                LEFT JOIN M_Group ON M_Group.id = MC_ItemGroupDetails.Group_id 
-                LEFT JOIN MC_SubGroup ON MC_SubGroup.id = MC_ItemGroupDetails.SubGroup_id
-                '''  
-                
-                orderby = f'''
-                    ORDER BY M_Group.Sequence, MC_SubGroup.Sequence,i.Sequence
-                '''  
-                
-                query = f'''
-                   SELECT M_MRPMaster.id,M_MRPMaster.EffectiveDate,M_MRPMaster.MRP,M_MRPMaster.CommonID,C_Companies.Name CompanyName,i.Name as ItemName
+            with transaction.atomic():
+                EffectiveDate = MRPListData['EffectiveDate']
+                CommonID = MRPListData['CommonID'] 
+                  
+                query = M_MRPMaster.objects.raw('''
+                   SELECT M_MRPMaster.id,M_MRPMaster.EffectiveDate,M_MRPMaster.MRP,M_MRPMaster.CommonID,C_Companies.Name CompanyName,i.Name as ItemName, SUM(COUNT(i.id)) OVER () AS ItemCount
                         FROM M_MRPMaster 
                         left join C_Companies on C_Companies.id = M_MRPMaster.Company_id 
                         left join M_Parties a on a.id = M_MRPMaster.Division_id 
                         left join M_Parties on M_Parties.id = M_MRPMaster.Party_id 
                         left join M_Items i on M_MRPMaster.Item_id=i.id
-                        {joinsforgroupsubgroup}
+                        LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = i.id AND MC_ItemGroupDetails.GroupType_id = 1
+                        LEFT JOIN M_Group ON M_Group.id = MC_ItemGroupDetails.Group_id 
+                        LEFT JOIN MC_SubGroup ON MC_SubGroup.id = MC_ItemGroupDetails.SubGroup_id
                         where M_MRPMaster.IsDeleted=0  
-                        AND M_MRPMaster.EffectiveDate='{EffectiveDate}' AND M_MRPMaster.CommonID=%s
-                        -- group by EffectiveDate,Party_id,Division_id,CommonID 
-                        {orderby}
-                '''    
+                        AND M_MRPMaster.EffectiveDate=%s AND M_MRPMaster.CommonID=%s
+                        GROUP BY M_MRPMaster.id, M_MRPMaster.EffectiveDate, M_MRPMaster.MRP, M_MRPMaster.CommonID, C_Companies.Name, i.Name
+                        ORDER BY M_Group.Sequence, MC_SubGroup.Sequence,i.Sequence''',[EffectiveDate,CommonID])    
                 
-                MRPListDataQuery = M_MRPMaster.objects.raw(query, [CommonID])  
-               
-                if list(MRPListDataQuery):
-                     
-                        MRPListdata_Serializer = MRPListDetailsSerializer(MRPListDataQuery, many=True).data
+                if query:
+                    List = []
+                    ItemCount = query[0].ItemCount
+                    for a in query:
+                        List.append({
+                            "id": a.id,
+                            "EffectiveDate": a.EffectiveDate,
+                            "MRP": a.MRP,
+                            "CommonID": a.CommonID,
+                            "CompanyName": a.CompanyName,
+                            "ItemName": a.ItemName
+                        })
                     
-                        # ---- transaction_logNew add 406 in m_transactiontype and TransactionCategory from m_generalmaster
-                        log_entry = create_transaction_logNew(request, MRPListData, 0, '', 406, 0)
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': MRPListdata_Serializer})
-                
+                    MRPList = ({
+                        "ItemCount":ItemCount,
+                        "MRPList": List
+                    })
+
+                    log_entry = create_transaction_logNew(request, MRPListData, 0, '', 406, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': MRPList})
                 else:
-                        #---- transaction_logNew 7 in m_transactiontype for Data Not available
                         log_entry = create_transaction_logNew(request, 0, 0, "Get MRP Details:"+"MRP Details Not available", 7, 0)
                         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'MRP Details not available', 'Data': []})
-                
         except Exception as e:
-            # ---- Exception 33 for Exception in m_transactiontype
-            log_entry = create_transaction_logNew(request, 0, 0, "Get MRP Details:"+ str(e), 33, 0)
+            log_entry = create_transaction_logNew(request, MRPListData, 0, "Get MRP Details:"+ str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': Exception(e), 'Data': []}) 
                 
 
+
+class M_MRPsListViewSecond(CreateAPIView):
     
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
+    
+    @transaction.atomic()
+    def post(self, request):
+        MRPListData = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                FromDate = MRPListData['FromDate']
+                ToDate = MRPListData['ToDate']
+                # M_MRPMaster.CommonID >0 Comment on 21-08-2024
+                # MRPdata = M_MRPMaster.objects.raw('''SELECT M_MRPMaster.id,M_MRPMaster.EffectiveDate,M_MRPMaster.Company_id,M_MRPMaster.Division_id,M_MRPMaster.Party_id,M_MRPMaster.CreatedBy,M_MRPMaster.CreatedOn,M_MRPMaster.CommonID,C_Companies.Name CompanyName,a.Name DivisionName,M_Parties.Name PartyName  FROM M_MRPMaster left join C_Companies on C_Companies.id = M_MRPMaster.Company_id left join M_Parties a on a.id = M_MRPMaster.Division_id left join M_Parties on M_Parties.id = M_MRPMaster.Party_id where M_MRPMaster.CommonID >0 AND M_MRPMaster.IsDeleted=0   group by EffectiveDate,Party_id,Division_id,CommonID Order BY EffectiveDate Desc''')
+                
+                MRPdata = M_MRPMaster.objects.raw('''SELECT M_MRPMaster.id,M_MRPMaster.EffectiveDate,M_MRPMaster.Company_id,M_MRPMaster.Division_id,M_MRPMaster.Party_id,M_MRPMaster.CreatedBy,M_MRPMaster.CreatedOn,M_MRPMaster.CommonID,C_Companies.Name CompanyName,a.Name DivisionName,M_Parties.Name PartyName  FROM M_MRPMaster left join C_Companies on C_Companies.id = M_MRPMaster.Company_id left join M_Parties a on a.id = M_MRPMaster.Division_id left join M_Parties on M_Parties.id = M_MRPMaster.Party_id where M_MRPMaster.IsDeleted=0 AND EffectiveDate BETWEEN %s AND %s  group by EffectiveDate,Party_id,Division_id,CommonID Order BY EffectiveDate Desc''',[FromDate,ToDate])
+                
+                if not MRPdata:
+                    log_entry = create_transaction_logNew(request, 0, 0, "MRP Not available",119,0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'MRP Not available', 'Data': []})
+                else:
+                    MRPdata_Serializer = M_MRPsSerializerSecond(MRPdata, many=True).data
+                    log_entry = create_transaction_logNew(request, MRPdata_Serializer, 0,'',119,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': MRPdata_Serializer})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request,0, 0,'SingleGET MRP:'+str(Exception(e)),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})   
            
