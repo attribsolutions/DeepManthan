@@ -205,7 +205,7 @@ class SPOSStockAdjustmentView(CreateAPIView):
                                                             WHERE D.StockDate = CURRENT_DATE
                                                             AND D.Item = %s AND D.Party = %s 
                                                             ORDER BY FoodERP.M_Group.Sequence, FoodERP.MC_SubGroup.Sequence, FoodERP.MC_ItemGroupDetails.ItemSequence''',([id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party]))   
-                                                       
+                print(query)                                       
                 if query:
                     BatchCodelist = list()
                     for a in query:
@@ -232,7 +232,7 @@ class SPOSStockAdjustmentView(CreateAPIView):
                             'BaseUnitQuantity': a.Quantity,
                             'BatchDate': a.StockDate,
                             'BatchCode':  a.BatchCode,
-                            'MRP':  a.MRP,
+                            'MRP':  a.MRPValue,
                             'SystemBatchDate':  a.StockDate,
                             'SystemBatchCode':  a.BatchCode,
                             'MRPValue': a.MRPValue,
