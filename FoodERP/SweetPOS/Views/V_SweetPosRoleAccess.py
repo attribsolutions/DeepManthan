@@ -155,7 +155,7 @@ class MachineTypeListView(CreateAPIView):
                 Party = MachineType_Data['Party']
                 query = M_SweetPOSMachine.objects.raw('''Select A.id, A.Party, A.MacID, A.MachineRole ,  B.Name MachineTypeName, A.IsServer, A.ClientID
                         From SweetPOS.M_SweetPOSMachine A 
-                        JOIN  FoodERP.M_GeneralMaster B on B.id = A.MachineRole
+                        left JOIN  FoodERP.M_GeneralMaster B on B.id = A.MachineRole
                         WHERE A.Party = %s''',[Party])
                 
                 MachineTypeList= list()
