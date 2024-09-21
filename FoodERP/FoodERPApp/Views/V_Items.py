@@ -111,8 +111,13 @@ class M_ItemsFilterView(CreateAPIView):
                         x = PartyID
 
                 if IsSCMCompany == 1:
-                    company_queryset=C_Companies.objects.filter(CompanyGroup=CompanyGroupID)
-                    company_ids = [company.id for company in company_queryset]
+                    # company_queryset=C_Companies.objects.filter(CompanyGroup=CompanyGroupID)
+                    # company_ids = [company.id for company in company_queryset]
+                    
+                    company_ids = C_Companies.objects.filter(CompanyGroup=CompanyGroupID).values_list('id', flat=True)
+                    company_ids_tuple = tuple(company_ids)  
+                    company_ids_str = ', '.join(map(str, company_ids_tuple))
+                    # CustomPrint(company_ids_tuple)
                     # query = M_Items.objects.select_related().filter(IsSCM=1,Company__in=Company).order_by('Sequence')
                     query= M_Items.objects.raw(f'''SELECT M_Items.id,M_Items.Name, M_Items.ShortName, M_Items.Sequence, M_Items.BarCode, M_Items.SAPItemCode,
                                                M_Items.isActive, M_Items.IsSCM, M_Items.CanBeSold, M_Items.CanBePurchase, M_Items.BrandName, M_Items.Tag,
@@ -126,9 +131,9 @@ class M_ItemsFilterView(CreateAPIView):
                                                left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
                                                left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
                                                left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
-                                               WHERE M_Items.IsSCM=1 AND  M_Items.Company_id IN %s 
-                                               ORDER BY M_Group.Sequence,MC_SubGroup.Sequence,{seq} ASC''',([GroupType_id],[tuple(company_ids)])) 
-                       
+                                               WHERE M_Items.IsSCM=1 AND  M_Items.Company_id IN ({company_ids_str})
+                                               ORDER BY M_Group.Sequence,MC_SubGroup.Sequence,{seq} ASC''',([GroupType_id])) 
+                    # CustomPrint(query.query)  
                 else:
                     # CustomPrint("Dhruti")
                     # query = M_Items.objects.select_related().filter(Company=CompanyID).order_by('Sequence')
@@ -149,15 +154,20 @@ class M_ItemsFilterView(CreateAPIView):
                                                left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
                                                WHERE M_Items.Company_id=%s 
                                                ORDER BY M_Group.Sequence,MC_SubGroup.Sequence,{seq} ASC''',([GroupType_id],[CompanyID]))
+                    # CustomPrint(query.query)  
                 if not query:
                     log_entry = create_transaction_logNew(request, Logindata, x, "Items Not available",102,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
                 else:
                     Items_Serializer = ItemSerializerThird(query, many=True).data
                     ItemListData = list ()
+                    # CustomPrint("sfdfd")
+                    # CustomPrint(Items_Serializer)
                     for a in Items_Serializer:
+                        # CustomPrint(a['id'])
                         UnitDetails = [] 
-                        if PartyID > 0:                             
+                        if PartyID > 0:  
+                                                      
                             UnitDetails = UnitDropdown(a['id'], PartyID, 0) 
                         # UnitDetails=list()
                         # for d in a['ItemUnitDetails']:
@@ -199,7 +209,8 @@ class M_ItemsFilterView(CreateAPIView):
                             "UpdatedBy": a['UpdatedBy'],
                             "UpdatedOn": a['UpdatedOn'],
                             "UnitDetails":UnitDetails
-                        })  
+                        }) 
+                        CustomPrint(ItemListData) 
                     print("ItemFilterAPI EndTime : ",datetime.now())    
                     log_entry = create_transaction_logNew(request, Logindata, x,'Party Items List',102,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemListData})   
