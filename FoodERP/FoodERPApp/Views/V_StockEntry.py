@@ -402,16 +402,17 @@ class StockEntryItemsView(CreateAPIView):
                                                             ROUND(GSTHsnCodeMaster(M_Items.id, CURDATE(), 2), 2) AS GSTPercentage,
                                                             GetTodaysDateMRP(M_Items.id, CURDATE(), 1, 0, 0) AS MRPID,
                                                             GSTHsnCodeMaster(M_Items.id, CURDATE(), 1) AS GSTID,
-                                                            GetTodaysDateRate(M_Items.id, CURDATE(),  %s, 0, 1) AS Rate
+                                                            GetTodaysDateRate(M_Items.id, CURDATE(),  %s, 0, 1) AS Rate,
+                                                            FORMAT(IFNULL(O.ClosingBalance, 0), 15) AS CurrentStock 
                                                             FROM M_Items 
                                                             JOIN MC_PartyItems ON MC_PartyItems.Item_id = M_Items.id
+                                                            LEFT JOIN SweetPOS.O_SPOSDateWiseLiveStock O ON O.Item = M_Items.id AND O.StockDate = CURRENT_DATE 
                                                             left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id= %s
                                                             left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
                                                             left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
                                                             left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
                                                             WHERE MC_PartyItems.Party_id = %s 
                                                             Order By M_Group.Sequence,MC_SubGroup.Sequence,{seq}''', ([PartyID],[PartyID],[GroupTypeid],[PartyID]))
-             
                 if not Itemquery:
                     log_entry = create_transaction_logNew(request, Logindata, 0, 'Franchise Items Not available', 102, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available', 'Data': []})
@@ -421,6 +422,7 @@ class StockEntryItemsView(CreateAPIView):
                     "ItemName": item.ItemName,
                     'GroupName': item.GroupName,
                     'SubGroupName' : item.SubGroupName,
+                    'CurrentStock': item.CurrentStock,
                     "ItemUnitDetails": [{
                         "Unit": unit.id,
                         "BaseUnitQuantity": unit.BaseUnitQuantity,  
