@@ -140,7 +140,7 @@ class MachineTypeSaveView(CreateAPIView):
                         LastInsertID = MachineType.id
                     
                 log_entry = create_transaction_logNew(request, MachineType_Data, MachineType_Data[0]['Party'], '', 416, LastInsertID)        
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Machine Type Save Successfully','TransactionID':LastInsertID, 'Data':[]})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Machine Type Save Successfully', 'TransactionID':LastInsertID, 'Data':[]})
         except Exception as e:
             log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'MachineTypeSave:'+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]})
@@ -153,7 +153,7 @@ class MachineTypeListView(CreateAPIView):
         try:
             with transaction.atomic():
                 Party = MachineType_Data['Party']
-                query = M_SweetPOSMachine.objects.raw('''Select A.id, A.Party, A.MacID, A.MachineRole ,  B.Name MachineTypeName, A.IsServer
+                query = M_SweetPOSMachine.objects.raw('''Select A.id, A.Party, A.MacID, A.MachineRole ,  B.Name MachineTypeName, A.IsServer, A.ClientID
                         From SweetPOS.M_SweetPOSMachine A 
                         JOIN  FoodERP.M_GeneralMaster B on B.id = A.MachineRole
                         WHERE A.Party = %s''',[Party])
@@ -166,7 +166,8 @@ class MachineTypeListView(CreateAPIView):
                         "MacID": a.MacID,
                         "MachineType": a.MachineRole,
                         "MachineTypeName": a.MachineTypeName,
-                        "IsServer": a.IsServer
+                        "IsServer": a.IsServer,
+                        "ClientID": a.ClientID
                     })
                     log_entry = create_transaction_logNew(request, MachineType_Data, Party, '', 417, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :MachineTypeList})
