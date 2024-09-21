@@ -79,7 +79,7 @@ class Uploaded_EInvoice(CreateAPIView):
     on a.id=b.Invoice_id''',([id],[id])
     )
                         InvoiceItem=TC_InvoiceItems.objects.raw('''SELECT M_Items.id,M_Items.Name ItemName ,M_GSTHSNCode.HSNCode,sum(Quantity) Quantity,M_Units.EwayBillUnit,TC_InvoiceItems.Rate,sum(TC_InvoiceItems.DiscountAmount)DiscountAmount,
-    sum(CGST)CGST,sum(SGST)SGST,sum(IGST)IGST,(sum(Quantity)* Rate)total_amount,((sum(Quantity)* Rate)-sum(DiscountAmount))assessable_value,TC_InvoiceItems.GSTPercentage gst_rate,
+    sum(CGST)CGST,sum(SGST)SGST,sum(IGST)IGST,(sum(BasicAmount)+sum(DiscountAmount))total_amount,(sum(BasicAmount))assessable_value,TC_InvoiceItems.GSTPercentage gst_rate,
     sum(Amount) total_item_value
     FROM TC_InvoiceItems 
     join M_Items on TC_InvoiceItems.Item_id=M_Items.id
@@ -116,7 +116,7 @@ from SweetPOS.TC_SPOSInvoiceItems where Invoice_id=%s)b
 on a.id=b.Invoice_id''',([id],[id])
 )
                         InvoiceItem=TC_SPOSInvoiceItems.objects.raw('''SELECT M_Items.id,M_Items.Name ItemName ,SPOSInvoiceItems.HSNCode,sum(Quantity) Quantity,M_Units.EwayBillUnit,SPOSInvoiceItems.Rate,sum(SPOSInvoiceItems.DiscountAmount)DiscountAmount,
-sum(CGST)CGST,sum(SGST)SGST,sum(IGST)IGST,(sum(Quantity)* Rate)total_amount,((sum(Quantity)* Rate)-sum(DiscountAmount))assessable_value,SPOSInvoiceItems.GSTPercentage gst_rate,
+sum(CGST)CGST,sum(SGST)SGST,sum(IGST)IGST,(sum(BasicAmount)+sum(DiscountAmount))total_amount,(sum(BasicAmount))assessable_value,SPOSInvoiceItems.GSTPercentage gst_rate,
 sum(Amount) total_item_value
 FROM SweetPOS.TC_SPOSInvoiceItems SPOSInvoiceItems
 join FoodERP.M_Items on SPOSInvoiceItems.Item=M_Items.id
@@ -176,8 +176,8 @@ where Invoice_id=%s group by SPOSInvoiceItems.Item,SPOSInvoiceItems.HSNCode,M_Un
                             'igst_amount': a['IGST'],
                             'cgst_amount': a['CGST'],
                             'sgst_amount': a['SGST'],
-                            'total_amount':  round(float(a['Quantity'])*float(a['Rate']),2),
-                            'assessable_value': round((float(a['Quantity'])*float(a['Rate']))-(float(a['DiscountAmount'])),2),
+                            'total_amount': float(a['total_amount']),
+                            'assessable_value': float(a['assessable_value']),
                             'gst_rate': a['gst_rate'],
                             'total_item_value': float(a['total_item_value']),
                             'batch_details': Batchlist
