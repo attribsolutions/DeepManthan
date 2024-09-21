@@ -475,14 +475,14 @@ class M_GetStockEntryList(CreateAPIView):
                 query = '''
                     SELECT 1 as id, s.StockDate, p.Name as PartyName, s.Party_id FROM T_Stock as s 
                     JOIN  M_Parties as p ON s.Party_id = p.id   
-                    WHERE s.StockDate BETWEEN %s AND %s AND s.party_id=%s
+                    WHERE s.StockDate BETWEEN %s AND %s AND s.party_id=%s AND s.IsStockAdjustment = 0
                     GROUP BY s.Party_Id, s.StockDate
                     
                     UNION
 
                     SELECT 1 as id, s.StockDate, p.Name as PartyName, s.Party FROM SweetPOS.T_SPOSStock as s  
                     JOIN  M_Parties as p ON s.Party = p.id   
-                    WHERE s.StockDate BETWEEN %s AND %s AND s.Party=%s
+                    WHERE s.StockDate BETWEEN %s AND %s AND s.Party=%s AND s.IsStockAdjustment = 0
                     GROUP BY s.Party, s.StockDate
                 '''
                 StockDataQuery = T_Stock.objects.raw(query, [FromDate, ToDate, Party, FromDate, ToDate, Party])
@@ -546,7 +546,7 @@ class M_GetStockEntryItemList(CreateAPIView):
                         INNER JOIN MC_ItemUnits as iu ON iu.id = s.Unit
                         INNER JOIN M_Units as u ON u.id = iu.UnitID_id
                         {joinsforgroupsubgroup}
-                        WHERE s.Party = %s AND s.StockDate = %s
+                        WHERE s.Party = %s AND s.StockDate = %s AND s.IsStockAdjustment = 0
                         {orderby}
                     ) AS OrderedSPOSStock
                     
@@ -560,7 +560,7 @@ class M_GetStockEntryItemList(CreateAPIView):
                         INNER JOIN MC_ItemUnits as iu ON iu.id = s.Unit_id
                         INNER JOIN M_Units as u ON u.id = iu.UnitID_id
                         {joinsforgroupsubgroup}
-                        WHERE s.Party_id = %s AND s.StockDate = %s
+                        WHERE s.Party_id = %s AND s.StockDate = %s AND s.IsStockAdjustment = 0
                         {orderby}
                     ) AS OrderedStock
                     ORDER BY Sequence,GSequence,ItemSequence
