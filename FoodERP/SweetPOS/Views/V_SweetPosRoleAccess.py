@@ -153,7 +153,7 @@ class MachineTypeListView(CreateAPIView):
         try:
             with transaction.atomic():
                 Party = MachineType_Data['Party']
-                query = M_SweetPOSMachine.objects.raw('''Select A.id, A.Party, A.MacID, A.MachineRole ,  B.Name MachineTypeName, A.IsServer, A.ClientID
+                query = M_SweetPOSMachine.objects.raw('''Select A.id, A.Party, A.MacID, IFNULL(A.MachineRole, 0) AS MachineRole ,  B.Name MachineTypeName, A.IsServer, A.ClientID
                         From SweetPOS.M_SweetPOSMachine A 
                         left JOIN  FoodERP.M_GeneralMaster B on B.id = A.MachineRole
                         WHERE A.Party = %s''',[Party])
@@ -166,6 +166,8 @@ class MachineTypeListView(CreateAPIView):
                     for d in c:
                         if int(a.MachineRole) ==  int(d[0]):
                             RoleID = d[1]
+                        else:
+                            RoleID = ""
                     MachineTypeList.append({
                                 "id": a.id,
                                 "Party": a.Party,
