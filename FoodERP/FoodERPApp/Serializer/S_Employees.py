@@ -98,6 +98,12 @@ class EmployeepartiesDataSerializer(serializers.Serializer):
     id= serializers.IntegerField()
     Name = serializers.CharField(max_length=100)
 
+
+class EmployeepartiesDataSerializer03(serializers.Serializer):
+    id= serializers.IntegerField()
+    Name = serializers.CharField(max_length=100)
+    RoleName= serializers.CharField(max_length=100)
+
 class M_EmployeesSerializerforgetdata(serializers.ModelSerializer):
     # Company_id =  serializers.IntegerField()
     class Meta:
