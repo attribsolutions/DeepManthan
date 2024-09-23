@@ -178,7 +178,13 @@ where M_Employees.id= %s''', [id])
                     GetAllData = list()
 
                     Employeeparties = MC_EmployeeParties.objects.raw(
-                        '''SELECT Party_id as id, M_Parties.Name FROM MC_EmployeeParties join M_Parties on M_Parties.id = MC_EmployeeParties.Party_id where Employee_id=%s''', ([id]))
+                        # '''SELECT Party_id as id, M_Parties.Name FROM MC_EmployeeParties join M_Parties on M_Parties.id = MC_EmployeeParties.Party_id where Employee_id=%s''', ([id]))
+                        f'''SELECT  b.Role_id Role,M_Roles.Name AS RoleName,M_Parties.id,M_Parties.Name AS PartyName from 
+                        (SELECT MC_EmployeeParties.id,MC_EmployeeParties.Party_id,'0' RoleID,Employee_id FROM MC_EmployeeParties where Employee_id={id})a 
+                        left join (select MC_UserRoles.Party_id,MC_UserRoles.Role_id,Employee_id FROM MC_UserRoles 
+                        join M_Users on M_Users.id=MC_UserRoles.User_id WHERE M_Users.Employee_id={id})b on a.Party_id=b.Party_id 
+                        left join M_Parties on M_Parties.id=a.Party_id 
+                        Left join M_Roles on M_Roles.id=b.Role_id''')
                     EmployeepartiesData_Serializer = EmployeepartiesDataSerializer(
                         Employeeparties, many=True).data
 
@@ -187,8 +193,7 @@ where M_Employees.id= %s''', [id])
                         EmployeeParties.append({
                             'id': a['id'],
                             'Name': a['Name']
-                        })
-
+                        })                          
                     GetAllData.append({
                         'id':  M_Employees_Serializer[0]['id'],
                         'Name':  M_Employees_Serializer[0]['Name'],
@@ -225,10 +230,11 @@ where M_Employees.id= %s''', [id])
 
     @transaction.atomic()
     def put(self, request, id=0):
-        M_Employeesdata = JSONParser().parse(request)
+        M_Employeesdata = JSONParser().parse(request)        
         try:
             with transaction.atomic():
                 M_EmployeesdataByID = M_Employees.objects.get(id=id)
+                # CustomPrint(M_EmployeesdataByID)
                 M_Employees_Serializer = M_EmployeesSerializer(
                     M_EmployeesdataByID, data=M_Employeesdata)
                 if M_Employees_Serializer.is_valid():
