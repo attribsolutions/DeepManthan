@@ -179,7 +179,7 @@ where M_Employees.id= %s''', [id])
 
                     Employeeparties = MC_EmployeeParties.objects.raw(
                         # '''SELECT Party_id as id, M_Parties.Name FROM MC_EmployeeParties join M_Parties on M_Parties.id = MC_EmployeeParties.Party_id where Employee_id=%s''', ([id]))
-                        f'''SELECT  b.Role_id Role,M_Roles.Name AS RoleName,M_Parties.id,M_Parties.Name AS PartyName from 
+                        f'''SELECT  b.Role_id Role,M_Roles.Name AS RoleName,M_Parties.id,M_Parties.Name from 
                         (SELECT MC_EmployeeParties.id,MC_EmployeeParties.Party_id,'0' RoleID,Employee_id FROM MC_EmployeeParties where Employee_id={id})a 
                         left join (select MC_UserRoles.Party_id,MC_UserRoles.Role_id,Employee_id FROM MC_UserRoles 
                         join M_Users on M_Users.id=MC_UserRoles.User_id WHERE M_Users.Employee_id={id})b on a.Party_id=b.Party_id 
@@ -226,7 +226,7 @@ where M_Employees.id= %s''', [id])
                     return JsonResponse({"StatusCode": 200, "Status": True, "Message": " ", "Data": GetAllData[0]})
         except Exception as e:
             log_entry = create_transaction_logNew(request,0,0,'SingleGETEmplyoees:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def put(self, request, id=0):
