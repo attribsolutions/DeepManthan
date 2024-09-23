@@ -240,25 +240,23 @@ class DetailsOfSubgroups_GroupsViewNEW(CreateAPIView):
                 left join MC_SubGroup as sg on sg.id=igd.SubGroup_id
                 ''',[GroupType_id])
                 
-                ItemList = []  
                 for a in query: 
-                    ItemList.append({"ItemID": a.ItemID,
-                                                "ItemName": a.ItemName,
-                                                "ItemSequence": a.ItemSequence
-                                            })
-                    
-                GroupSubgroupItemList.append({
-                                                "GroupTypeID": a.GroupType_id,
-                                                "GroupID": a.id,
-                                                "GroupName": a.GroupName,
-                                                "GroupSequence": a.GroupSequence,
-                                                "SubGroupID": a.SubGroupID,
-                                                "SubGroupName": a.SubGroupName,
-                                                "SubGroupSequence": a.SubGroupSequence,
-                                                "Items": ItemList})
+                    GroupSubgroupItemList.append({
+                        "GroupTypeID": a.GroupType_id,
+                        "GroupID": a.GroupID,
+                        "GroupName": a.GroupName,
+                        "GroupSequence": a.GroupSequence,
+                        "SubGroupID": a.SubGroupID,
+                        "SubGroupName": a.SubGroupName,
+                        "SubGroupSequence": a.SubGroupSequence,
+                        "Items": [{
+                            "ItemID": a.ItemID,
+                            "ItemName": a.ItemName,
+                            "ItemSequence": a.ItemSequence
+                        }]
+                    })
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GroupSubgroupItemList})                
-                # else:
-                #    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group, SubGroup Details not available', 'Data': []})
+                
         
         except Exception as e:
             
