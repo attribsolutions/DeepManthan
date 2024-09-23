@@ -184,7 +184,8 @@ class SPOSStockAdjustmentView(CreateAPIView):
     def get(self, request, id=0,Party=0):
         try:
             with transaction.atomic():
-                query=O_SPOSDateWiseLiveStock.objects.raw('''SELECT D.id, D.Item, M_Items.Name AS ItemName, D.StockDate, D.ClosingBalance AS Quantity, 
+                query=O_SPOSDateWiseLiveStock.objects.raw(''' SELECT 1 as id, M_Items.id Item, M_Items.Name AS ItemName, D.StockDate,
+                                                            FORMAT(IFNULL(D.ClosingBalance, 0), 15) AS Quantity,
                                                             M_Units.id AS UnitID, M_Units.Name AS UnitName,M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName,
                                                             (SELECT MRP FROM SweetPOS.T_SPOSStock 
                                                                 WHERE StockDate = (SELECT MAX(StockDate) FROM SweetPOS.T_SPOSStock WHERE Item = %s AND Party = %s)
@@ -195,17 +196,15 @@ class SPOSStockAdjustmentView(CreateAPIView):
                                                             (SELECT MRPValue FROM SweetPOS.T_SPOSStock 
                                                                 WHERE StockDate = (SELECT MAX(StockDate) FROM SweetPOS.T_SPOSStock WHERE Item = %s AND Party = %s)
                                                                 AND Item = %s AND Party = %s ORDER BY id DESC LIMIT 1) AS MRPValue
-                                                            FROM SweetPOS.O_SPOSDateWiseLiveStock D
-                                                            JOIN FoodERP.M_Items ON M_Items.id = D.Item
-                                                            JOIN FoodERP.M_Units ON M_Units.id = D.Unit
+                                                            FROM  FoodERP.M_Items
+                                                            left JOIN SweetPOS.O_SPOSDateWiseLiveStock D ON M_Items.id = D.Item and D.Party = %s and D.StockDate = CURRENT_DATE
+                                                            left JOIN FoodERP.M_Units ON M_Units.id = M_Items.BaseUnitID_id
                                                             LEFT JOIN FoodERP.MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id AND MC_ItemGroupDetails.GroupType_id = 5
                                                             LEFT JOIN FoodERP.M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
                                                             LEFT JOIN FoodERP.M_Group ON M_Group.id = MC_ItemGroupDetails.Group_id
                                                             LEFT JOIN FoodERP.MC_SubGroup ON MC_SubGroup.id = MC_ItemGroupDetails.SubGroup_id
-                                                            WHERE D.StockDate = CURRENT_DATE
-                                                            AND D.Item = %s AND D.Party = %s 
-                                                            ORDER BY FoodERP.M_Group.Sequence, FoodERP.MC_SubGroup.Sequence, FoodERP.MC_ItemGroupDetails.ItemSequence''',([id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party]))   
-                                                       
+                                                            WHERE  M_Items.id = %s
+                                                            ORDER BY FoodERP.M_Group.Sequence, FoodERP.MC_SubGroup.Sequence, FoodERP.MC_ItemGroupDetails.ItemSequence''',([id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party],[Party],[id]))                                   
                 if query:
                     BatchCodelist = list()
                     for a in query:
@@ -232,7 +231,7 @@ class SPOSStockAdjustmentView(CreateAPIView):
                             'BaseUnitQuantity': a.Quantity,
                             'BatchDate': a.StockDate,
                             'BatchCode':  a.BatchCode,
-                            'MRP':  a.MRP,
+                            'MRP':  a.MRPValue,
                             'SystemBatchDate':  a.StockDate,
                             'SystemBatchCode':  a.BatchCode,
                             'MRPValue': a.MRPValue,
@@ -246,8 +245,8 @@ class SPOSStockAdjustmentView(CreateAPIView):
                     log_entry = create_transaction_logNew(request,0, Party,BatchCodelist,407,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BatchCodelist})
                 else:
-                    log_entry = create_transaction_logNew(request, 0, Party, 'Please Process Your Stock', 407, 0)
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Please Process Your Stock', 'Data': []})
+                    log_entry = create_transaction_logNew(request, 0, Party, 'Item Not Available', 407, 0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Item Not Available', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request,0, 0,'GETStockAdjustment:'+str(),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
