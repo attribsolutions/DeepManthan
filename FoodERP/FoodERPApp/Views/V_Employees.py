@@ -192,7 +192,8 @@ where M_Employees.id= %s''', [id])
                     for a in EmployeepartiesData_Serializer:
                         EmployeeParties.append({
                             'id': a['id'],
-                            'Name': a['Name']
+                            'Name': a['Name'],
+                            'RoleName':a['RoleName']
                         })                          
                     GetAllData.append({
                         'id':  M_Employees_Serializer[0]['id'],
