@@ -166,7 +166,8 @@ class MachineTypeListView(CreateAPIView):
                     for d in c:
                         if int(a.MachineType) ==  int(d[0]):
                             RoleID = d[1]
-                        
+                        else:
+                            RoleID = ""
                     MachineTypeList.append({
                                 "id": a.id,
                                 "Party": a.Party,
