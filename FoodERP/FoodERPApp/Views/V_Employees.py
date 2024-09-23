@@ -185,14 +185,15 @@ where M_Employees.id= %s''', [id])
                         join M_Users on M_Users.id=MC_UserRoles.User_id WHERE M_Users.Employee_id={id})b on a.Party_id=b.Party_id 
                         left join M_Parties on M_Parties.id=a.Party_id 
                         Left join M_Roles on M_Roles.id=b.Role_id''')
-                    EmployeepartiesData_Serializer = EmployeepartiesDataSerializer(
+                    EmployeepartiesData_Serializer = EmployeepartiesDataSerializer03(
                         Employeeparties, many=True).data
 
                     EmployeeParties = list()
                     for a in EmployeepartiesData_Serializer:
                         EmployeeParties.append({
                             'id': a['id'],
-                            'Name': a['Name']
+                            'Name': a['Name'],
+                            'RoleName':a['RoleName']
                         })                          
                     GetAllData.append({
                         'id':  M_Employees_Serializer[0]['id'],
