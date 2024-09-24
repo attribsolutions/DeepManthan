@@ -128,19 +128,12 @@ class MachineTypeSaveView(CreateAPIView):
         MachineType_Data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                for a in MachineType_Data:
-                    query = M_SweetPOSMachine.objects.filter(MacID=a['MacID'])
-                    if query:
-                        MachineType_serializer = MachineTypeSerializer(query[0],data=a)
-                    else:
-                        MachineType_serializer = MachineTypeSerializer(data=a)
-
+                    MachineType_serializer = MachineTypeSerializer(data=MachineType_Data)
                     if MachineType_serializer.is_valid():
                         MachineType = MachineType_serializer.save()
                         LastInsertID = MachineType.id
-                    
-                log_entry = create_transaction_logNew(request, MachineType_Data, MachineType_Data[0]['Party'], '', 416, LastInsertID)        
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Machine Type Save Successfully', 'TransactionID':LastInsertID, 'Data':[]})
+                        log_entry = create_transaction_logNew(request, MachineType_Data, MachineType_Data['Party'], '', 416, LastInsertID)        
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Machine Type Save Successfully',"TransactionID" : LastInsertID, 'Data':[]})
         except Exception as e:
             log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'MachineTypeSave:'+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]})
@@ -223,6 +216,30 @@ class SPOSLoginDetailsView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, LoginData, 0, 'SPOSLoginDetails:'+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+        
+class MachineTypeUpdateView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    
+    @transaction.atomic()
+    def put(self, request):
+        MachineType_Data = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                for a in MachineType_Data:
+                    query = M_SweetPOSMachine.objects.filter(MacID=a['MacID'])
+                    if query:
+                        MachineType_serializer = MachineTypeSerializer(query[0],data=a)
+                    else:
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'TransactionID':LastInsertID, 'Data':[]})
+                    if MachineType_serializer.is_valid():
+                        MachineType = MachineType_serializer.save()
+                        LastInsertID = MachineType.id
+                    
+                log_entry = create_transaction_logNew(request, MachineType_Data, MachineType_Data[0]['Party'], '', 416, LastInsertID)        
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Machine Type Update Successfully', 'TransactionID':LastInsertID, 'Data':[]})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'MachineTypeSave:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]})
                
 
 
