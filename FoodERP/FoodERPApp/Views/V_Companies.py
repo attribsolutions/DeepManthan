@@ -167,6 +167,7 @@ class C_CompaniesView(CreateAPIView):
                     "CreatedBy": 1,
                     "UpdatedBy": 1,
                     "last_activity" : '2023-04-01 00:00:00',
+                    "POSRateType" : None,
                     "UserRole": [
                                 {
                                     "Party": "",
