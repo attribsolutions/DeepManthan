@@ -139,43 +139,69 @@ class UserListViewSecond(CreateAPIView):
                 Usersdata = M_Users.objects.filter(id=id)
                 if Usersdata.exists():
                     Usersdata_Serializer = UserListSerializer(Usersdata, many=True).data
-                    # CustomPrint(Usersdata_Serializer)
+                    CustomPrint(Usersdata_Serializer)
                     UserData = list()
                     for a in Usersdata_Serializer:
                         RoleData = list()
                         UserPartiesQuery = MC_UserRoles.objects.raw('''SELECT MC_UserRoles.id,MC_UserRoles.Party_id ,M_Parties.Name PartyName FROM MC_UserRoles left join M_Parties on M_Parties.id= MC_UserRoles.Party_id Where MC_UserRoles.User_id=%s  ''',[id])
-                        
+                        # CustomPrint(UserPartiesQuery)
                         if not UserPartiesQuery:
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Not Found', 'Data':[] })    
                         else:    
-                            SingleGetUserListUserPartiesSerializerData = SingleGetUserListUserPartiesSerializer(UserPartiesQuery,  many=True).data
+                            # SingleGetUserListUserPartiesSerializerData = SingleGetUserListUserPartiesSerializer(UserPartiesQuery,  many=True).data
                             # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':SingleGetUserListUserPartiesSerializerData})  
-                            for b in SingleGetUserListUserPartiesSerializerData:
-                                PartyID=b['Party_id']
+                            # for b in SingleGetUserListUserPartiesSerializerData:
+                                # PartyID=b['Party_id']
                                 
-                                if PartyID is None:
-                                    PartyRoles = MC_UserRoles.objects.raw('''SELECT MC_UserRoles.id,MC_UserRoles.Role_id ,M_Roles.Name RoleName FROM MC_UserRoles join M_Roles on M_Roles.id= MC_UserRoles.Role_id Where MC_UserRoles.Party_id is null and  MC_UserRoles.User_id=%s ''',([id]))
-                                else:    
+                                # if PartyID is None:
+                                #     PartyRoles = MC_UserRoles.objects.raw('''SELECT MC_UserRoles.id,MC_UserRoles.Role_id ,M_Roles.Name RoleName FROM MC_UserRoles join M_Roles on M_Roles.id= MC_UserRoles.Role_id Where MC_UserRoles.Party_id is null and  MC_UserRoles.User_id=%s ''',([id]))
+                                # else:    
                                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'ccccccccccc', 'Data':PartyID})  
-                                    PartyRoles = MC_UserRoles.objects.raw('''SELECT MC_UserRoles.id,MC_UserRoles.Role_id ,M_Roles.Name RoleName FROM MC_UserRoles join M_Roles on M_Roles.id= MC_UserRoles.Role_id Where MC_UserRoles.Party_id=%s and  MC_UserRoles.User_id=%s ''',([PartyID],[id]))
+                                # PartyRoles = MC_UserRoles.objects.raw('''SELECT MC_UserRoles.id,MC_UserRoles.Role_id ,M_Roles.Name RoleName FROM MC_UserRoles join M_Roles on M_Roles.id= MC_UserRoles.Role_id Where MC_UserRoles.Party_id=%s and  MC_UserRoles.User_id=%s ''',([PartyID],[id]))
                                
-                                SingleGetUserListUserPartyRoleData = SingleGetUserListUserPartyRoleSerializer(PartyRoles,  many=True).data
+                                # SingleGetUserListUserPartyRoleData = SingleGetUserListUserPartyRoleSerializer(PartyRoles,  many=True).data
                                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':SingleGetUserListUserPartyRoleData})    
-                                PartyRoleData = list()
-                                for c in SingleGetUserListUserPartyRoleData:
-                                    PartyRoleData.append({
-                                        'Role': c['Role_id'],
-                                        'RoleName': c['RoleName'], 
-                                    })
-                                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartyRoleData[0]})    
-                                RoleData.append({
-                                    # 'Role': b['Role']['id'],
-                                    # 'RoleName': b['Role']['Name'],
-                                    'Party': b['Party_id'],
-                                    'PartyName': b['PartyName'],
-                                    'PartyRoles':PartyRoleData
+                                # PartyRoleData = list()
+                                # for c in SingleGetUserListUserPartyRoleData:
+                                #     PartyRoleData.append({
+                                #         'Role': c['Role_id'],
+                                #         'RoleName': c['RoleName']
+                                #     })
+                                # # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartyRoleData[0]})    
+                                # RoleData.append({
+                                #     # 'Role': b['Role']['id'],
+                                #     # 'RoleName': b['Role']['Name'],
+                                #     'Party': b['Party_id'],
+                                #     'PartyName': b['PartyName'],
+                                #     'PartyRoles':PartyRoleData
+                                # })
+                               
 
-                                })
+                                    PartyRoleData = {}
+                                    for b in a["UserRole"]:
+                                        party_id = b['Party']['id'] if b['Party']['id'] is not None else ''
+                                        party_name = b['Party']['Name'] if b['Party']['id'] is not None else ''
+                                        role_id = b['Role']['id']
+                                        role_name = b['Role']['Name']
+
+                                        
+                                        if party_id in PartyRoleData:
+                                            PartyRoleData[party_id]['PartyRoles'].append({
+                                                'Role': role_id,
+                                                'RoleName': role_name
+                                            })
+                                        else:
+                                            
+                                            PartyRoleData[party_id] = {
+                                                'Party': party_id,
+                                                'PartyName': party_name,
+                                                'PartyRoles': [{
+                                                    'Role': role_id,
+                                                    'RoleName': role_name
+                                                }]
+                                            }                                    
+                                    RoleData = list(PartyRoleData.values())
+                            
                     UserData.append({
                         'id': a["id"],
                         'LoginName': a["LoginName"],

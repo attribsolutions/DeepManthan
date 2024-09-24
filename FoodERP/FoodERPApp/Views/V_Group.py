@@ -228,30 +228,49 @@ class DetailsOfSubgroups_GroupsViewNEW(CreateAPIView):
         DetailsOfSubgroups = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                GroupType_id = DetailsOfSubgroups.get('GroupType_id')
+                GroupType_id = DetailsOfSubgroups['GroupType_id']
                 
-                query = '''
-                select 1 as id, igd.Group_id as GroupID,g.name as GroupName,g.Sequence GroupSequence,igd.GroupType_id,igd.SubGroup_id,igd.ItemSequence,
+                GroupSubgroupItemList = []
+                query = M_Items.objects.raw('''
+                select 1 as id, g.id as GroupID,g.name as GroupName,g.Sequence GroupSequence,igd.GroupType_id,igd.SubGroup_id,igd.ItemSequence,
                 sg.id as SubGroupID, sg.Name as SubGroupName,sg.Sequence as SubGroupSequence,i.id ItemID,i.Name ItemName,
                 i.Sequence as ItemSequence  
                 from M_Items as i 
                 left join MC_ItemGroupDetails as igd ON i.id=igd.Item_ID and igd.GroupType_id=%s 
                 left join M_Group as g ON g.id=igd.Group_id
                 left join MC_SubGroup as sg on sg.id=igd.SubGroup_id
-                '''
-                Details_OfSubgroups = M_Items.objects.raw(query, [GroupType_id])
+                order by g.Sequence,sg.Sequence,igd.ItemSequence''',[GroupType_id])
                 
-            if list(Details_OfSubgroups): 
-                GroupData_Serializer = M_GroupData(Details_OfSubgroups, many=True).data                   
-                log_entry = create_transaction_logNew(request,0, 0,'GroupTypeID:'+str(GroupType_id),393,0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GroupData_Serializer})                
-            else:
-               return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Group, SubGroup Details not available', 'Data': []})
-        
+                grouped_data = {}
+
+                for a in query:
+                    group_key = (a.GroupID, a.SubGroupID)
+                    
+                    if group_key not in grouped_data:
+                        grouped_data[group_key] = {
+                            "GroupTypeID": a.GroupType_id,
+                            "GroupID": a.GroupID,
+                            "GroupName": a.GroupName,
+                            "GroupSequence": a.GroupSequence,
+                            "SubGroupID": a.SubGroupID,
+                            "SubGroupName": a.SubGroupName,
+                            "SubGroupSequence": a.SubGroupSequence,
+                            "Items": []
+                        }
+
+                    grouped_data[group_key]["Items"].append({
+                        "ItemID": a.ItemID,
+                        "ItemName": a.ItemName,
+                        "ItemSequence": a.ItemSequence
+                    })
+
+                for key, group_data in grouped_data.items():
+                    GroupSubgroupItemList.append(group_data)
+
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GroupSubgroupItemList})                
         except Exception as e:
-            
                 log_entry = create_transaction_logNew(request,0, 0,'DetailsOfsubgroups_groups:'+str(e),33,0)
-                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': Exception(e), 'Data': []})
          
 
 class UpdateGroupSubGroupSequenceView(CreateAPIView):
@@ -360,19 +379,24 @@ class UpdateGroupSubGroupSequenceViewNew(CreateAPIView):
                     Item_ID = b['ItemID']
                     Item_Sequence = b['ItemSequence']
 
-                    q0 = MC_ItemGroupDetails.objects.filter(Item_id=Item_ID, Group_id=Group_ID, SubGroup_id=SubGroup_ID)
+                    q0 = MC_ItemGroupDetails.objects.filter(
+                        Item_id=Item_ID, Group_id=Group_ID, SubGroup_id=SubGroup_ID)
                     if q0:
                         q0.ItemSequence = Item_Sequence
+                        q0.GroupType_id = GroupType_ID
                         items_to_update.append(q0)
                     else:
-                        q1 = MC_ItemGroupDetails(Item_id=Item_ID,Group_id=Group_ID,ItemSequence=Item_Sequence,
+                        q1 = MC_ItemGroupDetails(
+                            Item_id=Item_ID,
+                            Group_id=Group_ID,
+                            ItemSequence=Item_Sequence,
                             GroupType_id=GroupType_ID,
                             SubGroup_id=SubGroup_ID
                         )
                         items_to_create.append(q1)
 
             if items_to_update:
-                MC_ItemGroupDetails.objects.bulk_update(items_to_update, ['ItemSequence'])
+                MC_ItemGroupDetails.objects.bulk_update(items_to_update, ['ItemSequence', 'GroupType_id'])
 
             if items_to_create:
                 MC_ItemGroupDetails.objects.bulk_create(items_to_create)

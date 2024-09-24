@@ -36,6 +36,7 @@ urlpatterns = [
     url(r'SPOSMobileUpdate/([0-9]+)$', MobileNumberUpdateView.as_view()),
     url(r'SPOSMachineTypeSave$', MachineTypeSaveView.as_view()),
     url(r'SPOSMachineTypeList$', MachineTypeListView.as_view()),
+    url(r'SPOSMachineTypeUpdate$', MachineTypeUpdateView.as_view()),
     url(r'SPOSStockOutReport$', StockOutReportView.as_view()),
 
     #User
