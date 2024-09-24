@@ -174,10 +174,10 @@ class MachineTypeListView(CreateAPIView):
                                 })
                 log_entry = create_transaction_logNew(request, MachineType_Data, Party, '', 417, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :MachineTypeList})
-            log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'Machine Role not available', 417, 0)
-            return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Machine Role not available', 'Data' : []})
+            log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'Machine Type not available', 417, 0)
+            return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Machine Type not available', 'Data' : []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'Machine Role List:'+str(e), 33, 0)
+            log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'Machine Type List:'+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':Exception(e), 'Data':[]})
         
         
@@ -230,15 +230,16 @@ class MachineTypeUpdateView(CreateAPIView):
                     if query:
                         MachineType_serializer = MachineTypeSerializer(query[0],data=a)
                     else:
+                        log_entry = create_transaction_logNew(request, MachineType_Data, MachineType_Data[0]['Party'], 'Machine Type not available', 418, 0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'TransactionID':LastInsertID, 'Data':[]})
                     if MachineType_serializer.is_valid():
                         MachineType = MachineType_serializer.save()
                         LastInsertID = MachineType.id
                     
-                log_entry = create_transaction_logNew(request, MachineType_Data, MachineType_Data[0]['Party'], '', 416, LastInsertID)        
+                log_entry = create_transaction_logNew(request, MachineType_Data, MachineType_Data[0]['Party'], '', 418, LastInsertID)        
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Machine Type Update Successfully', 'TransactionID':LastInsertID, 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'MachineTypeSave:'+str(e), 33, 0)
+            log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'MachineTypeUpdate:'+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]})
                
 
