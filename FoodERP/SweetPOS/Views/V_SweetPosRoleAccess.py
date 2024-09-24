@@ -163,11 +163,12 @@ class MachineTypeListView(CreateAPIView):
                     q1 =  M_Settings.objects.filter(id=48).values('DefaultValue')
                     b = q1[0]['DefaultValue'].split('!')
                     c = [bb.strip().split('-') for bb in b]
+                    RoleID = ""
                     for d in c:
                         if int(a.MachineType) ==  int(d[0]):
-                            RoleID = d[1]
-                        else:
-                            RoleID = ""
+                            RoleID = d[1]   
+                        
+                    
                     MachineTypeList.append({
                                 "id": a.id,
                                 "Party": a.Party,
