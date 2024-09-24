@@ -229,37 +229,46 @@ class DetailsOfSubgroups_GroupsViewNEW(CreateAPIView):
         try:
             with transaction.atomic():
                 GroupType_id = DetailsOfSubgroups['GroupType_id']
+                
                 GroupSubgroupItemList = []
                 query = M_Items.objects.raw('''
-                select 1 as id, igd.Group_id as GroupID,g.name as GroupName,g.Sequence GroupSequence,igd.GroupType_id,igd.SubGroup_id,igd.ItemSequence,
+                select 1 as id, g.id as GroupID,g.name as GroupName,g.Sequence GroupSequence,igd.GroupType_id,igd.SubGroup_id,igd.ItemSequence,
                 sg.id as SubGroupID, sg.Name as SubGroupName,sg.Sequence as SubGroupSequence,i.id ItemID,i.Name ItemName,
                 i.Sequence as ItemSequence  
                 from M_Items as i 
                 left join MC_ItemGroupDetails as igd ON i.id=igd.Item_ID and igd.GroupType_id=%s 
                 left join M_Group as g ON g.id=igd.Group_id
                 left join MC_SubGroup as sg on sg.id=igd.SubGroup_id
-                ''',[GroupType_id])
+                order by g.Sequence,sg.Sequence,igd.ItemSequence''',[GroupType_id])
                 
-                for a in query: 
-                    GroupSubgroupItemList.append({
-                        "GroupTypeID": a.GroupType_id,
-                        "GroupID": a.GroupID,
-                        "GroupName": a.GroupName,
-                        "GroupSequence": a.GroupSequence,
-                        "SubGroupID": a.SubGroupID,
-                        "SubGroupName": a.SubGroupName,
-                        "SubGroupSequence": a.SubGroupSequence,
-                        "Items": [{
-                            "ItemID": a.ItemID,
-                            "ItemName": a.ItemName,
-                            "ItemSequence": a.ItemSequence
-                        }]
+                grouped_data = {}
+
+                for a in query:
+                    group_key = (a.GroupID, a.SubGroupID)
+                    
+                    if group_key not in grouped_data:
+                        grouped_data[group_key] = {
+                            "GroupTypeID": a.GroupType_id,
+                            "GroupID": a.GroupID,
+                            "GroupName": a.GroupName,
+                            "GroupSequence": a.GroupSequence,
+                            "SubGroupID": a.SubGroupID,
+                            "SubGroupName": a.SubGroupName,
+                            "SubGroupSequence": a.SubGroupSequence,
+                            "Items": []
+                        }
+
+                    grouped_data[group_key]["Items"].append({
+                        "ItemID": a.ItemID,
+                        "ItemName": a.ItemName,
+                        "ItemSequence": a.ItemSequence
                     })
+
+                for key, group_data in grouped_data.items():
+                    GroupSubgroupItemList.append(group_data)
+
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GroupSubgroupItemList})                
-                
-        
         except Exception as e:
-            
                 log_entry = create_transaction_logNew(request,0, 0,'DetailsOfsubgroups_groups:'+str(e),33,0)
                 return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': Exception(e), 'Data': []})
          
