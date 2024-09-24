@@ -189,12 +189,15 @@ where M_Employees.id= %s''', [id])
                         Employeeparties, many=True).data
 
                     EmployeeParties = list()
+                   
                     for a in EmployeepartiesData_Serializer:
+                        
                         EmployeeParties.append({
-                            'id': a['id'],
-                            'Name': a['Name'],
-                            'RoleName':a['RoleName']
-                        })                          
+                            'id': a['id'] if a['id'] is not None else '',
+                            'Name': a['Name']if a['Name'] is not None else '',
+                            'RoleName':a['RoleName']if a['RoleName'] is not None else ''
+                        })     
+                                  
                     GetAllData.append({
                         'id':  M_Employees_Serializer[0]['id'],
                         'Name':  M_Employees_Serializer[0]['Name'],

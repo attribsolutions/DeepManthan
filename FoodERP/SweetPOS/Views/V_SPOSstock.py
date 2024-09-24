@@ -114,24 +114,31 @@ class SPOSStockReportView(CreateAPIView):
                 Unit = Orderdata['Unit']
                 Party = Orderdata['Party']
                 PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
-                UnitName = M_Units.objects.filter(id=Unit).values("Name")
-                unitname = UnitName[0]['Name']
-                
-                ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Party,0).split(',')
-                
+                CustomPrint(PartyNameQ)
+                if(Unit!=0):
+                    UnitName = M_Units.objects.filter(id=Unit).values("Name")
+                    unitname = UnitName[0]['Name']                    
+                else:
+                    unitname='UnitName'      
+                # print('aaaaa')
+                if(Unit==0):
+                    unitcondi='A.Unit'
+                else:
+                    unitcondi=Unit  
+                CustomPrint(Unit)  
                 StockreportQuery = O_SPOSDateWiseLiveStock.objects.raw(f'''
                 SELECT 1 as id,A.Item_id,A.Unit,
-                FoodERP.UnitwiseQuantityConversion(A.Item_id,ifnull(OpeningBalance,0),0,A.Unit,0,%s,0)OpeningBalance,
-                FoodERP.UnitwiseQuantityConversion(A.Item_id,GRNInward,0,A.Unit,0,%s,0)GRNInward,
-                FoodERP.UnitwiseQuantityConversion(A.Item_id,Sale,0,A.Unit,0,%s,0)Sale,
-                FoodERP.UnitwiseQuantityConversion(A.Item_id,ClosingBalance,0,A.Unit,0,%s,0)ClosingBalance,
-                FoodERP.UnitwiseQuantityConversion(A.Item_id,ActualStock,0,A.Unit,0,%s,0)ActualStock,
+                FoodERP.UnitwiseQuantityConversion(A.Item_id,ifnull(OpeningBalance,0),0,A.Unit,0,{unitcondi},0)OpeningBalance,
+                FoodERP.UnitwiseQuantityConversion(A.Item_id,GRNInward,0,A.Unit,0,{unitcondi},0)GRNInward,
+                FoodERP.UnitwiseQuantityConversion(A.Item_id,Sale,0,A.Unit,0,{unitcondi},0)Sale,
+                FoodERP.UnitwiseQuantityConversion(A.Item_id,ClosingBalance,0,A.Unit,0,{unitcondi},0)ClosingBalance,
+                FoodERP.UnitwiseQuantityConversion(A.Item_id,ActualStock,0,A.Unit,0,{unitcondi},0)ActualStock,
                 A.ItemName,
                 D.QuantityInBaseUnit,
-                FoodERP.UnitwiseQuantityConversion(A.Item_id,PurchaseReturn,0,A.Unit,0,%s,0)PurchaseReturn,
-                FoodERP.UnitwiseQuantityConversion(A.Item_id,SalesReturn,0,A.Unit,0,%s,0)SalesReturn,
-                FoodERP.UnitwiseQuantityConversion(A.Item_id,StockAdjustment,0,A.Unit,0,%s,0)StockAdjustment
-                ,GroupTypeName,GroupName,SubGroupName,%s UnitName
+                FoodERP.UnitwiseQuantityConversion(A.Item_id,PurchaseReturn,0,A.Unit,0,{unitcondi},0)PurchaseReturn,
+                FoodERP.UnitwiseQuantityConversion(A.Item_id,SalesReturn,0,A.Unit,0,{unitcondi},0)SalesReturn,
+                FoodERP.UnitwiseQuantityConversion(A.Item_id,StockAdjustment,0,A.Unit,0,{unitcondi},0)StockAdjustment
+                ,GroupTypeName,GroupName,SubGroupName,'{unitname}' UnitName
                 FROM
 
                         ( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit,M_Units.Name UnitName ,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
@@ -140,7 +147,10 @@ class SPOSStockReportView(CreateAPIView):
 
                 JOIN FoodERP.M_Items ON M_Items.id=O_SPOSDateWiseLiveStock.Item
                 join FoodERP.M_Units on M_Units.id= O_SPOSDateWiseLiveStock.Unit
-                {ItemsGroupJoinsandOrderby[0]}
+                left join FoodERP.MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id = 5
+                left JOIN FoodERP.M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
+                left JOIN FoodERP.M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
+                left JOIN FoodERP.MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
                  WHERE StockDate BETWEEN %s AND %s AND Party=%s GROUP BY Item,Unit,M_GroupType.id,M_Group.id,MC_SubGroup.id) A
 
                 left JOIN (SELECT O_SPOSDateWiseLiveStock.Item, OpeningBalance FROM O_SPOSDateWiseLiveStock WHERE O_SPOSDateWiseLiveStock.StockDate = %s AND O_SPOSDateWiseLiveStock.Party=%s) B
@@ -153,11 +163,9 @@ class SPOSStockReportView(CreateAPIView):
                 FROM T_SPOSStock
                 WHERE Party =%s AND StockDate BETWEEN %s AND %s
                 GROUP BY Item) D
-                ON A.Item_id = D.Item 
-                {ItemsGroupJoinsandOrderby[1]}''', ([Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [Unit], [unitname], [FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate]))
-                # print(StockreportQuery)
-                serializer = SPOSStockReportSerializer(StockreportQuery, many=True).data
-                
+                ON A.Item_id = D.Item ''', ( [FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate]))
+                CustomPrint(StockreportQuery)
+                serializer = SPOSStockReportSerializer(StockreportQuery, many=True).data                
                 StockData = list()
                 StockData.append({
                     "FromDate": FromDate,
@@ -173,7 +181,7 @@ class SPOSStockReportView(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request,Orderdata, 0, 'StockReport:'+str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
         
         
  
