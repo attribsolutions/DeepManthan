@@ -114,7 +114,6 @@ class SPOSStockReportView(CreateAPIView):
                 Unit = Orderdata['Unit']
                 Party = Orderdata['Party']
                 PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
-
                 CustomPrint(PartyNameQ)
                 if(Unit!=0):
                     UnitName = M_Units.objects.filter(id=Unit).values("Name")
@@ -127,7 +126,6 @@ class SPOSStockReportView(CreateAPIView):
                 else:
                     unitcondi=Unit  
                 CustomPrint(Unit)  
-
                 StockreportQuery = O_SPOSDateWiseLiveStock.objects.raw(f'''
                 SELECT 1 as id,A.Item_id,A.Unit,
                 FoodERP.UnitwiseQuantityConversion(A.Item_id,ifnull(OpeningBalance,0),0,A.Unit,0,{unitcondi},0)OpeningBalance,
@@ -149,7 +147,10 @@ class SPOSStockReportView(CreateAPIView):
 
                 JOIN FoodERP.M_Items ON M_Items.id=O_SPOSDateWiseLiveStock.Item
                 join FoodERP.M_Units on M_Units.id= O_SPOSDateWiseLiveStock.Unit
-                {ItemsGroupJoinsandOrderby[0]}
+                left join FoodERP.MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id = 5
+                left JOIN FoodERP.M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
+                left JOIN FoodERP.M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
+                left JOIN FoodERP.MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
                  WHERE StockDate BETWEEN %s AND %s AND Party=%s GROUP BY Item,Unit,M_GroupType.id,M_Group.id,MC_SubGroup.id) A
 
                 left JOIN (SELECT O_SPOSDateWiseLiveStock.Item, OpeningBalance FROM O_SPOSDateWiseLiveStock WHERE O_SPOSDateWiseLiveStock.StockDate = %s AND O_SPOSDateWiseLiveStock.Party=%s) B
@@ -162,11 +163,9 @@ class SPOSStockReportView(CreateAPIView):
                 FROM T_SPOSStock
                 WHERE Party =%s AND StockDate BETWEEN %s AND %s
                 GROUP BY Item) D
-
                 ON A.Item_id = D.Item ''', ( [FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate]))
                 CustomPrint(StockreportQuery)
                 serializer = SPOSStockReportSerializer(StockreportQuery, many=True).data                
-
                 StockData = list()
                 StockData.append({
                     "FromDate": FromDate,
