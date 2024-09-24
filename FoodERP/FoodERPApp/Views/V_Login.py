@@ -148,9 +148,9 @@ class UserListViewSecond(CreateAPIView):
                         if not UserPartiesQuery:
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Not Found', 'Data':[] })    
                         else:    
-                            SingleGetUserListUserPartiesSerializerData = SingleGetUserListUserPartiesSerializer(UserPartiesQuery,  many=True).data
+                            # SingleGetUserListUserPartiesSerializerData = SingleGetUserListUserPartiesSerializer(UserPartiesQuery,  many=True).data
                             # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':SingleGetUserListUserPartiesSerializerData})  
-                            for b in SingleGetUserListUserPartiesSerializerData:
+                            # for b in SingleGetUserListUserPartiesSerializerData:
                                 # PartyID=b['Party_id']
                                 
                                 # if PartyID is None:
