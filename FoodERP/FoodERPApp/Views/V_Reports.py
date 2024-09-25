@@ -491,10 +491,10 @@ class StockReportView(CreateAPIView):
                     
                 # print('aaaaa')
                 if(Unit==0):
-                    unitcondi='A.Unit'
+                    unitcondi='A.Unit_id'
                 else:
                     unitcondi=Unit  
-                StockreportQuery = O_DateWiseLiveStock.objects.raw('''SELECT  1 as id,A.Item_id,A.Unit_id,
+                StockreportQuery = O_DateWiseLiveStock.objects.raw(f'''SELECT  1 as id,A.Item_id,A.Unit_id,
 UnitwiseQuantityConversion(A.Item_id,ifnull(OpeningBalance,0),0,A.Unit_id,0,{unitcondi},0)OpeningBalance, 
 UnitwiseQuantityConversion(A.Item_id,GRNInward,0,A.Unit_id,0,{unitcondi},0)GRNInward, 
 UnitwiseQuantityConversion(A.Item_id,Sale,0,A.Unit_id,0,{unitcondi},0)Sale, 
