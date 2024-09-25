@@ -595,7 +595,8 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
         
 class MobileNumberSaveView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = ()
+    authentication_classes = [BasicAuthentication]
     
     @transaction.atomic()
     def post(self, request):
