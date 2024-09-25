@@ -185,6 +185,8 @@ class SPOSStockReportView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
         
         
+        
+        
  
 class SPOSStockAdjustmentView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
