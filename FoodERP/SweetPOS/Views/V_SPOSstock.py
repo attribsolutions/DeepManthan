@@ -114,14 +114,16 @@ class SPOSStockReportView(CreateAPIView):
                 Unit = Orderdata['Unit']
                 Party = Orderdata['Party']
                 PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
+                
+                ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Party,0).split('!')
+
                 CustomPrint(PartyNameQ)
                 if(Unit!=0):
                     UnitName = M_Units.objects.filter(id=Unit).values("Name")
                     unitname = UnitName[0]['Name']                    
                 else:
                     unitname =''
-                    
-                # print('aaaaa')
+              
                 if(Unit==0):
                     unitcondi='A.Unit'
                 else:
@@ -141,18 +143,15 @@ class SPOSStockReportView(CreateAPIView):
                 FoodERP.UnitwiseQuantityConversion(A.Item_id,StockAdjustment,0,A.Unit,0,{unitcondi},0)StockAdjustment
                 ,GroupTypeName,GroupName,SubGroupName,CASE WHEN {Unit} = 0 THEN UnitName else '{unitname}' END UnitName
                 FROM
-
-                        ( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit,M_Units.Name UnitName ,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
-                    ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName
-                        FROM O_SPOSDateWiseLiveStock
+                ( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit,M_Units.Name UnitName ,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
+                    {ItemsGroupJoinsandOrderby[0]}
+                    FROM O_SPOSDateWiseLiveStock
 
                 JOIN FoodERP.M_Items ON M_Items.id=O_SPOSDateWiseLiveStock.Item
                 join FoodERP.M_Units on M_Units.id= O_SPOSDateWiseLiveStock.Unit
-                left join FoodERP.MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id = 5
-                left JOIN FoodERP.M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
-                left JOIN FoodERP.M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
-                left JOIN FoodERP.MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
-                 WHERE StockDate BETWEEN %s AND %s AND Party=%s GROUP BY Item,Unit,M_GroupType.id,M_Group.id,MC_SubGroup.id) A
+                {ItemsGroupJoinsandOrderby[1]}
+                 WHERE StockDate BETWEEN %s AND %s AND Party=%s GROUP BY Item,Unit,GroupType.id,Groupss.id,subgroup.id
+                 {ItemsGroupJoinsandOrderby[2]}) A
 
                 left JOIN (SELECT O_SPOSDateWiseLiveStock.Item, OpeningBalance FROM O_SPOSDateWiseLiveStock WHERE O_SPOSDateWiseLiveStock.StockDate = %s AND O_SPOSDateWiseLiveStock.Party=%s) B
                 ON A.Item_id = B.Item
@@ -165,7 +164,7 @@ class SPOSStockReportView(CreateAPIView):
                 WHERE Party =%s AND StockDate BETWEEN %s AND %s
                 GROUP BY Item) D
                 ON A.Item_id = D.Item ''', ( [FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate]))
-                CustomPrint(StockreportQuery)
+                
                 serializer = SPOSStockReportSerializer(StockreportQuery, many=True).data                
                 StockData = list()
                 StockData.append({
