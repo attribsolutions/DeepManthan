@@ -622,7 +622,7 @@ class MobileNumberSaveView(CreateAPIView):
     def get(self, request,MacID=0):
         try:
             with transaction.atomic():
-                query = M_ConsumerMobile.objects.filter(IsLinkToBill=False,MacID=MacID)
+                query = M_ConsumerMobile.objects.filter(IsLinkToBill=False,MacID=MacID).order_by('-id')
                 if query:
                     Mobile_serializer = MobileSerializer(query, many=True).data
                     log_entry = create_transaction_logNew(request, Mobile_serializer, 0, '', 412, 0)
