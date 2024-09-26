@@ -119,7 +119,8 @@ class SPOSStockReportView(CreateAPIView):
                     UnitName = M_Units.objects.filter(id=Unit).values("Name")
                     unitname = UnitName[0]['Name']                    
                 else:
-                    unitname='UnitName'      
+                    unitname =''
+                    
                 # print('aaaaa')
                 if(Unit==0):
                     unitcondi='A.Unit'
@@ -138,7 +139,7 @@ class SPOSStockReportView(CreateAPIView):
                 FoodERP.UnitwiseQuantityConversion(A.Item_id,PurchaseReturn,0,A.Unit,0,{unitcondi},0)PurchaseReturn,
                 FoodERP.UnitwiseQuantityConversion(A.Item_id,SalesReturn,0,A.Unit,0,{unitcondi},0)SalesReturn,
                 FoodERP.UnitwiseQuantityConversion(A.Item_id,StockAdjustment,0,A.Unit,0,{unitcondi},0)StockAdjustment
-                ,GroupTypeName,GroupName,SubGroupName,'{unitname}' UnitName
+                ,GroupTypeName,GroupName,SubGroupName,CASE WHEN {Unit} = 0 THEN UnitName else '{unitname}' END UnitName
                 FROM
 
                         ( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit,M_Units.Name UnitName ,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
@@ -181,8 +182,7 @@ class SPOSStockReportView(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request,Orderdata, 0, 'StockReport:'+str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
-        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})        
         
         
         
