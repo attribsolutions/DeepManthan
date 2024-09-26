@@ -851,22 +851,23 @@ def Get_Items_ByGroupandPartytype(Party ,GroupType=0):
     if GroupType > 0:
         GroupType_id = GroupType
     else: 
-        party_instance = M_Parties.objects.get(id=Party) 
-        PartyType = party_instance.PartyType  
-          
-        if PartyType == 19:
+        party_instance = M_Parties.objects.filter(id=Party).values('PartyType_id')
+        
+        if party_instance[0]['PartyType_id'] == 19:
             GroupType_id = 5
-            seq=(f'FoodERP.MC_ItemGroupDetails.ItemSequence')
+            seq=(f'groupdetails.ItemSequence')
         else:
             GroupType_id = 1
-            seq=(f'FoodERP.M_Items.Sequence')
-
-    joins =(f'''LEFT JOIN FoodERP.MC_ItemGroupDetails ON MC_ItemGroupDetails.item_id = M_Items.id
-        LEFT JOIN FoodERP.M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id  and MC_ItemGroupDetails.GroupType_id= {GroupType_id}
-        LEFT JOIN FoodERP.M_Group ON M_Group.id = MC_ItemGroupDetails.Group_id
-        LEFT JOIN FoodERP.MC_SubGroup ON MC_SubGroup.id = MC_ItemGroupDetails.SubGroup_id''')
+            seq=(f'M_Items.Sequence')
+            
+    selects = (f'''ifnull(GroupType.Name,'') GroupTypeName,ifnull(Groupss.Name,'') GroupName,ifnull(subgroup.Name,'') SubGroupName ''')
+    
+    joins =(f'''LEFT JOIN FoodERP.MC_ItemGroupDetails groupdetails ON groupdetails.item_id = M_Items.id
+        LEFT JOIN FoodERP.M_GroupType GroupType ON GroupType.id = groupdetails.GroupType_id  and groupdetails.GroupType_id= {GroupType_id}
+        LEFT JOIN FoodERP.M_Group Groupss ON Groupss.id = groupdetails.Group_id
+        LEFT JOIN FoodERP.MC_SubGroup subgroup ON subgroup.id = groupdetails.SubGroup_id''')
         
-    orderby=(f'''ORDER BY M_Group.Sequence,MC_SubGroup.Sequence,{seq}''')
+    orderby=(f'''ORDER BY Groupss.Sequence,subgroup.Sequence,{seq}''')
     
 
-    return joins +','+ orderby
+    return selects +'!'+ joins +'!'+ orderby

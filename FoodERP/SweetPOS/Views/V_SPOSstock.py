@@ -114,14 +114,16 @@ class SPOSStockReportView(CreateAPIView):
                 Unit = Orderdata['Unit']
                 Party = Orderdata['Party']
                 PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
+                
+                ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Party,0).split('!')
+
                 CustomPrint(PartyNameQ)
                 if(Unit!=0):
                     UnitName = M_Units.objects.filter(id=Unit).values("Name")
                     unitname = UnitName[0]['Name']                    
                 else:
                     unitname =''
-                    
-                # print('aaaaa')
+              
                 if(Unit==0):
                     unitcondi='A.Unit'
                 else:
@@ -141,18 +143,15 @@ class SPOSStockReportView(CreateAPIView):
                 FoodERP.UnitwiseQuantityConversion(A.Item_id,StockAdjustment,0,A.Unit,0,{unitcondi},0)StockAdjustment
                 ,GroupTypeName,GroupName,SubGroupName,CASE WHEN {Unit} = 0 THEN UnitName else '{unitname}' END UnitName
                 FROM
-
-                        ( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit,M_Units.Name UnitName ,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
-                    ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName
-                        FROM O_SPOSDateWiseLiveStock
+                ( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit,M_Units.Name UnitName ,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
+                    {ItemsGroupJoinsandOrderby[0]}
+                    FROM O_SPOSDateWiseLiveStock
 
                 JOIN FoodERP.M_Items ON M_Items.id=O_SPOSDateWiseLiveStock.Item
                 join FoodERP.M_Units on M_Units.id= O_SPOSDateWiseLiveStock.Unit
-                left join FoodERP.MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id = 5
-                left JOIN FoodERP.M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
-                left JOIN FoodERP.M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
-                left JOIN FoodERP.MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
-                 WHERE StockDate BETWEEN %s AND %s AND Party=%s GROUP BY Item,Unit,M_GroupType.id,M_Group.id,MC_SubGroup.id) A
+                {ItemsGroupJoinsandOrderby[1]}
+                 WHERE StockDate BETWEEN %s AND %s AND Party=%s GROUP BY Item,Unit,GroupType.id,Groupss.id,subgroup.id
+                 {ItemsGroupJoinsandOrderby[2]}) A
 
                 left JOIN (SELECT O_SPOSDateWiseLiveStock.Item, OpeningBalance FROM O_SPOSDateWiseLiveStock WHERE O_SPOSDateWiseLiveStock.StockDate = %s AND O_SPOSDateWiseLiveStock.Party=%s) B
                 ON A.Item_id = B.Item
@@ -165,7 +164,7 @@ class SPOSStockReportView(CreateAPIView):
                 WHERE Party =%s AND StockDate BETWEEN %s AND %s
                 GROUP BY Item) D
                 ON A.Item_id = D.Item ''', ( [FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate]))
-                CustomPrint(StockreportQuery)
+                
                 serializer = SPOSStockReportSerializer(StockreportQuery, many=True).data                
                 StockData = list()
                 StockData.append({
@@ -182,8 +181,7 @@ class SPOSStockReportView(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request,Orderdata, 0, 'StockReport:'+str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
-        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})        
         
         
         
@@ -195,9 +193,12 @@ class SPOSStockAdjustmentView(CreateAPIView):
     def get(self, request, id=0,Party=0):
         try:
             with transaction.atomic():
-                query=O_SPOSDateWiseLiveStock.objects.raw(''' SELECT 1 as id, M_Items.id Item, M_Items.Name AS ItemName, D.StockDate,
+                
+                ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Party,0).split('!')
+                
+                query=O_SPOSDateWiseLiveStock.objects.raw(f''' SELECT 1 as id, M_Items.id Item, M_Items.Name AS ItemName, D.StockDate,
                                                             FORMAT(IFNULL(D.ClosingBalance, 0), 15) AS Quantity,
-                                                            M_Units.id AS UnitID, M_Units.Name AS UnitName,M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName,
+                                                            M_Units.id AS UnitID, M_Units.Name AS UnitName,Groupss.Name AS GroupName,subgroup.Name AS SubGroupName,
                                                             (SELECT MRP FROM SweetPOS.T_SPOSStock 
                                                                 WHERE StockDate = (SELECT MAX(StockDate) FROM SweetPOS.T_SPOSStock WHERE Item = %s AND Party = %s)
                                                                 AND Item = %s AND Party = %s ORDER BY id DESC LIMIT 1) AS MRP,
@@ -210,12 +211,11 @@ class SPOSStockAdjustmentView(CreateAPIView):
                                                             FROM  FoodERP.M_Items
                                                             left JOIN SweetPOS.O_SPOSDateWiseLiveStock D ON M_Items.id = D.Item and D.Party = %s and D.StockDate = CURRENT_DATE
                                                             left JOIN FoodERP.M_Units ON M_Units.id = M_Items.BaseUnitID_id
-                                                            LEFT JOIN FoodERP.MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id AND MC_ItemGroupDetails.GroupType_id = 5
-                                                            LEFT JOIN FoodERP.M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
-                                                            LEFT JOIN FoodERP.M_Group ON M_Group.id = MC_ItemGroupDetails.Group_id
-                                                            LEFT JOIN FoodERP.MC_SubGroup ON MC_SubGroup.id = MC_ItemGroupDetails.SubGroup_id
+                                                            {ItemsGroupJoinsandOrderby[1]}
                                                             WHERE  M_Items.id = %s
-                                                            ORDER BY FoodERP.M_Group.Sequence, FoodERP.MC_SubGroup.Sequence, FoodERP.MC_ItemGroupDetails.ItemSequence''',([id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party],[Party],[id]))                                   
+                                                          {ItemsGroupJoinsandOrderby[2]}''',([id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party],[id],[Party],[Party],[id]))                                   
+                
+                
                 if query:
                     BatchCodelist = list()
                     for a in query:
@@ -274,16 +274,17 @@ class StockOutReportView(CreateAPIView):
                 FromDate = StockData['FromDate']
                 ToDate = StockData['ToDate']
                 Party = StockData['Party']
-
-                StockOutReportQuery = T_SPOSStockOut.objects.raw('''SELECT A.id, A.StockDate , A.Item ItemID, B.Name, M_Group.Name "Group", MC_SubGroup.Name SubGroup, A.Party, M_Parties.Name PartyName, A.CreatedBy, A.CreatedOn StockoutTime
-                            FROM SweetPOS.T_SPOSStockOut A 
-                            JOIN FoodERP.M_Items B ON B.id = A.Item
-                            JOIN FoodERP.M_Parties ON M_Parties.id = A.Party
-                            LEFT JOIN FoodERP.MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id=B.id AND MC_ItemGroupDetails.GroupType_id = 5
-                            LEFT JOIN FoodERP.M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
-                            LEFT JOIN FoodERP.MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
-                            WHERE A.StockDate BETWEEN %s AND %s AND A.Party=%s''',[FromDate,ToDate,Party])
                 
+                ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Party,0).split('!')
+               
+                StockOutReportQuery = T_SPOSStockOut.objects.raw(f'''SELECT A.id, A.StockDate , A.Item ItemID, M_Items.Name, Groupss.Name "Group", subgroup.Name SubGroup, A.Party, M_Parties.Name PartyName, A.CreatedBy, A.CreatedOn StockoutTime
+                            FROM SweetPOS.T_SPOSStockOut A 
+                            JOIN FoodERP.M_Items  ON M_Items.id = A.Item
+                            JOIN FoodERP.M_Parties ON M_Parties.id = A.Party
+                            {ItemsGroupJoinsandOrderby[1]}
+                            WHERE A.StockDate BETWEEN %s AND %s AND A.Party=%s
+                            {ItemsGroupJoinsandOrderby[2]}''',[FromDate,ToDate,Party])
+             
                 StockOutDataList = list()
 
                 for a in StockOutReportQuery:
@@ -299,9 +300,9 @@ class StockOutReportView(CreateAPIView):
                         "StockoutTime": a.StockoutTime
 
                     })
-                log_entry = create_transaction_logNew(request, StockData, StockData['Party'], '', 419, 0)
+                log_entry = create_transaction_logNew(request, StockData, Party, '', 419, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': StockOutDataList})
-        except Exception as e:
+        except str as e:
             log_entry = create_transaction_logNew(request, StockData, 0, 'SPOS StockOut Report:'+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
                

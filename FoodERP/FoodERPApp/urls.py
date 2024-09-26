@@ -313,7 +313,7 @@ urlpatterns = [
             url(r'InvoicesFilter$', InvoiceListFilterView.as_view()),
             url(r'InvoicesFilterSecond$', InvoiceListFilterViewSecond.as_view()),
             url(r'InvoiceNoList$', InvoiceNoView.as_view()),
-            url(r'BulkInvoices$', BulkInvoiceView.as_view()),
+            url(r'BulkInvoices$', BulkInvoiceView.as_view()), #InvoiceExcelUpload
             
             url(r'Uploaded_EInvoicea/([0-9]+)/([0-9]+)/([0-9]+)$', Uploaded_EInvoice.as_view()),
             url(r'Uploaded_EwayBill/([0-9]+)/([0-9]+)/([0-9]+)$', Uploaded_EwayBill.as_view()),
