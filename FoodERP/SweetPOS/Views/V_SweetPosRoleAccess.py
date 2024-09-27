@@ -137,7 +137,7 @@ class MachineTypeSaveView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MacID is already exist!', 'Data' : []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'MachineTypeSave:'+str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
         
 class MachineTypeListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -148,20 +148,21 @@ class MachineTypeListView(CreateAPIView):
             with transaction.atomic():
                 Party = MachineType_Data['Party']
                 query = M_SweetPOSMachine.objects.raw('''Select A.id, A.Party, A.MacID, ifnull(A.MachineType,'') MachineType ,  B.Name MachineTypeName, A.IsServer, A.ClientID
-                        From SweetPOS.M_SweetPOSMachine A 
+                        From SweetPOS.M_SweetPOSMachine A
                         left JOIN  FoodERP.M_GeneralMaster B on B.id = A.MachineType
                         WHERE A.Party = %s''',[Party])
                 
-                MachineTypeList= list()
+                MachineTypeList= []
                 for a in query:
                     q1 =  M_Settings.objects.filter(id=48).values('DefaultValue')
                     b = q1[0]['DefaultValue'].split('!')
                     c = [bb.strip().split('-') for bb in b]
-                    RoleID = ""
+                    
+                    RoleIDs = []
                     for d in c:
                         if a.MachineType ==  d[0]:
-                            RoleID = d[1]   
-                        
+                            RoleIDs = d[1]   
+                    MultipleRoleIDs = ','.join(RoleIDs)   
                     
                     MachineTypeList.append({
                                 "id": a.id,
@@ -171,15 +172,15 @@ class MachineTypeListView(CreateAPIView):
                                 "MachineTypeName": a.MachineTypeName,
                                 "IsServer": a.IsServer,
                                 "ClientID": a.ClientID,
-                                "MachineRole":RoleID
+                                "MachineRole":MultipleRoleIDs
                                 })
-                log_entry = create_transaction_logNew(request, MachineType_Data, Party, '', 417, 0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :MachineTypeList})
-            log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'Machine Type not available', 417, 0)
-            return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Machine Type not available', 'Data' : []})
+                    log_entry = create_transaction_logNew(request, MachineType_Data, Party, '', 417, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :MachineTypeList})
+                log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'Machine Type not available', 417, 0)
+                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Machine Type not available', 'Data' : []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'Machine Type List:'+str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data':[]})
         
         
 
@@ -241,7 +242,7 @@ class MachineTypeUpdateView(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Machine Type Update Successfully', 'TransactionID':LastInsertID, 'Data':[]})
         except Exception as e:
             log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'MachineTypeUpdate:'+str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
                
 
 
