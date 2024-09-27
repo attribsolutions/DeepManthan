@@ -230,6 +230,7 @@ class DetailsOfSubgroups_GroupsViewNEW(CreateAPIView):
             with transaction.atomic():
                 GroupType_id = DetailsOfSubgroups['GroupType_id']
                 
+                
                 GroupSubgroupItemList = []
                 query = M_Items.objects.raw('''
                 select 1 as id, g.id as GroupID,g.name as GroupName,g.Sequence GroupSequence,igd.GroupType_id,igd.SubGroup_id,igd.ItemSequence,
