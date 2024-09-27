@@ -813,7 +813,7 @@ class BulkInvoiceView(CreateAPIView):
                             if CustomerMapping.count() > 0:
                                 aa['Customer']=CustomerMapping[0]['Customer']
                             else:
-                                # log_entry = create_transaction_logNew(request, Invoicedata, 0, "Customer Data Mapping Missing",37,0)
+                                log_entry = create_transaction_logNew(request, Invoicedata, 0, "Customer Data Mapping Missing",37,0)
                                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Customer Data Mapping Missing", 'Data':[]})    
                             # CustomPrint(aa['Customer'])
                             for bb in aa['InvoiceItems']:
@@ -823,7 +823,7 @@ class BulkInvoiceView(CreateAPIView):
                                 if ItemMapping.count() > 0:
                                     bb['Item']=ItemMapping[0]['Item']
                                 else:
-                                    # log_entry = create_transaction_logNew(request, Invoicedata, 0, "Item Data Mapping Missing",38,0)
+                                    log_entry = create_transaction_logNew(request, Invoicedata, 0, "Item Data Mapping Missing",38,0)
                                     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Item Data Mapping Missing", 'Data':[]})     
                                 UnitMapping=M_UnitMappingMaster.objects.filter(MapUnit=bb['Unit'],Party=aa['Party']).values("Unit")
                                 if UnitMapping.count() > 0:
@@ -839,10 +839,10 @@ class BulkInvoiceView(CreateAPIView):
                                         QtyInBox=UnitwiseQuantityConversion(bb['Item'],bb['Quantity'],bb['Unit'],0,0,4,0).ConvertintoSelectedUnit()
                                         bb['QtyInBox'] = float(QtyInBox)
                                     else:
-                                        # log_entry = create_transaction_logNew(request, Invoicedata, 0, " MC_ItemUnits Data Mapping Missing",39,0)
+                                        log_entry = create_transaction_logNew(request, Invoicedata, 0, " MC_ItemUnits Data Mapping Missing",39,0)
                                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " MC_ItemUnits Data Mapping Missing", 'Data':[]})            
                                 else:
-                                    # log_entry = create_transaction_logNew(request, Invoicedata, 0, "Unit Data Mapping Missing",40,0)
+                                    log_entry = create_transaction_logNew(request, Invoicedata, 0, "Unit Data Mapping Missing",40,0)
                                     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Unit Data Mapping Missing", 'Data':[]})
                                 
                             # return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':aa })    
@@ -853,13 +853,13 @@ class BulkInvoiceView(CreateAPIView):
                                 Invoice_serializer.save()
                                 pass
                             else:
-                                # log_entry = create_transaction_logNew(request, Invoicedata, 0,'BulkInvoices:'+str(Invoice_serializer.errors),34,0)
+                                log_entry = create_transaction_logNew(request, Invoicedata, 0,'BulkInvoices:'+str(Invoice_serializer.errors),34,0)
                                 transaction.set_rollback(True)
                                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data': []})
-                    # log_entry = create_transaction_logNew(request, Invoicedata, 0, 'Invoice Save Successfully',4,0)
+                log_entry = create_transaction_logNew(request, Invoicedata, 0, 'Invoice Save Successfully',4,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':[]})
         except Exception as e:
-            # log_entry = create_transaction_logNew(request, Invoicedata, 0,'BulkInvoices:'+str(e), 33,0)
+            log_entry = create_transaction_logNew(request, Invoicedata, 0,'BulkInvoices:'+str(e), 33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e, 'Data': []})
         
 
