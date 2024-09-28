@@ -420,7 +420,7 @@ class UserPartiesViewSecond(CreateAPIView):
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Parties Not available', 'Data': []})
                 else:
-                    UserSerializer = M_UserPartiesSerializer1(query, many=True).data                                               
+                    UserSerializer = MultipeRoleForOneUser(query, many=True).data                                               
                     User_List = []
                     party_roles = {}  
                     for a in UserSerializer:
