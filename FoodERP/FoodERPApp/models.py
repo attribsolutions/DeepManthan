@@ -2407,4 +2407,22 @@ class M_ItemSupplier(models.Model):
 
     class Meta:
         db_table = "M_ItemSupplier"
- 
+
+
+# class debug_log(models.Model):
+#     debug_message = models.CharField(max_length=300, null=True)
+#     CreatedOn = models.DateTimeField(auto_now_add=True)
+
+#     class Meta:
+#         db_table = "debug_log"
+
+class debug_log(models.Model):
+    
+    debug_message = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'debug_log'  # Optional: Specifies the exact table name if needed.
+
+    def __str__(self):
+        return f"{self.created_at}: {self.debug_message}"        
