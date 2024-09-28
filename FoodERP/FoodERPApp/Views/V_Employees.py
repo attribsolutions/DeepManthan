@@ -179,7 +179,7 @@ where M_Employees.id= %s''', [id])
 
                     Employeeparties = MC_EmployeeParties.objects.raw(
                         # '''SELECT Party_id as id, M_Parties.Name FROM MC_EmployeeParties join M_Parties on M_Parties.id = MC_EmployeeParties.Party_id where Employee_id=%s''', ([id]))
-                        f'''SELECT 1 id, b.Role_id Role,M_Roles.Name AS RoleName,M_Parties.id  Party_id,M_Parties.Name  from 
+                        f'''SELECT  b.Role_id Role,M_Roles.Name AS RoleName,M_Parties.id  ,M_Parties.Name  from 
                         (SELECT MC_EmployeeParties.id,MC_EmployeeParties.Party_id,'0' RoleID,Employee_id FROM MC_EmployeeParties where Employee_id={id})a 
                         left join (select MC_UserRoles.Party_id,MC_UserRoles.Role_id,Employee_id FROM MC_UserRoles 
                         join M_Users on M_Users.id=MC_UserRoles.User_id WHERE M_Users.Employee_id={id})b on a.Party_id=b.Party_id 
@@ -207,12 +207,12 @@ where M_Employees.id= %s''', [id])
                         User_List = []
                         party_roles = {}  
                         for a in UserSerializer:
-                            party_id = a["Party_id"]                       
+                            party_id = a["id"]                       
                         
                             if party_id not in party_roles:
                                 party_roles[party_id] = {                               
-                                    
-                                    "Partyname": a["Name"]                                                                  
+                                    "id":a["id"],
+                                    "Name": a["Name"]                                                                  
                                 }                             
                         User_List = list(party_roles.values())   
                          
