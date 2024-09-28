@@ -151,9 +151,19 @@ class MachineTypeListView(CreateAPIView):
                         From SweetPOS.M_SweetPOSMachine A
                         left JOIN  FoodERP.M_GeneralMaster B on B.id = A.MachineType
                         WHERE A.Party = %s''',[Party])
-                
+              
                 MachineTypeList= list()
                 for a in query:
+                    MachineTypeIDs = a.MachineType.split(',') if a.MachineType else []
+                    MachineTypeDetails = []
+                    
+                    for MachineTypeID in MachineTypeIDs:
+                        subquery = M_GeneralMaster.objects.filter(id=MachineTypeID.strip()).values('id', 'Name').first() 
+                        if subquery:
+                            MachineTypeDetails.append({
+                                "id": subquery['id'],
+                                "MachineTypeName": subquery['Name']
+                            })  
                     q1 =  M_Settings.objects.filter(id=48).values('DefaultValue')
                     b = q1[0]['DefaultValue'].split('!')
                     c = [bb.strip().split('-') for bb in b]
@@ -161,14 +171,12 @@ class MachineTypeListView(CreateAPIView):
                     for d in c:
                         if a.MachineType ==  d[0]:
                             RoleID = d[1]   
-                        
-                    
+                            
                     MachineTypeList.append({
                                 "id": a.id,
                                 "Party": a.Party,
                                 "MacID": a.MacID,
-                                "MachineType": a.MachineType,
-                                "MachineTypeName": a.MachineTypeName,
+                                "MachineTypeDetails": MachineTypeDetails,
                                 "IsServer": a.IsServer,
                                 "ClientID": a.ClientID,
                                 "MachineRole":RoleID
@@ -179,7 +187,7 @@ class MachineTypeListView(CreateAPIView):
             return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Machine Type not available', 'Data' : []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'Machine Type List:'+str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data':[]})
         
         
 
