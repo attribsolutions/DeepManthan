@@ -93,8 +93,10 @@ class M_ItemsFilterView(CreateAPIView):
                 PartyID=Logindata['PartyID'] 
                 CompanyGroupID =Logindata['CompanyGroup'] 
                 IsSCMCompany = Logindata['IsSCMCompany'] 
+
                 IsBOM = Logindata['IsBOM'] 
                 
+
                 party_instance = M_Parties.objects.get(id=PartyID) 
                 PartyType = party_instance.PartyType 
                 
@@ -153,7 +155,7 @@ class M_ItemsFilterView(CreateAPIView):
                                                left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
                                                WHERE M_Items.Company_id=%s 
                                                ORDER BY M_Group.Sequence,MC_SubGroup.Sequence,{seq} ASC''',([GroupType_id],[CompanyID]))
-                  
+
                 if not query:
                     log_entry = create_transaction_logNew(request, Logindata, x, "Items Not available",102,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
@@ -165,9 +167,11 @@ class M_ItemsFilterView(CreateAPIView):
                         
                         UnitDetails = [] 
                         if PartyID > 0:  
+
                             if IsBOM == 1:                          
                              UnitDetails = UnitDropdown(a['id'], PartyID, 0) 
                         
+
                         ItemListData.append({
                             "id": a['id'],
                             "Name": a['Name'],
@@ -196,7 +200,7 @@ class M_ItemsFilterView(CreateAPIView):
                             "UpdatedOn": a['UpdatedOn'],
                             "UnitDetails":UnitDetails
                         }) 
-                        
+
                     print("ItemFilterAPI EndTime : ",datetime.now())    
                     log_entry = create_transaction_logNew(request, Logindata, x,'Party Items List',102,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemListData})   

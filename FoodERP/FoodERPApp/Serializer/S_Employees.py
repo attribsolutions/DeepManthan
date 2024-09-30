@@ -100,9 +100,15 @@ class EmployeepartiesDataSerializer(serializers.Serializer):
 
 
 class EmployeepartiesDataSerializer03(serializers.Serializer):
-    id= serializers.IntegerField()
-    Name = serializers.CharField(max_length=100)
-    RoleName= serializers.CharField(max_length=100)
+    # id= serializers.IntegerField()
+    # Role_id= serializers.IntegerField()
+    # Name = serializers.CharField(max_length=100)
+    # RoleName= serializers.CharField(max_length=100)
+    id = serializers.IntegerField()
+    Party_id = serializers.IntegerField()
+    Name=serializers.CharField(max_length=500)
+    Role= serializers.IntegerField()
+    RoleName=serializers.CharField(max_length=500)  
 
 class M_EmployeesSerializerforgetdata(serializers.ModelSerializer):
     # Company_id =  serializers.IntegerField()
