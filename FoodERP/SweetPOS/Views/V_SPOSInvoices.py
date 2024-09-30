@@ -617,11 +617,17 @@ class MobileNumberSaveView(CreateAPIView):
             log_entry = create_transaction_logNew(request, Mobile_Data, 0, 'ConsumerMobileSave:'+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
         
+class ConsumerMobileListView(CreateAPIView):
+    permission_classes = ()
+    authentication_classes = [BasicAuthentication]
 
     @transaction.atomic()
-    def get(self, request,MacID=0):
+    def post(self, request,MacID=0):
+        MobileData = JSONParser().parse(request)
         try:
             with transaction.atomic():
+                MacID = MobileData['MacID']
+
                 query = M_ConsumerMobile.objects.filter(IsLinkToBill=False,MacID=MacID).order_by('-id')
                 if query:
                     Mobile_serializer = MobileSerializer(query, many=True).data
