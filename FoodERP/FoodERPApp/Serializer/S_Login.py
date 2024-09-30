@@ -230,8 +230,14 @@ class SingleGetUserListUserPartiesSerializer(serializers.Serializer):
 class SingleGetUserListUserPartyRoleSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     Role_id = serializers.IntegerField()
-    RoleName=serializers.CharField(max_length=500)    
+    RoleName=serializers.CharField(max_length=500)  
     
+class MultipeRoleForOneUser(serializers.Serializer):  
+    id = serializers.IntegerField()
+    Party_id = serializers.IntegerField()
+    PartyName=serializers.CharField(max_length=500)
+    Role= serializers.IntegerField()
+    RoleName=serializers.CharField(max_length=500)  
 
     
     

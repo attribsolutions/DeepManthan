@@ -93,7 +93,7 @@ class ItemListView(CreateAPIView):
                 ifnull(i.BaseUnitID_id,0) AS UnitID, i.IsFranchisesItem,  
                 ifnull(Round(GetTodaysDateMRP(i.id, CURDATE(), 2, NULL,NULL),2),0.0) AS FoodERPMRP,
                 ifnull(MC_ItemGroupDetails.SubGroup_id,0) AS ItemGroupID,MC_ItemGroupDetails.ItemSequence,
-                i.IsCBMItem
+                i.IsCBMItem ,i.IsMixItem
                 FROM M_Items AS i
                 left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=i.id and GroupType_id=5
                 LEFT JOIN M_ChannelWiseItems ON i.id = M_ChannelWiseItems.Item_id
@@ -142,6 +142,7 @@ class ItemListView(CreateAPIView):
                         "ItemGroupID": row.ItemGroupID,
                         "FranchisesItemCode": "" ,
                         "DisplayIndex" :  row.ItemSequence,
+                        "IsMixItem" :row.IsMixItem,
                         
                     } )
                     
