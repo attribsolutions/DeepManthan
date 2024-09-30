@@ -33,7 +33,7 @@ urlpatterns = [
     url(r'SPOSRateList$', RateListView.as_view()),
     url(r'SPOSRateSave$', RateSaveView.as_view()),
     url(r'SPOSMobileLinkToBill$', MobileNumberSaveView.as_view()),
-    url(r'SPOSMobileLinkToBill/([0-9A-Za-z:]+)$', MobileNumberSaveView.as_view()), #MacID
+    url(r'SPOSMobileList$', ConsumerMobileListView.as_view()), 
     url(r'SPOSMobileUpdate/([0-9]+)$', MobileNumberUpdateView.as_view()),
     url(r'SPOSMachineTypeSave$', MachineTypeSaveView.as_view()),
     url(r'SPOSMachineTypeList$', MachineTypeListView.as_view()),
