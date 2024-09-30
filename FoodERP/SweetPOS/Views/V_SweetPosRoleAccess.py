@@ -156,6 +156,7 @@ class MachineTypeListView(CreateAPIView):
                 for a in query:
                     MachineTypeIDs = a.MachineType.split(',') if a.MachineType else []
                     MachineTypeDetails = []
+                    RoleIDs = []
                     
                     for MachineTypeID in MachineTypeIDs:
                         subquery = M_GeneralMaster.objects.filter(id=MachineTypeID.strip()).values('id', 'Name').first() 
@@ -164,14 +165,15 @@ class MachineTypeListView(CreateAPIView):
                                 "id": subquery['id'],
                                 "MachineTypeName": subquery['Name']
                             })  
-                    q1 =  M_Settings.objects.filter(id=48).values('DefaultValue')
-                    b = q1[0]['DefaultValue'].split('!')
-                    c = [bb.strip().split('-') for bb in b]
-                    RoleID = ""
-                    for d in c:
-                        if a.MachineType ==  d[0]:
-                            RoleID = d[1]   
-                            
+                        q1 =  M_Settings.objects.filter(id=48).values('DefaultValue')
+                        b = q1[0]['DefaultValue'].split('!')
+                        c = [bb.strip().split('-') for bb in b]
+                
+                        for d in c:
+                            if MachineTypeID.strip() == d[0]:
+                                RoleIDs.append(d[1])  
+                    RoleID = ','.join(RoleIDs) or ""   
+                        
                     MachineTypeList.append({
                                 "id": a.id,
                                 "Party": a.Party,
@@ -188,7 +190,6 @@ class MachineTypeListView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'Machine Type List:'+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data':[]})
-        
         
 
 class SPOSLoginDetailsView(CreateAPIView):
