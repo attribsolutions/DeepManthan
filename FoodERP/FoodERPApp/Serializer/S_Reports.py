@@ -161,7 +161,7 @@ class DamageStocktSerializer(serializers.Serializer):
     
 class GenericSaleReportSerializer(serializers.Serializer):
     
-    SAPPartyID=serializers.IntegerField()
+    SAPPartyID=serializers.CharField(max_length=500)
     PartyID=serializers.IntegerField()
     PartyName = serializers.CharField(max_length=500)
     PartyType = serializers.CharField(max_length=500)
