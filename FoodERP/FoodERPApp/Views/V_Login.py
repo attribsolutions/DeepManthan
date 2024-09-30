@@ -139,43 +139,69 @@ class UserListViewSecond(CreateAPIView):
                 Usersdata = M_Users.objects.filter(id=id)
                 if Usersdata.exists():
                     Usersdata_Serializer = UserListSerializer(Usersdata, many=True).data
-                    # CustomPrint(Usersdata_Serializer)
+                    CustomPrint(Usersdata_Serializer)
                     UserData = list()
                     for a in Usersdata_Serializer:
                         RoleData = list()
                         UserPartiesQuery = MC_UserRoles.objects.raw('''SELECT MC_UserRoles.id,MC_UserRoles.Party_id ,M_Parties.Name PartyName FROM MC_UserRoles left join M_Parties on M_Parties.id= MC_UserRoles.Party_id Where MC_UserRoles.User_id=%s  ''',[id])
-                        
+                        # CustomPrint(UserPartiesQuery)
                         if not UserPartiesQuery:
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Not Found', 'Data':[] })    
                         else:    
-                            SingleGetUserListUserPartiesSerializerData = SingleGetUserListUserPartiesSerializer(UserPartiesQuery,  many=True).data
+                            # SingleGetUserListUserPartiesSerializerData = SingleGetUserListUserPartiesSerializer(UserPartiesQuery,  many=True).data
                             # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':SingleGetUserListUserPartiesSerializerData})  
-                            for b in SingleGetUserListUserPartiesSerializerData:
-                                PartyID=b['Party_id']
+                            # for b in SingleGetUserListUserPartiesSerializerData:
+                                # PartyID=b['Party_id']
                                 
-                                if PartyID is None:
-                                    PartyRoles = MC_UserRoles.objects.raw('''SELECT MC_UserRoles.id,MC_UserRoles.Role_id ,M_Roles.Name RoleName FROM MC_UserRoles join M_Roles on M_Roles.id= MC_UserRoles.Role_id Where MC_UserRoles.Party_id is null and  MC_UserRoles.User_id=%s ''',([id]))
-                                else:    
+                                # if PartyID is None:
+                                #     PartyRoles = MC_UserRoles.objects.raw('''SELECT MC_UserRoles.id,MC_UserRoles.Role_id ,M_Roles.Name RoleName FROM MC_UserRoles join M_Roles on M_Roles.id= MC_UserRoles.Role_id Where MC_UserRoles.Party_id is null and  MC_UserRoles.User_id=%s ''',([id]))
+                                # else:    
                                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'ccccccccccc', 'Data':PartyID})  
-                                    PartyRoles = MC_UserRoles.objects.raw('''SELECT MC_UserRoles.id,MC_UserRoles.Role_id ,M_Roles.Name RoleName FROM MC_UserRoles join M_Roles on M_Roles.id= MC_UserRoles.Role_id Where MC_UserRoles.Party_id=%s and  MC_UserRoles.User_id=%s ''',([PartyID],[id]))
+                                # PartyRoles = MC_UserRoles.objects.raw('''SELECT MC_UserRoles.id,MC_UserRoles.Role_id ,M_Roles.Name RoleName FROM MC_UserRoles join M_Roles on M_Roles.id= MC_UserRoles.Role_id Where MC_UserRoles.Party_id=%s and  MC_UserRoles.User_id=%s ''',([PartyID],[id]))
                                
-                                SingleGetUserListUserPartyRoleData = SingleGetUserListUserPartyRoleSerializer(PartyRoles,  many=True).data
+                                # SingleGetUserListUserPartyRoleData = SingleGetUserListUserPartyRoleSerializer(PartyRoles,  many=True).data
                                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':SingleGetUserListUserPartyRoleData})    
-                                PartyRoleData = list()
-                                for c in SingleGetUserListUserPartyRoleData:
-                                    PartyRoleData.append({
-                                        'Role': c['Role_id'],
-                                        'RoleName': c['RoleName'], 
-                                    })
-                                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartyRoleData[0]})    
-                                RoleData.append({
-                                    # 'Role': b['Role']['id'],
-                                    # 'RoleName': b['Role']['Name'],
-                                    'Party': b['Party_id'],
-                                    'PartyName': b['PartyName'],
-                                    'PartyRoles':PartyRoleData
+                                # PartyRoleData = list()
+                                # for c in SingleGetUserListUserPartyRoleData:
+                                #     PartyRoleData.append({
+                                #         'Role': c['Role_id'],
+                                #         'RoleName': c['RoleName']
+                                #     })
+                                # # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartyRoleData[0]})    
+                                # RoleData.append({
+                                #     # 'Role': b['Role']['id'],
+                                #     # 'RoleName': b['Role']['Name'],
+                                #     'Party': b['Party_id'],
+                                #     'PartyName': b['PartyName'],
+                                #     'PartyRoles':PartyRoleData
+                                # })
+                               
 
-                                })
+                                    PartyRoleData = {}
+                                    for b in a["UserRole"]:
+                                        party_id = b['Party']['id'] if b['Party']['id'] is not None else ''
+                                        party_name = b['Party']['Name'] if b['Party']['id'] is not None else ''
+                                        role_id = b['Role']['id']
+                                        role_name = b['Role']['Name']
+
+                                        
+                                        if party_id in PartyRoleData:
+                                            PartyRoleData[party_id]['PartyRoles'].append({
+                                                'Role': role_id,
+                                                'RoleName': role_name
+                                            })
+                                        else:
+                                            
+                                            PartyRoleData[party_id] = {
+                                                'Party': party_id,
+                                                'PartyName': party_name,
+                                                'PartyRoles': [{
+                                                    'Role': role_id,
+                                                    'RoleName': role_name
+                                                }]
+                                            }                                    
+                                    RoleData = list(PartyRoleData.values())
+                            
                     UserData.append({
                         'id': a["id"],
                         'LoginName': a["LoginName"],
@@ -391,15 +417,32 @@ class UserPartiesViewSecond(CreateAPIView):
             with transaction.atomic():
                 query = MC_EmployeeParties.objects.raw(
                     '''SELECT  a.id,b.Role_id Role,M_Roles.Name AS RoleName,a.Party_id,M_Parties.Name AS PartyName ,a.Employee_id,M_Parties.SAPPartyCode,M_PartyType.IsSCM as IsSCMPartyType,M_Parties.GSTIN from (SELECT MC_EmployeeParties.id,MC_EmployeeParties.Party_id,'0' RoleID,Employee_id FROM MC_EmployeeParties where Employee_id=%s)a left join (select MC_UserRoles.Party_id,MC_UserRoles.Role_id,Employee_id FROM MC_UserRoles join M_Users on M_Users.id=MC_UserRoles.User_id WHERE M_Users.Employee_id=%s)b on a.Party_id=b.Party_id left join M_Parties on M_Parties.id=a.Party_id Left join M_Roles on M_Roles.id=b.Role_id left join M_PartyType on M_Parties.PartyType_id=M_PartyType.id''', ([id], [id]))
-                # CustomPrint(str(query.query))
                 if not query:
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Parties Not available', 'Data': []})
                 else:
-                    M_UserParties_Serializer = M_UserPartiesSerializer1(
-                        query, many=True).data
+                    UserSerializer = MultipeRoleForOneUser(query, many=True).data                                               
+                    User_List = []
+                    party_roles = {}  
+                    for a in UserSerializer:
+                        party_id = a["Party_id"]                       
+                       
+                        if party_id not in party_roles:
+                            party_roles[party_id] = {                               
+                                "PartyID": party_id,
+                                "Partyname": a["PartyName"],
+                                "RoleDetails": []                                
+                            }
+                        
+                        if a["Role"]:
+                            party_roles[party_id]["RoleDetails"].append({
+                                "RoleName": a["RoleName"],
+                                "Role": a["Role"]
+                            })
+                    
+                    User_List = list(party_roles.values())           
 
-                    log_entry = create_transaction_logNew(request,{'UserID':id},0,"UserPartiesForUserMaster",144,0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_UserParties_Serializer})
+                log_entry = create_transaction_logNew(request,{'UserID':id},0,"UserPartiesForUserMaster",144,0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': User_List})
         except Exception as e:
             log_entry = create_transaction_logNew(request,0,0,'UserPartiesForUserMaster:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})

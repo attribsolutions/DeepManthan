@@ -5,7 +5,6 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
-
 from FoodERPDBLog.views import create_transaction_logNew2
 from ..Serializer.S_CommFunction import *
 from ..Serializer.S_Mrps import *
@@ -16,6 +15,7 @@ from ..models import *
 from datetime import date
 from ..models import TransactionLogJsonData
 from ..models import M_Settings
+from django.db import connection
 
 
 '''Common Functions List
@@ -843,3 +843,31 @@ class LogTransactionView(CreateAPIView):
         except Exception as e:
             transaction.set_rollback(True)  
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': None})
+
+
+
+def Get_Items_ByGroupandPartytype(Party ,GroupType=0):
+    
+    if GroupType > 0:
+        GroupType_id = GroupType
+    else: 
+        party_instance = M_Parties.objects.filter(id=Party).values('PartyType_id')
+        
+        if party_instance[0]['PartyType_id'] == 19:
+            GroupType_id = 5
+            seq=(f'groupdetails.ItemSequence')
+        else:
+            GroupType_id = 1
+            seq=(f'M_Items.Sequence')
+            
+    selects = (f'''ifnull(GroupType.Name,'') GroupTypeName,ifnull(Groupss.Name,'') GroupName,ifnull(subgroup.Name,'') SubGroupName ''')
+    
+    joins =(f'''LEFT JOIN FoodERP.MC_ItemGroupDetails groupdetails ON groupdetails.item_id = M_Items.id
+        LEFT JOIN FoodERP.M_GroupType GroupType ON GroupType.id = groupdetails.GroupType_id  and groupdetails.GroupType_id= {GroupType_id}
+        LEFT JOIN FoodERP.M_Group Groupss ON Groupss.id = groupdetails.Group_id
+        LEFT JOIN FoodERP.MC_SubGroup subgroup ON subgroup.id = groupdetails.SubGroup_id''')
+        
+    orderby=(f'''ORDER BY Groupss.Sequence,subgroup.Sequence,{seq}''')
+    
+
+    return selects +'!'+ joins +'!'+ orderby

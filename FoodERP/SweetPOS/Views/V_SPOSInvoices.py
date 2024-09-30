@@ -595,7 +595,8 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
         
 class MobileNumberSaveView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = ()
+    authentication_classes = [BasicAuthentication]
     
     @transaction.atomic()
     def post(self, request):
@@ -618,10 +619,10 @@ class MobileNumberSaveView(CreateAPIView):
         
 
     @transaction.atomic()
-    def get(self, request):
+    def get(self, request,MacID=0):
         try:
             with transaction.atomic():
-                query = M_ConsumerMobile.objects.filter(IsLinkToBill=False)
+                query = M_ConsumerMobile.objects.filter(IsLinkToBill=False,MacID=MacID).order_by('-id')
                 if query:
                     Mobile_serializer = MobileSerializer(query, many=True).data
                     log_entry = create_transaction_logNew(request, Mobile_serializer, 0, '', 412, 0)

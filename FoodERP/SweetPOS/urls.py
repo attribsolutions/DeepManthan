@@ -22,6 +22,7 @@ urlpatterns = [
     # Master APIs IN Projects Add Page ,List Page
     url(r'SPOSroleaccess$', SweetPosRoleAccessView.as_view()),
     url(r'Lspos$', SPOSLog_inView.as_view()),
+    url(r'SpoS_login_Detail$', SPOSLoginDetailsView.as_view()),
     url(r'ItemGroupandSubgroup$', ItemGroupandSubgroupView.as_view()),
     url(r'ItemList/([0-9]+)$', ItemListView.as_view()),
     url(r'InsertSweetPOSSaleList$', SPOSInvoiceView.as_view()),
@@ -32,9 +33,11 @@ urlpatterns = [
     url(r'SPOSRateList$', RateListView.as_view()),
     url(r'SPOSRateSave$', RateSaveView.as_view()),
     url(r'SPOSMobileLinkToBill$', MobileNumberSaveView.as_view()),
+    url(r'SPOSMobileLinkToBill/([0-9A-Za-z:]+)$', MobileNumberSaveView.as_view()), #MacID
     url(r'SPOSMobileUpdate/([0-9]+)$', MobileNumberUpdateView.as_view()),
     url(r'SPOSMachineTypeSave$', MachineTypeSaveView.as_view()),
     url(r'SPOSMachineTypeList$', MachineTypeListView.as_view()),
+    url(r'SPOSMachineTypeUpdate$', MachineTypeUpdateView.as_view()),
     url(r'SPOSStockOutReport$', StockOutReportView.as_view()),
 
     #User

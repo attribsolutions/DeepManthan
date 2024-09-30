@@ -178,17 +178,44 @@ where M_Employees.id= %s''', [id])
                     GetAllData = list()
 
                     Employeeparties = MC_EmployeeParties.objects.raw(
-                        '''SELECT Party_id as id, M_Parties.Name FROM MC_EmployeeParties join M_Parties on M_Parties.id = MC_EmployeeParties.Party_id where Employee_id=%s''', ([id]))
-                    EmployeepartiesData_Serializer = EmployeepartiesDataSerializer(
-                        Employeeparties, many=True).data
+                        # '''SELECT Party_id as id, M_Parties.Name FROM MC_EmployeeParties join M_Parties on M_Parties.id = MC_EmployeeParties.Party_id where Employee_id=%s''', ([id]))
+                        f'''SELECT  b.Role_id Role,M_Roles.Name AS RoleName,M_Parties.id  ,M_Parties.Name  from 
+                        (SELECT MC_EmployeeParties.id,MC_EmployeeParties.Party_id,'0' RoleID,Employee_id FROM MC_EmployeeParties where Employee_id={id})a 
+                        left join (select MC_UserRoles.Party_id,MC_UserRoles.Role_id,Employee_id FROM MC_UserRoles 
+                        join M_Users on M_Users.id=MC_UserRoles.User_id WHERE M_Users.Employee_id={id})b on a.Party_id=b.Party_id 
+                        left join M_Parties on M_Parties.id=a.Party_id 
+                        Left join M_Roles on M_Roles.id=b.Role_id''')                    
+                    
+                    # EmployeepartiesData_Serializer = EmployeepartiesDataSerializer03(
+                    #     Employeeparties, many=True).data
 
-                    EmployeeParties = list()
-                    for a in EmployeepartiesData_Serializer:
-                        EmployeeParties.append({
-                            'id': a['id'],
-                            'Name': a['Name']
-                        })
-
+                    # EmployeeParties = list()
+                   
+                    # for a in EmployeepartiesData_Serializer:
+                        
+                    #     EmployeeParties.append({
+                    #         'id': a['id'] if a['id'] is not None else '',
+                    #         'Name': a['Name']if a['Name'] is not None else '',
+                    #         'RoleName':a['RoleName']if a['RoleName'] is not None else ''
+                    #     })     
+                    # CustomPrint(Employeeparties)       
+                    if not Employeeparties:
+                        return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Parties Not available', 'Data': []})
+                    else:
+                        UserSerializer = EmployeepartiesDataSerializer03(Employeeparties, many=True).data   
+                        # CustomPrint(UserSerializer)                                            
+                        User_List = []
+                        party_roles = {}  
+                        for a in UserSerializer:
+                            party_id = a["id"]                       
+                        
+                            if party_id not in party_roles:
+                                party_roles[party_id] = {                               
+                                    "id":a["id"],
+                                    "Name": a["Name"]                                                                  
+                                }                             
+                        User_List = list(party_roles.values())   
+                         
                     GetAllData.append({
                         'id':  M_Employees_Serializer[0]['id'],
                         'Name':  M_Employees_Serializer[0]['Name'],
@@ -215,20 +242,21 @@ where M_Employees.id= %s''', [id])
                         'PIN':  M_Employees_Serializer[0]['PIN'],
                         'DesignationID':  M_Employees_Serializer[0]['DesignationID'],
                         'Designation':  M_Employees_Serializer[0]['Designation'],
-                        'EmployeeParties': EmployeeParties
+                        'EmployeeParties': User_List
                     })
                     log_entry = create_transaction_logNew(request,M_Employees_Serializer,0,'',201,id)
                     return JsonResponse({"StatusCode": 200, "Status": True, "Message": " ", "Data": GetAllData[0]})
         except Exception as e:
             log_entry = create_transaction_logNew(request,0,0,'SingleGETEmplyoees:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     @transaction.atomic()
     def put(self, request, id=0):
-        M_Employeesdata = JSONParser().parse(request)
+        M_Employeesdata = JSONParser().parse(request)        
         try:
             with transaction.atomic():
                 M_EmployeesdataByID = M_Employees.objects.get(id=id)
+                # CustomPrint(M_EmployeesdataByID)
                 M_Employees_Serializer = M_EmployeesSerializer(
                     M_EmployeesdataByID, data=M_Employeesdata)
                 if M_Employees_Serializer.is_valid():
