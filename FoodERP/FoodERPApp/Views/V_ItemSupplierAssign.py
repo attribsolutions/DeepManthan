@@ -99,9 +99,9 @@ class OrderItemSupplier(CreateAPIView):
                 join M_Items on M_Items.id=TC_OrderItems.Item_id  
                 LEFT JOIN M_ItemSupplier I ON I.item_id=M_Items.id 
                 left join M_Parties s on I.Supplier_id=s.id                 
-                where  OrderDate between %s and %s  And T_Orders.Supplier_id=%s
+                where  OrderDate between %s and %s  And T_Orders.Supplier_id=%s And IsDeleted=0
                 Group By M_Items.id,s.id order by s.id desc''',[FromDate,ToDate,Party])
-                # CustomPrint(ItemSupplierquery.query)              
+                CustomPrint(ItemSupplierquery.query)              
                 if ItemSupplierquery:                   
                     Supplier_List=list()  
                     ItemData = []
