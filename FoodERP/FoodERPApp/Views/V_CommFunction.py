@@ -850,6 +850,11 @@ def Get_Items_ByGroupandPartytype(Party ,GroupType=0):
     
     if GroupType > 0:
         GroupType_id = GroupType
+        if GroupType_id==5:
+            seq = (f'groupdetails.ItemSequence')
+        else:
+            GroupType_id ==1
+            seq=(f'M_Items.Sequence')
     else: 
         party_instance = M_Parties.objects.filter(id=Party).values('PartyType_id')
         
