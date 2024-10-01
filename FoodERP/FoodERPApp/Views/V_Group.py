@@ -233,14 +233,15 @@ class DetailsOfSubgroups_GroupsViewNEW(CreateAPIView):
                 
                 GroupSubgroupItemList = []
                 query = M_Items.objects.raw('''
-                select 1 as id, g.id as GroupID,g.name as GroupName,g.Sequence GroupSequence,igd.GroupType_id,igd.SubGroup_id,igd.ItemSequence,
-                sg.id as SubGroupID, sg.Name as SubGroupName,sg.Sequence as SubGroupSequence,i.id ItemID,i.Name ItemName,
-                i.Sequence as ItemSequence  
-                from M_Items as i 
-                left join MC_ItemGroupDetails as igd ON i.id=igd.Item_ID and igd.GroupType_id=%s 
-                left join M_Group as g ON g.id=igd.Group_id
-                left join MC_SubGroup as sg on sg.id=igd.SubGroup_id
-                order by g.Sequence,sg.Sequence,igd.ItemSequence''',[GroupType_id])
+                select 1 as id, G.Id as GroupID,G.name as GroupName,G.Sequence GroupSequence,IGD.GroupType_Id,IGD.SubGroup_Id,IGD.ItemSequence,
+                SG.Id as SubGroupID, SG.Name as SubGroupName,SG.Sequence as SubGroupSequence,I.Id ItemID,I.Name ItemName,
+                I.Sequence as ItemSequence 
+from M_Group G 
+joIn MC_SubGroup SG on G.Id=SG.Group_Id
+left joIn MC_ItemGroupDetails IGD on IGD.Group_Id=G.Id
+left joIn M_Items I on I.Id=IGD.Item_Id 
+where G.GroupType_Id=%s
+order by G.Sequence,SG.Sequence, IGD.ItemSequence''',[GroupType_id])
                 
                 grouped_data = {}
 
@@ -249,7 +250,7 @@ class DetailsOfSubgroups_GroupsViewNEW(CreateAPIView):
                     
                     if group_key not in grouped_data:
                         grouped_data[group_key] = {
-                            "GroupTypeID": a.GroupType_id,
+                            "GroupTypeID": GroupType_id,
                             "GroupID": a.GroupID,
                             "GroupName": a.GroupName,
                             "GroupSequence": a.GroupSequence,
