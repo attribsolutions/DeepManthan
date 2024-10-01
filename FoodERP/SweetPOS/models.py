@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import UniqueConstraint
 
 
 # Create your models here.
@@ -281,6 +282,9 @@ class M_ConsumerMobile(models.Model):
     MacID   = models.CharField(max_length=200)
 
     class Meta:
+        constraints = [
+            UniqueConstraint(fields=['Mobile', 'MacID'], name='unique_Mobile_MacID')
+        ]
         db_table = "M_ConsumerMobile"        
 
 class M_SweetPOSMachine(models.Model):
