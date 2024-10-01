@@ -167,7 +167,7 @@ class C_CompaniesView(CreateAPIView):
                     "CreatedBy": 1,
                     "UpdatedBy": 1,
                     "last_activity" : '2023-04-01 00:00:00',
-                    "POSRateType" : None,
+                    "POSRateType" : 0,
                     "UserRole": [
                                 {
                                     "Party": "",
@@ -175,7 +175,7 @@ class C_CompaniesView(CreateAPIView):
                                 }
                     ]
                 }
-
+                
                 Companies_Serializer = C_CompanySerializer(data=Companiesdata)
                 
                 AdminDivisionDatalist_Serializer=M_PartySerializer(data=AdminDivisionDatalist[0])
@@ -211,7 +211,7 @@ class C_CompaniesView(CreateAPIView):
                 else:
                     log_entry = create_transaction_logNew(request, Companiesdata,0,'CompanySave:'+str(Employee_Serializer.errors),34,0)
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Employee_Serializer.errors, 'Data':[]})
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':str(Companies_Serializer.errors) +','+  str(Employee_Serializer.errors) +','+ str(AdminDivisionDatalist_Serializer.errors) +','+ str(UserRegistration_Serializer.errors), 'Data':[]})
         except IntegrityError:   
             log_entry = create_transaction_logNew(request, 0,0,'Company used in another table',8,0)  
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Company used in another table', 'Data': []})
