@@ -99,6 +99,10 @@ class SPOSInvoiceView(CreateAPIView):
                             quryforunit=MC_ItemUnits.objects.filter(Item=ItemId,IsDeleted=0,UnitID=unit).values('id')
                             
                             InvoiceItem['Unit'] = quryforunit[0]['id']
+
+                            queryformobile = M_ConsumerMobile.objects.filter(Mobile=Invoicedata['MobileNo']).values('Mobile')
+                            if queryformobile:
+                                q = M_ConsumerMobile.objects.filter(Mobile=queryformobile[0]['Mobile']).update(IsLinkToBill=1)
                             
                             # InvoiceItem['BasicAmount'] = InvoiceItem['Amount']
                             InvoiceItem['InvoiceDate'] = InvoiceItem['SaleDate']
@@ -627,7 +631,6 @@ class ConsumerMobileListView(CreateAPIView):
         try:
             with transaction.atomic():
                 MacID = MobileData['MacID']
-
                 query = M_ConsumerMobile.objects.filter(IsLinkToBill=False,MacID=MacID).order_by('-id')
                 if query:
                     Mobile_serializer = MobileSerializer(query, many=True).data
