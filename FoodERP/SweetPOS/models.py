@@ -126,6 +126,8 @@ class TC_SPOSInvoiceItems(models.Model):
     HSNCode = models.CharField(max_length=20)
     InvoiceDate = models.DateField()
     Party = models.IntegerField()
+    IsMixItem = models.BooleanField(default=False)
+    MixItemId = models.IntegerField(blank=True, null=True)
 
     class Meta:
         db_table = "TC_SPOSInvoiceItems"    
