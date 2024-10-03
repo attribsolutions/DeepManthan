@@ -99,8 +99,8 @@ class SPOSInvoiceView(CreateAPIView):
                             quryforunit=MC_ItemUnits.objects.filter(Item=ItemId,IsDeleted=0,UnitID=unit).values('id')
                             
                             InvoiceItem['Unit'] = quryforunit[0]['id']
-
-                            queryformobile = M_ConsumerMobile.objects.filter(Mobile=Invoicedata['MobileNo'],MacID=Invoicedata['MacID'])
+                            
+                            queryformobile = M_ConsumerMobile.objects.filter(Mobile=Invoicedata['MobileNo'],MacID=Invoicedata.get('MacID', None) )
                             if queryformobile:
                                 M_ConsumerMobile.objects.filter(Mobile=Invoicedata['MobileNo'],MacID=Invoicedata['MacID']).update(IsLinkToBill=1)
                             
