@@ -850,7 +850,7 @@ def Get_Items_ByGroupandPartytype(Party ,GroupType=0):
     
     if GroupType > 0:
         GroupType_id = GroupType
-        if GroupType_id==5 :
+        if GroupType_id==5:
             seq = (f'groupdetails.ItemSequence')
         else:
             GroupType_id ==1
