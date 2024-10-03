@@ -120,7 +120,7 @@ DATABASE_ROUTERS = [
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'FoodERP2',       
+        'NAME': 'FoodERP',       
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',  
 
