@@ -867,10 +867,10 @@ def Get_Items_ByGroupandPartytype(Party ,GroupType=0):
             
     selects = (f'''ifnull(GroupType.Name,'') GroupTypeName,ifnull(Groupss.Name,'') GroupName,ifnull(subgroup.Name,'') SubGroupName ''')
     
-    joins =(f'''LEFT JOIN FoodERP.MC_ItemGroupDetails groupdetails ON groupdetails.item_id = M_Items.id
-        LEFT JOIN FoodERP.M_GroupType GroupType ON GroupType.id = groupdetails.GroupType_id  and groupdetails.GroupType_id= {GroupType_id}
-        LEFT JOIN FoodERP.M_Group Groupss ON Groupss.id = groupdetails.Group_id
-        LEFT JOIN FoodERP.MC_SubGroup subgroup ON subgroup.id = groupdetails.SubGroup_id''')
+    joins =(f'''JOIN FoodERP.MC_ItemGroupDetails groupdetails ON groupdetails.item_id = M_Items.id
+        JOIN FoodERP.M_GroupType GroupType ON GroupType.id = groupdetails.GroupType_id  and groupdetails.GroupType_id= {GroupType_id}
+        JOIN FoodERP.M_Group Groupss ON Groupss.id = groupdetails.Group_id
+        JOIN FoodERP.MC_SubGroup subgroup ON subgroup.id = groupdetails.SubGroup_id''')
         
     orderby=(f'''ORDER BY Groupss.Sequence,subgroup.Sequence,{seq}''')
     
