@@ -291,10 +291,13 @@ class M_ConsumerMobile(models.Model):
 
 class M_SweetPOSMachine(models.Model):
     Party = models.IntegerField()
-    MacID = models.CharField(max_length=200,unique=True)
+    MacID = models.CharField(max_length=200)
     MachineType = models.CharField(max_length=200,null=True,blank=True )
     IsServer = models.BooleanField(default=False)
     ClientID =  models.IntegerField()
 
     class Meta:
+        constraints = [
+            UniqueConstraint(fields=['Party', 'MacID'], name='unique_Party_MacID')
+        ]
         db_table = "M_SweetPOSMachine"        
