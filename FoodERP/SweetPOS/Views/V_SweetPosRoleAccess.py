@@ -236,7 +236,7 @@ class MachineTypeUpdateView(CreateAPIView):
         try:
             with transaction.atomic():
                 for a in MachineType_Data:
-                    query = M_SweetPOSMachine.objects.filter(MacID=a['MacID'])
+                    query = M_SweetPOSMachine.objects.filter(MacID=a['MacID'],Party=a['Party'])
                     if query:
                         MachineType_serializer = MachineTypeSerializer(query[0],data=a)
                     else:
