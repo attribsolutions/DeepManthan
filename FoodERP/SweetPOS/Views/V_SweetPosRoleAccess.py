@@ -221,7 +221,7 @@ class SPOSLoginDetailsView(CreateAPIView):
                         "CreatedOn": a.CreatedOn
                     })
                     
-                log_entry = create_transaction_logNew(request, LoginData, 0, 'SPOSLoginDetails', 421, 0)
+                log_entry = create_transaction_logNew(request, LoginData, 0, 'SPOSLoginDetails', 422, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SPOSLoginDetailsList})
         except Exception as e:
             log_entry = create_transaction_logNew(request, LoginData, 0, 'SPOSLoginDetails:'+str(e), 33, 0)
