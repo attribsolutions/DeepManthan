@@ -115,7 +115,7 @@ class SPOSStockReportView(CreateAPIView):
                 Party = Orderdata['Party']
                 PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
                 
-                ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Party,0).split('!')
+                ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Party,5).split('!')
 
                 CustomPrint(PartyNameQ)
                 if(Unit!=0):

@@ -23,32 +23,19 @@ class RateListView(CreateAPIView):
                 POSRateType = Rate_Data['POSRateType'] 
                 
                 today = date.today()
-                GroupTypeid = 5 
+
+                ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(0,5).split('!')   
                 
-                # ---- Order By Sequence  
-                joinsforgroupsubgroup = f'''
-                    LEFT JOIN FoodERP.MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = B.id AND MC_ItemGroupDetails.GroupType_id = {GroupTypeid}
-                    LEFT JOIN FoodERP.M_Group ON M_Group.id = MC_ItemGroupDetails.Group_id 
-                    LEFT JOIN FoodERP.MC_SubGroup ON MC_SubGroup.id = MC_ItemGroupDetails.SubGroup_id
-                '''   
-                orderby = f'''
-                    ORDER BY M_Group.Sequence, MC_SubGroup.Sequence,MC_ItemGroupDetails.ItemSequence
-                '''   
-                
-                q0 = f'''SELECT A.id, A.Item_id ItemID,  B.Name ItemName, C.Rate, C.IsChangeRateToDefault,round(FoodERP.GetTodaysDateMRP(B.id,%s,2,0,0),0) PrimaryRate,M_Group.Name as GroupName,MC_SubGroup.Name as SubGroupName
+                q0 =  M_ChannelWiseItems.objects.raw(f'''SELECT A.id, A.Item_id ItemID,  M_Items.Name ItemName, C.Rate, C.IsChangeRateToDefault,round(FoodERP.GetTodaysDateMRP(M_Items.id,%s,2,0,0),0) PrimaryRate,Groupss.Name as GroupName,subgroup.Name as SubGroupName
                                                     FROM FoodERP.M_ChannelWiseItems A 
-                                                    join FoodERP.M_Items B on A.Item_id = B.id
-                                                    {joinsforgroupsubgroup}
-                                                    left join SweetPOS.M_SPOSRateMaster C on C.ItemID = B.id and C.IsDeleted=0 and C.EffectiveFrom <= %s and C.POSRateType = %s 
+                                                    join FoodERP.M_Items  on A.Item_id = M_Items.id
+                                                    {ItemsGroupJoinsandOrderby[1]}
+                                                    left join SweetPOS.M_SPOSRateMaster C on C.ItemID = M_Items.id and C.IsDeleted=0 and C.EffectiveFrom <= %s and C.POSRateType = %s 
                                                     where A.PartyType_id=19 
-                                                    {orderby}
-                                                    '''
-                                                                         
-                params = [today, EffectiveFrom, POSRateType]
-                
-                q1 = M_SPOSRateMaster.objects.raw(q0,params)
+                                                    {ItemsGroupJoinsandOrderby[2]}
+                                                    ''', [today, EffectiveFrom, POSRateType])
                 RateList = list()
-                for a in q1:
+                for a in q0:
                     RateList.append({
                         "ItemID": a.ItemID,
                         "ItemName":a.ItemName,
@@ -58,9 +45,12 @@ class RateListView(CreateAPIView):
                         "GroupName":a.GroupName,
                         "SubGroupName":a.SubGroupName
                     })
+                log_entry = create_transaction_logNew(request, Rate_Data, 0, 'RateDetails', 420, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :RateList})
+            log_entry = create_transaction_logNew(request, 0, 0, 'Rate not available', 420, 0)
             return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Rate not available', 'Data' : []})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0, 'RateData:' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data':[]})
         
 class RateSaveView(CreateAPIView):
@@ -79,7 +69,10 @@ class RateSaveView(CreateAPIView):
                 Rate_serializer = RateSerializer(data=Rate_data, many=True)
                 if Rate_serializer.is_valid():
                     Rate_serializer.save()
+                    log_entry = create_transaction_logNew(request, Rate_data, 0, 'SaveRate', 421, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Rate Save Successfully', 'Data': []})
+                log_entry = create_transaction_logNew(request, 0, 0, 'Data not available', 421, 0)
                 return JsonResponse({'StatusCode': 406, 'Status': False, 'Message': 'Data not available', 'Data': Rate_serializer.errors})
         except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0, 'RateData:' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
