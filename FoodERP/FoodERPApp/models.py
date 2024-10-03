@@ -2426,3 +2426,13 @@ class debug_log(models.Model):
 
     def __str__(self):
         return f"{self.created_at}: {self.debug_message}"        
+    
+
+class M_Country(models.Model): 
+    Country = models.CharField(max_length=500)
+    Currency = models.CharField(max_length=500) 
+    CurrencySymbol = models.CharField(max_length=500) 
+    Weight = models.CharField(max_length=500)
+    
+    class Meta:
+        db_table = "M_Country"    
