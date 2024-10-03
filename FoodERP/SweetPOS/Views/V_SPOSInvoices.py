@@ -100,6 +100,10 @@ class SPOSInvoiceView(CreateAPIView):
                             
                             InvoiceItem['Unit'] = quryforunit[0]['id']
                             
+                            queryformobile = M_ConsumerMobile.objects.filter(Mobile=Invoicedata['MobileNo'],MacID=Invoicedata.get('MacID', None) )
+                            if queryformobile:
+                                M_ConsumerMobile.objects.filter(Mobile=Invoicedata['MobileNo'],MacID=Invoicedata['MacID']).update(IsLinkToBill=1)
+                            
                             # InvoiceItem['BasicAmount'] = InvoiceItem['Amount']
                             InvoiceItem['InvoiceDate'] = InvoiceItem['SaleDate']
                             InvoiceItem['MRPValue'] = InvoiceItem['MRP']
@@ -122,6 +126,8 @@ class SPOSInvoiceView(CreateAPIView):
                             InvoiceItem['SaleID']=0
                             InvoiceItem['HSNCode']=InvoiceItem['HSNCode']
                             InvoiceItem['Party']=InvoiceItem['PartyID']
+                            InvoiceItem['IsMixItem'] = InvoiceItem.get('IsMixItem', 0)  
+                            InvoiceItem['MixItemId'] = InvoiceItem.get('MixItemId', None) 
                             BaseUnitQuantity=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,0,0).GetBaseUnitQuantity()
                             InvoiceItem['BaseUnitQuantity'] =  float(BaseUnitQuantity)
                             QtyInNo=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,1,0).ConvertintoSelectedUnit()
@@ -147,7 +153,6 @@ class SPOSInvoiceView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, inputdata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastIDs),383,0,0,0, 0)    
                 return JsonResponse({'status_code': 200, 'Success': True,  'Message': 'Invoice Save Successfully','TransactionID':LastIDs, 'Data':[]})
         except Exception as e:
-            
             log_entry = create_transaction_logNew(request, inputdata, 0,'InvoiceSave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
         
@@ -391,7 +396,7 @@ WHERE SPOSInv.Invoice_id = {a.id}''')
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Invoice Data Not available ', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'SingleInvoice:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})        
         
 
 class UpdateCustomerVehiclePOSInvoiceView(CreateAPIView):
@@ -617,11 +622,16 @@ class MobileNumberSaveView(CreateAPIView):
             log_entry = create_transaction_logNew(request, Mobile_Data, 0, 'ConsumerMobileSave:'+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
         
+class ConsumerMobileListView(CreateAPIView):
+    permission_classes = ()
+    authentication_classes = [BasicAuthentication]
 
     @transaction.atomic()
-    def get(self, request,MacID=0):
+    def post(self, request,MacID=0):
+        MobileData = JSONParser().parse(request)
         try:
             with transaction.atomic():
+                MacID = MobileData['MacID']
                 query = M_ConsumerMobile.objects.filter(IsLinkToBill=False,MacID=MacID).order_by('-id')
                 if query:
                     Mobile_serializer = MobileSerializer(query, many=True).data
