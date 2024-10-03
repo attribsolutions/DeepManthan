@@ -246,7 +246,7 @@ class MachineTypeUpdateView(CreateAPIView):
                         MachineType = MachineType_serializer.save()
                         LastInsertID = MachineType.id
                     
-                log_entry = create_transaction_logNew(request, MachineType_Data, MachineType_Data[0]['Party'], '', 418, LastInsertID)        
+                log_entry = create_transaction_logNew(request, MachineType_Data, MachineType_Data[0]['Party'], '', 418, 0)        
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Machine Type Update Successfully', 'TransactionID':LastInsertID, 'Data':[]})
         except Exception as e:
             log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'MachineTypeUpdate:'+str(e), 33, 0)
