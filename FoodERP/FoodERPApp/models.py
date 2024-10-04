@@ -103,7 +103,7 @@ class M_PartyType(models.Model):
     Company = models.ForeignKey(C_Companies, related_name='PartyTypeCompany',on_delete=models.PROTECT)
     IsFranchises = models.BooleanField(default=False)
     SAPIndicator = models.CharField(max_length=20)
-    Country = models.CharField(max_length=500,null=True, blank=True)       
+    Country = models.IntegerField(null=True, blank=True)       
  
     class Meta:
         db_table = 'M_PartyType'
@@ -216,7 +216,7 @@ class M_Parties(models.Model):
     IsApprovedParty = models.BooleanField(default=False)
     SkyggeID = models.CharField(max_length=500,null=True, blank=True)
     UploadSalesDatafromExcelParty= models.BooleanField(default=False)
-    Country = models.CharField(max_length=500,null=True, blank=True)
+    Country = models.IntegerField(null=True, blank=True)
     class Meta:
         db_table = 'M_Parties'
         
