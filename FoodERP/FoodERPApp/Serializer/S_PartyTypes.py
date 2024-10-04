@@ -15,7 +15,7 @@ class PartyTypeSerializerSecond(serializers.ModelSerializer):
 
     class Meta:
         model = M_PartyType
-        fields = ['Name', 'IsVendor', 'IsSCM', 'IsDivision', 'IsAdminDivision', 'CreatedBy', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'IsRetailer', 'Company', 'IsFranchises', 'SAPIndicator', 'CountryID','CountryName'] 
+        fields = ['id','Name', 'IsVendor', 'IsSCM', 'IsDivision', 'IsAdminDivision', 'CreatedBy', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'IsRetailer', 'Company', 'IsFranchises', 'SAPIndicator', 'CountryID','CountryName'] 
     
     def get_CountryName(self, obj):
         # Perform a query to get the country name based on some identifier (e.g., CountryID)
