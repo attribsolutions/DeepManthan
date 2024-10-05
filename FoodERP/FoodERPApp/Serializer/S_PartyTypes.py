@@ -11,17 +11,22 @@ class PartyTypeSerializer(serializers.ModelSerializer):
 
 class PartyTypeSerializerSecond(serializers.ModelSerializer):
     SAPIndicator = serializers.CharField(required=False)
-    CountryName = serializers.SerializerMethodField()
 
     class Meta:
         model = M_PartyType
-        fields = ['id','Name', 'IsVendor', 'IsSCM', 'IsDivision', 'IsAdminDivision', 'CreatedBy', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'IsRetailer', 'Company', 'IsFranchises', 'SAPIndicator', 'CountryID','CountryName'] 
+        fields = ['id','Name', 'IsVendor', 'IsSCM', 'IsDivision', 'IsAdminDivision', 'CreatedBy', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'IsRetailer', 'Company', 'IsFranchises', 'SAPIndicator', 'CountryID'] 
     
-    def get_CountryName(self, obj):
-        # Perform a query to get the country name based on some identifier (e.g., CountryID)
-        country = M_Country.objects.filter(id=obj.CountryID).first()
+    def to_representation(self, instance):
+        # get representation from ModelSerializer
+        ret = super(PartyTypeSerializerSecond, self).to_representation(instance)
+        country = M_Country.objects.get(id=instance.CountryID)
         if country:
-            return country.Country
-        return None
+            ret['Country'] = country.Country  
+        else:
+            ret['Country'] = None  
+            
+        return ret
+    
+       
 
    
