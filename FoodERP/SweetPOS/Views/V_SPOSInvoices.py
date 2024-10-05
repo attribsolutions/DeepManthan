@@ -632,21 +632,29 @@ class ConsumerMobileListView(CreateAPIView):
         try:
             with transaction.atomic():
                 MacID = MobileData['MacID']
-                query = M_ConsumerMobile.objects.filter(IsLinkToBill=False,MacID=MacID).order_by('-id')
-                if query:
-                    Mobile_serializer = MobileSerializer(query, many=True).data
-                    log_entry = create_transaction_logNew(request, Mobile_serializer, 0, '', 412, 0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :Mobile_serializer})
-                log_entry = create_transaction_logNew(request, Mobile_serializer, 0, 'Mobile Number not available', 412, 0)
+                query = M_ConsumerMobile.objects.raw('''SELECT id, Mobile, IsLinkToBill, MacID
+                                FROM SweetPOS.M_ConsumerMobile 
+                                Where IsLinkToBill=0 AND MacID=%s 
+                                AND id = (SELECT MAX(id) FROM sweetpos.M_ConsumerMobile WHERE CreatedOn < NOW() - INTERVAL 5 MINUTE)                     
+                                order by id desc''',[MacID])
+                MobileDataList = list()
+                for a in query:
+                    MobileDataList.append({
+                        "id": a.id,
+                        "Mobile": a.Mobile,
+                        "IsLinkToBill": a.IsLinkToBill,
+                        "MacID": a.MacID
+                    })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :MobileDataList})
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Mobile Number not available', 'Data' : []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0, 'Get All Mobile Number:'+str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':Exception(e), 'Data':[]})
         
 
 class MobileNumberUpdateView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
-    
+    permission_classes = ()
+    authentication_classes = [BasicAuthentication]
+
     @transaction.atomic()
     def put(self, request,id=0):
         Mobile_Data = JSONParser().parse(request)
