@@ -632,18 +632,21 @@ class ConsumerMobileListView(CreateAPIView):
         try:
             with transaction.atomic():
                 MacID = MobileData['MacID']
-                query = M_ConsumerMobile.objects.raw('''SELECT id, Mobile, IsLinkToBill, MacID
+                Party = MobileData['Party']
+                query = M_ConsumerMobile.objects.raw('''SELECT id, Mobile, IsLinkToBill, MacID, Party, CreatedOn
                                 FROM SweetPOS.M_ConsumerMobile 
-                                Where IsLinkToBill=0 AND MacID=%s 
+                                Where IsLinkToBill=0 AND MacID=%s AND Party = %s
                                 AND id = (SELECT MAX(id) FROM sweetpos.M_ConsumerMobile WHERE CreatedOn < NOW() - INTERVAL 5 MINUTE)                     
-                                order by id desc''',[MacID])
+                                order by id desc''',[MacID,Party])
                 MobileDataList = list()
                 for a in query:
                     MobileDataList.append({
                         "id": a.id,
                         "Mobile": a.Mobile,
                         "IsLinkToBill": a.IsLinkToBill,
-                        "MacID": a.MacID
+                        "MacID": a.MacID,
+                        "Party": a.Party,
+                        "CreatedOn": a.CreatedOn
                     })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :MobileDataList})
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Mobile Number not available', 'Data' : []})
