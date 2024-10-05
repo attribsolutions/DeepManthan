@@ -283,6 +283,7 @@ class M_ConsumerMobile(models.Model):
     IsLinkToBill = models.BooleanField(default=False)
     MacID   = models.CharField(max_length=200)
     Party = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
     class Meta:
         constraints = [
             UniqueConstraint(fields=['Mobile', 'MacID'], name='unique_Mobile_MacID')
