@@ -9,16 +9,9 @@ class PartyTypeSerializer(serializers.ModelSerializer):
         model = M_PartyType
         fields = '__all__'
 
-class PartyTypeSerializerSecond(serializers.ModelSerializer):
-    SAPIndicator = serializers.CharField(required=False)
-
-    class Meta:
-        model = M_PartyType
-        fields = ['id','Name', 'IsVendor', 'IsSCM', 'IsDivision', 'IsAdminDivision', 'CreatedBy', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'IsRetailer', 'Company', 'IsFranchises', 'SAPIndicator', 'CountryID'] 
-    
     def to_representation(self, instance):
         # get representation from ModelSerializer
-        ret = super(PartyTypeSerializerSecond, self).to_representation(instance)
+        ret = super(PartyTypeSerializer, self).to_representation(instance)
         country = M_Country.objects.get(id=instance.CountryID)
         if country:
             ret['Country'] = country.Country  
@@ -26,7 +19,8 @@ class PartyTypeSerializerSecond(serializers.ModelSerializer):
             ret['Country'] = None  
             
         return ret
-    
+
+
        
 
    
