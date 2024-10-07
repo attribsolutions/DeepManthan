@@ -157,6 +157,9 @@ from .Views.V_Rates import *
 
 from .Views.V_ItemSupplierAssign import *
 
+from .Views.V_Country import *
+
+
 # from .Views.V_FTP import *
 
 
@@ -752,6 +755,11 @@ urlpatterns = [
 #ItemSupplier
               url(r'ItemSupplier$',ItemSupplierView.as_view()), 
               url(r'OrderItemSupplierMaster$',OrderItemSupplier.as_view()), 
+
+#Country
+              url(r'CountrySave$',CountryCurrencySaveView.as_view()), 
+              url(r'GETCountry$',CountryCurrencyListView.as_view()),
+              url(r'Country/([0-9]+)$',CountryCurrencyViewSecond.as_view()),
                 
                 
 

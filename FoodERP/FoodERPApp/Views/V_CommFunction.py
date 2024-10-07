@@ -850,6 +850,11 @@ def Get_Items_ByGroupandPartytype(Party ,GroupType=0):
     
     if GroupType > 0:
         GroupType_id = GroupType
+        if GroupType_id==5:
+            seq = (f'groupdetails.ItemSequence')
+        else:
+            GroupType_id ==1
+            seq=(f'M_Items.Sequence')
     else: 
         party_instance = M_Parties.objects.filter(id=Party).values('PartyType_id')
         
@@ -862,8 +867,8 @@ def Get_Items_ByGroupandPartytype(Party ,GroupType=0):
             
     selects = (f'''ifnull(GroupType.Name,'') GroupTypeName,ifnull(Groupss.Name,'') GroupName,ifnull(subgroup.Name,'') SubGroupName ''')
     
-    joins =(f'''LEFT JOIN FoodERP.MC_ItemGroupDetails groupdetails ON groupdetails.item_id = M_Items.id
-        LEFT JOIN FoodERP.M_GroupType GroupType ON GroupType.id = groupdetails.GroupType_id  and groupdetails.GroupType_id= {GroupType_id}
+    joins =(f'''LEFT JOIN FoodERP.MC_ItemGroupDetails groupdetails ON groupdetails.item_id = M_Items.id and groupdetails.GroupType_id= {GroupType_id}
+        LEFT JOIN FoodERP.M_GroupType GroupType ON GroupType.id = groupdetails.GroupType_id  
         LEFT JOIN FoodERP.M_Group Groupss ON Groupss.id = groupdetails.Group_id
         LEFT JOIN FoodERP.MC_SubGroup subgroup ON subgroup.id = groupdetails.SubGroup_id''')
         
