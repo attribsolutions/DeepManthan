@@ -10,11 +10,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='m_parties',
-            name='Country',
-            field=models.CharField(blank=True, max_length=500, null=True),
-        ),
+        
         migrations.AddField(
             model_name='m_partytype',
             name='Country',

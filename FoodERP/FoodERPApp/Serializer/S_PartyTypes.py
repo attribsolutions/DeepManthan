@@ -9,16 +9,16 @@ class PartyTypeSerializer(serializers.ModelSerializer):
         model = M_PartyType
         fields = '__all__'
 
-    def to_representation(self, instance):
-        # get representation from ModelSerializer
-        ret = super(PartyTypeSerializer, self).to_representation(instance)
-        country = M_Country.objects.get(id=instance.CountryID)
-        if country:
-            ret['Country'] = country.Country  
-        else:
-            ret['Country'] = None  
+    # def to_representation(self, instance):
+    #     # get representation from ModelSerializer
+    #     ret = super(PartyTypeSerializer, self).to_representation(instance)
+    #     country = M_Country.objects.get(id=instance.CountryID)
+    #     if country:
+    #         ret['Country'] = country.Country  
+    #     else:
+    #         ret['Country'] = None  
             
-        return ret
+    #     return ret
 
 
        
