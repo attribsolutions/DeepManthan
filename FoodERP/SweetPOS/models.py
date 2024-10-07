@@ -282,7 +282,8 @@ class M_ConsumerMobile(models.Model):
     Mobile = models.CharField(max_length=100)
     IsLinkToBill = models.BooleanField(default=False)
     MacID   = models.CharField(max_length=200)
-
+    Party = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
     class Meta:
         constraints = [
             UniqueConstraint(fields=['Mobile', 'MacID'], name='unique_Mobile_MacID')
@@ -291,10 +292,13 @@ class M_ConsumerMobile(models.Model):
 
 class M_SweetPOSMachine(models.Model):
     Party = models.IntegerField()
-    MacID = models.CharField(max_length=200,unique=True)
+    MacID = models.CharField(max_length=200)
     MachineType = models.CharField(max_length=200,null=True,blank=True )
     IsServer = models.BooleanField(default=False)
     ClientID =  models.IntegerField()
 
     class Meta:
+        constraints = [
+            UniqueConstraint(fields=['Party', 'MacID'], name='unique_Party_MacID')
+        ]
         db_table = "M_SweetPOSMachine"        
