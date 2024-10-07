@@ -651,7 +651,7 @@ class ConsumerMobileListView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :MobileDataList})
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Mobile Number not available', 'Data' : []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data':[]})
         
 
 class MobileNumberUpdateView(CreateAPIView):
