@@ -107,7 +107,7 @@ class M_PartiesSerializer(serializers.ModelSerializer):
     PartySubParty = MC_PartySubPartySerializer(many=True)
     Cluster = serializers.IntegerField(write_only=True,  required=False)  
     SubCluster = serializers.IntegerField(write_only=True,  required=False)
-    Country = CountrySerializer()
+    
 
     class Meta:
         model =  M_Parties
@@ -264,7 +264,7 @@ class M_PartiesSerializerSecond(serializers.ModelSerializer):
     SubCluster= ClusterSubClusterSerializer(read_only=True)
     PartyType = PartyTypeSerializerSecond()
     PriceList= PriceListSerializerSecond()
-    Country = CountrySerializer()
+    Country = CountrySerializer(read_only=True)
     PartyPrefix = PartyPrefixsSerializer(many=True)
     MCSubParty = PartySubPartySerializer3(many=True)
     
@@ -354,7 +354,8 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
     PartyAddress = UpdatePartyAddressSerializer(many=True)
     PartyPrefix = UpdatePartyPrefixsSerializer(many=True)
     PartySubParty = UpdateMC_PartySubPartySerializer(many=True)
-    
+    # Country = CountrySerializer(many=True)
+
     class Meta:
         model =  M_Parties
         fields = '__all__'
@@ -401,7 +402,9 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
         instance.Longitude = validated_data.get(
             'Longitude', instance.Longitude)
         instance.IsApprovedParty = validated_data.get(
-            'IsApprovedParty', instance.IsApprovedParty)    
+            'IsApprovedParty', instance.IsApprovedParty) 
+        instance.Country = validated_data.get(
+            'Country', instance.Country)   
             
         instance.save()   
         
