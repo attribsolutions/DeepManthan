@@ -347,7 +347,7 @@ class OrderEditserializer(serializers.Serializer):
     Discount = serializers.DecimalField(max_digits=20, decimal_places=2)
     DiscountAmount = serializers.DecimalField(max_digits=20, decimal_places=2)
     StockQuantity = serializers.DecimalField(max_digits=20, decimal_places=3)
-    
+    Weightage=serializers.DecimalField(max_digits=10, decimal_places=2)
     # def to_representation(self, instance):
     #     data = super().to_representation(instance)
     #     if data['StockQuantity'] is None:
