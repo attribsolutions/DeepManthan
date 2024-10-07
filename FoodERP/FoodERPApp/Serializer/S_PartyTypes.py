@@ -11,7 +11,7 @@ class PartyTypeSerializer(serializers.ModelSerializer):
 
 class PartTypeSerializerSecond(serializers.ModelSerializer):
     SAPIndicator = serializers.CharField(required=False)
-    Country = CountrySerializer(read_only=True)
+    Country = CountrySerializer()
     class Meta:
         model = M_PartyType
         fields = ['id','Name', 'IsVendor', 'IsSCM', 'IsDivision', 'IsAdminDivision', 'CreatedBy', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'IsRetailer', 'Company', 'IsFranchises', 'SAPIndicator', 'Country']   
