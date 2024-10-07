@@ -126,7 +126,7 @@ class SPOSInvoiceView(CreateAPIView):
                             InvoiceItem['SaleID']=0
                             InvoiceItem['HSNCode']=InvoiceItem['HSNCode']
                             InvoiceItem['Party']=InvoiceItem['PartyID']
-                            InvoiceItem['IsMixItem'] = InvoiceItem.get('IsMixItem', 0)  
+                            InvoiceItem['IsMixItem'] = InvoiceItem.get('IsMixItem') or 0  
                             InvoiceItem['MixItemId'] = InvoiceItem.get('MixItemId', None) 
                             BaseUnitQuantity=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,0,0).GetBaseUnitQuantity()
                             InvoiceItem['BaseUnitQuantity'] =  float(BaseUnitQuantity)
