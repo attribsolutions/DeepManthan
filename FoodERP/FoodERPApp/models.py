@@ -54,6 +54,15 @@ def upload_to(instance,filename):
     return 'post/{filename}'.format(filename=filename) 
  
 
+class M_Country(models.Model): 
+    Country = models.CharField(max_length=500)
+    Currency = models.CharField(max_length=500) 
+    CurrencySymbol = models.CharField(max_length=500) 
+    Weight = models.CharField(max_length=500)
+    
+    class Meta:
+        db_table = "M_Country"
+
 class C_CompanyGroups(models.Model):
 
     Name = models.CharField(max_length=100)
@@ -103,7 +112,7 @@ class M_PartyType(models.Model):
     Company = models.ForeignKey(C_Companies, related_name='PartyTypeCompany',on_delete=models.PROTECT)
     IsFranchises = models.BooleanField(default=False)
     SAPIndicator = models.CharField(max_length=20)
-    CountryID = models.IntegerField(null=True, blank=True)       
+    Country = models.ForeignKey(M_Country, related_name='PartyTypeCountry',on_delete=models.PROTECT,null=True, blank=True)  
  
     class Meta:
         db_table = 'M_PartyType'
@@ -153,6 +162,9 @@ class M_PriceList(models.Model):
     class Meta:
         db_table = 'M_PriceList'        
 
+
+
+
 class M_States(models.Model):
     Name = models.CharField(max_length=100)
     StateCode = models.CharField(max_length=100)
@@ -160,7 +172,7 @@ class M_States(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
-
+    # Country = models.ForeignKey(M_Country, related_name='PartyTypeCountry',on_delete=models.PROTECT,null=True, blank=True)
     class Meta:
         db_table = "M_States"
 
@@ -2430,11 +2442,4 @@ class debug_log(models.Model):
         return f"{self.created_at}: {self.debug_message}"        
     
 
-class M_Country(models.Model): 
-    Country = models.CharField(max_length=500)
-    Currency = models.CharField(max_length=500) 
-    CurrencySymbol = models.CharField(max_length=500) 
-    Weight = models.CharField(max_length=500)
     
-    class Meta:
-        db_table = "M_Country"    
