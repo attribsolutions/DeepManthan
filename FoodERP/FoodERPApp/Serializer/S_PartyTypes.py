@@ -1,6 +1,6 @@
 from ..models import *
 from rest_framework import serializers
-
+from ..Serializer.S_Parties import *
 
 class PartyTypeSerializer(serializers.ModelSerializer):
     SAPIndicator = serializers.CharField(required=False)
@@ -9,16 +9,12 @@ class PartyTypeSerializer(serializers.ModelSerializer):
         model = M_PartyType
         fields = '__all__'
 
-    # def to_representation(self, instance):
-    #     # get representation from ModelSerializer
-    #     ret = super(PartyTypeSerializer, self).to_representation(instance)
-    #     country = M_Country.objects.get(id=instance.CountryID)
-    #     if country:
-    #         ret['Country'] = country.Country  
-    #     else:
-    #         ret['Country'] = None  
-            
-    #     return ret
+class PartTypeSerializerSecond(serializers.ModelSerializer):
+    SAPIndicator = serializers.CharField(required=False)
+    Country = CountrySerializer(read_only=True)
+    class Meta:
+        model = M_PartyType
+        fields = ['Name', 'IsVendor', 'IsSCM', 'IsDivision', 'IsAdminDivision', 'CreatedBy', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'IsRetailer', 'Company', 'IsFranchises', 'SAPIndicator', 'Country']   
 
 
        
