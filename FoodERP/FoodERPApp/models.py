@@ -216,7 +216,7 @@ class M_Parties(models.Model):
     IsApprovedParty = models.BooleanField(default=False)
     SkyggeID = models.CharField(max_length=500,null=True, blank=True)
     UploadSalesDatafromExcelParty= models.BooleanField(default=False)
-    CountryID = models.IntegerField(null=True, blank=True)
+    
     class Meta:
         db_table = 'M_Parties'
         

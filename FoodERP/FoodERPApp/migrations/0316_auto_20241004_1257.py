@@ -10,11 +10,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RenameField(
-            model_name='m_parties',
-            old_name='Country',
-            new_name='CountryID',
-        ),
+        
         migrations.RenameField(
             model_name='m_partytype',
             old_name='Country',
