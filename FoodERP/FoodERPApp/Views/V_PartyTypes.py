@@ -71,7 +71,7 @@ class PartyTypeView(CreateAPIView):
         try:
             with transaction.atomic():
                 PartyTypedata = JSONParser().parse(request)
-                PartyTypedata_Serializer = PartyTypeSerializer(data=PartyTypedata)
+                PartyTypedata_Serializer = PartTypeSerializerSecond(data=PartyTypedata)
                 if PartyTypedata_Serializer.is_valid():
                     PartyType = PartyTypedata_Serializer.save()
                     LastInsertID = PartyType.id
