@@ -55,56 +55,42 @@ class PartyItemsFilterView(CreateAPIView):
                 CompanyGroupID =Logindata['CompanyGroup'] 
                 IsSCMCompany = Logindata['IsSCMCompany']
                 
-                party_instance = M_Parties.objects.get(id=PartyID) 
-                PartyType = party_instance.PartyType 
-                
-                if PartyType == 19:
-                    GroupType_id = 5
-                    seq=(f'MC_ItemGroupDetails.ItemSequence')
-                else:
-                    GroupType_id = 1
-                    seq=(f'M_Items.Sequence')
+                ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(PartyID,0).split('!')
 
                 if IsSCMCompany == 1:
                     Itemquery= MC_PartyItems.objects.raw(f'''SELECT distinct M_Items.id,M_Items.Name,ifnull(MC_PartyItems.Party_id,0) Party_id,
-                                                         ifnull(M_Parties.Name,'') PartyName,ifnull(M_GroupType.Name,'') GroupTypeName,
-                                                         ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,
+                                                         ifnull(M_Parties.Name,'') PartyName,
+                                                         {ItemsGroupJoinsandOrderby[0]},
                                                          M_ItemMappingMaster.MapItem 
                                                          FROM M_Items 
                                                          JOIN M_ChannelWiseItems ON M_ChannelWiseItems.Item_id=M_Items.id  
                                                          LEFT JOIN MC_PartyItems ON MC_PartyItems.Item_id=M_ChannelWiseItems.Item_id AND MC_PartyItems.Party_id=%s 
                                                          LEFT JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id 
-                                                         LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id and MC_ItemGroupDetails.GroupType_id=%s
-                                                         LEFT JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
-                                                         LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
-                                                         LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
+                                                         {ItemsGroupJoinsandOrderby[1]}
                                                          left join M_ItemMappingMaster on M_Items.id=M_ItemMappingMaster.Item_id and M_ItemMappingMaster.Party_id=%s 
                                                          WHERE IsSCM=1 AND M_Items.Company_id IN (select id from C_Companies where CompanyGroup_id=%s)
                                                          AND M_ChannelWiseItems.PartyType_id IN (SELECT distinct M_Parties.PartyType_id 
                                                          FROM MC_PartySubParty 
                                                          JOIN M_Parties ON M_Parties.id = MC_PartySubParty.SubParty_id 
                                                          WHERE (MC_PartySubParty.Party_id=%s OR SubParty_id=%s)) 
-                                                         ORDER BY M_Group.Sequence,MC_SubGroup.Sequence,{seq}''',([PartyID],[GroupType_id],[PartyID],[CompanyGroupID],[PartyID],[PartyID]))
+                                                         {ItemsGroupJoinsandOrderby[2]}''',([PartyID],[PartyID],[CompanyGroupID],[PartyID],[PartyID]))
                 else:
                     # Itemquery= MC_PartyItems.objects.raw('''SELECT distinct M_Items.id,M_Items.Name,ifnull(MC_PartyItems.Party_id,0) Party_id,ifnull(M_Parties.Name,'') PartyName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,M_ItemMappingMaster.MapItem from M_Items JOIN M_ChannelWiseItems ON M_ChannelWiseItems.Item_id=M_Items.id  left JOIN MC_PartyItems ON MC_PartyItems.Item_id=M_ChannelWiseItems.Item_id AND MC_PartyItems.Party_id=%s left JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id left join M_ItemMappingMaster on M_Items.id=M_ItemMappingMaster.Item_id and M_ItemMappingMaster.Party_id=%s where M_Items.Company_id =%s order by M_Group.id, MC_SubGroup.id''',([PartyID],[PartyID],[CompanyID]))
                     Itemquery= MC_PartyItems.objects.raw(f'''SELECT distinct M_Items.id,M_Items.Name,ifnull(MC_PartyItems.Party_id,0) Party_id,
-                                                         ifnull(M_Parties.Name,'') PartyName,ifnull(M_GroupType.Name,'') GroupTypeName,
-                                                         ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,
+                                                         ifnull(M_Parties.Name,'') PartyName,
+                                                         {ItemsGroupJoinsandOrderby[0]},
                                                          M_ItemMappingMaster.MapItem
                                                          FROM M_Items 
                                                          JOIN M_ChannelWiseItems ON M_ChannelWiseItems.Item_id=M_Items.id  
                                                          LEFT JOIN MC_PartyItems ON MC_PartyItems.Item_id=M_ChannelWiseItems.Item_id AND MC_PartyItems.Party_id=%s 
                                                          LEFT JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id 
-                                                         LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id and MC_ItemGroupDetails.GroupType_id=%s
-                                                         LEFT JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
-                                                         LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
-                                                         LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
+                                                         {ItemsGroupJoinsandOrderby[1]} 
                                                          left join M_ItemMappingMaster on M_Items.id=M_ItemMappingMaster.Item_id and M_ItemMappingMaster.Party_id=%s
                                                          WHERE M_Items.Company_id IN (select id from C_Companies where CompanyGroup_id=%s)
                                                          AND M_ChannelWiseItems.PartyType_id IN (SELECT distinct M_Parties.PartyType_id FROM MC_PartySubParty JOIN M_Parties ON M_Parties.id = MC_PartySubParty.SubParty_id
                                                          WHERE (MC_PartySubParty.Party_id=%s OR SubParty_id=%s))  
-                                                         ORDER BY M_Group.Sequence,MC_SubGroup.Sequence,{seq} ''',([PartyID],[GroupType_id],[PartyID],[CompanyGroupID],[PartyID],[PartyID]))
-                # CustomPrint(Itemquery)
+                                                         {ItemsGroupJoinsandOrderby[2]} ''',([PartyID],[PartyID],[CompanyGroupID],[PartyID],[PartyID]))
+        
                 if not Itemquery:
                     log_entry = create_transaction_logNew(request,Logindata,0,'Items Not available',181,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
