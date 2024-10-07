@@ -10,19 +10,12 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='m_parties',
-            name='Country',
-        ),
+        
         migrations.RemoveField(
             model_name='m_partytype',
             name='Country',
         ),
-        migrations.AddField(
-            model_name='m_parties',
-            name='CountryID',
-            field=models.IntegerField(blank=True, null=True),
-        ),
+        
         migrations.AddField(
             model_name='m_partytype',
             name='CountryID',
