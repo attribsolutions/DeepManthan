@@ -55,20 +55,13 @@ class T_MobileAppOrdersView(CreateAPIView):
                         Orderdata = list()
                         Orderitem=list()
                         
-                        #  checkduplicate=T_Orders.objects.select_for_update().filter(
-                        #     FullOrderNumber=AppOrderNumber,
-                        #     Supplier_id=Supplier
-                        #     )
-                        # if checkduplicate.exists():
-                        #     log_entry = create_transaction_logNew(request, data, Supplier, 'A similar order already exists in the system, AppOrderNumber : '+data['AppOrderNumber'],161,0,0,0,Customer)
-                        #     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'A similar order already exists in the system, AppOrderNumber : '+data['AppOrderNumber']})
-                         
                         checkduplicate=T_Orders.objects.filter(FullOrderNumber=data['AppOrderNumber'],Supplier_id=data['FoodERPSupplierID']).exists()
                         if checkduplicate:
                             log_entry = create_transaction_logNew(request, data, Supplier, 'A similar order already exists in the system, AppOrderNumber : '+data['AppOrderNumber'],161,0,0,0,Customer)
                             return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'A similar order already exists in the system, AppOrderNumber : '+data['AppOrderNumber']})
                         else:
-                            log_entry = create_transaction_logNew(request, data, Supplier, 'checkduplicate=T_Orders.objects.filter(FullOrderNumber'+data['AppOrderNumber']+',Supplier_id='+data['FoodERPSupplierID'],161,0,0,0,Customer)
+                            log_entry = create_transaction_logNew(request, data, Supplier, f'checkduplicate=T_Orders.objects.filter(FullOrderNumber=data[{AppOrderNumber}],Supplier_id=data[{Supplier}]).exists()',161,0,0,0,Customer)
+                            # print("log_entry",log_entry)
                             for aa in data['OrderItem']:
                                 ItemCheck = M_Items.objects.filter(id=aa['FoodERPItemID']).exists()
                                 if not ItemCheck:
