@@ -634,10 +634,12 @@ class ConsumerMobileListView(CreateAPIView):
                 MacID = MobileData['MacID']
                 Party = MobileData['Party']
                 query = M_ConsumerMobile.objects.raw('''SELECT id, Mobile, IsLinkToBill, MacID, Party, CreatedOn
-                                FROM SweetPOS.M_ConsumerMobile 
-                                Where IsLinkToBill=0 AND MacID=%s AND Party = %s                     
-                                order by id desc
-                                LIMIT 1''',[MacID,Party])
+                                            FROM SweetPOS.M_ConsumerMobile 
+                                            WHERE IsLinkToBill = 0 
+                                            AND MacID = %s 
+                                            AND Party = %s
+                                            AND CreatedOn between NOW() - INTERVAL 5 MINUTE and Now()
+                                            ORDER BY id DESC''',[MacID,Party])
                 MobileDataList = list()
                 for a in query:
                     MobileDataList.append({
