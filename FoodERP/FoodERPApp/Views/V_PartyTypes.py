@@ -83,7 +83,7 @@ class PartyTypeView(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PartyTypedata_Serializer.errors, 'Data':[]})
         except Exception as e:
                 log_entry = create_transaction_logNew(request,0,0,'PartyTypeSave:'+str(Exception(e)),33,0)
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
             
         
     @transaction.atomic()
@@ -104,7 +104,7 @@ class PartyTypeView(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PartyTypedata_Serializer.errors, 'Data':[]})
         except Exception as e:
                 log_entry = create_transaction_logNew(request,0,0,Exception(e),33,0)
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
 
     @transaction.atomic()
