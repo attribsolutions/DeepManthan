@@ -60,10 +60,12 @@ class T_MobileAppOrdersView(CreateAPIView):
                         Orderitem=list()
                         
                         checkduplicate=T_Orders.objects.filter(FullOrderNumber=data['AppOrderNumber'],Supplier_id=data['FoodERPSupplierID'])
+                        # log
                         if checkduplicate:
                             log_entry = create_transaction_logNew(request, data, Supplier, 'A similar order already exists in the system, AppOrderNumber : '+data['AppOrderNumber'],161,0,0,0,Customer)
                             return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'A similar order already exists in the system, AppOrderNumber : '+data['AppOrderNumber']})
                         else:
+                            log_entry = create_transaction_logNew(request, data+','+checkduplicate.query, Supplier, 'A similar order already exists in the system, AppOrderNumber : '+data['AppOrderNumber'],161,0,0,0,Customer)
                             for aa in data['OrderItem']:
                                 ItemCheck = M_Items.objects.filter(id=aa['FoodERPItemID']).exists()
                                 if not ItemCheck:
@@ -83,8 +85,6 @@ class T_MobileAppOrdersView(CreateAPIView):
                                     aa['FoodERPItemID'], aa['QuantityinPieces'], unit[0]['id'], 0, 0, 2, 0).ConvertintoSelectedUnit()
                                 QtyInBox = UnitwiseQuantityConversion(
                                     aa['FoodERPItemID'], aa['QuantityinPieces'], unit[0]['id'], 0, 0, 4, 0).ConvertintoSelectedUnit()
-                            
-                                
                                 
                                 Orderitem.append(
                                     {
@@ -170,7 +170,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                                 OrderID = Order_serializer.data['id']
                                 PartyID = Order_serializer.data['Customer']
                                 
-                                log_entry = create_transaction_logNew(request, data, Supplier, 'MobileAppOrder Save Successfully',149,OrderID,0,0,Customer)
+                                log_entry = create_transaction_logNew(request, data+','+Orderdata[0], Supplier, 'MobileAppOrder Save Successfully',149,OrderID,0,0,Customer)
                                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully', 'FoodERPOrderID': OrderID})
                             log_entry = create_transaction_logNew(request, data, Supplier,  Order_serializer.errors,161,OrderID,0,0,Customer)
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
