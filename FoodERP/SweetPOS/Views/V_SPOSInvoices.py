@@ -126,7 +126,7 @@ class SPOSInvoiceView(CreateAPIView):
                             InvoiceItem['SaleID']=0
                             InvoiceItem['HSNCode']=InvoiceItem['HSNCode']
                             InvoiceItem['Party']=InvoiceItem['PartyID']
-                            InvoiceItem['IsMixItem'] = InvoiceItem.get('IsMixItem', 0)  
+                            InvoiceItem['IsMixItem'] = InvoiceItem.get('IsMixItem') or 0  
                             InvoiceItem['MixItemId'] = InvoiceItem.get('MixItemId', None) 
                             BaseUnitQuantity=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,0,0).GetBaseUnitQuantity()
                             InvoiceItem['BaseUnitQuantity'] =  float(BaseUnitQuantity)
@@ -634,10 +634,12 @@ class ConsumerMobileListView(CreateAPIView):
                 MacID = MobileData['MacID']
                 Party = MobileData['Party']
                 query = M_ConsumerMobile.objects.raw('''SELECT id, Mobile, IsLinkToBill, MacID, Party, CreatedOn
-                                FROM SweetPOS.M_ConsumerMobile 
-                                Where IsLinkToBill=0 AND MacID=%s AND Party = %s                     
-                                order by id desc
-                                LIMIT 1''',[MacID,Party])
+                                            FROM SweetPOS.M_ConsumerMobile 
+                                            WHERE IsLinkToBill = 0 
+                                            AND MacID = %s 
+                                            AND Party = %s
+                                            AND CreatedOn between NOW() - INTERVAL 5 MINUTE and Now()
+                                            ORDER BY id DESC''',[MacID,Party])
                 MobileDataList = list()
                 for a in query:
                     MobileDataList.append({
@@ -648,10 +650,12 @@ class ConsumerMobileListView(CreateAPIView):
                         "Party": a.Party,
                         "CreatedOn": a.CreatedOn
                     })
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :MobileDataList})
-                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Mobile Number not available', 'Data' : []})
+                if MobileDataList:
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': MobileDataList})
+                else:
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Mobile Number not available', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data':[]})
         
 
 class MobileNumberUpdateView(CreateAPIView):
