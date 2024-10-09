@@ -483,6 +483,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                         PartyTypeID=F('Party__PartyType_id'),
                         PartyType=F('Party__PartyType__Name'), 
                         CurrencySymbol=F('Party__PartyType__Country__CurrencySymbol'), 
+                        Weight=F('Party__PartyType__Country__Weight'), 
                         UploadSalesDatafromExcelParty=F('Party__UploadSalesDatafromExcelParty'),
                         # IsDefaultPartyAddress=F('Party__PartyAddress__IsDefault')      
                     ).annotate(
@@ -493,7 +494,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                     .values(
                         'id', 'Party_id', 'Role_id', 'RoleName', 'PartyName','PartyAddress', 'User__Employee_id',
                         'Party__SAPPartyCode', 'IsSCMPartyTypeInt','IsFranchisesInt', 'GSTIN', 'FSSAINo', 'FSSAIExpiry',
-                        'PartyTypeID', 'PartyType','CurrencySymbol', 'UploadSalesDatafromExcelPartyInt','Party__PriceList_id'
+                        'PartyTypeID', 'PartyType','CurrencySymbol','Weight', 'UploadSalesDatafromExcelPartyInt','Party__PriceList_id'
                     )
                     # .filter(IsDefaultPartyAddress=True)
                     
@@ -525,10 +526,10 @@ class UserPartiesForLoginPage(CreateAPIView):
                             "PartyTypeID":item['PartyTypeID'],
                             "PartyType":item['PartyType'],
                             "CurrencySymbol":item['CurrencySymbol'],
+                            "Weight":item['Weight'],
                             "UploadSalesDatafromExcelParty":item['UploadSalesDatafromExcelPartyInt'],
                             "PriceList_id":item['Party__PriceList_id']
-                        })
-                    
+                        }) 
                     log_entry = create_transaction_logNew(request,UserPartiesData,0 ,"PartyDropdownforloginpage",145,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': UserPartiesData})
         except Exception as e:
