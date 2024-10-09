@@ -65,7 +65,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                             log_entry = create_transaction_logNew(request, data, Supplier, 'A similar order already exists in the system, AppOrderNumber : '+data['AppOrderNumber'],161,0,0,0,Customer)
                             return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'A similar order already exists in the system, AppOrderNumber : '+data['AppOrderNumber']})
                         else:
-                            log_entry = create_transaction_logNew(request, data+','+checkduplicate.query, Supplier, 'A similar order already exists in the system, AppOrderNumber : '+data['AppOrderNumber'],161,0,0,0,Customer)
+                            log_entry = create_transaction_logNew(request, data+','+checkduplicate.query, Supplier, 'validation log,AppOrderNumber'+data['AppOrderNumber'],161,0,0,0,Customer)
                             for aa in data['OrderItem']:
                                 ItemCheck = M_Items.objects.filter(id=aa['FoodERPItemID']).exists()
                                 if not ItemCheck:
