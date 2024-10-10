@@ -15,14 +15,11 @@ from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework.authentication import BasicAuthentication
 import json ,requests
-
-
-
+ 
 class T_MobileAppOrdersView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = [BasicAuthentication]
-
-
+ 
     @transaction.atomic()
     def post(self, request):
         data = JSONParser().parse(request)
@@ -34,7 +31,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                     
                     # Parsing the authorization header
                     auth_type, auth_string = auth_header.split(' ', 1)
-                    if auth_type.lower() == 'basic':
+                    if auth_type.lower() == 'basic': 
                        
                         # Decoding the base64-encoded username and password
                         try:
@@ -42,9 +39,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                                 auth_string).decode().split(':', 1)
                         except (TypeError, ValueError, UnicodeDecodeError):
                             return responses('Invalid authorization header', status=status.HTTP_401_UNAUTHORIZED)
-                        # Authenticating the user
-                    # CustomPrint(username,password)    
-                    # CustomPrint('1111!1')    
+                        
                     user = authenticate(request, username=username, password=password)
                     # CustomPrint(username,password)
                     InvoiceItems = list()
@@ -59,13 +54,17 @@ class T_MobileAppOrdersView(CreateAPIView):
                         Orderdata = list()
                         Orderitem=list()
                         
-                        checkduplicate=T_Orders.objects.filter(FullOrderNumber=data['AppOrderNumber'],Supplier_id=data['FoodERPSupplierID'])
-                        # log
+
+                        checkduplicate=T_Orders.objects.filter(FullOrderNumber=data['AppOrderNumber'],Supplier_id=data['FoodERPSupplierID']).exists()
+
                         if checkduplicate:
                             log_entry = create_transaction_logNew(request, data, Supplier, 'A similar order already exists in the system, AppOrderNumber : '+data['AppOrderNumber'],161,0,0,0,Customer)
                             return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'A similar order already exists in the system, AppOrderNumber : '+data['AppOrderNumber']})
                         else:
-                            log_entry = create_transaction_logNew(request, data+','+checkduplicate.query, Supplier, 'validation log,AppOrderNumber'+data['AppOrderNumber'],161,0,0,0,Customer)
+
+                            log_entry = create_transaction_logNew(request, data, Supplier, f'checkduplicate=T_Orders.objects.filter(FullOrderNumber=data[{AppOrderNumber}],Supplier_id=data[{Supplier}]).exists()',149,0,0,0,Customer)
+                            # print("log_entry",log_entry)
+
                             for aa in data['OrderItem']:
                                 ItemCheck = M_Items.objects.filter(id=aa['FoodERPItemID']).exists()
                                 if not ItemCheck:
@@ -85,7 +84,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                                     aa['FoodERPItemID'], aa['QuantityinPieces'], unit[0]['id'], 0, 0, 2, 0).ConvertintoSelectedUnit()
                                 QtyInBox = UnitwiseQuantityConversion(
                                     aa['FoodERPItemID'], aa['QuantityinPieces'], unit[0]['id'], 0, 0, 4, 0).ConvertintoSelectedUnit()
-                                
+
                                 Orderitem.append(
                                     {
                                         "Item": aa['FoodERPItemID'],
@@ -115,9 +114,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                                         "Comment": '',
                                         "QtyInNo" : QtyInNo,
                                         "QtyInKg" : QtyInKg,
-                                        "QtyInBox" : QtyInBox
-
-
+                                        "QtyInBox" : QtyInBox 
                                         }
                                 )
                                 
@@ -131,7 +128,6 @@ class T_MobileAppOrdersView(CreateAPIView):
                                 
                             
                             Orderdata.append({
-                                
                                 "OrderDate": OrderDate,
                                 "DeliveryDate": OrderDate,
                                 "OrderAmount": OrderAmount,
@@ -159,10 +155,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                                 "OrderType": 2,
                                 "IsConfirm": True,
                                 "OrderItem" :  Orderitem
-
-                            })
-
-
+                            }) 
                             # return JsonResponse({ 'Data': Orderdata })
                             Order_serializer = T_OrderSerializer(data=Orderdata[0])
                             if Order_serializer.is_valid():
