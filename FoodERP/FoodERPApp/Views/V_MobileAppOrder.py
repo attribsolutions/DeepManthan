@@ -19,8 +19,7 @@ import json ,requests
 class T_MobileAppOrdersView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = [BasicAuthentication]
-
-
+ 
     @transaction.atomic()
     def post(self, request):
         data = JSONParser().parse(request)
@@ -60,7 +59,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                             log_entry = create_transaction_logNew(request, data, Supplier, 'A similar order already exists in the system, AppOrderNumber : '+data['AppOrderNumber'],161,0,0,0,Customer)
                             return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'A similar order already exists in the system, AppOrderNumber : '+data['AppOrderNumber']})
                         else:
-                            log_entry = create_transaction_logNew(request, data, Supplier, f'checkduplicate=T_Orders.objects.filter(FullOrderNumber=data[{AppOrderNumber}],Supplier_id=data[{Supplier}]).exists()',161,0,0,0,Customer)
+                            log_entry = create_transaction_logNew(request, data, Supplier, f'checkduplicate=T_Orders.objects.filter(FullOrderNumber=data[{AppOrderNumber}],Supplier_id=data[{Supplier}]).exists()',149,0,0,0,Customer)
                             # print("log_entry",log_entry)
                             for aa in data['OrderItem']:
                                 ItemCheck = M_Items.objects.filter(id=aa['FoodERPItemID']).exists()
