@@ -164,10 +164,14 @@ where Invoice_id=%s group by SPOSInvoiceItems.Item,SPOSInvoiceItems.HSNCode,M_Un
                             Batchlist.append({
                                 'name': "Batch-"+d['BatchCode']
                             })
+                            if a['HSNCode'].startswith("99"):
+                                is_service= "Y"  # Yes, it's a service
+                            else:
+                                is_service= "N" # No, it's not a service
                         InvoiceItemDetails.append({
                             'item_serial_number': a['id'],
                             'product_description': a['ItemName'],
-                            'is_service': 'N',
+                            'is_service': is_service,
                             'hsn_code': a['HSNCode'],
                             'quantity': a['Quantity'],
                             'unit': a['EwayBillUnit'],
