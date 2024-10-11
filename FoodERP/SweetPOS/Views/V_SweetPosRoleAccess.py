@@ -147,7 +147,7 @@ class MachineTypeListView(CreateAPIView):
         try:
             with transaction.atomic():
                 Party = MachineType_Data['Party']
-                query = M_SweetPOSMachine.objects.raw('''Select A.id, A.Party, A.MacID, ifnull(A.MachineType,'') MachineType ,  B.Name MachineTypeName, A.IsServer, A.ClientID
+                query = M_SweetPOSMachine.objects.raw('''Select A.id, A.Party, A.MacID, ifnull(A.MachineType,'') MachineType ,  B.Name MachineTypeName, A.IsServer, A.ClientID,A.IsAutoUpdate,A.IsGiveUpdate,A.IsService,IFNULL(A.MachineName, '') AS MachineName,A.ServerSequence,A.UploadSaleRecordCount,A.Validity,IFNULL(A.Version,'') AS Version
                         From SweetPOS.M_SweetPOSMachine A
                         left JOIN  FoodERP.M_GeneralMaster B on B.id = A.MachineType
                         WHERE A.Party = %s''',[Party])
@@ -181,7 +181,15 @@ class MachineTypeListView(CreateAPIView):
                                 "MachineTypeDetails": MachineTypeDetails,
                                 "IsServer": a.IsServer,
                                 "ClientID": a.ClientID,
-                                "MachineRole":RoleID
+                                "MachineRole":RoleID,
+                                "IsAutoUpdate":a.IsAutoUpdate,
+                                "IsGiveUpdate":a.IsGiveUpdate,
+                                "IsService":a.IsService,
+                                "MachineName":a.MachineName,
+                                "ServerSequence":a.ServerSequence,
+                                "UploadSaleRecordCount":a.UploadSaleRecordCount,
+                                "Validity":a.Validity,
+                                "Version":a.Version
                                 })
                 log_entry = create_transaction_logNew(request, MachineType_Data, Party, '', 417, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :MachineTypeList})
@@ -236,7 +244,7 @@ class MachineTypeUpdateView(CreateAPIView):
         try:
             with transaction.atomic():
                 for a in MachineType_Data:
-                    query = M_SweetPOSMachine.objects.filter(MacID=a['MacID'],Party=a['Party'])
+                    query = M_SweetPOSMachine.objects.filter(Party=a['Party'],MacID=a['MacID'])
                     if query:
                         MachineType_serializer = MachineTypeSerializer(query[0],data=a)
                     else:
