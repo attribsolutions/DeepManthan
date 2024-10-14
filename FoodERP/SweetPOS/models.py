@@ -296,6 +296,14 @@ class M_SweetPOSMachine(models.Model):
     MachineType = models.CharField(max_length=200,null=True,blank=True )
     IsServer = models.BooleanField(default=False)
     ClientID =  models.IntegerField()
+    ServerSequence = models.IntegerField()
+    MachineName = models.CharField(max_length=200,null=True,blank=True)
+    Validity = models.DateField()
+    UploadSaleRecordCount  = models.IntegerField()
+    IsService  = models.BooleanField(default=False)
+    Version = models.CharField(max_length=200 ,null=True,blank=True)
+    IsGiveUpdate = models.BooleanField(default=False)
+    IsAutoUpdate = models.BooleanField(default=False)
 
     class Meta:
         constraints = [
