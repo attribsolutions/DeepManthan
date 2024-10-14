@@ -165,7 +165,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                                 OrderID = Order_serializer.data['id']
                                 PartyID = Order_serializer.data['Customer']
                                 
-                                log_entry = create_transaction_logNew(request, data+','+Orderdata[0], Supplier, 'MobileAppOrder Save Successfully',149,OrderID,0,0,Customer)
+                                log_entry = create_transaction_logNew(request, str(data)+','+str(Orderdata[0]), Supplier, 'MobileAppOrder Save Successfully',149,OrderID,0,0,Customer)
                                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully', 'FoodERPOrderID': OrderID})
                             log_entry = create_transaction_logNew(request, data, Supplier,  Order_serializer.errors,161,OrderID,0,0,Customer)
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
