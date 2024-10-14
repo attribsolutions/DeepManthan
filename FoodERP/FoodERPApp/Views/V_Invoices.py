@@ -53,14 +53,19 @@ class OrderDetailsForInvoice(CreateAPIView):
                                     join M_GSTHSNCode on M_GSTHSNCode.id=TC_OrderItems.GST_id
                                     left join M_MarginMaster on M_MarginMaster.id=TC_OrderItems.Margin_id
                                     where TC_OrderItems.Order_id=%s and TC_OrderItems.IsDeleted=0''',[Party,OrderID])
-                                       
+                    
+                    
+                    # print(OrderItemQuery)                  
                     if OrderItemQuery:
 
                         for b in OrderItemQuery:
                             Customer=b.CustomerID
                             Item= b.ItemID 
                             
-                            obatchwisestockquery= O_BatchWiseLiveStock.objects.raw('''select *,RateCalculationFunction1(LiveBatcheid, ItemID, %s, UnitID, 0, 0, MRP, 0)Rate
+                            Weightage = MC_ItemUnits.objects.filter(Item_id=Item).values('BaseUnitQuantity')                            
+                            BaseUnitQuantityinKG=Weightage[0]['BaseUnitQuantity']
+                           
+                            obatchwisestockquery= O_BatchWiseLiveStock.objects.raw(f'''select *,RateCalculationFunction1(LiveBatcheid, ItemID, %s, UnitID, 0, 0, MRP, 0)Rate
                                                 from (select O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id ItemID,O_LiveBatches.BatchCode,O_LiveBatches.BatchDate,O_LiveBatches.SystemBatchCode,
                                                 O_LiveBatches.SystemBatchDate,O_LiveBatches.id LiveBatcheid,O_LiveBatches.MRP_id LiveBatcheMRPID,O_LiveBatches.GST_id LiveBatcheGSTID,
                                                 (case when O_LiveBatches.MRP_id is null then O_LiveBatches.MRPValue else M_MRPMaster.MRP end )MRP,
@@ -73,7 +78,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                                                 join M_GSTHSNCode on M_GSTHSNCode.id=O_LiveBatches.GST_id
                                                 join MC_ItemUnits on MC_ItemUnits.id=O_BatchWiseLiveStock.Unit_id
                                                 where O_BatchWiseLiveStock.Item_id=%s and O_BatchWiseLiveStock.Party_id=%s and O_BatchWiseLiveStock.BaseUnitQuantity > 0 and IsDamagePieces=0)a ''',[Customer,Item,Party])     
-
+                            CustomPrint(obatchwisestockquery)
                             stockDatalist = list()
                             if not obatchwisestockquery:
                                 stockDatalist =[]
@@ -134,6 +139,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                                 "Amount": b.Amount,
                                 "DiscountType" : DiscountType,
                                 "Discount" : Discount,
+                                "Weightage":BaseUnitQuantityinKG,
                                 "UnitDetails":UnitDropdown(b.ItemID,Customer,0),
                                 "StockDetails":stockDatalist
                             })
