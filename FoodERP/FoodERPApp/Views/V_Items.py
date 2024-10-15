@@ -74,7 +74,7 @@ class MCUnitDetailsView(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': UnitDetails})
         except Exception as e:
             log_entry = create_transaction_logNew(request, MaterialIssueIDdata, 0,'UnitDetails of Items:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})       
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})       
         
 class M_ItemsFilterView(CreateAPIView):
     
@@ -93,19 +93,9 @@ class M_ItemsFilterView(CreateAPIView):
                 PartyID=Logindata['PartyID'] 
                 CompanyGroupID =Logindata['CompanyGroup'] 
                 IsSCMCompany = Logindata['IsSCMCompany'] 
-
                 IsBOM = Logindata['IsBOM'] 
                 
-
-                party_instance = M_Parties.objects.get(id=PartyID) 
-                PartyType = party_instance.PartyType 
-                
-                if PartyType == 19:
-                    GroupType_id = 5
-                    seq=(f'MC_ItemGroupDetails.ItemSequence')
-                else:
-                    GroupType_id = 1
-                    seq=(f'M_Items.Sequence')
+                ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(PartyID,0).split('!')
                 
                 #for log
                 if PartyID == '':
@@ -123,20 +113,15 @@ class M_ItemsFilterView(CreateAPIView):
                                                M_Items.isActive, M_Items.IsSCM, M_Items.CanBeSold, M_Items.CanBePurchase, M_Items.BrandName, M_Items.Tag,
                                                M_Items.CreatedBy, M_Items.CreatedOn, M_Items.UpdatedBy, M_Items.UpdatedOn, M_Items.Breadth, M_Items.Grammage,
                                                M_Items.Height, M_Items.Length, M_Items.StoringCondition, M_Items.BaseUnitID_id, M_Items.Company_id, 
-                                               M_Items.Budget,C_Companies.Name AS CompanyName, M_Units.Name AS BaseUnitName 
+                                               M_Items.Budget,C_Companies.Name AS CompanyName, M_Units.Name AS BaseUnitName,{ItemsGroupJoinsandOrderby[0]}
                                                FROM M_Items 
                                                JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id 
                                                JOIN C_Companies ON C_Companies.id = M_Items.Company_id 
-                                               left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id= %s
-                                               left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
-                                               left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
-                                               left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
+                                               {ItemsGroupJoinsandOrderby[1]}
                                                WHERE M_Items.IsSCM=1 AND  M_Items.Company_id IN ({company_ids_str})
-                                               ORDER BY M_Group.Sequence,MC_SubGroup.Sequence,{seq} ASC''',([GroupType_id])) 
+                                               {ItemsGroupJoinsandOrderby[2]}''') 
                     # CustomPrint(query.query)  
                 else:
-                    
-                    # CustomPrint("Dhruti")
                     # query = M_Items.objects.select_related().filter(Company=CompanyID).order_by('Sequence')
                     query= M_Items.objects.raw(f'''SELECT M_Items.id,M_Items.Name, M_Items.ShortName, M_Items.Sequence, 
                                                M_Items.BarCode, M_Items.SAPItemCode, M_Items.isActive, M_Items.IsSCM,
@@ -146,15 +131,13 @@ class M_ItemsFilterView(CreateAPIView):
                                                M_Items.Grammage, M_Items.Height, M_Items.Length, 
                                                M_Items.StoringCondition, M_Items.BaseUnitID_id, 
                                                M_Items.Company_id, M_Items.Budget,C_Companies.Name AS CompanyName,
-                                               M_Units.Name AS BaseUnitName FROM M_Items 
+                                               M_Units.Name AS BaseUnitName,{ItemsGroupJoinsandOrderby[0]}
+                                               FROM M_Items 
                                                JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id 
                                                JOIN C_Companies ON C_Companies.id = M_Items.Company_id 
-                                               left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id= %s
-                                               left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
-                                               left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
-                                               left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
+                                               {ItemsGroupJoinsandOrderby[1]}
                                                WHERE M_Items.Company_id=%s 
-                                               ORDER BY M_Group.Sequence,MC_SubGroup.Sequence,{seq} ASC''',([GroupType_id],[CompanyID]))
+                                               {ItemsGroupJoinsandOrderby[2]}''',([CompanyID]))
 
                 if not query:
                     log_entry = create_transaction_logNew(request, Logindata, x, "Items Not available",102,0)
@@ -207,7 +190,7 @@ class M_ItemsFilterView(CreateAPIView):
         except Exception as e:
             print("ItemFilterAPI EndTime : ",datetime.now())
             log_entry = create_transaction_logNew(request, Logindata, 0,'ItemList:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
 #---- M_Items Save Class
 class M_ItemsView(CreateAPIView):
