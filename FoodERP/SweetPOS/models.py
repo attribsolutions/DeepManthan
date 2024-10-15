@@ -285,9 +285,8 @@ class M_ConsumerMobile(models.Model):
     Party = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     class Meta:
-        constraints = [
-            UniqueConstraint(fields=['Mobile', 'MacID'], name='unique_Mobile_MacID')
-        ]
+        
+        
         db_table = "M_ConsumerMobile"        
 
 class M_SweetPOSMachine(models.Model):
