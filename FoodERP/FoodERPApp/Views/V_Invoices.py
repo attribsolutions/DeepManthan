@@ -43,7 +43,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                                     TC_OrderItems.GST_id,M_GSTHSNCode.HSNCode,TC_OrderItems.GSTPercentage,M_MarginMaster.id MarginID,M_MarginMaster.Margin,TC_OrderItems.BasicAmount,
                                     TC_OrderItems.GSTAmount,TC_OrderItems.CGST,TC_OrderItems.SGST,TC_OrderItems.IGST,TC_OrderItems.CGSTPercentage,TC_OrderItems.SGSTPercentage,
                                     TC_OrderItems.IGSTPercentage,TC_OrderItems.Amount,M_Parties.Name CustomerName,M_Parties.PAN,MC_PartySubParty.IsTCSParty,
-                                    T_Orders.OrderDate,M_Parties.id CustomerID,M_Parties.GSTIN,T_Orders.FullOrderNumber
+                                    T_Orders.OrderDate,M_Parties.id CustomerID,M_Parties.GSTIN,T_Orders.FullOrderNumber,(select BaseUnitQuantity from MC_ItemUnits where IsDeleted=0  and UnitID_id=2 and Item_id=ItemID)Weightage
                                     FROM TC_OrderItems
                                     join T_Orders on T_Orders.id=TC_OrderItems.Order_id
                                     join M_Parties on M_Parties.id=T_Orders.Customer_id
@@ -60,11 +60,8 @@ class OrderDetailsForInvoice(CreateAPIView):
 
                         for b in OrderItemQuery:
                             Customer=b.CustomerID
-                            Item= b.ItemID 
+                            Item= b.ItemID                            
                             
-                            Weightage = MC_ItemUnits.objects.filter(Item_id=Item).values('BaseUnitQuantity')                            
-                            BaseUnitQuantityinKG=Weightage[0]['BaseUnitQuantity']
-                           
                             obatchwisestockquery= O_BatchWiseLiveStock.objects.raw(f'''select *,RateCalculationFunction1(LiveBatcheid, ItemID, %s, UnitID, 0, 0, MRP, 0)Rate
                                                 from (select O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id ItemID,O_LiveBatches.BatchCode,O_LiveBatches.BatchDate,O_LiveBatches.SystemBatchCode,
                                                 O_LiveBatches.SystemBatchDate,O_LiveBatches.id LiveBatcheid,O_LiveBatches.MRP_id LiveBatcheMRPID,O_LiveBatches.GST_id LiveBatcheGSTID,
@@ -139,7 +136,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                                 "Amount": b.Amount,
                                 "DiscountType" : DiscountType,
                                 "Discount" : Discount,
-                                "Weightage":BaseUnitQuantityinKG,
+                                "Weightage":b.Weightage,
                                 "UnitDetails":UnitDropdown(b.ItemID,Customer,0),
                                 "StockDetails":stockDatalist
                             })
