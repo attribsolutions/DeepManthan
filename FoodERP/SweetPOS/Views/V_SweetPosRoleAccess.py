@@ -134,10 +134,11 @@ class MachineTypeSaveView(CreateAPIView):
                         LastInsertID = MachineType.id
                         log_entry = create_transaction_logNew(request, MachineType_Data, MachineType_Data['Party'], '', 416, LastInsertID)        
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Machine Type Save Successfully',"TransactionID" : LastInsertID, 'Data':[]})
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MacID is already exist!', 'Data' : []})
+                    return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': MachineType_serializer.errors, 'Data': []})
+                    
         except Exception as e:
             log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'MachineTypeSave:'+str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
         
 class MachineTypeListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
