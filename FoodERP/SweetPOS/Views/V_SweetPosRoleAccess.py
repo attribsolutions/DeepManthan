@@ -128,10 +128,6 @@ class MachineTypeSaveView(CreateAPIView):
         MachineType_Data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                    # query = M_SweetPOSMachine.objects.filter(MacID=MachineType_Data['MacID'])
-                    # if query.exists():
-                    #     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MacID is already exist!', 'Data' : []})
-
                     MachineType_serializer = MachineTypeSerializer(data=MachineType_Data)
                     if MachineType_serializer.is_valid():
                         MachineType = MachineType_serializer.save()
@@ -142,7 +138,7 @@ class MachineTypeSaveView(CreateAPIView):
                     
         except Exception as e:
             log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'MachineTypeSave:'+str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
         
 class MachineTypeListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
