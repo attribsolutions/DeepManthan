@@ -285,9 +285,8 @@ class M_ConsumerMobile(models.Model):
     Party = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     class Meta:
-        constraints = [
-            UniqueConstraint(fields=['Mobile', 'MacID'], name='unique_Mobile_MacID')
-        ]
+        
+        
         db_table = "M_ConsumerMobile"        
 
 class M_SweetPOSMachine(models.Model):
@@ -296,10 +295,10 @@ class M_SweetPOSMachine(models.Model):
     MachineType = models.CharField(max_length=200,null=True,blank=True )
     IsServer = models.BooleanField(default=False)
     ClientID =  models.IntegerField()
-    ServerSequence = models.IntegerField()
+    ServerSequence = models.IntegerField(null=True,blank=True)
     MachineName = models.CharField(max_length=200,null=True,blank=True)
-    Validity = models.DateField()
-    UploadSaleRecordCount  = models.IntegerField()
+    Validity = models.DateField(null=True,blank=True)
+    UploadSaleRecordCount  = models.IntegerField(null=True,blank=True)
     IsService  = models.BooleanField(default=False)
     Version = models.CharField(max_length=200 ,null=True,blank=True)
     IsGiveUpdate = models.BooleanField(default=False)
