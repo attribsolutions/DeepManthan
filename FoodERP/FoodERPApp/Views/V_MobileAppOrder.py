@@ -56,21 +56,24 @@ class T_MobileAppOrdersView(CreateAPIView):
                         
 
                         # checkduplicate=T_Orders.objects.filter(FullOrderNumber=data['AppOrderNumber'],Supplier_id=data['FoodERPSupplierID'])
-                        checkduplicate=T_Orders.objects.filter(FullOrderNumber=data['AppOrderNumber'],Supplier_id=data['FoodERPSupplierID']).exists()
-
+                        checkduplicate=T_Orders.objects.filter(FullOrderNumber__iexact=data['AppOrderNumber'].strip(),Supplier_id=data['FoodERPSupplierID']).exists()
+                         # print("checkduplicate",checkduplicate)
+                        
                         if checkduplicate:
                             log_entry = create_transaction_logNew(request, data, Supplier, 'A similar order already exists in the system, AppOrderNumber : '+data['AppOrderNumber'],161,0,0,0,Customer)
                             return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'A similar order already exists in the system, AppOrderNumber : '+data['AppOrderNumber']})
                         else:
 
-                            log_entry = create_transaction_logNew(request, data, Supplier, f'checkduplicate=T_Orders.objects.filter(FullOrderNumber=data[{AppOrderNumber}],Supplier_id=data[{Supplier}]).exists()',149,0,0,0,Customer)
+                            log_entry = create_transaction_logNew(request, data, Supplier, f'checkduplicate=T_Orders.objects.filter(FullOrderNumber__iexact=data[{AppOrderNumber}].strip(),Supplier_id=data[{Supplier}]).exists()',149,0,0,0,Customer)
 
                             for aa in data['OrderItem']:
+                                # Check Item Is Exist
                                 ItemCheck = M_Items.objects.filter(id=aa['FoodERPItemID']).exists()
                                 if not ItemCheck:
                                     log_entry = create_transaction_logNew(request, data, Supplier, f'ItemID {aa["FoodERPItemID"]} is not present in the FoodERP 2.0', 161, 0, 0, 0, Customer)
                                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': f'ItemID {aa["FoodERPItemID"]} is not present in the FoodERP 2.0'})
                                 # CustomPrint(aa['FoodERPItemID'])
+                                
                                 unit=MC_ItemUnits.objects.filter(UnitID_id=1,Item_id=aa['FoodERPItemID'],IsDeleted=0).values('id')
                                 
                                 Gst = GSTHsnCodeMaster(aa['FoodERPItemID'], OrderDate).GetTodaysGstHsnCode()
@@ -114,10 +117,8 @@ class T_MobileAppOrdersView(CreateAPIView):
                                         "Comment": '',
                                         "QtyInNo" : QtyInNo,
                                         "QtyInKg" : QtyInKg,
-
                                         "QtyInBox" : QtyInBox
-
-                                        }
+                                    }
                                 )
                                 
                             '''Get Max Order Number'''
@@ -128,7 +129,6 @@ class T_MobileAppOrdersView(CreateAPIView):
                             c=MC_PartyAddress.objects.filter(Party_id=Customer,IsDefault=1).values('id')
                             # CustomPrint(c)
                                 
-                            
                             Orderdata.append({
                                 "OrderDate": OrderDate,
                                 "DeliveryDate": OrderDate,

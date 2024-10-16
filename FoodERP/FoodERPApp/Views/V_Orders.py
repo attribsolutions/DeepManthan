@@ -37,7 +37,7 @@ class POTypeView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
-class OrderListFilterView(CreateAPIView):
+class OrderListFilterView(CreateAPIView): 
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
 
