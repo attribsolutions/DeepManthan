@@ -128,10 +128,6 @@ class MachineTypeSaveView(CreateAPIView):
         MachineType_Data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                    query = M_SweetPOSMachine.objects.filter(MacID=MachineType_Data['MacID'])
-                    if query.exists():
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MacID is already exist!', 'Data' : []})
-
                     MachineType_serializer = MachineTypeSerializer(data=MachineType_Data)
                     if MachineType_serializer.is_valid():
                         MachineType = MachineType_serializer.save()
@@ -142,7 +138,7 @@ class MachineTypeSaveView(CreateAPIView):
                     
         except Exception as e:
             log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'MachineTypeSave:'+str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
         
 class MachineTypeListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -152,7 +148,7 @@ class MachineTypeListView(CreateAPIView):
         try:
             with transaction.atomic():
                 Party = MachineType_Data['Party']
-                query = M_SweetPOSMachine.objects.raw('''Select A.id, A.Party, A.MacID, ifnull(A.MachineType,'') MachineType ,  B.Name MachineTypeName, A.IsServer, A.ClientID,A.IsAutoUpdate,A.IsGiveUpdate,A.IsService,IFNULL(A.MachineName, '') AS MachineName,A.ServerSequence,A.UploadSaleRecordCount,A.Validity,IFNULL(A.Version,'') AS Version
+                query = M_SweetPOSMachine.objects.raw('''Select A.id, A.Party, A.MacID, ifnull(A.MachineType,'') MachineType ,  B.Name MachineTypeName, A.IsServer, A.ClientID,A.IsAutoUpdate,A.IsGiveUpdate,A.IsService,IFNULL(A.MachineName, '') AS MachineName,A.ServerSequence,A.UploadSaleRecordCount,A.Validity,IFNULL(A.Version,'') AS Version, A.SeverName, A.ServerHost, A.ServerUser, A.ServerPassWord, A.ServerDatabase
                         From SweetPOS.M_SweetPOSMachine A
                         left JOIN  FoodERP.M_GeneralMaster B on B.id = A.MachineType
                         WHERE A.Party = %s''',[Party])
@@ -194,7 +190,12 @@ class MachineTypeListView(CreateAPIView):
                                 "ServerSequence":a.ServerSequence,
                                 "UploadSaleRecordCount":a.UploadSaleRecordCount,
                                 "Validity":a.Validity,
-                                "Version":a.Version
+                                "Version":a.Version,
+                                "SeverName":a.SeverName,
+                                "ServerHost": a.ServerHost,
+                                "ServerUser": a.ServerUser,
+                                "ServerPassWord": a.ServerPassWord,
+                                "ServerDatabase": a.ServerDatabase
                                 })
                 log_entry = create_transaction_logNew(request, MachineType_Data, Party, '', 417, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :MachineTypeList})
