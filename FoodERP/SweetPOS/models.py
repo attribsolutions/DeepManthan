@@ -308,6 +308,7 @@ class M_SweetPOSMachine(models.Model):
     ServerUser = models.CharField(max_length=100,null=True,blank=True)
     ServerPassWord = models.CharField(max_length=100,null=True,blank=True)
     ServerDatabase = models.CharField(max_length=100,null=True,blank=True)
+    Invoiceprefix = models.CharField(max_length=100 ,null=True,blank=True)
 
     class Meta:
         constraints = [
