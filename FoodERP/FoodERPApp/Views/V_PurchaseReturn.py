@@ -266,7 +266,7 @@ class PurchaseReturnView(CreateAPIView):
                     "Mode" : request.POST.get('Mode'),
                     "PurchaseReturnReferences" : purchase_return_references,
                     "ReturnItems" : return_items
-                }
+                } 
                 
                 '''Image Upload code END'''
                 # PurchaseReturndata = JSONParser().parse(request)
@@ -279,13 +279,16 @@ class PurchaseReturnView(CreateAPIView):
                 
                 PurchaseReturndata['ReturnNo'] = str(c)               
                
-                if (Mode == str(1)): # Sales Return                    
+                if (Mode == str(1)): # Sales Return    
                     # d= 'SRN'
-                    d = GetPrifix.GetPurchaseReturnPrifix(Party)                    
+                    d = GetPrifix.GetPurchaseReturnPrifix(Party) 
                 else :                   
-                    d = GetPrifix.GetPurchaseReturnPrifix(customerid)                   
+                    d = GetPrifix.GetPurchaseReturnPrifix(customerid)  
                  
-                PurchaseReturndata['FullReturnNumber'] = str(d)+""+str(c)
+                #  comment for Prifix get None
+                # PurchaseReturndata['FullReturnNumber'] = str(d)+""+str(c)
+                PurchaseReturndata['FullReturnNumber'] = (str(d) if d is not None else "") + str(c)
+                # print("PurchaseReturndata",PurchaseReturndata)
                 
                 item = ""
                 
