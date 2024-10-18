@@ -289,7 +289,7 @@ where Invoice_id=%s group by SPOSInvoiceItems.Item,SPOSInvoiceItems.HSNCode,M_Un
                         "POST", EInvoice_URL, headers=headers, data=payload1)
                     
                     data_dict = json.loads(response.text)
-                    # CustomPrint(data_dict)
+                    print(data_dict)
                     # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': data_dict['results']['status'], 'Data': InvoiceData[0]})
                     if(data_dict['results']['status']== 'Success' and data_dict['results']['code']== 200):
                         if int(Mode) == 1:
@@ -314,8 +314,8 @@ where Invoice_id=%s group by SPOSInvoiceItems.Item,SPOSInvoiceItems.HSNCode,M_Un
                             log_entry = create_transaction_logNew(request,InvoiceUploadSerializer,0,f'E-Invoice Upload Successfully  of InvoiceID: {InvoiceID}',362,0 )
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-Invoice Upload Successfully', 'Data': payload1})
                     else:
-                        log_entry = create_transaction_logNew(request, InvoiceUploadSerializer,0, data_dict['results']['errorMessage'], 92,0)
-                        return JsonResponse({'StatusCode': data_dict['results']['code'], 'Status': True, 'Message': data_dict['results']['errorMessage'], 'Data': InvoiceData[0] })
+                        log_entry = create_transaction_logNew(request, InvoiceUploadSerializer,0, data_dict['results'], 92,0)
+                        return JsonResponse({'StatusCode': data_dict['results']['code'], 'Status': True, 'Message': data_dict['results'], 'Data': InvoiceData[0] })
                     
                 else:
                     log_entry = create_transaction_logNew(request,InvoiceUploadSerializer,0, aa[1],362,0) 
