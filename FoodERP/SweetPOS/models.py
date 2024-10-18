@@ -303,6 +303,11 @@ class M_SweetPOSMachine(models.Model):
     Version = models.CharField(max_length=200 ,null=True,blank=True)
     IsGiveUpdate = models.BooleanField(default=False)
     IsAutoUpdate = models.BooleanField(default=False)
+    SeverName = models.CharField(max_length=100,null=True,blank=True)
+    ServerHost = models.CharField(max_length=100,null=True,blank=True)
+    ServerUser = models.CharField(max_length=100,null=True,blank=True)
+    ServerPassWord = models.CharField(max_length=100,null=True,blank=True)
+    ServerDatabase = models.CharField(max_length=100,null=True,blank=True)
 
     class Meta:
         constraints = [
