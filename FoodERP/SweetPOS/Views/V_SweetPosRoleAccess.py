@@ -191,7 +191,7 @@ class MachineTypeListView(CreateAPIView):
                                 "UploadSaleRecordCount":a.UploadSaleRecordCount,
                                 "Validity":a.Validity,
                                 "Version":a.Version,
-                                "SeverName":a.SeverName,
+                                "ServerName":a.SeverName,
                                 "ServerHost": a.ServerHost,
                                 "ServerUser": a.ServerUser,
                                 "ServerPassWord": a.ServerPassWord,
