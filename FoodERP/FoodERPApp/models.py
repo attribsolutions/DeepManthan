@@ -59,6 +59,7 @@ class M_Country(models.Model):
     Currency = models.CharField(max_length=500) 
     CurrencySymbol = models.CharField(max_length=500) 
     Weight = models.CharField(max_length=500)
+    IsTaxApplicable = models.BooleanField(default=False)
     
     class Meta:
         db_table = "M_Country"
@@ -784,7 +785,7 @@ class M_GSTHSNCode(models.Model):
     UpdatedOn = models.DateTimeField(auto_now=True)
     Company = models.ForeignKey(C_Companies, related_name='GstCompany', on_delete=models.PROTECT)
     Item = models.ForeignKey(M_Items, related_name='ItemGSTHSNDetails', on_delete=models.CASCADE)
-
+    # PartyType = models.ForeignKey(M_PartyType, related_name='GSTMasterPartyType', on_delete=models.PROTECT,null=True,blank=True)
     class Meta:
         db_table = "M_GSTHSNCode"          
                    
@@ -815,7 +816,7 @@ class M_MRPMaster(models.Model):
     Item = models.ForeignKey(M_Items, related_name='ItemMRPDetails', on_delete=models.CASCADE)
     'Customer means M_Parties ID'
     Party =models.ForeignKey(M_Parties, related_name='MRPParty', on_delete=models.PROTECT,null=True,blank=True)
-
+    # PartyType = models.ForeignKey(M_PartyType, related_name='MRPMasterPartyType', on_delete=models.PROTECT,null=True,blank=True)
     class Meta:
         db_table = "M_MRPMaster"      
 
