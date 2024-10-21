@@ -18,9 +18,10 @@ class M_MRPsView(CreateAPIView):
     
     @transaction.atomic()
     def post(self, request):
+        M_Mrpsdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                M_Mrpsdata = JSONParser().parse(request)
+                
                 a=MaxValueMaster(M_MRPMaster,'CommonID')
                 jsondata=a.GetMaxValue() 
                 additionaldata= list()
@@ -39,8 +40,8 @@ class M_MRPsView(CreateAPIView):
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Mrps_Serializer.errors,'Data' :[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'MRPSave:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, M_Mrpsdata, 0,'MRPSave:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class GETMrpDetails(CreateAPIView): 
@@ -143,21 +144,21 @@ class GetMRPListDetailsView(CreateAPIView):
             with transaction.atomic():
                 EffectiveDate = MRPListData['EffectiveDate']
                 CommonID = MRPListData['CommonID'] 
-                  
-                query = M_MRPMaster.objects.raw('''
-                   SELECT M_MRPMaster.id,M_MRPMaster.EffectiveDate,M_MRPMaster.MRP,M_MRPMaster.CommonID,C_Companies.Name CompanyName,i.Name as ItemName, SUM(COUNT(i.id)) OVER () AS ItemCount
+                
+                ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(0,1).split('!')
+                 
+                query = M_MRPMaster.objects.raw(f'''
+                   SELECT M_MRPMaster.id,M_MRPMaster.EffectiveDate,M_MRPMaster.MRP,M_MRPMaster.CommonID,C_Companies.Name CompanyName, M_Items.Name as ItemName, SUM(COUNT(M_Items.id)) OVER () AS ItemCount
                         FROM M_MRPMaster 
                         left join C_Companies on C_Companies.id = M_MRPMaster.Company_id 
                         left join M_Parties a on a.id = M_MRPMaster.Division_id 
                         left join M_Parties on M_Parties.id = M_MRPMaster.Party_id 
-                        left join M_Items i on M_MRPMaster.Item_id=i.id
-                        LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = i.id AND MC_ItemGroupDetails.GroupType_id = 1
-                        LEFT JOIN M_Group ON M_Group.id = MC_ItemGroupDetails.Group_id 
-                        LEFT JOIN MC_SubGroup ON MC_SubGroup.id = MC_ItemGroupDetails.SubGroup_id
+                        left join M_Items  on M_MRPMaster.Item_id=M_Items.id
+                        {ItemsGroupJoinsandOrderby[1]}
                         where M_MRPMaster.IsDeleted=0  
                         AND M_MRPMaster.EffectiveDate=%s AND M_MRPMaster.CommonID=%s
-                        GROUP BY M_MRPMaster.id, M_MRPMaster.EffectiveDate, M_MRPMaster.MRP, M_MRPMaster.CommonID, C_Companies.Name, i.Name
-                        ORDER BY M_Group.Sequence, MC_SubGroup.Sequence,i.Sequence''',[EffectiveDate,CommonID])    
+                        GROUP BY M_MRPMaster.id, M_MRPMaster.EffectiveDate, M_MRPMaster.MRP, M_MRPMaster.CommonID, C_Companies.Name, M_Items.Name
+                         {ItemsGroupJoinsandOrderby[2]}''',[EffectiveDate,CommonID])    
                 
                 if query:
                     List = []
@@ -184,7 +185,7 @@ class GetMRPListDetailsView(CreateAPIView):
                         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'MRP Details not available', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, MRPListData, 0, "Get MRP Details:"+ str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': Exception(e), 'Data': []}) 
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []}) 
                 
 
 
@@ -213,6 +214,6 @@ class M_MRPsListViewSecond(CreateAPIView):
                     log_entry = create_transaction_logNew(request, MRPdata_Serializer, 0,'',119,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': MRPdata_Serializer})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'SingleGET MRP:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})   
+            log_entry = create_transaction_logNew(request,MRPListData, 0,'SingleGET MRP:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})   
            
