@@ -64,7 +64,7 @@ class SPOSInvoiceView(CreateAPIView):
                         Invoicedata['TCSAmount']=0.0
                         Invoicedata['InvoiceNumber'] = Invoicedata['BillNumber']
                         Invoicedata['InvoiceDate'] = Invoicedata['SaleDate']
-                        Invoicedata['FullInvoiceNumber'] = Invoicedata['BillNumber']
+                        Invoicedata['FullInvoiceNumber'] = Invoicedata['FullInvoiceNumber']
                         Invoicedata['Customer'] = 43194
                         Invoicedata['Party'] = Invoicedata['DivisionID']
                         Invoicedata['GrandTotal'] =Invoicedata['RoundedAmount']
