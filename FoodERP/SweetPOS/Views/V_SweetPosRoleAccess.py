@@ -173,8 +173,14 @@ class MachineTypeListView(CreateAPIView):
                         for d in c:
                             if MachineTypeID.strip() == d[0]:
                                 RoleIDs.append(d[1])  
+                                role_names = []
+                                if RoleIDs:
+                                    roles = M_Roles.objects.filter(id__in=RoleIDs).values('id', 'Name')
+                                    for role in roles: 
+                                        role_names.append(role['Name'])
+                                MachineRole_Name = ','.join(role_names)
                     RoleID = ','.join(RoleIDs) or ""   
-                        
+                           
                     MachineTypeList.append({
                                 "id": a.id,
                                 "Party": a.Party,
@@ -182,7 +188,8 @@ class MachineTypeListView(CreateAPIView):
                                 "MachineTypeDetails": MachineTypeDetails,
                                 "IsServer": a.IsServer,
                                 "ClientID": a.ClientID,
-                                "MachineRole":RoleID,
+                                "MachineRole":RoleID, 
+                                "MachineRoleName": MachineRole_Name,
                                 "IsAutoUpdate":a.IsAutoUpdate,
                                 "IsGiveUpdate":a.IsGiveUpdate,
                                 "IsService":a.IsService,
