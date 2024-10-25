@@ -481,6 +481,9 @@ class StockReportView(CreateAPIView):
                 Unit = Orderdata['Unit']
                 Party = Orderdata['Party']
                 PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
+                
+                ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Party,0).split('!')
+                
                 # UnitName = M_Units.objects.filter(id=Unit).values("Name")
                 # unitname = UnitName[0]['Name']
                 if(Unit!=0):
@@ -509,17 +512,15 @@ class StockReportView(CreateAPIView):
                 FROM 
 	
 	( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit_id,M_Units.Name UnitName ,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
-    ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName
+    {ItemsGroupJoinsandOrderby[0]}
 	 FROM O_DateWiseLiveStock
 	
 	    JOIN M_Items ON M_Items.id=O_DateWiseLiveStock.Item_id 
         join M_Units on M_Units.id=O_DateWiseLiveStock.Unit_id
-        left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id  and MC_ItemGroupDetails.GroupType_id=1
-		left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
-		left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
-		left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
+        {ItemsGroupJoinsandOrderby[1]} 
 		 
-		 WHERE StockDate BETWEEN %s AND %s AND Party_id=%s GROUP BY Item_id,M_GroupType.id,M_Group.id,MC_SubGroup.id) A 
+		 WHERE StockDate BETWEEN %s AND %s AND Party_id=%s GROUP BY Item_id,Unit_id,GroupType.id,Groupss.id,subgroup.id
+        {ItemsGroupJoinsandOrderby[2]}) A 
 		
 		left JOIN (SELECT O_DateWiseLiveStock.Item_id, OpeningBalance FROM O_DateWiseLiveStock WHERE O_DateWiseLiveStock.StockDate = %s AND O_DateWiseLiveStock.Party_id=%s) B
 		
@@ -859,7 +860,7 @@ class InvoiceDateExportReportView(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Reportdata, 0, 'InvoiceDateExportReport:'+str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class DeletedInvoiceDateExportReportView(CreateAPIView):
