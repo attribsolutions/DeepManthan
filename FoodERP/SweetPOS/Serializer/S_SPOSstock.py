@@ -26,6 +26,7 @@ class SPOSStockReportSerializer(serializers.Serializer):
     Sale = serializers.DecimalField(max_digits=10, decimal_places=3)
     PurchaseReturn = serializers.DecimalField(max_digits=10, decimal_places=3)
     ClosingBalance=serializers.DecimalField(max_digits=10, decimal_places=3)
+    ClosingAmount = serializers.DecimalField(max_digits=10, decimal_places=3)
     ActualStock=serializers.DecimalField(max_digits=10, decimal_places=3)
     ItemName = serializers.CharField(max_length=500)
     GroupTypeName = serializers.CharField(max_length=500)

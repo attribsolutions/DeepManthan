@@ -481,8 +481,10 @@ class UserPartiesForLoginPage(CreateAPIView):
                         FSSAINo=F('Party__PartyAddress__FSSAINo'),
                         FSSAIExpiry=F('Party__PartyAddress__FSSAIExipry'),
                         PartyTypeID=F('Party__PartyType_id'),
-                        PartyType=F('Party__PartyType__Name'), 
+                        PartyType=F('Party__PartyType__Name'),
+                        Country_id=F('Party__Country_id'),
                         CurrencySymbol=F('Party__PartyType__Country__CurrencySymbol'), 
+                        Country=F('Party__PartyType__Country__Country'),
                         Weight=F('Party__PartyType__Country__Weight'), 
                         UploadSalesDatafromExcelParty=F('Party__UploadSalesDatafromExcelParty'),
                         # IsDefaultPartyAddress=F('Party__PartyAddress__IsDefault')      
@@ -494,7 +496,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                     .values(
                         'id', 'Party_id', 'Role_id', 'RoleName', 'PartyName','PartyAddress', 'User__Employee_id',
                         'Party__SAPPartyCode', 'IsSCMPartyTypeInt','IsFranchisesInt', 'GSTIN', 'FSSAINo', 'FSSAIExpiry',
-                        'PartyTypeID', 'PartyType','CurrencySymbol','Weight', 'UploadSalesDatafromExcelPartyInt','Party__PriceList_id'
+                        'PartyTypeID', 'PartyType','Country_id','CurrencySymbol','Country','Weight', 'UploadSalesDatafromExcelPartyInt','Party__PriceList_id'
                     )
                     # .filter(IsDefaultPartyAddress=True)
                     
@@ -525,7 +527,9 @@ class UserPartiesForLoginPage(CreateAPIView):
                             "FSSAIExipry" :item['FSSAIExpiry'],
                             "PartyTypeID":item['PartyTypeID'],
                             "PartyType":item['PartyType'],
+                            "Country_id":item['Country_id'],
                             "CurrencySymbol":item['CurrencySymbol'],
+                            "Country":item['Country'],
                             "Weight":item['Weight'],
                             "UploadSalesDatafromExcelParty":item['UploadSalesDatafromExcelPartyInt'],
                             "PriceList_id":item['Party__PriceList_id']
