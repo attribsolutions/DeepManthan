@@ -228,7 +228,11 @@ class SPOSLoginDetailsView(CreateAPIView):
                 ToDate = datetime.strptime(ToDateStr, '%Y-%m-%d %H:%M:%S')
                 DivisionID = LoginData['DivisionID']
 
-                SPOSLoginDetailsQuery = M_SweetPOSLogin.objects.raw('''SELECT M_SweetPOSLogin.id,UserName,DivisionID,ClientID,MacID,ExePath,ExeVersion,CreatedOn FROM SweetPOS.M_SweetPOSLogin WHERE CreatedOn BETWEEN %s AND %s AND DivisionID=%s''',[FromDate,ToDate,DivisionID])
+                SPOSLoginDetailsQuery = M_SweetPOSLogin.objects.raw('''SELECT L.id,L.UserName,L.DivisionID,L.ClientID,L.MacID,L.ExePath,
+                                                                    L.ExeVersion,L.CreatedOn,M.MachineName
+                                                                    FROM SweetPOS.M_SweetPOSLogin L
+                                                                    JOIN SweetPOS.M_SweetPOSMachine M ON L.ClientID = M.id 
+                                                                    WHERE L.CreatedOn BETWEEN %s AND %s AND L.DivisionID=%s''',[FromDate,ToDate,DivisionID])
                 SPOSLoginDetailsList = list()
 
                 for a in SPOSLoginDetailsQuery:
@@ -238,6 +242,7 @@ class SPOSLoginDetailsView(CreateAPIView):
                         "DivisionID": a.DivisionID,
                         "ClientID": a.ClientID,
                         "MacID": a.MacID,
+                        "MachineName": a.MachineName,
                         "ExePath": a.ExePath,
                         "ExeVersion": a.ExeVersion,
                         "CreatedOn": a.CreatedOn
