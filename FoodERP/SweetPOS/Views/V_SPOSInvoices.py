@@ -64,7 +64,7 @@ class SPOSInvoiceView(CreateAPIView):
                         Invoicedata['TCSAmount']=0.0
                         Invoicedata['InvoiceNumber'] = Invoicedata['BillNumber']
                         Invoicedata['InvoiceDate'] = Invoicedata['SaleDate']
-                        Invoicedata['FullInvoiceNumber'] = Invoicedata['BillNumber']
+                        Invoicedata['FullInvoiceNumber'] = Invoicedata['FullInvoiceNumber']
                         Invoicedata['Customer'] = 43194
                         Invoicedata['Party'] = Invoicedata['DivisionID']
                         Invoicedata['GrandTotal'] =Invoicedata['RoundedAmount']
@@ -173,6 +173,7 @@ class SPOSMaxsaleIDView(CreateAPIView):
                 if user is not None: 
                     
                     QueryfordivisionID = M_SweetPOSRoleAccess.objects.filter(Party=DivisionID).values('Party')
+                    QueryforSaleRecordCount = M_SweetPOSMachine.objects.filter(Party=DivisionID).values('UploadSaleRecordCount')
                     if not QueryfordivisionID:
                             
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'DivisionId is not mapped. Please map it from the SPOSRoleAccess page.', 'Data':[]})
@@ -183,7 +184,7 @@ class SPOSMaxsaleIDView(CreateAPIView):
                             maxSaleID=row.MaxSaleID
 
                         log_entry = create_transaction_logNew(request, 0, QueryfordivisionID[0]['Party'],'',384,0,0,0,ClientID)
-                        return JsonResponse({"Success":True,"status_code":200,"SaleID":maxSaleID,"Toprows":200})    
+                        return JsonResponse({"Success":True,"status_code":200,"SaleID":maxSaleID,"Toprows":QueryforSaleRecordCount[0]['UploadSaleRecordCount']})    
         except Exception as e:
             
             log_entry = create_transaction_logNew(request, 0, 0,'GET_Max_SweetPOS_SaleID_By_ClientID:'+str(e),33,0)
