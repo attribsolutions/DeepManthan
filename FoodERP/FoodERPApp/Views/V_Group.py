@@ -237,9 +237,9 @@ class DetailsOfSubgroups_GroupsViewNEW(CreateAPIView):
                 SG.Id as SubGroupID, SG.Name as SubGroupName,SG.Sequence as SubGroupSequence,I.Id ItemID,I.Name ItemName,
                 I.Sequence as ItemSequence 
 from M_Group G 
-joIn MC_SubGroup SG on G.Id=SG.Group_Id
-left joIn MC_ItemGroupDetails IGD on IGD.Group_Id=G.Id
-left joIn M_Items I on I.Id=IGD.Item_Id 
+left join MC_ItemGroupDetails IGD on IGD.Group_Id=G.Id
+left join MC_SubGroup SG ON SG.Id = IGD.SubGroup_id 
+left join M_Items I on I.Id=IGD.Item_Id 
 where G.GroupType_Id={GroupType_id}
 
 union
@@ -276,11 +276,12 @@ select 1 as id, g.id as GroupID,g.name as GroupName,g.Sequence GroupSequence,igd
 
                 for key, group_data in grouped_data.items():
                     GroupSubgroupItemList.append(group_data)
-
+                    
+                log_entry = create_transaction_logNew(request,DetailsOfSubgroups, 0,'GroupTypeID:'+str(id),393,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GroupSubgroupItemList})                
         except Exception as e:
-                log_entry = create_transaction_logNew(request,0, 0,'DetailsOfsubgroups_groups:'+str(e),33,0)
-                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': Exception(e), 'Data': []})
+                log_entry = create_transaction_logNew(request,DetailsOfSubgroups, 0,'DetailsOfsubgroups_groups:'+str(e),33,0)
+                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
          
 
 class UpdateGroupSubGroupSequenceView(CreateAPIView):
