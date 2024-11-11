@@ -134,6 +134,7 @@ class MachineTypeSaveView(CreateAPIView):
                         LastInsertID = MachineType.id
                         log_entry = create_transaction_logNew(request, MachineType_Data, MachineType_Data['Party'], '', 416, LastInsertID)        
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Machine Type Save Successfully',"TransactionID" : LastInsertID, 'Data':[]})
+                    log_entry = create_transaction_logNew(request, MachineType_Data, MachineType_Data['Party'], '', 416, 0)
                     return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': MachineType_serializer.errors, 'Data': []})
                     
         except Exception as e:
@@ -179,8 +180,9 @@ class MachineTypeListView(CreateAPIView):
                                     for role in roles: 
                                         role_names.append(role['Name'])
                                 MachineRole_Name = ','.join(role_names)
+                                
                     RoleID = ','.join(RoleIDs) or ""   
-                           
+                    
                     MachineTypeList.append({
                                 "id": a.id,
                                 "Party": a.Party,
@@ -189,7 +191,7 @@ class MachineTypeListView(CreateAPIView):
                                 "IsServer": a.IsServer,
                                 "ClientID": a.ClientID,
                                 "MachineRole":RoleID, 
-                                "MachineRoleName": MachineRole_Name,
+                                "MachineRoleName":MachineRole_Name if RoleID not in [None, ""] else None,
                                 "IsAutoUpdate":a.IsAutoUpdate,
                                 "IsGiveUpdate":a.IsGiveUpdate,
                                 "IsService":a.IsService,

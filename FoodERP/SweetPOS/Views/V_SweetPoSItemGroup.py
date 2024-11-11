@@ -99,8 +99,8 @@ class ItemListView(CreateAPIView):
                 LEFT JOIN M_ChannelWiseItems ON i.id = M_ChannelWiseItems.Item_id
                 join MC_PartyItems on MC_PartyItems.Item_id=i.id and MC_PartyItems.party_id={DivisionID}
                 WHERE M_ChannelWiseItems.PartyType_id = 19  """)                  
+                # return Response({"status": True, "status_code": 200, "count": "", "data": "" }, status=200)
                 
-               
                 count=0
                 item_data=list()
                 for row in query:
