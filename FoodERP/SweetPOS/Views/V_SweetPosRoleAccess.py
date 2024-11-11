@@ -134,10 +134,11 @@ class MachineTypeSaveView(CreateAPIView):
                         LastInsertID = MachineType.id
                         log_entry = create_transaction_logNew(request, MachineType_Data, MachineType_Data['Party'], '', 416, LastInsertID)        
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Machine Type Save Successfully',"TransactionID" : LastInsertID, 'Data':[]})
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MacID is already exist!', 'Data' : []})
+                    return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': MachineType_serializer.errors, 'Data': []})
+                    
         except Exception as e:
             log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'MachineTypeSave:'+str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
         
 class MachineTypeListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -147,7 +148,7 @@ class MachineTypeListView(CreateAPIView):
         try:
             with transaction.atomic():
                 Party = MachineType_Data['Party']
-                query = M_SweetPOSMachine.objects.raw('''Select A.id, A.Party, A.MacID, ifnull(A.MachineType,'') MachineType ,  B.Name MachineTypeName, A.IsServer, A.ClientID,A.IsAutoUpdate,A.IsGiveUpdate,A.IsService,IFNULL(A.MachineName, '') AS MachineName,A.ServerSequence,A.UploadSaleRecordCount,A.Validity,IFNULL(A.Version,'') AS Version
+                query = M_SweetPOSMachine.objects.raw('''Select A.id, A.Party, A.MacID, ifnull(A.MachineType,'') MachineType ,  B.Name MachineTypeName, A.IsServer, A.ClientID,A.IsAutoUpdate,A.IsGiveUpdate,A.IsService,IFNULL(A.MachineName, '') AS MachineName,A.ServerSequence,A.UploadSaleRecordCount,A.Validity,IFNULL(A.Version,'') AS Version, A.SeverName, A.ServerHost, A.ServerUser, A.ServerPassWord, A.ServerDatabase, A.Invoiceprefix
                         From SweetPOS.M_SweetPOSMachine A
                         left JOIN  FoodERP.M_GeneralMaster B on B.id = A.MachineType
                         WHERE A.Party = %s''',[Party])
@@ -172,8 +173,14 @@ class MachineTypeListView(CreateAPIView):
                         for d in c:
                             if MachineTypeID.strip() == d[0]:
                                 RoleIDs.append(d[1])  
+                                role_names = []
+                                if RoleIDs:
+                                    roles = M_Roles.objects.filter(id__in=RoleIDs).values('id', 'Name')
+                                    for role in roles: 
+                                        role_names.append(role['Name'])
+                                MachineRole_Name = ','.join(role_names)
                     RoleID = ','.join(RoleIDs) or ""   
-                        
+                           
                     MachineTypeList.append({
                                 "id": a.id,
                                 "Party": a.Party,
@@ -181,7 +188,8 @@ class MachineTypeListView(CreateAPIView):
                                 "MachineTypeDetails": MachineTypeDetails,
                                 "IsServer": a.IsServer,
                                 "ClientID": a.ClientID,
-                                "MachineRole":RoleID,
+                                "MachineRole":RoleID, 
+                                "MachineRoleName": MachineRole_Name,
                                 "IsAutoUpdate":a.IsAutoUpdate,
                                 "IsGiveUpdate":a.IsGiveUpdate,
                                 "IsService":a.IsService,
@@ -189,7 +197,13 @@ class MachineTypeListView(CreateAPIView):
                                 "ServerSequence":a.ServerSequence,
                                 "UploadSaleRecordCount":a.UploadSaleRecordCount,
                                 "Validity":a.Validity,
-                                "Version":a.Version
+                                "Version":a.Version,
+                                "ServerName":a.SeverName,
+                                "ServerHost": a.ServerHost,
+                                "ServerUser": a.ServerUser,
+                                "ServerPassWord": a.ServerPassWord,
+                                "ServerDatabase": a.ServerDatabase,
+                                "Invoiceprefix": a.Invoiceprefix
                                 })
                 log_entry = create_transaction_logNew(request, MachineType_Data, Party, '', 417, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :MachineTypeList})
@@ -214,7 +228,11 @@ class SPOSLoginDetailsView(CreateAPIView):
                 ToDate = datetime.strptime(ToDateStr, '%Y-%m-%d %H:%M:%S')
                 DivisionID = LoginData['DivisionID']
 
-                SPOSLoginDetailsQuery = M_SweetPOSLogin.objects.raw('''SELECT M_SweetPOSLogin.id,UserName,DivisionID,ClientID,MacID,ExePath,ExeVersion,CreatedOn FROM SweetPOS.M_SweetPOSLogin WHERE CreatedOn BETWEEN %s AND %s AND DivisionID=%s''',[FromDate,ToDate,DivisionID])
+                SPOSLoginDetailsQuery = M_SweetPOSLogin.objects.raw('''SELECT L.id,L.UserName,L.DivisionID,L.ClientID,L.MacID,L.ExePath,
+                                                                    L.ExeVersion,L.CreatedOn,M.MachineName
+                                                                    FROM SweetPOS.M_SweetPOSLogin L
+                                                                    JOIN SweetPOS.M_SweetPOSMachine M ON L.ClientID = M.id 
+                                                                    WHERE L.CreatedOn BETWEEN %s AND %s AND L.DivisionID=%s''',[FromDate,ToDate,DivisionID])
                 SPOSLoginDetailsList = list()
 
                 for a in SPOSLoginDetailsQuery:
@@ -224,6 +242,7 @@ class SPOSLoginDetailsView(CreateAPIView):
                         "DivisionID": a.DivisionID,
                         "ClientID": a.ClientID,
                         "MacID": a.MacID,
+                        "MachineName": a.MachineName,
                         "ExePath": a.ExePath,
                         "ExeVersion": a.ExeVersion,
                         "CreatedOn": a.CreatedOn

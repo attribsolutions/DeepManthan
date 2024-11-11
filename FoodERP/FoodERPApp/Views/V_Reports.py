@@ -481,6 +481,9 @@ class StockReportView(CreateAPIView):
                 Unit = Orderdata['Unit']
                 Party = Orderdata['Party']
                 PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
+                
+                ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Party,0).split('!')
+                
                 # UnitName = M_Units.objects.filter(id=Unit).values("Name")
                 # unitname = UnitName[0]['Name']
                 if(Unit!=0):
@@ -509,17 +512,15 @@ class StockReportView(CreateAPIView):
                 FROM 
 	
 	( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit_id,M_Units.Name UnitName ,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
-    ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName
+    {ItemsGroupJoinsandOrderby[0]}
 	 FROM O_DateWiseLiveStock
 	
 	    JOIN M_Items ON M_Items.id=O_DateWiseLiveStock.Item_id 
         join M_Units on M_Units.id=O_DateWiseLiveStock.Unit_id
-        left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id  and MC_ItemGroupDetails.GroupType_id=1
-		left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
-		left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
-		left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
+        {ItemsGroupJoinsandOrderby[1]} 
 		 
-		 WHERE StockDate BETWEEN %s AND %s AND Party_id=%s GROUP BY Item_id,M_GroupType.id,M_Group.id,MC_SubGroup.id) A 
+		 WHERE StockDate BETWEEN %s AND %s AND Party_id=%s GROUP BY Item_id,Unit_id,GroupType.id,Groupss.id,subgroup.id
+        {ItemsGroupJoinsandOrderby[2]}) A 
 		
 		left JOIN (SELECT O_DateWiseLiveStock.Item_id, OpeningBalance FROM O_DateWiseLiveStock WHERE O_DateWiseLiveStock.StockDate = %s AND O_DateWiseLiveStock.Party_id=%s) B
 		
@@ -859,7 +860,7 @@ class InvoiceDateExportReportView(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Reportdata, 0, 'InvoiceDateExportReport:'+str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class DeletedInvoiceDateExportReportView(CreateAPIView):
@@ -960,9 +961,39 @@ class ReturnReportDownloadView(CreateAPIView):
                 ToDate = Reportdata['ToDate']
                 Party = Reportdata['Party']
                 Party_list = Party.split(",")
-                query = T_PurchaseReturn.objects.raw('''SELECT T_PurchaseReturn.id, T_PurchaseReturn.ReturnDate,B.Name CustomerName,D.Name CustomerType,C_Companies.Name CompanyName, M_Group.Name Product,MC_SubGroup.Name SubProduct, M_Items.id AS ERPItemCode, M_Items.SAPItemCode, M_Items.Name MaterialName,TC_PurchaseReturnItems.Quantity ReturnQtyNos,TC_PurchaseReturnItems.MRPValue,TC_PurchaseReturnItems.Rate, TC_PurchaseReturnItems.BasicAmount,TC_PurchaseReturnItems.GSTPercentage, TC_PurchaseReturnItems.GSTAmount, TC_PurchaseReturnItems.Amount,TC_PurchaseReturnItems.Discount,TC_PurchaseReturnItems.DiscountAmount,TC_PurchaseReturnItems.DiscountType,TC_PurchaseReturnItems.BatchDate, TC_PurchaseReturnItems.BatchCode,M_GeneralMaster.Name ReasonForReturn,TC_PurchaseReturnItems.ApprovedQuantity ApprovedQuantityInNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,M_Routes.Name RouteName,A.Name SupplierName,C.Name SupplierType,T_PurchaseReturn.FullReturnNumber,ApprovedByCompany,FinalApprovalDate,ApprovedRate,ApprovedBasicAmount,ApprovedGSTPercentage,ApprovedCGST,ApprovedIGST,ApprovedSGST,ApprovedCGSTPercentage,ApprovedSGSTPercentage,ApprovedIGSTPercentage,ApprovedGSTAmount,ApprovedAmount,ApprovedDiscountAmount FROM TC_PurchaseReturnItems JOIN T_PurchaseReturn ON T_PurchaseReturn.id =TC_PurchaseReturnItems.PurchaseReturn_id JOIN M_Parties A ON A.id= T_PurchaseReturn.Party_id JOIN M_Parties B ON B.id = T_PurchaseReturn.Customer_id JOIN M_PartyType C  ON C.id= A.PartyType_id JOIN M_PartyType D ON D.id= B.PartyType_id Left JOIN MC_PartyAddress ON MC_PartyAddress.Party_id=B.id AND MC_PartyAddress.IsDefault=1 JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id = B.id  Left JOIN M_Routes ON M_Routes.id=MC_PartySubParty.Route_id JOIN M_Items ON M_Items.id = TC_PurchaseReturnItems.Item_id LEFT JOIN MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1 LEFT JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id JOIN M_GeneralMaster ON M_GeneralMaster.id = TC_PurchaseReturnItems.ItemReason_id JOIN C_Companies ON C_Companies.id = M_Items.Company_id WHERE T_PurchaseReturn.ReturnDate BETWEEN %s AND %s AND  (T_PurchaseReturn.Party_id IN %s OR T_PurchaseReturn.Customer_id IN %s)  Order by T_PurchaseReturn.ReturnDate,T_PurchaseReturn.Customer_id  ''', ([
+                query = T_PurchaseReturn.objects.raw('''select *,M_Routes.Name RouteName from (SELECT T_PurchaseReturn.id, T_PurchaseReturn.ReturnDate,B.Name CustomerName,D.Name CustomerType,C_Companies.Name CompanyName,
+                                                      M_Group.Name Product,MC_SubGroup.Name SubProduct, M_Items.id AS ERPItemCode, M_Items.SAPItemCode, M_Items.Name MaterialName,TC_PurchaseReturnItems.Quantity ReturnQtyNos,
+                                                     TC_PurchaseReturnItems.MRPValue,TC_PurchaseReturnItems.Rate, TC_PurchaseReturnItems.BasicAmount,
+                                                     TC_PurchaseReturnItems.GSTPercentage, TC_PurchaseReturnItems.GSTAmount, TC_PurchaseReturnItems.Amount,
+                                                     TC_PurchaseReturnItems.Discount,TC_PurchaseReturnItems.DiscountAmount,TC_PurchaseReturnItems.DiscountType,
+                                                     TC_PurchaseReturnItems.BatchDate, TC_PurchaseReturnItems.BatchCode,M_GeneralMaster.Name ReasonForReturn,
+                                                     TC_PurchaseReturnItems.ApprovedQuantity ApprovedQuantityInNo,MC_PartyAddress.Address,MC_PartyAddress.PIN,
+                                                     A.Name SupplierName,C.Name SupplierType,T_PurchaseReturn.FullReturnNumber,
+                                                     ApprovedByCompany,FinalApprovalDate,ApprovedRate,ApprovedBasicAmount,ApprovedGSTPercentage,ApprovedCGST,
+                                                     ApprovedIGST,ApprovedSGST,ApprovedCGSTPercentage,ApprovedSGSTPercentage,ApprovedIGSTPercentage,
+                                                     ApprovedGSTAmount,ApprovedAmount,ApprovedDiscountAmount ,A.id PartyID,B.id CustomerID
+                                                     FROM TC_PurchaseReturnItems 
+                                                     JOIN T_PurchaseReturn ON T_PurchaseReturn.id =TC_PurchaseReturnItems.PurchaseReturn_id 
+                                                     JOIN M_Parties A ON A.id= T_PurchaseReturn.Party_id 
+                                                     JOIN M_Parties B ON B.id = T_PurchaseReturn.Customer_id 
+                                                     JOIN M_PartyType C  ON C.id= A.PartyType_id 
+                                                     JOIN M_PartyType D ON D.id= B.PartyType_id 
+                                                     Left JOIN MC_PartyAddress ON MC_PartyAddress.Party_id=B.id AND MC_PartyAddress.IsDefault=1 
+                                                     
+                                                     JOIN M_Items ON M_Items.id = TC_PurchaseReturnItems.Item_id 
+                                                     LEFT JOIN MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1 
+                                                     LEFT JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
+                                                     LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
+                                                     LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
+                                                     JOIN M_GeneralMaster ON M_GeneralMaster.id = TC_PurchaseReturnItems.ItemReason_id 
+                                                     JOIN C_Companies ON C_Companies.id = M_Items.Company_id 
+                                                     WHERE T_PurchaseReturn.ReturnDate BETWEEN %s AND %s AND  (T_PurchaseReturn.Party_id IN %s OR T_PurchaseReturn.Customer_id IN %s)  
+                                                     Order by T_PurchaseReturn.ReturnDate,T_PurchaseReturn.Customer_id)PP
+                                                     JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id = PP.CustomerID and MC_PartySubParty.Party_id=PP.PartyID
+                                                     LEFT JOIN M_Routes ON M_Routes.id = MC_PartySubParty.Route_id
+                                                       ''', ([
                                                       FromDate, ToDate, Party_list,Party_list]))
-                # CustomPrint(query.query)
+                # print(query.query)
                 if query:
                     ReturnSerializer = ReturnReportSerializer(
                         query, many=True).data

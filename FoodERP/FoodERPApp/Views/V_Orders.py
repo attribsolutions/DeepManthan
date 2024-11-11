@@ -37,7 +37,7 @@ class POTypeView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
-class OrderListFilterView(CreateAPIView):
+class OrderListFilterView(CreateAPIView): 
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
 
@@ -53,6 +53,8 @@ class OrderListFilterView(CreateAPIView):
                 Supplier = Orderdata['Supplier']
                 OrderType = Orderdata['OrderType']
                 CustomerType = Orderdata['CustomerType']
+                Country = Orderdata['Country']
+
                 d = date.today()   
 
                 # for log
@@ -88,6 +90,12 @@ class OrderListFilterView(CreateAPIView):
                         q = query.union(queryForOpenPO)
                 else:  # OrderType -2 Sales Order
                     # Pradnya :  OrderType=2 filter remove form all ORM Query coz parasnath purches order is katraj div sale order
+                
+                    if Country:
+                        bbb = Q(Customer__PartyType__Country_id=Country)
+                    else:
+                        bbb = Q()
+
                     if(CustomerType == ''):  # all
                         aaa = Q()
                     else:
@@ -97,20 +105,20 @@ class OrderListFilterView(CreateAPIView):
                     if(Customer == ''):
                         q0 = MC_PartySubParty.objects.filter(Party=Supplier).values('SubParty')
                         q1 = T_Orders.objects.filter(
-                            OrderDate__range=[FromDate, ToDate], Supplier_id=Supplier,Customer_id__in=q0).select_related('Customer').filter(aaa)
+                            OrderDate__range=[FromDate, ToDate], Supplier_id=Supplier,Customer_id__in=q0).select_related('Customer').filter(aaa,bbb)
                         query = T_Orders.objects.filter(
-                            OrderDate__range=[FromDate, ToDate], Supplier_id=Supplier).select_related('Customer').filter(aaa)
+                            OrderDate__range=[FromDate, ToDate], Supplier_id=Supplier).select_related('Customer').filter(aaa,bbb)
                         queryForOpenPO = T_Orders.objects.filter(
-                            POFromDate__lte=FromDate, POToDate__gte=ToDate, Supplier_id=Supplier).select_related('Customer').filter(aaa)
+                            POFromDate__lte=FromDate, POToDate__gte=ToDate, Supplier_id=Supplier).select_related('Customer').filter(aaa,bbb)
                         q2 = query.union(queryForOpenPO)
                         q = q2.union(q1)
 
                     else:
 
                         query = T_Orders.objects.filter(OrderDate__range=[
-                                                        FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier).select_related('Customer').filter(aaa)
+                                                        FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier).select_related('Customer').filter(aaa,bbb)
                         queryForOpenPO = T_Orders.objects.filter(
-                            POFromDate__lte=FromDate, POToDate__gte=ToDate, Customer_id=Customer, Supplier_id=Supplier).select_related('Customer').filter(aaa)
+                            POFromDate__lte=FromDate, POToDate__gte=ToDate, Customer_id=Customer, Supplier_id=Supplier).select_related('Customer').filter(aaa,bbb)
                         q = query.union(queryForOpenPO)
                 # CustomPrint(query.query)
                 # return JsonResponse({'query': str(q.query)})
@@ -183,6 +191,7 @@ class OrderListFilterView(CreateAPIView):
                                 "IsTCSParty":TCSPartyFlag,
                                 "MobileAppOrderFlag" : a['MobileAppOrderFlag'],
                                 "SubPartyFlag": SubPartyFlag
+                                
                             })
 
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderListData})
@@ -711,7 +720,6 @@ class EditOrderView(CreateAPIView):
 
                 if (q1[0]['PartyType__IsRetailer'] == 0 ):
                     PartyItem = Customer
-                                                   
                     Itemquery = TC_OrderItems.objects.raw(f'''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,
                     convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,1) else a.GST_id end),SIGNED)GST_id,
                     convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,2) else M_GSTHSNCode.GSTPercentage  end),DECIMAL(10, 2))GSTPercentage,
@@ -759,7 +767,6 @@ left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
 
 Order By M_Group.Sequence,MC_SubGroup.Sequence,{seq}  ''', ([EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[Customer],[Party],[EffectiveDate],[Customer],[Party],[Stockparty],[EffectiveDate],[RateParty],[PartyItem], [Party],[PartyItem], [OrderID]))
-                    
                 else:
                     PartyItem = Party
                     Itemquery = TC_OrderItems.objects.raw(f'''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,

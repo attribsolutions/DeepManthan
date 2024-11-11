@@ -64,7 +64,7 @@ class SPOSInvoiceView(CreateAPIView):
                         Invoicedata['TCSAmount']=0.0
                         Invoicedata['InvoiceNumber'] = Invoicedata['BillNumber']
                         Invoicedata['InvoiceDate'] = Invoicedata['SaleDate']
-                        Invoicedata['FullInvoiceNumber'] = Invoicedata['BillNumber']
+                        Invoicedata['FullInvoiceNumber'] = Invoicedata['FullInvoiceNumber']
                         Invoicedata['Customer'] = 43194
                         Invoicedata['Party'] = Invoicedata['DivisionID']
                         Invoicedata['GrandTotal'] =Invoicedata['RoundedAmount']
@@ -173,6 +173,7 @@ class SPOSMaxsaleIDView(CreateAPIView):
                 if user is not None: 
                     
                     QueryfordivisionID = M_SweetPOSRoleAccess.objects.filter(Party=DivisionID).values('Party')
+                    QueryforSaleRecordCount = M_SweetPOSMachine.objects.filter(Party=DivisionID).values('UploadSaleRecordCount')
                     if not QueryfordivisionID:
                             
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'DivisionId is not mapped. Please map it from the SPOSRoleAccess page.', 'Data':[]})
@@ -183,7 +184,7 @@ class SPOSMaxsaleIDView(CreateAPIView):
                             maxSaleID=row.MaxSaleID
 
                         log_entry = create_transaction_logNew(request, 0, QueryfordivisionID[0]['Party'],'',384,0,0,0,ClientID)
-                        return JsonResponse({"Success":True,"status_code":200,"SaleID":maxSaleID,"Toprows":200})    
+                        return JsonResponse({"Success":True,"status_code":200,"SaleID":maxSaleID,"Toprows":QueryforSaleRecordCount[0]['UploadSaleRecordCount']})    
         except Exception as e:
             
             log_entry = create_transaction_logNew(request, 0, 0,'GET_Max_SweetPOS_SaleID_By_ClientID:'+str(e),33,0)
@@ -544,7 +545,7 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
 
                 PartyDetails = M_Parties.objects.raw('''SELECT FoodERP.M_Parties.id, Name, FoodERP.MC_PartyAddress.Address,
                                                         (SELECT SUM(SweetPOS.T_SPOSInvoices.TotalAmount) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s AND SweetPOS.T_SPOSInvoices.IsDeleted=0) TotalAmount,
-                                                        (SELECT COUNT(id) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s) BillCount,
+                                                        (SELECT COUNT(id) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s AND SweetPOS.T_SPOSInvoices.IsDeleted=0) BillCount,
                                                         (SELECT TIME(MIN(SweetPOS.T_SPOSInvoices.CreatedOn)) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s) FirstBillTime,
                                                         (SELECT TIME(MAX(SweetPOS.T_SPOSInvoices.CreatedOn)) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s) LastBillTime,
                                                         (SELECT FullInvoiceNumber FROM SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s ORDER BY id DESC LIMIT 1) LastInvoiceNumber,
