@@ -232,8 +232,8 @@ class DetailsOfSubgroups_GroupsViewNEW(CreateAPIView):
                 Company_id = DetailsOfSubgroups['Company_id']
                 
                 GroupSubgroupItemList = []
-                query = M_Items.objects.raw(f'''
-                select 1 as id,  G.Id as GroupID,G.name as GroupName,G.Sequence GroupSequence,IGD.GroupType_Id,IGD.SubGroup_Id,IGD.ItemSequence,
+                query = M_Items.objects.raw(f'''select * from 
+                (select 1 as id,  G.Id as GroupID,G.name as GroupName,G.Sequence GroupSequence,IGD.GroupType_Id,IGD.SubGroup_Id,IGD.ItemSequence,
                 SG.Id as SubGroupID, SG.Name as SubGroupName,SG.Sequence as SubGroupSequence,I.Id ItemID,I.Name ItemName
 from M_Group G 
 left join MC_ItemGroupDetails IGD on IGD.Group_Id=G.Id
@@ -248,7 +248,7 @@ select 1 as id, g.id as GroupID,g.name as GroupName,g.Sequence GroupSequence,igd
                 left join MC_ItemGroupDetails as igd ON i.id=igd.Item_ID and igd.GroupType_id={GroupType_id}
                 left join M_Group as g ON g.id=igd.Group_id
                 left join MC_SubGroup as sg on sg.id=igd.SubGroup_id
-                where i.Company_id={Company_id} ''')
+                where i.Company_id={Company_id} )a order by GroupSequence,SubGroupSequence,ItemSequence''')
                 
                 grouped_data = {}
 
