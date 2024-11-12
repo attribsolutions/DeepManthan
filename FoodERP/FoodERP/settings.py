@@ -124,7 +124,7 @@ DATABASES = {
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',  
 
-        'HOST': '10.4.5.68',   
+        'HOST': '43.225.53.91',   
 
         'PORT': '3306' , 
         'OPTIONS': { 
@@ -137,7 +137,7 @@ DATABASES = {
         'NAME': 'TransactionLog',       
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',    
-        'HOST': '10.4.5.68',    
+        'HOST': '43.225.53.91',    
         'PORT': '3306' , 
         'OPTIONS': { 
             'sql_mode': 'STRICT_TRANS_TABLES', 
@@ -149,7 +149,7 @@ DATABASES = {
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',  
 
-        'HOST': '10.4.5.68',    
+        'HOST': '43.225.53.91',    
 
         'PORT': '3306' , 
         'OPTIONS': { 
