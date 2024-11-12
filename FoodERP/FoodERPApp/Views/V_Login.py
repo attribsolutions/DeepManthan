@@ -470,7 +470,7 @@ class UserPartiesForLoginPage(CreateAPIView):
 
                 query = (
                     MC_UserRoles.objects.select_related('User', 'Party', 'Role')
-                    .filter(User__Employee_id=id,Party__PartyAddress__IsDefault=1)
+                    .filter(User__Employee_id=id,Party__PartyAddress__IsDefault=1,Party__PartyDetailsParty__Group_id__isnull=True)
                     .annotate(
                         RoleName=F('Role__Name'),
                         PartyName=F('Party__Name'),
@@ -487,6 +487,10 @@ class UserPartiesForLoginPage(CreateAPIView):
                         Country=F('Party__PartyType__Country__Country'),
                         Weight=F('Party__PartyType__Country__Weight'), 
                         UploadSalesDatafromExcelParty=F('Party__UploadSalesDatafromExcelParty'),
+                        ClusterName=F('Party__PartyDetailsParty__Cluster__Name'),
+                        SubClusterName=F('Party__PartyDetailsParty__SubCluster__Name'),
+                        MobileNo=F('Party__MobileNo'),
+                        AlternateContactNo=F('Party__AlternateContactNo')
                         # IsDefaultPartyAddress=F('Party__PartyAddress__IsDefault')      
                     ).annotate(
                         IsSCMPartyTypeInt=Case(When(IsSCMPartyType=True, then=Value(1)),default=Value(0),output_field=IntegerField()),
@@ -496,11 +500,12 @@ class UserPartiesForLoginPage(CreateAPIView):
                     .values(
                         'id', 'Party_id', 'Role_id', 'RoleName', 'PartyName','PartyAddress', 'User__Employee_id',
                         'Party__SAPPartyCode', 'IsSCMPartyTypeInt','IsFranchisesInt', 'GSTIN', 'FSSAINo', 'FSSAIExpiry',
-                        'PartyTypeID', 'PartyType','Country_id','CurrencySymbol','Country','Weight', 'UploadSalesDatafromExcelPartyInt','Party__PriceList_id'
+                        'PartyTypeID', 'PartyType','Country_id','CurrencySymbol','Country','Weight', 'UploadSalesDatafromExcelPartyInt','Party__PriceList_id',
+                        'ClusterName', 'SubClusterName','MobileNo', 'AlternateContactNo'
                     )
                     # .filter(IsDefaultPartyAddress=True)
                     
-                )      
+                )    
                 # UserID = request.user.id
                 # CustomPrint(str(query.query))
                 if not query:
@@ -532,7 +537,11 @@ class UserPartiesForLoginPage(CreateAPIView):
                             "Country":item['Country'],
                             "Weight":item['Weight'],
                             "UploadSalesDatafromExcelParty":item['UploadSalesDatafromExcelPartyInt'],
-                            "PriceList_id":item['Party__PriceList_id']
+                            "PriceList_id":item['Party__PriceList_id'],
+                            "ClusterName": item['ClusterName'],
+                            "SubClusterName": item['SubClusterName'],
+                            "MobileNo": item['MobileNo'],
+                            "AlternateContactNo": item['AlternateContactNo']
                         }) 
                     log_entry = create_transaction_logNew(request,UserPartiesData,0 ,"PartyDropdownforloginpage",145,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': UserPartiesData})
@@ -598,9 +607,11 @@ class GetUserDetailsView(APIView):
                 companygroup = company.CompanyGroup
                   
                 # Get PartyName
-                PartyData=M_Users.objects.raw(f'''select m.id,m.LoginName,p.id,p.Name as PartyName,p.AlternateContactNo from M_Users as m
-                                left Join MC_EmployeeParties as ep on m.Employee_id=ep.Employee_id
-                                left join M_Parties as p on ep.Party_id=p.id where m.id={UserId}''')
+                PartyData=M_Users.objects.raw(f'''select m.id,m.LoginName,p.id,p.Name as PartyName,p.AlternateContactNo
+                                                From M_Users as m
+                                                LEFT JOIN MC_EmployeeParties as ep on m.Employee_id=ep.Employee_id
+                                                LEFT JOIN M_Parties as p on ep.Party_id=p.id
+                                                where m.id={UserId}''')
                 #End
                   
                 a = list()
@@ -618,13 +629,13 @@ class GetUserDetailsView(APIView):
                             "CompanyName": company.Name,
                             "IsSCMCompany": company.IsSCM,
                             "CompanyGroup": companygroup.id,
-                            "AlternateContactNo":p.AlternateContactNo
+                            "AlternateContactNo":p.AlternateContactNo,
                         })
                 
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': a[0]})
         except Exception as e:
             
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]}) 
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]}) 
 
 # Registration Input json
 # {

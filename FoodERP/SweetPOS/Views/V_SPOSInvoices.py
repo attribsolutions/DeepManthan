@@ -468,6 +468,7 @@ class DeleteInvoiceView(CreateAPIView):
                                 InvoiceItem['POSItemID'] = InvoiceItem['ItemID']
                                 InvoiceItem['SaleItemID']=0
                                 InvoiceItem['SaleID']=0
+                                InvoiceItem['IsMixItem']=InvoiceItem.get('IsMixItem') or 0
                                 # InvoiceItem['HSNCode']=InvoiceItem['HSNCode']
                                 InvoiceItem['Party']=InvoiceItem['PartyID']
                                 BaseUnitQuantity=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,0,0).GetBaseUnitQuantity()
