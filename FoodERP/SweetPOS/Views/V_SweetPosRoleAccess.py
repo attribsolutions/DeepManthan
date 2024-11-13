@@ -267,17 +267,13 @@ class MachineTypeUpdateView(CreateAPIView):
             if not query:
                 log_entry = create_transaction_logNew(request, MachineType_Data, MachineType_Data['Party'], 'Machine Type not available', 418, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': 'Machine Type Not Found', 'TransactionID': 0, 'Data': []})
-            MachineType_Data.pop('MachineRole', None) 
             MachineType_serializer = MachineTypeSerializer(query, data=MachineType_Data)
-
             if MachineType_serializer.is_valid():
-                MachineType = MachineType_serializer.save()
+                MachineType_serializer.save()
                 log_entry = create_transaction_logNew(request, MachineType_Data, MachineType_Data['Party'], '', 418, 0)
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': 'Machine Type Update Successfully', 'Data': []
-                })
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': 'Machine Type Update Successfully', 'Data': []})
             else:
                 return JsonResponse({'StatusCode': 400,'Status': True,'Message': MachineType_serializer.errors,'Data': []})
-        
         except Exception as e:
             log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'MachineTypeUpdate:' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
