@@ -142,8 +142,8 @@ class SPOSStockReportView(CreateAPIView):
                 FoodERP.UnitwiseQuantityConversion(A.Item_id,SalesReturn,0,A.Unit,0,{unitcondi},0)SalesReturn,
                 FoodERP.UnitwiseQuantityConversion(A.Item_id,StockAdjustment,0,A.Unit,0,{unitcondi},0)StockAdjustment
                 ,GroupTypeName,GroupName,SubGroupName,
-                CASE WHEN {Unit} = 0 THEN UnitName else '{unitname}' END UnitName,
-                FoodERP.RateCalculationFunction1(0, A.Item_id, {Party}, A.Unit, 0, 0, 0, 1) * ClosingBalance  AS ClosingAmount
+                CASE WHEN {Unit} = 0 THEN UnitName else '{unitname}' END UnitName,               
+                (FoodERP.RateCalculationFunction1(0, A.Item_id, {Party}, A.Unit, 0, 0, 0, 1) * FoodERP.UnitwiseQuantityConversion(A.Item_id,ClosingBalance,0,A.Unit,0,A.Unit,0))ClosingAmount
                 FROM
                 ( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit,M_Units.Name UnitName ,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
                     {ItemsGroupJoinsandOrderby[0]}
@@ -174,7 +174,7 @@ class SPOSStockReportView(CreateAPIView):
                     "ToDate": ToDate,
                     "PartyName": PartyNameQ[0]["Name"],
                     "StockDetails": serializer})
-
+                # print(StockreportQuery)
                 if StockreportQuery:
                     log_entry = create_transaction_logNew(request, Orderdata, Party, 'From:'+str(FromDate)+','+'To:'+str(ToDate), 210, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': StockData})
