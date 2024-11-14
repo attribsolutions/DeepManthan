@@ -398,7 +398,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                     "DiscountType": b['DiscountType'],
                                     "Discount": b['Discount'],
                                     "DiscountAmount": b['DiscountAmount'],
-                                    "BachCode":BatchCode,
+                                    "BatchCode":BatchCode,
                                     "UnitDetails":UnitDetails
                                    
                                 })     
