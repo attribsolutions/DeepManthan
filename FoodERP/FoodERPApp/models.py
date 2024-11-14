@@ -889,7 +889,7 @@ class MC_PartyPrefixs(models.Model):
        
 class T_Orders(models.Model):
     OrderDate = models.DateField()
-    DeliveryDate = models.DateField()
+    DeliveryDate = models.DateTimeField(auto_now=True)
     OrderNo = models.IntegerField()
     FullOrderNumber = models.CharField(max_length=500)
     OrderAmount = models.DecimalField(max_digits=20, decimal_places=2)
@@ -910,6 +910,7 @@ class T_Orders(models.Model):
     SAPResponse =models.CharField(max_length=500 ,null=True)
     IsConfirm = models.BooleanField(default=False) 
     MobileAppOrderFlag = models.IntegerField(blank=True,null=True) 
+    AdvanceAmount=models.DecimalField(max_digits=20, decimal_places=2)
 
     # Inward = models.PositiveSmallIntegerField(default=0)
     class Meta:
