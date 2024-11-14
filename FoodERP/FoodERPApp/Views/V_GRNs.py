@@ -321,6 +321,8 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                 Order_list = POOrderIDs.split(",")
                 OrderData = list()
                 OrderItemDetails = list()
+                
+               
                 if Mode == 1:
                     OrderQuery=T_Orders.objects.raw('''SELECT T_Orders.Supplier_id id,M_Parties.Name SupplierName,sum(T_Orders.OrderAmount) OrderAmount ,T_Orders.Customer_id CustomerID,P.PriceList_id PriceListId
                     FROM T_Orders 
@@ -331,12 +333,30 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                         log_entry = create_transaction_logNew(request, 0, 0,"Records Not Found",29,0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
                     else:
+                        item = ""
                         OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True).data
                         OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list,IsDeleted=0).order_by('Item')
-                        OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data
-                        # return JsonResponse/({'StatusCode': 200, 'Status': True, 'Data': OrderItemSerializedata})
+                        OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data                       
+                        query = T_Orders.objects.filter(Customer_id=OrderSerializedata[0]['CustomerID']).values('id')
+                        # Convert QuerySet to a list to make it JSON serializable
+                        # query_list = list(query)
+                        # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': query_list})
                         for b in OrderItemSerializedata:
+                                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': b})
                                 Item= b['Item']['id']
+                                query1 = TC_OrderItems.objects.filter(Item_id=Item, Order_id__in=query).values('id')
+                                if(item == ""):
+                                    item = Item
+                                    c = query1.count()
+
+                                elif(item == Item):
+                                    item = 1
+                                    c = c+1
+                                else:
+                                    item = Item
+                                    c = 0
+
+                                BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(Item, OrderSerializedata[0]['CustomerID'], 0)
                                 query = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
                                 # CustomPrint(query.query)
                                 if query.exists():
@@ -378,6 +398,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                     "DiscountType": b['DiscountType'],
                                     "Discount": b['Discount'],
                                     "DiscountAmount": b['DiscountAmount'],
+                                    "BachCode":BatchCode,
                                     "UnitDetails":UnitDetails
                                    
                                 })     
