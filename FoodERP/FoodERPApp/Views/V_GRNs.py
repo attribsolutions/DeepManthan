@@ -337,17 +337,17 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                         OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True).data
                         OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list,IsDeleted=0).order_by('Item')
                         OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data                       
-                        query = T_Orders.objects.filter(Customer_id=OrderSerializedata[0]['CustomerID']).values('id')
+                        Ordersquery = T_Orders.objects.filter(Customer_id=OrderSerializedata[0]['CustomerID']).values('id')
                         # Convert QuerySet to a list to make it JSON serializable
                         # query_list = list(query)
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': query_list})
                         for b in OrderItemSerializedata:
                                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': b})
                                 Item= b['Item']['id']
-                                query1 = TC_OrderItems.objects.filter(Item_id=Item, Order_id__in=query).values('id')
+                                Batchquery1 = TC_OrderItems.objects.filter(Item_id=Item, Order_id__in=Ordersquery).values('id')
                                 if(item == ""):
                                     item = Item
-                                    c = query1.count()
+                                    c = Batchquery1.count()
 
                                 elif(item == Item):
                                     item = 1
