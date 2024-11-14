@@ -252,8 +252,6 @@ class ClusterSubClusterSerializer(serializers.ModelSerializer):
         model = M_PartyDetails
         fields = ['Cluster','SubCluster']
 
-
-
 class M_PartiesSerializerSecond(serializers.ModelSerializer):
     PartyAddress = PartyAddressSerializerSecond(many=True)
     City=CitiesSerializerSecond()
@@ -354,6 +352,8 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
     PartyAddress = UpdatePartyAddressSerializer(many=True)
     PartyPrefix = UpdatePartyPrefixsSerializer(many=True)
     PartySubParty = UpdateMC_PartySubPartySerializer(many=True)
+    Cluster = serializers.IntegerField(write_only=True)
+    SubCluster = serializers.IntegerField(write_only=True)
     # Country = CountrySerializer(many=True)
 
     class Meta:
@@ -380,7 +380,6 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
             'State', instance.State)
         instance.District = validated_data.get(
             'District', instance.District)
-        
         instance.City = validated_data.get(
             'City', instance.City)
         instance.SAPPartyCode = validated_data.get(
@@ -404,9 +403,17 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
         instance.IsApprovedParty = validated_data.get(
             'IsApprovedParty', instance.IsApprovedParty) 
         instance.Country = validated_data.get(
-            'Country', instance.Country)   
-            
+            'Country', instance.Country)
+        
         instance.save()   
+
+        Cluster = validated_data.get('Cluster')
+        SubCluster = validated_data.get('SubCluster')
+           
+        M_PartyDetails.objects.update_or_create(
+            Party=instance,
+            defaults={'Cluster_id': Cluster,
+                      'SubCluster_id': SubCluster,})
         
         for a in instance.PartyPrefix.all():
             a.delete() 
