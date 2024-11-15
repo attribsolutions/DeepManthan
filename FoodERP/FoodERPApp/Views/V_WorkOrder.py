@@ -288,9 +288,15 @@ class WorkOrderViewSecond(RetrieveAPIView):
         try:
             with transaction.atomic():
                 WorkOrderData = JSONParser().parse(request)
+                
+                
                 WorkOrderDataByID = T_WorkOrder.objects.get(id=id)
+                
+               
                 WorkOrder_Serializer = WorkOrderSerializer(
-                    WorkOrderDataByID, data=WorkOrderData)
+                    WorkOrderDataByID, data=WorkOrderData[0])
+                
+                # print(WorkOrder_Serializer)
                 if WorkOrder_Serializer.is_valid():
                     WorkOrder_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Work Order Updated Successfully', 'Data': []})
