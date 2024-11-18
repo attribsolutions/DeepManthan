@@ -203,7 +203,7 @@ sum(O_BatchWiseLiveStock.BaseUnitQuantity)Qty ,M_Items.BaseUnitID_id,
 ifnull(sum(case when IsDamagePieces=0 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)SaleableStock,
 ifnull(sum(case when IsDamagePieces=1 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)UnSaleableStock,
 O_LiveBatches.MRPValue ,
-0 BatchCode,0 SystemBatchCode,round(GSTHsnCodeMaster(M_Items.id,%s,2),2)GSTPercentage,0 Rate, M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
+0 BatchCode,0 SystemBatchCode,round(GSTHsnCodeMaster(M_Items.id,%s,2,0,0),2)GSTPercentage,0 Rate, M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
                 
                 FROM M_Items 
 join MC_PartyItems on M_Items.id=MC_PartyItems.Item_id and MC_PartyItems.Party_id in %s
@@ -261,7 +261,7 @@ order by M_Group.Sequence, MC_SubGroup.Sequence ,M_Items.Sequence''')
     ifnull((case when IsDamagePieces=0 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)SaleableStock,
     ifnull((case when IsDamagePieces=1 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)UnSaleableStock,
     O_LiveBatches.MRPValue ,
-    O_LiveBatches.BatchCode,O_LiveBatches.SystemBatchCode,round(GSTHsnCodeMaster(M_Items.id,%s,2),2)GSTPercentage,
+    O_LiveBatches.BatchCode,O_LiveBatches.SystemBatchCode,round(GSTHsnCodeMaster(M_Items.id,%s,2,0,0),2)GSTPercentage,
     {Condition},  M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
     FROM M_Items 
     join MC_PartyItems on M_Items.id=MC_PartyItems.Item_id and MC_PartyItems.Party_id in %s
@@ -397,11 +397,11 @@ class StockEntryItemsView(CreateAPIView):
                     seq=(f'M_Items.Sequence')
                 
                 Itemquery = MC_PartyItems.objects.raw(f'''SELECT M_Items.id, M_Items.Name AS ItemName,M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName,
-                                                            ROUND(GetTodaysDateMRP(M_Items.id, CURDATE(), 2, 0, 0), 2) AS MRPValue,
+                                                            ROUND(GetTodaysDateMRP(M_Items.id, CURDATE(), 2, 0, {PartyID},0), 2) AS MRPValue,
                                                             ROUND(GetTodaysDateRate(M_Items.id, CURDATE(), %s, 0, 2), 2) AS RateValue,
-                                                            ROUND(GSTHsnCodeMaster(M_Items.id, CURDATE(), 2), 2) AS GSTPercentage,
-                                                            GetTodaysDateMRP(M_Items.id, CURDATE(), 1, 0, 0) AS MRPID,
-                                                            GSTHsnCodeMaster(M_Items.id, CURDATE(), 1) AS GSTID,
+                                                            ROUND(GSTHsnCodeMaster(M_Items.id, CURDATE(), 2, {PartyID},0), 2) AS GSTPercentage,
+                                                            GetTodaysDateMRP(M_Items.id, CURDATE(), 1, 0,  {PartyID},0) AS MRPID,
+                                                            GSTHsnCodeMaster(M_Items.id, CURDATE(), 1, {PartyID},0) AS GSTID,
                                                             GetTodaysDateRate(M_Items.id, CURDATE(),  %s, 0, 1) AS Rate,
                                                             FORMAT(IFNULL(O.ClosingBalance, 0), 15) AS CurrentStock 
                                                             FROM M_Items 
@@ -413,7 +413,7 @@ class StockEntryItemsView(CreateAPIView):
                                                             left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
                                                             WHERE MC_PartyItems.Party_id = %s 
                                                             Order By M_Group.Sequence,MC_SubGroup.Sequence,{seq}''', ([PartyID],[PartyID],[GroupTypeid],[PartyID]))
-                # print(Itemquery)
+                print(Itemquery)
                 if not Itemquery:
                     log_entry = create_transaction_logNew(request, Logindata, 0, 'Franchise Items Not available', 102, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available', 'Data': []})
