@@ -1433,10 +1433,10 @@ class ProductAndMarginReportView(CreateAPIView):
                 except (ValueError, TypeError):
                     PriceListID = 0
 
-                query =f""" SELECT M_Items.id ,SAPItemCode,BarCode,GSTHsnCodeMaster(M_Items.id,%s,3,0,0)HSNCode,C_Companies.Name CompanyName,isActive,
+                query =f""" SELECT M_Items.id ,SAPItemCode,BarCode,GSTHsnCodeMaster(M_Items.id,%s,3,{PartyID},{PartyTypeID})HSNCode,C_Companies.Name CompanyName,isActive,
 (case when Length ='' then '' else concat(Length,'L X ',Breadth,'B X ',Height,'W - MM') end)BoxSize,StoringCondition
 ,ifnull(M_Group.Name,'') Product,ifnull(MC_SubGroup.Name,'') SubProduct,M_Items.Name ItemName,ShortName,
-round(GetTodaysDateMRP(M_Items.id,%s,2,0,0,0),0) MRP,round(GSTHsnCodeMaster(M_Items.id,%s,2,0,0),2)GST,M_Units.Name BaseUnit,Grammage SKUVol,
+round(GetTodaysDateMRP(M_Items.id,%s,2,0,{PartyID},{PartyTypeID}),0) MRP,round(GSTHsnCodeMaster(M_Items.id,%s,2,{PartyID},{PartyTypeID}),2)GST,M_Units.Name BaseUnit,Grammage SKUVol,
 MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuantity PcsInKg, PIN.BaseUnitQuantity PcsInNo, ifnull(M_Group.id,'') ProductID,ifnull(MC_SubGroup.id,'') SubProductID
  ,M_Items.BaseUnitID_id
  FROM M_Items

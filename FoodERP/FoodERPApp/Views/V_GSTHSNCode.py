@@ -25,8 +25,8 @@ class M_GstHsnCodeView(CreateAPIView):
                 for b in GstHsnCodedata:
                     b.update({"CommonID": jsondata})
                     additionaldata.append(b)
-                print(additionaldata)    
-                M_GstHsncodeSerializer = M_GstHsnCodeSerializerforsave(data=additionaldata,many=True)
+                  
+                M_GstHsncodeSerializer = M_GstHsnCodeSerializer(data=additionaldata,many=True)
             if M_GstHsncodeSerializer.is_valid():
                 M_GstHsncodeSerializer.save()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GST HsnCode Save Successfully','Data' :[]})
@@ -145,7 +145,6 @@ class GETGstHsnDetails(CreateAPIView):
                                             (SELECT id FROM M_GSTHSNCode where Item_id=M_Items.id and EffectiveDate = %s   {partytype}  
                                             and IsDeleted=0 order by  EffectiveDate desc,id desc limit 1 )IDD
                                             From M_Items)a limit 3''',[today,today,EffectiveDate,EffectiveDate,EffectiveDate])
-                print(query)
                 if not query:
                     # log_entry = create_transaction_logNew(request, 0, 0, "Items Not available",121,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []}) 
