@@ -146,7 +146,7 @@ class MaterialIsssueList(CreateAPIView):
                             "PartyName": a['Party']['Name'],
                             "CreatedOn": a['CreatedOn'],
                             "Status":a['Status'],
-                            "BatchCode":BatchCode,
+                            "PrintedBatchCode":BatchCode,
                             "Percentage":Percentage                         
                            
                         })                        
