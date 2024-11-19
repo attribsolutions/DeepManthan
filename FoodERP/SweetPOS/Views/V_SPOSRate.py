@@ -26,7 +26,7 @@ class RateListView(CreateAPIView):
 
                 ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(0,5).split('!')   
                 
-                q0 =  M_ChannelWiseItems.objects.raw(f'''SELECT A.id, A.Item_id ItemID,  M_Items.Name ItemName, C.Rate, C.IsChangeRateToDefault,round(FoodERP.GetTodaysDateMRP(M_Items.id,%s,2,0,0),0) PrimaryRate,Groupss.Name as GroupName,subgroup.Name as SubGroupName
+                q0 =  M_ChannelWiseItems.objects.raw(f'''SELECT A.id, A.Item_id ItemID,  M_Items.Name ItemName, C.Rate, C.IsChangeRateToDefault,GetTodaysDateMRP(M_Items.id,%s,2,0,0,0)PrimaryRate,Groupss.Name as GroupName,subgroup.Name as SubGroupName
                                                     FROM FoodERP.M_ChannelWiseItems A 
                                                     join FoodERP.M_Items  on A.Item_id = M_Items.id
                                                     {ItemsGroupJoinsandOrderby[1]}
@@ -34,6 +34,7 @@ class RateListView(CreateAPIView):
                                                     where A.PartyType_id=19 
                                                     {ItemsGroupJoinsandOrderby[2]}
                                                     ''', [today, EffectiveFrom, POSRateType])
+                print(q0)
                 RateList = list()
                 for a in q0:
                     RateList.append({

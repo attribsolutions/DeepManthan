@@ -72,7 +72,7 @@ class ProductionView(CreateAPIView):
                 GSTID = Gst[0]['Gstid']
                 GSTValue=Gst[0]['GST']                
                 
-                # MRPs=M_MRPMaster.objects.raw(f'''SELECT 1 id ,GetTodaysDateMRP({Item},'{ProductionDate}',1,0,0) MRPID,GetTodaysDateMRP({Item},'{ProductionDate}',2,0,0) MRPValue ''') 
+                # MRPs=M_MRPMaster.objects.raw(f'''SELECT 1 id ,GetTodaysDateMRP({Item},'{ProductionDate}',1,0,0,0) MRPID,GetTodaysDateMRP({Item},'{ProductionDate}',2,0,0,0) MRPValue ''') 
                 # first_row = MRPs[0]
                 # MRPID = first_row.MRPID               
                 # MRPValue=first_row.MRPValue

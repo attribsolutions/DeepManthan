@@ -725,11 +725,11 @@ class EditOrderView(CreateAPIView):
                 if (q1[0]['PartyType__IsRetailer'] == 0 ):
                     PartyItem = Customer
                     Itemquery = TC_OrderItems.objects.raw(f'''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,
-                    convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,1) else a.GST_id end),SIGNED)GST_id,
-                    convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,2) else M_GSTHSNCode.GSTPercentage  end),DECIMAL(10, 2))GSTPercentage,
-                            (Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,3) else M_GSTHSNCode.HSNCode end)HSNCode,
-                    convert((Case when a.MRP_id is null then GetTodaysDateMRP(a.Item_id,%s,1,0,0) else a.MRP_id end),SIGNED)MRP_id,
-                            (Case when a.MRP_id is null then GetTodaysDateMRP(a.Item_id,%s,2,0,0) else M_MRPMaster.MRP  end)MRPValue,
+                    convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,1,{RateParty},0) else a.GST_id end),SIGNED)GST_id,
+                    convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,2,{RateParty},0) else M_GSTHSNCode.GSTPercentage  end),DECIMAL(10, 2))GSTPercentage,
+                            (Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,3,{RateParty},0) else M_GSTHSNCode.HSNCode end)HSNCode,
+                    convert((Case when a.MRP_id is null then GetTodaysDateMRP(a.Item_id,%s,1,0,{RateParty},0) else a.MRP_id end),SIGNED)MRP_id,
+                            (Case when a.MRP_id is null then GetTodaysDateMRP(a.Item_id,%s,2,0,{RateParty},0) else M_MRPMaster.MRP  end)MRPValue,
                     convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,1,%s,%s) else a.Discount  end),DECIMAL(10, 2))Discount,
                     convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,2,%s,%s) else a.DiscountType  end),SIGNED)DiscountType,
 
@@ -774,11 +774,11 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,{seq}  ''', ([EffectiveDate],[Eff
                 else:
                     PartyItem = Party
                     Itemquery = TC_OrderItems.objects.raw(f'''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,
-                    convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,1) else a.GST_id end),SIGNED)GST_id,
-                    convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,2) else M_GSTHSNCode.GSTPercentage  end),DECIMAL(10, 2))GSTPercentage, 
-                    (Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,3) else M_GSTHSNCode.HSNCode end)HSNCode,
-                    convert((Case when a.MRP_id is null then GetTodaysDateMRP(a.Item_id,%s,1,0,0) else a.MRP_id end),SIGNED)MRP_id,
-                            (Case when a.MRP_id is null then GetTodaysDateMRP(a.Item_id,%s,2,0,0) else M_MRPMaster.MRP  end)MRPValue,
+                    convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,1,{RateParty},0) else a.GST_id end),SIGNED)GST_id,
+                    convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,2,{RateParty},0) else M_GSTHSNCode.GSTPercentage  end),DECIMAL(10, 2))GSTPercentage, 
+                    (Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,3,{RateParty},0) else M_GSTHSNCode.HSNCode end)HSNCode,
+                    convert((Case when a.MRP_id is null then GetTodaysDateMRP(a.Item_id,%s,1,0,{RateParty},0) else a.MRP_id end),SIGNED)MRP_id,
+                            (Case when a.MRP_id is null then GetTodaysDateMRP(a.Item_id,%s,2,0,{RateParty},0) else M_MRPMaster.MRP  end)MRPValue,
                     convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,1,%s,%s) else a.Discount  end),DECIMAL(10, 2))Discount,
                     convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,2,%s,%s) else a.DiscountType  end),SIGNED)DiscountType,
 
