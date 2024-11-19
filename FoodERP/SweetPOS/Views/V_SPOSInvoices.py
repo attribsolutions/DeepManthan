@@ -682,5 +682,46 @@ class MobileNumberUpdateView(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Mobile_Serializer.errors, 'Data' :[]})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Mobile_Data, 0, 'Consumer Mobile Update:'+str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})   
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})  
+        
+        
+class FranchiseSaleWithBillCountView(CreateAPIView):
+ 
+    permission_classes = (IsAuthenticated,)
+ 
+    @transaction.atomic()
+    def post(self, request):
+        DailySale = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                EmployeeID = DailySale['EmployeeID']
+                FromDate = DailySale['FromDate']
+                ToDate = DailySale['ToDate']
+ 
+                query = T_SPOSInvoices.objects.raw('''SELECT M_Parties.id, Name, Count(*) Bills, SUM(GrandTotal) GrandTotal
+                                                    FROM SweetPOS.T_SPOSInvoices
+                                                    JOIN FoodERP.M_Parties on Party = M_Parties.id
+                                                    WHERE InvoiceDate BETWEEN %s AND %s
+                                                    AND GrandTotal between 20 AND 5000 -- Optional
+                                                    AND Party IN (select Party_id from FoodERP.MC_ManagementParties WHERE Employee_id = %s)
+                                                    Group By M_Parties.id, Name
+                                                    Order By GrandTotal Desc''',[FromDate,ToDate,EmployeeID])
+                
+                DailySaleDataList = list()
+                for a in query:
+                    DailySaleDataList.append({
+                        "id": a.id,
+                        "Name": a.Name,
+                        "Bills": a.Bills,
+                        "GrandTotal": a.GrandTotal
+                    })
+                if DailySaleDataList:
+                    log_entry = create_transaction_logNew(request, DailySale, 0, 'FranchiseSaleWithBillCount:' + str(DailySaleDataList), 428, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': DailySaleDataList})
+                else:
+                    log_entry = create_transaction_logNew(request, DailySale, 0, 'FranchiseSaleWithBillCount Not Found', 428, 0)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'FranchiseSaleWithBillCount Not Available', 'Data': []})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, DailySale, 0, 'FranchiseSaleWithBillCount:' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data':[]}) 
 
