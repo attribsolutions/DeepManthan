@@ -279,7 +279,7 @@ class MachineTypeUpdateView(CreateAPIView):
                 return JsonResponse({'StatusCode': 400,'Status': True,'Message': MachineType_serializer.errors,'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'MachineTypeUpdate:' + str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
                
 
 
