@@ -266,11 +266,11 @@ class MachineTypeUpdateView(CreateAPIView):
     def put(self, request):
         MachineType_Data = JSONParser().parse(request)
         try:
-            query = M_SweetPOSMachine.objects.get(Party=MachineType_Data['Party'],MacID=MachineType_Data['MacID'])
+            query = M_SweetPOSMachine.objects.filter(Party=MachineType_Data['Party'],MacID=MachineType_Data['MacID'])
             if not query:
                 log_entry = create_transaction_logNew(request, MachineType_Data, MachineType_Data['Party'], 'Machine Type not available', 418, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': 'Machine Type Not Found', 'TransactionID': 0, 'Data': []})
-            MachineType_serializer = MachineTypeSerializer(query, data=MachineType_Data)
+            MachineType_serializer = MachineTypeSerializer(query[0], data=MachineType_Data)
             if MachineType_serializer.is_valid():
                 MachineType_serializer.save()
                 log_entry = create_transaction_logNew(request, MachineType_Data, MachineType_Data['Party'], '', 418, 0)
@@ -279,7 +279,7 @@ class MachineTypeUpdateView(CreateAPIView):
                 return JsonResponse({'StatusCode': 400,'Status': True,'Message': MachineType_serializer.errors,'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, MachineType_Data, 0, 'MachineTypeUpdate:' + str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
                
 
 
