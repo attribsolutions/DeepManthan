@@ -243,7 +243,8 @@ where SPOSInv.id={id}''')
                         InvoiceItemDetails = list()
                         InvoiceItemQuery=TC_SPOSInvoiceItems.objects.raw(f'''SELECT items.id,items.Name,SPOSInv.Quantity,0 MRP,SPOSInv.MRPValue,SPOSInv.Rate,SPOSInv.TaxType,SPOSInv.BaseUnitQuantity,0 GST,SPOSInv.GSTPercentage,0 MarginValue,
 SPOSInv.BasicAmount,SPOSInv.GSTAmount,SPOSInv.CGST,SPOSInv.SGST,SPOSInv.IGST,SPOSInv.CGSTPercentage,SPOSInv.SGSTPercentage,SPOSInv.IGSTPercentage,SPOSInv.Amount,
-'' BatchCode,'' BatchDate,SPOSInv.HSNCode,SPOSInv.DiscountType,SPOSInv.Discount,SPOSInv.DiscountAmount,SPOSInv.Unit,unit.Name UnitName
+'' BatchCode,'' BatchDate,SPOSInv.HSNCode,SPOSInv.DiscountType,SPOSInv.Discount,SPOSInv.DiscountAmount,SPOSInv.Unit,unit.Name UnitName,
+SPOSInv.IsMixItem, SPOSInv.MixItemId
 FROM SweetPOS.TC_SPOSInvoiceItems SPOSInv 
 join FoodERP.M_Items items on items.id=SPOSInv.Item
 join FoodERP.MC_ItemUnits itemunit on itemunit.id=SPOSInv.Unit
@@ -286,7 +287,9 @@ WHERE SPOSInv.Invoice_id = {a.id}''')
                                 "HSNCode":b.HSNCode,
                                 "DiscountType":b.DiscountType,
                                 "Discount":b.Discount,
-                                "DiscountAmount":b.DiscountAmount
+                                "DiscountAmount":b.DiscountAmount,
+                                "IsMixItem" : b.IsMixItem,
+                                "MixItemId" : b.MixItemId
                             })
                             
                         InvoiceReferenceDetails = list()
