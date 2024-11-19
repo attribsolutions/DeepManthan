@@ -534,7 +534,7 @@ class SPOSMaxDeletedInvoiceIDView(CreateAPIView):
 class TopSaleItemsOfFranchiseView(CreateAPIView):
     permission_classes = ()
     authentication_classes = [BasicAuthentication]
-
+ 
     @transaction.atomic()
     def post(self, request):
         SaleData = JSONParser().parse(request)
@@ -543,14 +543,14 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                 FromDate = SaleData['FromDate']
                 ToDate = SaleData['ToDate']
                 Party = SaleData['Party']
-
+ 
                 PartyDetails = M_Parties.objects.raw('''SELECT FoodERP.M_Parties.id, Name, FoodERP.MC_PartyAddress.Address,
-                                                        (SELECT SUM(SweetPOS.T_SPOSInvoices.TotalAmount) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s AND SweetPOS.T_SPOSInvoices.IsDeleted=0) TotalAmount,
+                                                        (SELECT SUM(SweetPOS.T_SPOSInvoices.GrandTotal) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s AND SweetPOS.T_SPOSInvoices.IsDeleted=0) TotalAmount,
                                                         (SELECT COUNT(id) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s AND SweetPOS.T_SPOSInvoices.IsDeleted=0) BillCount,
                                                         (SELECT TIME(MIN(SweetPOS.T_SPOSInvoices.CreatedOn)) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s) FirstBillTime,
                                                         (SELECT TIME(MAX(SweetPOS.T_SPOSInvoices.CreatedOn)) from SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s) LastBillTime,
                                                         (SELECT FullInvoiceNumber FROM SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s ORDER BY id DESC LIMIT 1) LastInvoiceNumber,
-                                                        (SELECT TotalAmount FROM SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s ORDER BY id DESC LIMIT 1) LastInvoiceAmount
+                                                        (SELECT GrandTotal FROM SweetPOS.T_SPOSInvoices WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s AND SweetPOS.T_SPOSInvoices.IsDeleted=0 ORDER BY id DESC LIMIT 1) LastInvoiceAmount
                                                         From FoodERP.M_Parties
                                                         JOIN FoodERP.MC_PartyAddress ON FoodERP.M_Parties.id = FoodERP.MC_PartyAddress.Party_id AND FoodERP.MC_PartyAddress.IsDefault = True
                                                         Where FoodERP.M_Parties.id= %s
@@ -558,10 +558,10 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                 Party_List = []
                 for party in PartyDetails:
                     TopSaleItems = TC_SPOSInvoiceItems.objects.raw('''SELECT 1 as id,SweetPOS.TC_SPOSInvoiceItems.Item, FoodERP.M_Items.Name AS ItemName,
-                                                                    SUM(SweetPOS.TC_SPOSInvoiceItems.Amount) AS TotalAmount, 
+                                                                    SUM(SweetPOS.TC_SPOSInvoiceItems.Amount) AS TotalAmount,
                                                                     SUM(SweetPOS.TC_SPOSInvoiceItems.Quantity) AS TotalQuantity,
                                                                     FoodERP.M_Units.Name AS UnitName
-                                                                    FROM SweetPOS.TC_SPOSInvoiceItems                                                                   
+                                                                    FROM SweetPOS.TC_SPOSInvoiceItems                                                                  
                                                                     JOIN SweetPOS.T_SPOSInvoices  ON SweetPOS.TC_SPOSInvoiceItems.Invoice_id = SweetPOS.T_SPOSInvoices.id
                                                                     JOIN FoodERP.M_Items ON SweetPOS.TC_SPOSInvoiceItems.Item = FoodERP.M_Items.id
                                                                     JOIN FoodERP.MC_ItemUnits ON SweetPOS.TC_SPOSInvoiceItems.Unit = FoodERP.MC_ItemUnits.id
@@ -569,7 +569,7 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                                                                     WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s AND SweetPOS.T_SPOSInvoices.IsDeleted=0
                                                                     GROUP BY SweetPOS.TC_SPOSInvoiceItems.Item, M_Items.Name, M_Units.Name
                                                                     ORDER BY TotalAmount DESC, TotalQuantity DESC LIMIT 5''', ([FromDate, ToDate, Party]))
-
+ 
                     TopSaleItems_List = []
                     for item in TopSaleItems:
                         TopSaleItems_List.append({
@@ -682,5 +682,46 @@ class MobileNumberUpdateView(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Mobile_Serializer.errors, 'Data' :[]})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Mobile_Data, 0, 'Consumer Mobile Update:'+str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})   
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})  
+        
+        
+class FranchiseSaleWithBillCountView(CreateAPIView):
+ 
+    permission_classes = (IsAuthenticated,)
+ 
+    @transaction.atomic()
+    def post(self, request):
+        DailySale = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                EmployeeID = DailySale['EmployeeID']
+                FromDate = DailySale['FromDate']
+                ToDate = DailySale['ToDate']
+ 
+                query = T_SPOSInvoices.objects.raw('''SELECT M_Parties.id, Name, Count(*) Bills, SUM(GrandTotal) GrandTotal
+                                                    FROM SweetPOS.T_SPOSInvoices
+                                                    JOIN FoodERP.M_Parties on Party = M_Parties.id
+                                                    WHERE InvoiceDate BETWEEN %s AND %s
+                                                    AND GrandTotal between 20 AND 5000 -- Optional
+                                                    AND Party IN (select Party_id from FoodERP.MC_ManagementParties WHERE Employee_id = %s)
+                                                    Group By M_Parties.id, Name
+                                                    Order By GrandTotal Desc''',[FromDate,ToDate,EmployeeID])
+                
+                DailySaleDataList = list()
+                for a in query:
+                    DailySaleDataList.append({
+                        "id": a.id,
+                        "Name": a.Name,
+                        "Bills": a.Bills,
+                        "GrandTotal": a.GrandTotal
+                    })
+                if DailySaleDataList:
+                    log_entry = create_transaction_logNew(request, DailySale, 0, 'FranchiseSaleWithBillCount:' + str(DailySaleDataList), 428, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': DailySaleDataList})
+                else:
+                    log_entry = create_transaction_logNew(request, DailySale, 0, 'FranchiseSaleWithBillCount Not Found', 428, 0)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'FranchiseSaleWithBillCount Not Available', 'Data': []})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, DailySale, 0, 'FranchiseSaleWithBillCount:' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data':[]}) 
 

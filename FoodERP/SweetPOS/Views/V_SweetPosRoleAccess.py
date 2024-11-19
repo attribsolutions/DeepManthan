@@ -128,6 +128,9 @@ class MachineTypeSaveView(CreateAPIView):
         MachineType_Data = JSONParser().parse(request)
         try:
             with transaction.atomic():
+                    query = M_SweetPOSMachine.objects.filter(MacID=MachineType_Data['MacID'])
+                    if query.exists():
+                        return JsonResponse({'StatusCode': 400,'Status': False,'Message': 'MacID already exist!', 'Data': []})
                     MachineType_serializer = MachineTypeSerializer(data=MachineType_Data)
                     if MachineType_serializer.is_valid():
                         MachineType = MachineType_serializer.save()
@@ -263,11 +266,11 @@ class MachineTypeUpdateView(CreateAPIView):
     def put(self, request):
         MachineType_Data = JSONParser().parse(request)
         try:
-            query = M_SweetPOSMachine.objects.get(Party=MachineType_Data['Party'],MacID=MachineType_Data['MacID'])
+            query = M_SweetPOSMachine.objects.filter(Party=MachineType_Data['Party'],MacID=MachineType_Data['MacID'])
             if not query:
                 log_entry = create_transaction_logNew(request, MachineType_Data, MachineType_Data['Party'], 'Machine Type not available', 418, 0)
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': 'Machine Type Not Found', 'TransactionID': 0, 'Data': []})
-            MachineType_serializer = MachineTypeSerializer(query, data=MachineType_Data)
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': 'Record Not Found', 'TransactionID': 0, 'Data': []})
+            MachineType_serializer = MachineTypeSerializer(query[0], data=MachineType_Data)
             if MachineType_serializer.is_valid():
                 MachineType_serializer.save()
                 log_entry = create_transaction_logNew(request, MachineType_Data, MachineType_Data['Party'], '', 418, 0)
