@@ -317,7 +317,7 @@ where IsDeleted = 0 AND T_Orders.id=%s''',[OrderID])
                     # CustomPrint(jsonbody)
                     aa = T_Orders.objects.filter(id=OrderID).update(
                         SAPResponse=data_dict['entry']['content']['m:properties']['d:Stats'])
-                    log_entry = create_transaction_logNew(request, jsonbody, 0, '',321,0)
+                    log_entry = create_transaction_logNew(request, jsonbody, 0, OrderID,321,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Send Successfully ', 'Data': []})
                 else:
                     index = a.find('error')

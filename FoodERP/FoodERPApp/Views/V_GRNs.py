@@ -594,22 +594,14 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                             "Unit": c['id'],
                                             "UnitName": c['BaseUnitConversion'],
                                         })
-                                MRPquery = M_MRPMaster.objects.filter(Item_id=b['Item']['id']).order_by('-id') 
-                                # if MRPquery.exists():
-                                #     MRPdata = ItemMRPSerializerSecond(MRPquery, many=True).data
-                                #     ItemMRPDetails = list()
-                                    
-                                #     for d in MRPdata:
-                                #         ItemMRPDetails.append({
-                                #         "MRP": d['id'],
-                                #         "MRPValue": d['MRP'],   
-                                #     })
-                                        
+                                # MRPquery = M_MRPMaster.objects.filter(Item_id=b['Item']['id']).order_by('-id') 
+                                
+                                MRPquery=MRPListFun(Item,a['Customer']['id'],0)        
                                 if MRPquery.exists():
-                                    MRPdata = ItemMRPSerializerSecond(MRPquery, many=True).data
+                                    # MRPdata = ItemMRPSerializerSecond(MRPquery, many=True).data
                                     ItemMRPDetails = list()
                                     unique_MRPs = set()
-                                    for d in MRPdata:
+                                    for d in MRPquery:
                                         MRPs = d['MRP']
                                         if MRPs not in unique_MRPs:
                                             ItemMRPDetails.append({
@@ -618,11 +610,12 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                             })
                                             unique_MRPs.add(MRPs)        
                                         
-                                GSTquery = M_GSTHSNCode.objects.filter(Item_id=b['Item']['id']).order_by('-id')[:3] 
+                                # GSTquery = M_GSTHSNCode.objects.filter(Item_id=b['Item']['id']).order_by('-id')[:3]
+                                GSTquery=GSTListFun(Item,a['Customer']['id'],0) 
                                 if GSTquery.exists():
-                                    Gstdata = ItemGSTHSNSerializerSecond(GSTquery, many=True).data
+                                    # Gstdata = ItemGSTHSNSerializerSecond(GSTquery, many=True).data
                                     ItemGSTDetails = list()
-                                    for e in Gstdata:
+                                    for e in GSTquery:
                                         ItemGSTDetails.append({
                                         "GST": e['id'],
                                         "GSTPercentage": e['GSTPercentage'],   

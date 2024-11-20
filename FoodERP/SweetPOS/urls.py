@@ -52,4 +52,5 @@ urlpatterns = [
     url(r'posDeletEInvoicE$',DeleteInvoiceView.as_view()),
     url(r'GETMaxPOSDeletedInvoiceIDByClientID/([0-9]+)/([0-9]+)$', SPOSMaxDeletedInvoiceIDView.as_view()),
     url(r'TopSaleItemsOfFranchise$', TopSaleItemsOfFranchiseView.as_view()),
+    url(r'FranchiseSaleWithBillCount$', FranchiseSaleWithBillCountView.as_view()),
     ]
