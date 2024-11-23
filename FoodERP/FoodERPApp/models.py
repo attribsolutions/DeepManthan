@@ -386,6 +386,7 @@ class M_Users(AbstractBaseUser):
     Employee = models.ForeignKey(M_Employees, related_name='UserEmployee', on_delete=models.PROTECT)
     # POSRateType = models.ForeignKey(M_GeneralMaster, related_name='POSRateType', on_delete=models.DO_NOTHING,blank=True, null=True)
     POSRateType =models.IntegerField(blank=True, null=True)
+    IsLoginPermissions = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'LoginName'
     REQUIRED_FIELDS = []
