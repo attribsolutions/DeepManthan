@@ -387,7 +387,7 @@ class NewProductSendToMobileAppView(CreateAPIView):
                 today = date.today()
                 q0=M_Items.objects.raw('''SELECT M_Items.id ,M_Items.Name ItemName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') FoodERPParentName,ifnull(MC_SubGroup.Name,'') FoodERPFamilyName 
 ,ifnull(MC_ItemGroupDetails.GroupType_id,'') GroupTypeId,ifnull(MC_ItemGroupDetails.Group_id,'') FoodERPParentId,ifnull(MC_ItemGroupDetails.SubGroup_id,0) FoodERPFamilyId,M_Items.BaseUnitID_id,M_Items.isActive
-,GSTHsnCodeMaster(M_Items.id,%s,3) HSNCode,GetTodaysDateMRP(M_Items.id,%s,2,0,0) MRPValue
+,GSTHsnCodeMaster(M_Items.id,%s,3,0,0) HSNCode,GetTodaysDateMRP(M_Items.id,%s,2,0,0,0) MRPValue
 FROM M_Items
 left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
@@ -446,7 +446,7 @@ where M_Items.id=%s''',([today],[today],[id]))
                     log_entry = create_transaction_logNew(request, payload_json_data, 0,response_json,152,0)
                     for a in response_json['data']:
                         query = M_Items.objects.filter(id=id).update(SkyggeProductID =a['productId'])
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': payload_json_data})
                 else:
                     log_entry = create_transaction_logNew(request, payload_json_data, 0,response_json['message'],164,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':response_json, 'Data': []})
@@ -466,7 +466,7 @@ where M_Items.id=%s''',([today],[today],[id]))
                 today = date.today()
                 q0=M_Items.objects.raw('''SELECT M_Items.id ,M_Items.Name ItemName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') FoodERPParentName,ifnull(MC_SubGroup.Name,'') FoodERPFamilyName 
 ,ifnull(MC_ItemGroupDetails.GroupType_id,'') GroupTypeId,ifnull(MC_ItemGroupDetails.Group_id,'') FoodERPParentId,ifnull(MC_ItemGroupDetails.SubGroup_id,'') FoodERPFamilyId,M_Items.BaseUnitID_id,M_Items.isActive
-,GSTHsnCodeMaster(M_Items.id,%s,3) HSNCode,GetTodaysDateMRP(M_Items.id,%s,2,0,0) MRPValue
+,GSTHsnCodeMaster(M_Items.id,%s,3,0,0) HSNCode,GetTodaysDateMRP(M_Items.id,%s,2,0,0,0) MRPValue
 FROM M_Items
 left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
@@ -478,21 +478,21 @@ where M_Items.id in %s''',([today],[today],ProductID_list))
                     RetaileRate=RateCalculationFunction(0,row.id,0,0,1,0,3).RateWithGST() 
                     DistributorRate=RateCalculationFunction(0,row.id,0,0,1,0,2).RateWithGST()
                     SuperStockistRate=RateCalculationFunction(0,row.id,0,0,1,0,1).RateWithGST() 
-                    ItemData.append({
-                            "FoodERPItemID": str(row.id),
-                            "FoodERPCategoryId":1,
-                            "FoodERPFamilyId":row.FoodERPFamilyId,
-                            "FoodERPTypeId":1,
-                            "FoodERPUomId":row.BaseUnitID_id,
-                            "ItemName":row.ItemName,
-                            "MRP":float(row.MRPValue),
-                            "RetailerRate":float(RetaileRate[0]['RateWithoutGST']),
-                            "DistributorRate":float(DistributorRate[0]['RateWithoutGST']),
-                            "SuperStockistRate":float(SuperStockistRate[0]['RateWithoutGST']),
-                            "ProductHSN":row.HSNCode,
-                            "IsActive":row.isActive
+                    # ItemData.append({
+                    #         "FoodERPItemID": str(row.id),
+                    #         "FoodERPCategoryId":1,
+                    #         "FoodERPFamilyId":row.FoodERPFamilyId,
+                    #         "FoodERPTypeId":1,
+                    #         "FoodERPUomId":row.BaseUnitID_id,
+                    #         "ItemName":row.ItemName,
+                    #         "MRP":float(row.MRPValue),
+                    #         "RetailerRate":float(RetaileRate[0]['RateWithoutGST']),
+                    #         "DistributorRate":float(DistributorRate[0]['RateWithoutGST']),
+                    #         "SuperStockistRate":float(SuperStockistRate[0]['RateWithoutGST']),
+                    #         "ProductHSN":row.HSNCode,
+                    #         "IsActive":row.isActive
                             
-                        })
+                    #     })
 
                 payload={
                     "products" : ItemData
@@ -506,6 +506,7 @@ where M_Items.id in %s''',([today],[today],ProductID_list))
                           }
                 
                 payload_json_data = json.dumps(payload)
+                # print('mobileappdat: -',payload_json_data)
                 response = requests.request("put", url, headers=headers, data=payload_json_data)
                 response_json=json.loads(response.text)
                 

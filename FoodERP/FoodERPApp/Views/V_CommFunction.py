@@ -94,6 +94,31 @@ def create_transaction_logNew(request, data, PartyID, TransactionDetails, Transa
     #     return None
     return log_entry
     
+def MRPListFun(Item,Party,PartyType):
+    PartyTypeQuery=M_Parties.objects.filter(id=Party).values('PartyType')
+    if PartyType: 
+        PartyTypeID=PartyType 
+    else:
+        PartyTypeID= PartyTypeQuery[0]['PartyType']
+    MRPquery = M_MRPMaster.objects.filter(Item_id=Item,Party=Party,PartyType__isnull=True,IsDeleted=0).values('MRP','id').order_by('-id')
+    if not MRPquery:
+        MRPquery = M_MRPMaster.objects.filter(Item_id=Item,Party__isnull=True,PartyType=PartyTypeID,IsDeleted=0).values('MRP','id').order_by('-id')
+        if not MRPquery:
+            MRPquery = M_MRPMaster.objects.filter(Item_id=Item,Party__isnull=True,PartyType__isnull=True,IsDeleted=0).values('MRP','id').order_by('-id')
+    # print(MRPquery.query)
+    return MRPquery
+
+def GSTListFun(Item,Party,PartyType):
+    PartyTypeQuery=M_Parties.objects.filter(id=Party).values('PartyType')
+    if PartyType: 
+        PartyTypeID=PartyType 
+    else:
+        PartyTypeID= PartyTypeQuery[0]['PartyType']
+    GSTquery =M_GSTHSNCode.objects.filter(Item_id=Item,PartyType=PartyTypeID).values('GSTPercentage','id','HSNCode').order_by('-id')[:3]
+    if not GSTquery:
+        GSTquery =M_GSTHSNCode.objects.filter(Item_id=Item,PartyType__isnull=True).values('GSTPercentage','id','HSNCode').order_by('-id')[:3]
+    # print(GSTquery.query)
+    return GSTquery
 def UnitDropdown(ItemID, PartyForRate, BatchID=0):   
     UnitDetails = list()
     ItemUnitquery = MC_ItemUnits.objects.filter(Item=ItemID, IsDeleted=0,IsShowUnit=1).select_related('UnitID').values('id','BaseUnitQuantity','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion','UnitID__id')

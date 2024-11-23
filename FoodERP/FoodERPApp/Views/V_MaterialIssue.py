@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import transaction
 from rest_framework.parsers import JSONParser
-from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
+from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix,SystemBatchCodeGeneration
 from ..Serializer.S_WorkOrder import *
 from ..Serializer.S_MaterialIssue import *
 from ..models import *
@@ -126,7 +126,9 @@ class MaterialIsssueList(CreateAPIView):
                             else:
                                 Percentage=0
                         else:  
-                            Percentage=100                        
+                            Percentage=100   
+                        Productionquery1 = T_MaterialIssue.objects.filter(Item_id=a['Item']['id']).values('id')                
+                        BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item']['id'], a['Party']['id'], Productionquery1.count())                     
                         MaterialIsssueListData.append({
                             "id": a['id'],
                             "MaterialIssueDate": a['MaterialIssueDate'],
@@ -144,6 +146,7 @@ class MaterialIsssueList(CreateAPIView):
                             "PartyName": a['Party']['Name'],
                             "CreatedOn": a['CreatedOn'],
                             "Status":a['Status'],
+                            "PrintedBatchCode":BatchCode,
                             "Percentage":Percentage                         
                            
                         })                        

@@ -508,17 +508,17 @@ class ReturnItemAddView(CreateAPIView):
     # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self, request, id=0):
+    def get(self, request, id=0,Party=0):
         try:
             with transaction.atomic():
                 # query = M_Items.objects.filter(id=id).values('id','Name')
                 query = M_Items.objects.raw('''select id ,name ,
-                                                round(GetTodaysDateMRP(%s,curdate(),2,0,0),2)MRPValue,                                                
-                                                round(GetTodaysDateRate(%s,curdate(),0,0,2),2)RateValue,
-                                                round(GSTHsnCodeMaster(%s,curdate(),2),2)GSTPercentage,
-                                                GetTodaysDateMRP(%s,curdate(),1,0,0)MRPID,
-                                                GSTHsnCodeMaster(%s,curdate(),1)GSTID,
-                                                GetTodaysDateRate(%s,curdate(),0,0,1)RateID
+                                                round(GetTodaysDateMRP(%s,curdate(),2,0,0,0),2)MRPValue,                                                
+                                                round(GetTodaysDateRate(%s,curdate(),0,0,2,0),2)RateValue,
+                                                round(GSTHsnCodeMaster(%s,curdate(),2,0,0),2)GSTPercentage,
+                                                GetTodaysDateMRP(%s,curdate(),1,0,0,0)MRPID,
+                                                GSTHsnCodeMaster(%s,curdate(),1,0,0)GSTID,
+                                                GetTodaysDateRate(%s,curdate(),0,0,1,0)RateID
                                                 from M_Items where id =%s''',[id,id,id,id,id,id,id])
                 # CustomPrint(query.query)
                 
@@ -620,17 +620,26 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                 ItemID = PurchaseReturndata['ItemID']
                 BatchCode = PurchaseReturndata['BatchCode']
                 CustomerID =PurchaseReturndata['Customer']
-
+                PartyID = PurchaseReturndata['Party']
+                
                 Itemquery = M_Items.objects.filter(id=ItemID).values("id","Name")
                 Item =Itemquery[0]["id"]
                 Unitquery = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0,UnitID_id=1).values("id")
-                MRPquery = M_MRPMaster.objects.filter(Item_id=Item).order_by('-id')
+                
+                
+                # MRPquery = M_MRPMaster.objects.filter(Item_id=Item ).order_by('-id')
+                # if not MRPquery:
+                #     MRPquery = M_MRPMaster.objects.filter(Item_id=Item ).order_by('-id')
+                
+                MRPquery=MRPListFun(Item,CustomerID,0)
+                # print(MRPquery)
                 if MRPquery.exists():
-                    MRPdata = ItemMRPSerializerSecond(MRPquery, many=True).data
+                    # MRPdata = ItemMRPSerializerSecond(MRPquery, many=True).data
                     ItemMRPDetails = list()
                     unique_MRPs = set()
-                    for d in MRPdata:
+                    for d in MRPquery:
                         MRPs = d['MRP']
+                        # print(MRPs)
                         CalculatedRateusingMRPMargin=RateCalculationFunction(0,Item,CustomerID,0,1,0,0,MRPs).RateWithGST()
                         Rate=CalculatedRateusingMRPMargin[0]["NoRatewithOutGST"]
                         if MRPs not in unique_MRPs:
@@ -650,11 +659,12 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                     #     "Rate" : round(Rate,2),
                     # })
 
-                GSTquery = M_GSTHSNCode.objects.filter(Item_id=Item).order_by('-id')[:3] 
+                # GSTquery = M_GSTHSNCode.objects.filter(Item_id=Item).order_by('-id')[:3] 
+                GSTquery=GSTListFun(Item,CustomerID,0)
                 if GSTquery.exists():
-                    Gstdata = ItemGSTHSNSerializerSecond(GSTquery, many=True).data
+                    # Gstdata = ItemGSTHSNSerializerSecond(GSTquery, many=True).data
                     ItemGSTDetails = list()
-                    for e in Gstdata:
+                    for e in GSTquery:
                         ItemGSTDetails.append({
                         "GST": e['id'],
                         "GSTPercentage": e['GSTPercentage'],   
