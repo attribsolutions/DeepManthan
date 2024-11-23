@@ -281,7 +281,7 @@ class UserLoginView(RetrieveAPIView):
         find_user = M_Users.objects.filter(
                     Q(isLoginUsingEmail=1, Employee__email=LoginName) |
                     Q(isLoginUsingMobile=1, Employee__Mobile=LoginName) |
-                    Q(LoginName=LoginName)).values( 'id', 'LoginName')
+                    Q(LoginName=LoginName)).values( 'id', 'LoginName','IsLoginPermissions')
         
         # employee = find_user.Employee
         if find_user:
@@ -298,7 +298,8 @@ class UserLoginView(RetrieveAPIView):
                     "Message": "User logged in  successfully",
                     'refreshtoken': str(refresh),
                     'token': str(refresh.access_token),
-                    "UserID": find_user[0]['id']
+                    "UserID": find_user[0]['id'],
+                    "IsLoginPermissions": find_user[0]['IsLoginPermissions']
                 }, status=status.HTTP_200_OK)
                 
             else:
