@@ -482,7 +482,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                         FSSAIExpiry=F('Party__PartyAddress__FSSAIExipry'),
                         PartyTypeID=F('Party__PartyType_id'),
                         PartyType=F('Party__PartyType__Name'),
-                        Country_id=F('Party__Country_id'),
+                        Country_id=F('Party__PartyType__Country__id'),
                         CurrencySymbol=F('Party__PartyType__Country__CurrencySymbol'), 
                         Country=F('Party__PartyType__Country__Country'),
                         Weight=F('Party__PartyType__Country__Weight'), 
@@ -507,7 +507,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                     
                 )    
                 # UserID = request.user.id
-                # CustomPrint(str(query.query))
+                # print(str(query.query))
                 if not query:
                     log_entry = create_transaction_logNew(request,0,0,"Parties Not available",145,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Parties Not available', 'Data': []})
