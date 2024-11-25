@@ -31,7 +31,7 @@ class M_MRPsView(CreateAPIView):
                 for b in M_Mrpsdata:
                     b.update({'CommonID': jsondata})
                     additionaldata.append(b)
-                print(additionaldata)
+                # print(additionaldata)
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MRP Save Successfully','Data' : additionaldata })
                 M_Mrps_Serializer = M_MRPsSerializer(data=additionaldata,many=True)
                 
@@ -80,12 +80,12 @@ class GETMrpDetails(CreateAPIView):
                                              ifnull(GetTodaysDateMRP(M_Items.id,%s,2,{DivisionID},{PartyID},{PartyTypeID}),0)MRP,
                                              ifnull(GetTodaysDateMRP(M_Items.id,%s,3,{DivisionID},{PartyID},{PartyTypeID}),'')EffectiveDate,
                                              (SELECT ifnull(MRP,0)MRP FROM M_MRPMaster where Item_id=M_Items.id
-				                            and EffectiveDate = %s   {Partyy}  {partytype} and IsDeleted=0 order by EffectiveDate desc, id desc limit 1)TodaysDateMRPP
+				                            and EffectiveDate = %s   {Partyy}  {partytype} and IsDeleted=0 order by EffectiveDate desc, id desc limit 1)TodaysDateMRPP,
                                              (SELECT ifnull(id,0)id FROM M_MRPMaster where Item_id=M_Items.id
 				                            and EffectiveDate = %s   {Partyy}  {partytype} and IsDeleted=0 order by EffectiveDate desc, id desc limit 1)IDD
                                              From M_Items
-                                             WHERE Company_id = {CompanyID}''',[today,today,EffectiveDate])             
-                print(query)
+                                             WHERE Company_id = {CompanyID}''',[today,today,EffectiveDate,EffectiveDate])             
+                # print(query)
                 if not query:
                     log_entry = create_transaction_logNew(request, 0, PartyID, "Items Not available",121,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
@@ -116,8 +116,8 @@ class M_MRPsViewSecond(CreateAPIView):
         try:
             with transaction.atomic():
                 MRPdata = M_MRPMaster.objects.filter(id=id).update(IsDeleted=1)
-                print("pratiksha")
-                print(MRPdata)
+  
+                # print(MRPdata)
                 # MRPdata.delete()
                 log_entry = create_transaction_logNew(request, {'MRPID':id}, 0, 'MRPID:'+str(id),122,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'MRP Deleted Successfully','DeleteID':id,'Data':[]})

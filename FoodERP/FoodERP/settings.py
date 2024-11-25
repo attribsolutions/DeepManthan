@@ -115,6 +115,7 @@ DATABASE_ROUTERS = [
 #         'OPTIONS': { 
 #             'sql_mode': 'STRICT_TRANS_TABLES', 
 #         },
+
 #     },
 # }
 DATABASES = {

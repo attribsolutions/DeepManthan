@@ -126,7 +126,9 @@ class GETGstHsnDetails(CreateAPIView):
             with transaction.atomic():
                 EffectiveDate = GSTHSNDetails['EffectiveDate']
                 PartyTypeID = GSTHSNDetails['PartyTypeID']
+                Company = GSTHSNDetails['Company']
                 today = date.today()
+                
                 if PartyTypeID == 0 :
                     partytype=(f"AND PartyType_id is null ")
                 else:
@@ -144,7 +146,7 @@ class GETGstHsnDetails(CreateAPIView):
                                             and IsDeleted=0 order by  EffectiveDate desc,id desc limit 1 )HSNCode,
                                             (SELECT id FROM M_GSTHSNCode where Item_id=M_Items.id and EffectiveDate = %s   {partytype}  
                                             and IsDeleted=0 order by  EffectiveDate desc,id desc limit 1 )IDD
-                                            From M_Items)a limit 3''',[today,today,EffectiveDate,EffectiveDate,EffectiveDate])
+                                            From M_Items where M_Items.Company_id={Company})a limit 200''',[today,today,EffectiveDate,EffectiveDate,EffectiveDate])
                 if not query:
                     # log_entry = create_transaction_logNew(request, 0, 0, "Items Not available",121,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []}) 
@@ -179,12 +181,12 @@ class GetGSTHSNCodeDetailsView(CreateAPIView):
              with transaction.atomic():
                 EffectiveDate = GSTHSNData['EffectiveDate']
                 CommonID = GSTHSNData['CommonID']
-                PartyTypeID = GSTHSNData['PartyTypeID']
+                # PartyTypeID = GSTHSNData['PartyTypeID']
              
-                if PartyTypeID == 0 :
-                    partytype=(f"AND PartyType_id is null ")
-                else:
-                    partytype = (f" AND PartyType_id={PartyTypeID}")
+                # if PartyTypeID == 0 :
+                #     partytype=(f"AND PartyType_id is null ")
+                # else:
+                #     partytype = (f" AND PartyType_id={PartyTypeID}")
                 
                 query = M_GSTHSNCode.objects.raw(f'''
                     SELECT M_GSTHSNCode.id,M_GSTHSNCode.EffectiveDate,M_GSTHSNCode.GSTPercentage,M_GSTHSNCode.HSNCode,M_GSTHSNCode.CommonID,M_GSTHSNCode.PartyType_id as PartyTypeID,
@@ -194,7 +196,7 @@ class GetGSTHSNCodeDetailsView(CreateAPIView):
                     left join M_Items on M_Items.id=M_GSTHSNCode.Item_id
                     where M_GSTHSNCode.IsDeleted=0  
                     AND M_GSTHSNCode.EffectiveDate=%s AND M_GSTHSNCode.CommonID=%s 
-                   {partytype}
+                   
                         -- group by EffectiveDate,Party_id,Division_id,CommonID 
                         GROUP BY M_GSTHSNCode.id, M_GSTHSNCode.EffectiveDate, M_GSTHSNCode.GSTPercentage, M_GSTHSNCode.CommonID, C_Companies.Name, M_Items.Name
                         Order BY EffectiveDate Desc''',[EffectiveDate,CommonID])   
@@ -238,29 +240,31 @@ class GstHsnListView(CreateAPIView):
             with transaction.atomic():
                 FromDate = GSTListData['FromDate']
                 ToDate = GSTListData['ToDate']
-                PartyTypeID = GSTListData['PartyTypeID']
+                # PartyTypeID = GSTListData['PartyTypeID']
                 # add Comment on 22 M_GSTHSNCode.CommonID > 0
                 # GstHsndata = M_GSTHSNCode.objects.raw('''SELECT M_GSTHSNCode.id,M_GSTHSNCode.EffectiveDate,M_GSTHSNCode.Company_id,M_GSTHSNCode.CommonID,M_GSTHSNCode.CreatedBy,M_GSTHSNCode.CreatedOn,C_Companies.Name CompanyName  FROM M_GSTHSNCode left join C_Companies on C_Companies.id = M_GSTHSNCode.Company_id where M_GSTHSNCode.CommonID > 0 AND M_GSTHSNCode.IsDeleted=0  group by EffectiveDate,CommonID Order BY EffectiveDate Desc''')
                 
-                if PartyTypeID == 0 :
-                    partytype=(f"AND PartyType_id is null ")
-                else:
-                    partytype = (f" AND PartyType_id={PartyTypeID}")
+                # if PartyTypeID == 0 :
+                #     partytype=(f"AND PartyType_id is null ")
+                # else:
+                #     partytype = (f" AND PartyType_id={PartyTypeID}")
                     
-                GstHsndata = M_GSTHSNCode.objects.raw(f'''SELECT M_GSTHSNCode.id,M_GSTHSNCode.EffectiveDate,M_GSTHSNCode.Company_id,
+                GstHsndata = M_GSTHSNCode.objects.raw(f'''SELECT M_GSTHSNCode.id,M_GSTHSNCode.EffectiveDate,M_GSTHSNCode.Company_id as CompanyID ,
                                                       M_GSTHSNCode.CommonID,M_GSTHSNCode.CreatedBy,M_GSTHSNCode.CreatedOn,M_GSTHSNCode.PartyType_id as PartyTypeID,
-                                                      C_Companies.Name CompanyName
+                                                       M_PartyType.Name as PartyTypeName,
+                                                      C_Companies.Name as CompanyName
                                                       FROM M_GSTHSNCode
                                                       left join C_Companies on C_Companies.id = M_GSTHSNCode.Company_id 
+                                                      left join M_PartyType on M_PartyType.id = M_GSTHSNCode.PartyType_id
                                                       where M_GSTHSNCode.IsDeleted=0 AND EffectiveDate BETWEEN %s AND %s 
-                                                      {partytype} 
                                                       group by EffectiveDate,CommonID Order BY EffectiveDate Desc''',[FromDate,ToDate])
                 
                
                 if not GstHsndata:
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'GST And HSNCode Not available', 'Data': []})
                 else:
-                    GstHsndata_Serializer = M_GstHsnCodeSerializer(GstHsndata, many=True).data
+                    GstHsndata_Serializer = GSTHSNCodeCompanyPartyTypeSerializer(GstHsndata, many=True).data
+                    # print(GstHsndata_Serializer)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': GstHsndata_Serializer})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
