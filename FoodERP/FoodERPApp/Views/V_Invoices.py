@@ -290,16 +290,17 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     'Vehicle_id', 'TCSAmount', 'Hide','MobileNo','CreatedBy'
                 )
     
-                # print(SposInvoices_query)
+                # print(SposInvoices_query.query)
                 Spos_Invoices = []
                 for b in SposInvoices_query:
+                    # print(b['Customer_id'])
                     parties = M_Parties.objects.filter(id=Party).values('Name')
                     customers = M_Parties.objects.filter(id=b['Customer_id']).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
                     vehicle = M_Vehicles.objects.filter(id=b['Vehicle_id']).values('VehicleNumber')
 
                     # CPartyName = M_SweetPOSUser.objects.using('sweetpos_db').filter(id=b['CreatedBy']).values('LoginName') 
                     CPartyName = M_Users.objects.filter(id=b['CreatedBy']).values('LoginName') 
-
+                    
                     party = Party
                     customer = customers[0]['id']
                     b['PartyName'] = parties[0]['Name']
@@ -316,6 +317,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     b['VehicleNo'] = vehicle[0]['VehicleNumber'] if vehicle else ''
                     Spos_Invoices.append(b) 
                 combined_invoices = []
+                
                 for aa in Invoices_query:
                         aa['CreatedBy'] = 0
                         aa['Identify_id'] = 1 
@@ -346,7 +348,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                                 IsTCSParty = ""
                             else:
                                 IsTCSParty= query2[0]['IsTCSParty']   
-
+                            
                             InvoiceListData.append({
                                 "Identify_id": a['Identify_id'],
                                 "id": a['id'],
@@ -383,7 +385,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})           
         except Exception as e:
             log_entry = create_transaction_logNew(request, Invoicedata, 0,'InvoiceList:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
 class InvoiceView(CreateAPIView):

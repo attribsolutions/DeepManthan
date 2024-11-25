@@ -281,7 +281,7 @@ class UserLoginView(RetrieveAPIView):
         find_user = M_Users.objects.filter(
                     Q(isLoginUsingEmail=1, Employee__email=LoginName) |
                     Q(isLoginUsingMobile=1, Employee__Mobile=LoginName) |
-                    Q(LoginName=LoginName)).values( 'id', 'LoginName')
+                    Q(LoginName=LoginName)).values( 'id', 'LoginName','IsLoginPermissions')
         
         # employee = find_user.Employee
         if find_user:
@@ -298,7 +298,8 @@ class UserLoginView(RetrieveAPIView):
                     "Message": "User logged in  successfully",
                     'refreshtoken': str(refresh),
                     'token': str(refresh.access_token),
-                    "UserID": find_user[0]['id']
+                    "UserID": find_user[0]['id'],
+                    "IsLoginPermissions": find_user[0]['IsLoginPermissions']
                 }, status=status.HTTP_200_OK)
                 
             else:
@@ -482,7 +483,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                         FSSAIExpiry=F('Party__PartyAddress__FSSAIExipry'),
                         PartyTypeID=F('Party__PartyType_id'),
                         PartyType=F('Party__PartyType__Name'),
-                        Country_id=F('Party__Country_id'),
+                        Country_id=F('Party__PartyType__Country__id'),
                         CurrencySymbol=F('Party__PartyType__Country__CurrencySymbol'), 
                         Country=F('Party__PartyType__Country__Country'),
                         Weight=F('Party__PartyType__Country__Weight'), 
@@ -507,7 +508,7 @@ class UserPartiesForLoginPage(CreateAPIView):
                     
                 )    
                 # UserID = request.user.id
-                # CustomPrint(str(query.query))
+                # print(str(query.query))
                 if not query:
                     log_entry = create_transaction_logNew(request,0,0,"Parties Not available",145,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Parties Not available', 'Data': []})
