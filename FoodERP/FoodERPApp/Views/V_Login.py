@@ -299,7 +299,7 @@ class UserLoginView(RetrieveAPIView):
                     'refreshtoken': str(refresh),
                     'token': str(refresh.access_token),
                     "UserID": find_user[0]['id'],
-                    "IsLoginPermissions": find_user[0]['IsLoginPermissions']
+                    "IsLoginPermissions": find_user[0]['IsLoginPermissions']  
                 }, status=status.HTTP_200_OK)
                 
             else:
