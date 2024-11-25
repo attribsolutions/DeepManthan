@@ -993,7 +993,7 @@ class ReturnReportDownloadView(CreateAPIView):
                                                      LEFT JOIN M_Routes ON M_Routes.id = MC_PartySubParty.Route_id
                                                        ''', ([
                                                       FromDate, ToDate, Party_list,Party_list]))
-                print(query.query)
+                # print(query.query)
                 if query:
                     ReturnSerializer = ReturnReportSerializer(
                         query, many=True).data

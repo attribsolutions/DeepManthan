@@ -632,14 +632,14 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                 #     MRPquery = M_MRPMaster.objects.filter(Item_id=Item ).order_by('-id')
                 
                 MRPquery=MRPListFun(Item,CustomerID,0)
-                print(MRPquery)
+                # print(MRPquery)
                 if MRPquery.exists():
                     # MRPdata = ItemMRPSerializerSecond(MRPquery, many=True).data
                     ItemMRPDetails = list()
                     unique_MRPs = set()
                     for d in MRPquery:
                         MRPs = d['MRP']
-                        print(MRPs)
+                        # print(MRPs)
                         CalculatedRateusingMRPMargin=RateCalculationFunction(0,Item,CustomerID,0,1,0,0,MRPs).RateWithGST()
                         Rate=CalculatedRateusingMRPMargin[0]["NoRatewithOutGST"]
                         if MRPs not in unique_MRPs:

@@ -100,12 +100,12 @@ def MRPListFun(Item,Party,PartyType):
         PartyTypeID=PartyType 
     else:
         PartyTypeID= PartyTypeQuery[0]['PartyType']
-    MRPquery = M_MRPMaster.objects.filter(Item_id=Item,Party=Party,PartyType__isnull=True ).values('MRP','id').order_by('-id')
+    MRPquery = M_MRPMaster.objects.filter(Item_id=Item,Party=Party,PartyType__isnull=True,IsDeleted=0).values('MRP','id').order_by('-id')
     if not MRPquery:
-        MRPquery = M_MRPMaster.objects.filter(Item_id=Item,Party__isnull=True,PartyType=PartyTypeID ).values('MRP','id').order_by('-id')
+        MRPquery = M_MRPMaster.objects.filter(Item_id=Item,Party__isnull=True,PartyType=PartyTypeID,IsDeleted=0).values('MRP','id').order_by('-id')
         if not MRPquery:
-            MRPquery = M_MRPMaster.objects.filter(Item_id=Item,Party__isnull=True,PartyType__isnull=True ).values('MRP','id').order_by('-id')
-    print(MRPquery.query)
+            MRPquery = M_MRPMaster.objects.filter(Item_id=Item,Party__isnull=True,PartyType__isnull=True,IsDeleted=0).values('MRP','id').order_by('-id')
+    # print(MRPquery.query)
     return MRPquery
 
 def GSTListFun(Item,Party,PartyType):
@@ -117,7 +117,7 @@ def GSTListFun(Item,Party,PartyType):
     GSTquery =M_GSTHSNCode.objects.filter(Item_id=Item,PartyType=PartyTypeID).values('GSTPercentage','id','HSNCode').order_by('-id')[:3]
     if not GSTquery:
         GSTquery =M_GSTHSNCode.objects.filter(Item_id=Item,PartyType__isnull=True).values('GSTPercentage','id','HSNCode').order_by('-id')[:3]
-    print(GSTquery.query)
+    # print(GSTquery.query)
     return GSTquery
 def UnitDropdown(ItemID, PartyForRate, BatchID=0):   
     UnitDetails = list()

@@ -386,6 +386,7 @@ class M_Users(AbstractBaseUser):
     Employee = models.ForeignKey(M_Employees, related_name='UserEmployee', on_delete=models.PROTECT)
     # POSRateType = models.ForeignKey(M_GeneralMaster, related_name='POSRateType', on_delete=models.DO_NOTHING,blank=True, null=True)
     POSRateType =models.IntegerField(blank=True, null=True)
+    IsLoginPermissions = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'LoginName'
     REQUIRED_FIELDS = []
@@ -785,7 +786,7 @@ class M_GSTHSNCode(models.Model):
     UpdatedOn = models.DateTimeField(auto_now=True)
     Company = models.ForeignKey(C_Companies, related_name='GstCompany', on_delete=models.PROTECT)
     Item = models.ForeignKey(M_Items, related_name='ItemGSTHSNDetails', on_delete=models.CASCADE)
-    # PartyType = models.ForeignKey(M_PartyType, related_name='GSTMasterPartyType', on_delete=models.PROTECT,null=True,blank=True)
+    PartyType = models.ForeignKey(M_PartyType, related_name='GSTMasterPartyType', on_delete=models.PROTECT,null=True,blank=True)
     class Meta:
         db_table = "M_GSTHSNCode"          
                    
@@ -816,7 +817,7 @@ class M_MRPMaster(models.Model):
     Item = models.ForeignKey(M_Items, related_name='ItemMRPDetails', on_delete=models.CASCADE)
     'Customer means M_Parties ID'
     Party =models.ForeignKey(M_Parties, related_name='MRPParty', on_delete=models.PROTECT,null=True,blank=True)
-    # PartyType = models.ForeignKey(M_PartyType, related_name='MRPMasterPartyType', on_delete=models.PROTECT,null=True,blank=True)
+    PartyType = models.ForeignKey(M_PartyType, related_name='MRPMasterPartyType', on_delete=models.PROTECT,null=True,blank=True)
     class Meta:
         db_table = "M_MRPMaster"      
 
@@ -1154,7 +1155,7 @@ class M_BillOfMaterial(models.Model):
     Company = models.ForeignKey(C_Companies, on_delete=models.PROTECT)
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT) 
     Unit = models.ForeignKey(MC_ItemUnits, related_name='BOMUnitID', on_delete=models.PROTECT)
- 
+    Party =models.ForeignKey(M_Parties, on_delete=models.PROTECT)
     class Meta:
         db_table = "M_BillOfMaterial"
       
