@@ -1433,10 +1433,10 @@ class ProductAndMarginReportView(CreateAPIView):
                 except (ValueError, TypeError):
                     PriceListID = 0
 
-                query =f""" SELECT M_Items.id ,SAPItemCode,BarCode,GSTHsnCodeMaster(M_Items.id,%s,3,{PartyID},{PartyTypeID})HSNCode,C_Companies.Name CompanyName,isActive,
+                query =f""" SELECT M_Items.id ,SAPItemCode,BarCode,GSTHsnCodeMaster(M_Items.id,%s,3,{PartyID},0)HSNCode,C_Companies.Name CompanyName,isActive,
 (case when Length ='' then '' else concat(Length,'L X ',Breadth,'B X ',Height,'W - MM') end)BoxSize,StoringCondition
 ,ifnull(M_Group.Name,'') Product,ifnull(MC_SubGroup.Name,'') SubProduct,M_Items.Name ItemName,ShortName,
-round(GetTodaysDateMRP(M_Items.id,%s,2,0,{PartyID},{PartyTypeID}),0) MRP,round(GSTHsnCodeMaster(M_Items.id,%s,2,{PartyID},{PartyTypeID}),2)GST,M_Units.Name BaseUnit,Grammage SKUVol,
+round(GetTodaysDateMRP(M_Items.id,%s,2,0,{PartyID},0),0) MRP,round(GSTHsnCodeMaster(M_Items.id,%s,2,{PartyID},0),2)GST,M_Units.Name BaseUnit,Grammage SKUVol,
 MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuantity PcsInKg, PIN.BaseUnitQuantity PcsInNo, ifnull(M_Group.id,'') ProductID,ifnull(MC_SubGroup.id,'') SubProductID
  ,M_Items.BaseUnitID_id
  FROM M_Items
@@ -1451,9 +1451,11 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
  JOIN MC_ItemUnits PIK on PIK.Item_id=M_Items.id and PIK.UnitID_id=2 and PIK.IsDeleted=0
  JOIN MC_ItemUnits PIN on PIN.Item_id=M_Items.id and PIN.UnitID_id=1 and PIN.IsDeleted=0
  """
-                
+                # print(query)
                 q=C_Companies.objects.filter(id=CompanyID).values('IsSCM')
+                # print(q)
                 if q[0]['IsSCM'] == 1:
+                   
                     CompanyIDs=MC_EmployeeParties.objects.raw(f'''select GetAllCompanyIDsFromLoginCompany({CompanyID}) id''')
                     for row in CompanyIDs:
                         p=row.id
@@ -1461,31 +1463,41 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                     dd=Party_ID[:-1]
                     C=', '.join(dd)
                     Companycondition = f"where M_Items.Company_id in( {C}) and M_Items.IsSCM=1"
+                    # print(Companycondition)
                 else:
+                    
                     Companycondition = f"where M_Items.Company_id = {CompanyID}"
+                    
+                    
                 
                 if IsSCM == '0':
+                    # print("SSSSSSSSS")
                     query += f"{Companycondition} "
+                    # print(query)
                     # query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence  "
                     ItemQuery = M_Items.objects.raw(query, [today, today, today])
+                    # print(ItemQuery)
                 else:
+                    
                     query += f"join MC_PartyItems on MC_PartyItems.Item_id=M_Items.id and MC_PartyItems.Party_id=%s {Companycondition}"
                     # query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence  "
                     ItemQuery = M_Items.objects.raw(query, [today, today, today, PartyID])
-                
+                   
                 if any(ItemID) :    
+                    
                     query += " "
                     query += "  AND M_Items.id in %s "
                     query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence  "
                     
                     if IsSCM == '0':
-                       
+                           
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,ItemID])
                         
                     else:
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,PartyID,ItemID])
                      
                 elif any(SubGroupID):
+                      
                     query += " "
                     query += "  AND M_Group.id in %s and MC_SubGroup.id in %s"
                     query += " order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence"
@@ -1494,6 +1506,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                     else:
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,PartyID,GroupID,SubGroupID])
                 elif any(GroupID):
+                    
                     query += " "
                     query += "  AND M_Group.id in %s "
                     query += "order by M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence"
@@ -1502,19 +1515,22 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                     else:
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,PartyID,GroupID])
                 
-                # CustomPrint(ItemQuery.query)                
+                # CustomPrint(ItemQuery.query)    
+                # print(ItemQuery)            
                 ItemsList = list()
+                # print(ItemsList)
                 if ItemQuery:
-
+                    # print("SHRU")     
                     for row in ItemQuery:
                         
                         if IsSCM == '0':
                            
                             # CustomPrint(PriceListID)
                             if PriceListID == 0:
-                                CustomPrint("Shrut1")
+                                # print("Shrut1")
                                 pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName FROM M_PriceList  order by Sequence''')
                                 CustomPrint(pricelistquery.query)
+                                # print(pricelistquery)
                             else:
                                 all_ids = []
                                 # CustomPrint("Shruti")
@@ -1529,7 +1545,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                                     all_ids_tuple = tuple(all_ids)
                                     # CustomPrint(all_ids_tuple)
                                     pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName FROM M_PriceList where id in %s order by Sequence''',[all_ids_tuple])
-                                # CustomPrint(pricelistquery)
+                               
                         else:
                             if PriceListID == 0:
                                
@@ -1557,8 +1573,9 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id in (%s
                         ItemMargins = list()
                         RateList = list()
                         ItemImage = list()
-
+                        
                         for x in pricelistquery:
+                            
                             query2 = M_MarginMaster.objects.raw('''select 1 as id, GetTodaysDateMargin(%s,%s,%s,0,0)Margin,RateCalculationFunction1(0, %s, 0, 1, 0, %s, 0, 0)RatewithoutGST,RateCalculationFunction1(0, %s, 0, 1, 0, %s, 0, 1)RatewithGST,RateCalculationFunction1(0, %s, 0, %s, 0, %s, 0, 0)BaseUnitRatewithoutGST''', (
                                 row.id, today, x.id, row.id, x.id, row.id, x.id,row.id, row.BaseUnitID_id,x.id))
 

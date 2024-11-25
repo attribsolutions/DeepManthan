@@ -22,11 +22,17 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_Users
         fields = '__all__'
-        extra_kwargs = {'password': {'write_only': True}}
+        extra_kwargs = {
+                        'password': {'write_only': True},
+                        'IsLoginPermissions': {'required': True},
+                        }
 
     def create(self, validated_data):
         Roles_data = validated_data.pop('UserRole')
+        is_login_permissions = validated_data.pop('IsLoginPermissions', True)
         user = M_Users.objects.create_user(**validated_data)
+        user.IsLoginPermissions = is_login_permissions
+        user.save()
 
         for Role_data in Roles_data:
             MC_UserRoles.objects.create(User=user, **Role_data)
@@ -46,6 +52,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             'isLoginUsingMobile', instance.isLoginUsingMobile)
         instance.isLoginUsingEmail = validated_data.get(
             'isLoginUsingEmail', instance.isLoginUsingEmail)
+        instance.IsLoginPermissions = validated_data.get(
+            'IsLoginPermissions', instance.IsLoginPermissions)
         # instance.AdminPassword = validated_data.get(
         #     'password', instance.password)   
         instance.UpdatedBy = validated_data.get(
