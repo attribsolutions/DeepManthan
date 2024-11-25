@@ -211,6 +211,7 @@ class UserListViewSecond(CreateAPIView):
                         'isSendOTP': a["isSendOTP"],
                         'isLoginUsingMobile': a["isLoginUsingMobile"],
                         'isLoginUsingEmail': a["isLoginUsingEmail"],
+                        'IsLoginPermissions' : a['IsLoginPermissions'],
                         'AdminPassword': a["AdminPassword"],
                         'CreatedBy': a["CreatedBy"],
                         'CreatedOn': a["CreatedOn"],
@@ -299,7 +300,7 @@ class UserLoginView(RetrieveAPIView):
                     'refreshtoken': str(refresh),
                     'token': str(refresh.access_token),
                     "UserID": find_user[0]['id'],
-                    "IsLoginPermissions": find_user[0]['IsLoginPermissions']
+                    "IsLoginPermissions": find_user[0]['IsLoginPermissions']  
                 }, status=status.HTTP_200_OK)
                 
             else:
