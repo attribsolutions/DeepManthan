@@ -410,10 +410,9 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
         Cluster = validated_data.get('Cluster')
         SubCluster = validated_data.get('SubCluster')
            
-        M_PartyDetails.objects.update_or_create(
+        M_PartyDetails.objects.filter(Party=instance, Group_id__isnull=True).update_or_create(
             Party=instance,
-            defaults={'Cluster_id': Cluster,
-                      'SubCluster_id': SubCluster,})
+            defaults={'Cluster_id': Cluster, 'SubCluster_id': SubCluster},)
         
         for a in instance.PartyPrefix.all():
             a.delete() 
