@@ -180,7 +180,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                         return response('Unauthorized', status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
             log_entry = create_transaction_logNew(request, data, 0,'MobileAppOrderSave:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
     @transaction.atomic()
