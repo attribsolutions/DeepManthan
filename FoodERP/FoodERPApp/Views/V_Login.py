@@ -106,6 +106,7 @@ class UserListView(CreateAPIView):
                             'isSendOTP': a["isSendOTP"],
                             'isLoginUsingMobile': a["isLoginUsingMobile"],
                             'isLoginUsingEmail': a["isLoginUsingEmail"],
+                            'IsLoginPermissions' : a['IsLoginPermissions'],
                             'AdminPassword': a["AdminPassword"],
                             'CreatedBy': a["CreatedBy"],
                             'CreatedOn': a["CreatedOn"],
