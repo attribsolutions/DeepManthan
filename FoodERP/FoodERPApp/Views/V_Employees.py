@@ -186,18 +186,18 @@ where M_Employees.id= %s''', [id])
                         left join M_Parties on M_Parties.id=a.Party_id 
                         Left join M_Roles on M_Roles.id=b.Role_id''')                    
                     
-                    # EmployeepartiesData_Serializer = EmployeepartiesDataSerializer03(
-                    #     Employeeparties, many=True).data
+                    EmployeepartiesData_Serializer = EmployeepartiesDataSerializer03(
+                        Employeeparties, many=True).data
 
-                    # EmployeeParties = list()
+                    EmployeeParties = list()
                    
-                    # for a in EmployeepartiesData_Serializer:
+                    for a in EmployeepartiesData_Serializer:
                         
-                    #     EmployeeParties.append({
-                    #         'id': a['id'] if a['id'] is not None else '',
-                    #         'Name': a['Name']if a['Name'] is not None else '',
-                    #         'RoleName':a['RoleName']if a['RoleName'] is not None else ''
-                    #     })     
+                        EmployeeParties.append({
+                            'id': a['id'] if a['id'] is not None else '',
+                            'Name': a['Name']if a['Name'] is not None else '',
+                            'RoleName':a['RoleName']if a['RoleName'] is not None else ''
+                        })     
                     # CustomPrint(Employeeparties)       
                     if not Employeeparties:
                         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Parties Not available', 'Data': []})
