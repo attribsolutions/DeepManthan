@@ -352,8 +352,8 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
     PartyAddress = UpdatePartyAddressSerializer(many=True)
     PartyPrefix = UpdatePartyPrefixsSerializer(many=True)
     PartySubParty = UpdateMC_PartySubPartySerializer(many=True)
-    Cluster = serializers.IntegerField(write_only=True)
-    SubCluster = serializers.IntegerField(write_only=True)
+    # Cluster = serializers.IntegerField(write_only=True)
+    # SubCluster = serializers.IntegerField(write_only=True)
     # Country = CountrySerializer(many=True)
 
     class Meta:
@@ -410,9 +410,7 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
         Cluster = validated_data.get('Cluster')
         SubCluster = validated_data.get('SubCluster')
            
-        M_PartyDetails.objects.filter(Party=instance, Group_id__isnull=True).update_or_create(
-            Party=instance,
-            defaults={'Cluster_id': Cluster, 'SubCluster_id': SubCluster},)
+        
         
         for a in instance.PartyPrefix.all():
             a.delete() 
@@ -429,9 +427,17 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
                 Party = MC_PartyAddress.objects.create(Party=instance, **PartyAddress_updatedata)   
                
             
-        query=M_PartyType.objects.filter(id=instance.PartyType.id).values('IsVendor')
-       
+        query=M_PartyType.objects.filter(id=instance.PartyType.id).values('IsVendor','IsRetailer')
+        
+        if not query[0]['IsRetailer'] == True:
+           
+            M_PartyDetails.objects.filter(Party=instance, Group_id__isnull=True).update_or_create(
+            Party=instance,
+            defaults={'Cluster_id': Cluster, 'SubCluster_id': SubCluster},)
+        
+        
         if query[0]['IsVendor'] == True:
+            
             for PartySubParty_data in validated_data['PartySubParty']:
                 Sub_Party = PartySubParty_data.pop('Party', None)
                 DeleteData = PartySubParty_data.pop('Delete', None)
@@ -440,6 +446,7 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
                 if DeleteData == 0:
                     PartySubParty=MC_PartySubParty.objects.create(Party=instance, SubParty=Sub_Party, **PartySubParty_data)  
         else: 
+           
             for PartySubParty_data in validated_data['PartySubParty']:
                 Main_Party = PartySubParty_data.pop('Party', None)
                 DeleteFlag = PartySubParty_data.pop('Delete', None)
@@ -447,6 +454,9 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
                 query = MC_PartySubParty.objects.filter(Party=Main_Party, SubParty=instance).delete()
                 if DeleteFlag == 0:
                    PartySubParty = MC_PartySubParty.objects.create(SubParty=instance, Party=Main_Party, **PartySubParty_data)
+        
+        
 
+        
         return instance
     
