@@ -152,6 +152,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                                     "IsDeleted": 0
                                     }
                                 ],
+                                "AdvanceAmount" : 0,
                                 "Customer": Customer,
                                 "Supplier": Supplier,
                                 "OrderType": 2,
@@ -160,8 +161,11 @@ class T_MobileAppOrdersView(CreateAPIView):
                             }) 
                             # return JsonResponse({ 'Data': Orderdata })
                             Order_serializer = T_OrderSerializer(data=Orderdata[0])
+                            # print(Order_serializer)
                             if Order_serializer.is_valid():
+                                
                                 Order_serializer.save()
+                                
                                 OrderID = Order_serializer.data['id']
                                 PartyID = Order_serializer.data['Customer']
                                 
