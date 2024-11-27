@@ -310,8 +310,14 @@ class M_SweetPOSMachine(models.Model):
     ServerDatabase = models.CharField(max_length=100,null=True,blank=True)
     Invoiceprefix = models.CharField(max_length=100 ,null=True,blank=True)
 
+    # class Meta:
+    #     constraints = [
+    #         UniqueConstraint(fields=['Party', 'MacID'], name='unique_Party_MacID')
+    #     ]
+    #     db_table = "M_SweetPOSMachine"        
+
     class Meta:
         constraints = [
-            UniqueConstraint(fields=['Party', 'MacID'], name='unique_Party_MacID')
+            UniqueConstraint(fields=['Party', 'MacID', 'SeverName', 'ServerHost', 'Invoiceprefix'], name='unique_Party_MacID_SeverName_ServerHost_Invoiceprefix')
         ]
-        db_table = "M_SweetPOSMachine"        
+        db_table = "M_SweetPOSMachine"    
