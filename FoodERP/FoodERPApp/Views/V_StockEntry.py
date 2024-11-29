@@ -173,12 +173,15 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                 if Party == "":
                     
                     PartyID=0;
-                    ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(PartyID,0).split('!')
+                    ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(0,1).split('!')
+                    # print(ItemsGroupJoinsandOrderby) 
                     if Employee > 0:
+                        # print("Shruti")
                         EmpPartys=MC_EmployeeParties.objects.raw('''select EmployeeParties(%s) id''',[Employee])
                         for row in EmpPartys:
                             p=row.id
                         PartyIDs = p.split(",")
+                        # print("PartyIDs")
                     where_clause = ""
                     p1 = (today,PartyIDs)
                     if Cluster:
@@ -204,7 +207,7 @@ sum(O_BatchWiseLiveStock.BaseUnitQuantity)Qty ,M_Items.BaseUnitID_id,
 ifnull(sum(case when IsDamagePieces=0 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)SaleableStock,
 ifnull(sum(case when IsDamagePieces=1 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)UnSaleableStock,
 O_LiveBatches.MRPValue ,
-0 BatchCode,0 SystemBatchCode,round(GSTHsnCodeMaster(M_Items.id,%s,2,{Party},0),2)GSTPercentage,0 Rate, M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
+0 BatchCode,0 SystemBatchCode,round(GSTHsnCodeMaster(M_Items.id,%s,2,0,0),2)GSTPercentage,0 Rate, M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster,SAPItemCode
                 
                 FROM M_Items 
 join MC_PartyItems on M_Items.id=MC_PartyItems.Item_id and MC_PartyItems.Party_id in %s
@@ -216,13 +219,12 @@ LEFT JOIN M_PartyDetails on  A.id=M_PartyDetails.Party_id AND M_PartyDetails.Gro
 LEFT JOIN M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id 
 LEFT JOIN M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id
 WHERE O_BatchWiseLiveStock.BaseUnitQuantity >0 {where_clause}
-group by A.id, M_GroupType.id,
-M_Group.id,MC_SubGroup.id, M_Items.id , GSTPercentage,MRPValue
 {ItemsGroupJoinsandOrderby[2]}''')
                     
                     Itemquery = MC_PartyItems.objects.raw(Stockquery, p1)
-                    
+                    # print(Itemquery.query)
                 else : 
+                    
                     PartyID=Party;
                     PartyIDs= Party 
 
@@ -262,7 +264,7 @@ M_Group.id,MC_SubGroup.id, M_Items.id , GSTPercentage,MRPValue
     ifnull((case when IsDamagePieces=1 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)UnSaleableStock,
     O_LiveBatches.MRPValue ,
     O_LiveBatches.BatchCode,O_LiveBatches.SystemBatchCode,round(GSTHsnCodeMaster(M_Items.id,%s,2,{Party},0),2)GSTPercentage,
-    {Condition},  M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
+    {Condition},  M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster,SAPItemCode
     FROM M_Items 
     join MC_PartyItems on M_Items.id=MC_PartyItems.Item_id and MC_PartyItems.Party_id in %s
     {ItemsGroupJoinsandOrderby[1]}
@@ -276,7 +278,7 @@ M_Group.id,MC_SubGroup.id, M_Items.id , GSTPercentage,MRPValue
     {ItemsGroupJoinsandOrderby[2]}''')
                        
                     Itemquery = MC_PartyItems.objects.raw(Stockquery, p2)
-                    CustomPrint(Itemquery.query)
+                    
                 if not Itemquery:
                     log_entry = create_transaction_logNew(request, StockReportdata, Party, "BatchWiseLiveStock Not available",88,0) 
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
@@ -330,7 +332,8 @@ M_Group.id,MC_SubGroup.id, M_Items.id , GSTPercentage,MRPValue
                             "Unit":StockUnit,
                             "GST" : row.GSTPercentage,
                             "Cluster" : row.Cluster,
-                            "SubCluster": row.SubCluster
+                            "SubCluster": row.SubCluster,
+                            "SAPItemCode":row.SAPItemCode
                         })
                         
                     
