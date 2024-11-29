@@ -1847,8 +1847,8 @@ class FranchiseSecondarySaleReportView(CreateAPIView):
                         "IsCBMItem": aa,
                         "MobileNo": a.MobileNo,
                         "MaterialSAPCode": a.MaterialSAPCode,
-                        "QtyInNo":float(a.QtyInNo),
-                        "QtyInKg":float(a.QtyInKg)
+                        "QtyInNo":round(a.QtyInNo,3),
+                        "QtyInKg":round(a.QtyInKg,3)
                         })
                     log_entry = create_transaction_logNew(request, Data, Party, '', 414, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReportdataList})  
