@@ -212,7 +212,12 @@ where M_Employees.id= %s''', [id])
                             if party_id not in party_roles:
                                 party_roles[party_id] = {                               
                                     "id":a["id"],
-                                    "RoleName": a["Name"]                                                                  
+
+
+                                    "Name": a["Name"],  
+                                    "RoleName":a["RoleName"]                                                               
+
+
                                 }                             
                         User_List = list(party_roles.values())   
                          
