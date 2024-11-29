@@ -114,7 +114,7 @@ class ItemListView(CreateAPIView):
                             "EffectiveFrom":row.RateEffectiveDate
                     })
 
-                    queryforRate =M_SPOSRateMaster.objects.filter(ItemID=row.id)
+                    queryforRate =M_SPOSRateMaster.objects.filter(ItemID=row.id,IsDeleted=0)
                     for RateRow in queryforRate:
                         Ratelist.append({	
                             "Rate": RateRow.Rate,
