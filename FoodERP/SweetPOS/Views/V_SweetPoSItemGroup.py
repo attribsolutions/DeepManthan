@@ -93,7 +93,7 @@ class ItemListView(CreateAPIView):
                 ifnull(i.BaseUnitID_id,0) AS UnitID, i.IsFranchisesItem,  
                 ifnull(Round(GetTodaysDateMRP(i.id, CURDATE(), 2, 0,0,0),2),0.0) AS FoodERPMRP,
                 ifnull(MC_ItemGroupDetails.SubGroup_id,0) AS ItemGroupID,MC_ItemGroupDetails.ItemSequence,
-                i.IsCBMItem ,i.IsMixItem,ifnull(SweetPOS.SPOSRateMaster(i.id),"0,0,0,0")OnlineRates
+                i.IsCBMItem ,i.IsMixItem,SweetPOS.SPOSRateMaster(i.id)OnlineRates
                 FROM M_Items AS i
                 left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=i.id and GroupType_id=5
                 LEFT JOIN M_ChannelWiseItems ON i.id = M_ChannelWiseItems.Item_id
@@ -116,14 +116,14 @@ class ItemListView(CreateAPIView):
 
                     # queryforRate =M_SPOSRateMaster.objects.filter(ItemID=row.id,IsDeleted=0)
                     # for RateRow in queryforRate:
-
-                    OnlineRates=(row.OnlineRates).split(',') 
-                    Ratelist.append({	
-                        "Rate": float(OnlineRates[0]),
-                        "POSRateType": int(OnlineRates[1]),
-                        "IsChangeRateToDefault": bool(OnlineRates[2]),
-                        "EffectiveFrom":OnlineRates[3]
-                    })
+                    if row.OnlineRates:
+                        OnlineRates=(row.OnlineRates).split(',') 
+                        Ratelist.append({	
+                            "Rate": float(OnlineRates[0]),
+                            "POSRateType": int(OnlineRates[1]),
+                            "IsChangeRateToDefault": bool(OnlineRates[2]),
+                            "EffectiveFrom":OnlineRates[3]
+                        })
                     
                     
                     item_data.append({
