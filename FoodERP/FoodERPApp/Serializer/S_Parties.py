@@ -430,10 +430,10 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
         query=M_PartyType.objects.filter(id=instance.PartyType.id).values('IsVendor','IsRetailer')
         
         if not query[0]['IsRetailer'] == True:
-           
-            M_PartyDetails.objects.filter(Party=instance, Group_id__isnull=True).update_or_create(
-            Party=instance,
-            defaults={'Cluster_id': Cluster, 'SubCluster_id': SubCluster},)
+            if Cluster is not None and SubCluster is not None:
+                M_PartyDetails.objects.filter(Party=instance, Group_id__isnull=True).update_or_create(
+                Party=instance,
+                defaults={'Cluster_id': Cluster, 'SubCluster_id': SubCluster},)
         
         
         if query[0]['IsVendor'] == True:
