@@ -1791,7 +1791,7 @@ class FranchiseSecondarySaleReportView(CreateAPIView):
                 #         where T_Invoices.InvoiceDate between %s and %s '''
                 
                 SPOSInvoicequery ='''Select X.id, M_Parties.Name FranchiseName, M_Parties.SAPPartyCode SAPCode, M_Parties.Name SAPName, X.InvoiceDate SaleDate, 
-                        X.ClientID, M_Items.CItemID , X.FullInvoiceNumber BillNumber, M_Items.Name ItemName, Y.Quantity, M_Units.Name UnitName, Y.MRPValue Rate, Y.Amount, M_Items.IsCBMItem, X.MobileNo, M_Items.SAPItemCode MaterialSAPCode,Y.QtyInNo,y.QtyInKg
+                        X.ClientID, M_Items.CItemID , X.FullInvoiceNumber BillNumber, M_Items.Name ItemName, Y.Quantity, M_Units.Name UnitName, Y.MRPValue Rate, Y.Amount, M_Items.IsCBMItem, X.MobileNo, M_Items.SAPItemCode MaterialSAPCode,Y.QtyInNo,Y.QtyInKg
                         from SweetPOS.T_SPOSInvoices X
                         join SweetPOS.TC_SPOSInvoiceItems Y on Y.Invoice_id = X.id 
                         join FoodERP.M_Parties on M_Parties.id = X.Party
@@ -1847,8 +1847,8 @@ class FranchiseSecondarySaleReportView(CreateAPIView):
                         "IsCBMItem": aa,
                         "MobileNo": a.MobileNo,
                         "MaterialSAPCode": a.MaterialSAPCode,
-                        "QtyInNo":float(a.QtyInNo),
-                        "QtyInKg":float(a.QtyInKg)
+                        "QtyInNo":round(a.QtyInNo,3),
+                        "QtyInKg":round(a.QtyInKg,3)
                         })
                     log_entry = create_transaction_logNew(request, Data, Party, '', 414, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReportdataList})  
