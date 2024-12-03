@@ -167,7 +167,8 @@ class SPOSMaxsaleIDView(CreateAPIView):
     def get(self, request,DivisionID,ClientID):
         try:
             with transaction.atomic():
-                
+                pass
+                return JsonResponse({"Success":True,"status_code":200,"SaleID":0,"Toprows":0}) 
                 user=BasicAuthenticationfunction(request)
                     
                 if user is not None: 
@@ -516,6 +517,7 @@ class SPOSMaxDeletedInvoiceIDView(CreateAPIView):
     def get(self, request,DivisionID,ClientID):
         try:
             with transaction.atomic():
+                return JsonResponse({"Success":True,"status_code":200,"DeletedInvoiceID":0,"Toprows":0})
                 
                 user=BasicAuthenticationfunction(request)
                     
