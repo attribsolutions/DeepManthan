@@ -34,7 +34,7 @@ class RateListView(CreateAPIView):
                                                     where A.PartyType_id=19 
                                                     {ItemsGroupJoinsandOrderby[2]}
                                                     ''', [today, EffectiveFrom, POSRateType])
-                print(q0)
+               
                 RateList = list()
                 for a in q0:
                     RateList.append({

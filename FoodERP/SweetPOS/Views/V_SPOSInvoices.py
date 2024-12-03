@@ -719,7 +719,7 @@ class FranchiseSaleWithBillCountView(CreateAPIView):
                         "GrandTotal": a.GrandTotal
                     })
                 if DailySaleDataList:
-                    log_entry = create_transaction_logNew(request, DailySale, 0, 'FranchiseSaleWithBillCount:' + str(DailySaleDataList), 428, 0)
+                    log_entry = create_transaction_logNew(request, DailySale, 0, 'FranchiseSaleWithBillCount', 428, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': DailySaleDataList})
                 else:
                     log_entry = create_transaction_logNew(request, DailySale, 0, 'FranchiseSaleWithBillCount Not Found', 428, 0)
