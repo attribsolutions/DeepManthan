@@ -52,7 +52,7 @@ class GSTR3BDownloadView(CreateAPIView):
                 0 as Cess
             FROM SweetPOS.T_SPOSInvoices X
             JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id = X.id
-            WHERE X.Party = %s AND Y.InvoiceDate BETWEEN %s AND %s
+            WHERE X.Party = %s AND Y.InvoiceDate BETWEEN %s AND %s AND X.IsDeleted=0
             GROUP BY NatureOfSupplies
             UNION
             SELECT 
@@ -84,7 +84,7 @@ class GSTR3BDownloadView(CreateAPIView):
                 0 as Cess
             FROM SweetPOS.T_SPOSInvoices X
             JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id = X.id
-            WHERE X.Party = %s AND Y.InvoiceDate BETWEEN %s AND %s
+            WHERE X.Party = %s AND Y.InvoiceDate BETWEEN %s AND %s AND X.IsDeleted=0
             GROUP BY NatureOfSupplies
             UNION                                  
             SELECT 
@@ -180,7 +180,7 @@ class GSTR3BDownloadView(CreateAPIView):
                                     JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id = X.id
                                     JOIN M_Parties ON M_Parties.id = X.Customer
                                     JOIN M_States ON M_Parties.State_id = M_States.id
-                                    WHERE X.Party = %s AND X.InvoiceDate BETWEEN %s AND %s
+                                    WHERE X.Party = %s AND X.InvoiceDate BETWEEN %s AND %s AND X.IsDeleted=0
                                     GROUP BY X.id, M_States.StateCode, M_States.Name) A
                                     GROUP BY PlaceOfSupplyState_UT''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
                 Query3 = Query3Serializer(query3, many=True).data
