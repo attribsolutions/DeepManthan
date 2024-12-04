@@ -1004,7 +1004,7 @@ class SummaryReportView(CreateAPIView):
                 # OrderQuery='''SELECT T_Orders.id ,T_Orders.FullOrderNumber OrderNo,M_Group.name GroupName,MC_SubGroup.Name SubGroup,M_Items.Name MaterialName,OrderDate,s.Name SupplierName,c.Name CustomerName,TC_OrderItems.QtyInNo,TC_OrderItems.QtyInKg,TC_OrderItems.QtyInBox,TC_OrderItems.Amount,T_Orders.OrderAmount,T_Orders.CreatedOn  FROM T_Orders left join TC_InvoicesReferences on TC_InvoicesReferences.Order_id=T_Orders.id join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id join M_Items on M_Items.id=TC_OrderItems.Item_id join M_Parties s on T_Orders.Supplier_id=s.id join M_Parties c on T_Orders.Customer_id=c.id left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id where TC_InvoicesReferences.Order_id is null and OrderDate between %s and %s and c.PriceList_id in %s'''
                 OrderQuery='''SELECT T_Orders.id ,T_Orders.FullOrderNumber OrderNo,M_Group.name GroupName,
                 MC_SubGroup.Name SubGroup,M_Items.Name MaterialName,OrderDate,s.Name SupplierName,
-                c.Name CustomerName, TC_OrderItems.QtyInNo,TC_OrderItems.QtyInKg,TC_OrderItems.QtyInBox,TC_OrderItems.Amount,T_Orders.OrderAmount,T_Orders.CreatedOn  
+                c.Name CustomerName, TC_OrderItems.QtyInNo,TC_OrderItems.QtyInKg,TC_OrderItems.QtyInBox,TC_OrderItems.Amount,T_Orders.OrderAmount,T_Orders.CreatedOn,TC_OrderItems.Item_id ItemID,s.id SupplierID,c.id CustomerID  
                 FROM T_Orders 
                 left join TC_InvoicesReferences on TC_InvoicesReferences.Order_id=T_Orders.id and TC_InvoicesReferences.Order_id is null
                 join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id 
@@ -1075,7 +1075,10 @@ class SummaryReportView(CreateAPIView):
                             "QtyInKg": float(row.QtyInKg),
                             "QtyInBox": float(row.QtyInBox),
                             "OrderAmount": float(row.OrderAmount),
-                            "CreatedOn": row.CreatedOn                            
+                            "CreatedOn": row.CreatedOn  ,
+                            "ItemID" :row.ItemID,
+                            "SupplierID" :row.SupplierID,  
+                            "CustomerID":row.CustomerID                      
                         })
                     log_entry = create_transaction_logNew(request, Orderdata, x, 'From:'+FromDate+','+'To:'+ToDate,31,0,FromDate,ToDate,0)            
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderItemDetails})
