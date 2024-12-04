@@ -69,7 +69,7 @@ class GRNListFilterView(CreateAPIView):
                                 challan = x[0]['Challan']
                                 # print(challan)
                                 POType= ""
-                                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': x})
+                                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': x})
                             else:
                                 POType= ""
                         
@@ -79,28 +79,23 @@ class GRNListFilterView(CreateAPIView):
                             # else:
                             #     POType= ""
                             #     # POType= a['GRNReferences'][0]['Order']['POType']['id']
-                        data = {
+                            GRNListData.append({
                                 "id": a['id'],
                                 "GRNDate": a['GRNDate'],
                                 "Customer": a['Customer']['id'],
                                 "CustomerName": a['Customer']['Name'],
                                 "GRNNumber": a['GRNNumber'],
-                                "FullGRNNumber": a['FullGRNNumber'],                               
+                                "FullGRNNumber": a['FullGRNNumber'],
+                                "InvoiceNumber": a['InvoiceNumber'],
+                                "FullInvoiceNumber":a['GRNReferences'][0]['Invoice']['FullInvoiceNumber'],
+                                "InvoiceDate": a['GRNReferences'][0]['Invoice']['InvoiceDate'],
                                 "GrandTotal": a['GrandTotal'],
                                 "Party": a['Party']['id'],
                                 "PartyName": a['Party']['Name'],
                                 "CreatedOn" : a['CreatedOn'],
                                 "POType":POType
-                            }
-                        if a['GRNReferences'][0].get('Invoice') is None:
-                            data["InvoiceNumber"] = a.get('OrderNo')
-                            data["FullInvoiceNumber"] = a['GRNReferences'][0]['Order'].get('FullOrderNumber')
-                            data["InvoiceDate"] = a['GRNReferences'][0]['Order'].get('OrderDate')
-                        else:
-                            data["InvoiceNumber"] = a.get('InvoiceNumber')
-                            data["FullInvoiceNumber"] = a['GRNReferences'][0]['Invoice' ].get('FullInvoiceNumber')
-                            data["InvoiceDate"] = a['GRNReferences'][0]['Invoice'].get('InvoiceDate')
-                        GRNListData.append(data)                               
+
+                            })
                     # print(GRNListData)
                     #for log
                     if Supplier == '':
@@ -108,7 +103,7 @@ class GRNListFilterView(CreateAPIView):
                     else:
                         y= Supplier
                     # print("ssssssssssssssssssss")
-                    print(GRNListData)
+                    # print(GRNListData)
                     log_entry = create_transaction_logNew(request, GRNdata,Customer,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(y),68,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData})
         except Exception as e:
