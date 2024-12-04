@@ -26,7 +26,7 @@ urlpatterns = [
     url(r'ItemGroupandSubgroup$', ItemGroupandSubgroupView.as_view()),
     url(r'ItemList/([0-9]+)$', ItemListView.as_view()),
     url(r'InsertSweetPOSSaleList$', SPOSInvoiceView.as_view()),
-    url(r'GETMaxSweetPOSSaleIDByClientIDD/([0-9]+)/([0-9]+)$', SPOSMaxsaleIDView.as_view()),
+    url(r'GETMaxSweetPOSSaleIDByClientID/([0-9]+)/([0-9]+)$', SPOSMaxsaleIDView.as_view()),
     url(r'StockEntry$', StockView.as_view()),  # ForStockEntryandAdjustment
     url(r'SPOSStockAdjustment/([0-9]+)/([0-9]+)$',SPOSStockAdjustmentView.as_view()),  #ItemID/PartyID
     url(r'SPOSStockReport$', SPOSStockReportView.as_view()), 
@@ -50,7 +50,7 @@ urlpatterns = [
     url(r'CashierSummary$',SPOSCashierSummaryList.as_view()),
     url(r'UpdateCustomerVehiclePOSinvoice$',UpdateCustomerVehiclePOSInvoiceView.as_view()),
     url(r'posDeletEInvoicE$',DeleteInvoiceView.as_view()),
-    url(r'GETMaxPOSDeletedInvoiceIDByClientIDD/([0-9]+)/([0-9]+)$', SPOSMaxDeletedInvoiceIDView.as_view()),
+    url(r'GETMaxPOSDeletedInvoiceIDByClientID/([0-9]+)/([0-9]+)$', SPOSMaxDeletedInvoiceIDView.as_view()),
     url(r'TopSaleItemsOfFranchise$', TopSaleItemsOfFranchiseView.as_view()),
     url(r'FranchiseSaleWithBillCount$', FranchiseSaleWithBillCountView.as_view()),
     ]
