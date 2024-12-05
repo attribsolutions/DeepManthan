@@ -15,7 +15,7 @@ from .Views.V_SweetPoSUsers import *
 from .Views.V_SPOSstock import *
 
 from .Views.V_SPOSRate import *
-
+from .Views.V_SPOSServicesSettings import *
 
 urlpatterns = [
     
@@ -53,4 +53,9 @@ urlpatterns = [
     url(r'GETMaxPOSDeletedInvoiceIDByClientID/([0-9]+)/([0-9]+)$', SPOSMaxDeletedInvoiceIDView.as_view()),
     url(r'TopSaleItemsOfFranchise$', TopSaleItemsOfFranchiseView.as_view()),
     url(r'FranchiseSaleWithBillCount$', FranchiseSaleWithBillCountView.as_view()),
+
+
+    #Service Settings Import
+    url(r'SweetPosServiceSettingsImport/([0-9]+)$', SweetPosServiceSettingsImportView.as_view()),
+ 
     ]

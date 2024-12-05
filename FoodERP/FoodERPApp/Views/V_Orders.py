@@ -759,7 +759,7 @@ group by Item_id)StockQuantity , Round(GetTodaysDateRate(a.Item_id, %s,%s,0,2),2
 )a
 
 
-     join M_Items on M_Items.id=Item_id 
+     join M_Items on M_Items.id=Item_id and IsCBMItem=1
 left join M_MRPMaster on M_MRPMaster.id =a.MRP_id
 left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
 left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
@@ -801,7 +801,7 @@ group by Item_id)StockQuantity ,Round(GetTodaysDateRate(a.Item_id, '{EffectiveDa
 )a
 
 
-join M_Items on M_Items.id=Item_id 
+join M_Items on M_Items.id=Item_id and IsCBMItem=1
 left join M_MRPMaster on M_MRPMaster.id =a.MRP_id
 left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
 left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
