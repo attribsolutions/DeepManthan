@@ -285,9 +285,7 @@ class M_ConsumerMobile(models.Model):
     MacID   = models.CharField(max_length=200)
     Party = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
-    class Meta:
-        
-        
+    class Meta:  
         db_table = "M_ConsumerMobile"        
 
 class M_SweetPOSMachine(models.Model):
@@ -310,6 +308,7 @@ class M_SweetPOSMachine(models.Model):
     ServerPassWord = models.CharField(max_length=100,null=True,blank=True)
     ServerDatabase = models.CharField(max_length=100,null=True,blank=True)
     Invoiceprefix = models.CharField(max_length=100 ,null=True,blank=True)
+    ServiceTimeInterval = models.TimeField(null=True,blank=True)
 
     class Meta:
         constraints = [
@@ -327,4 +326,15 @@ class TC_SPOSInvoicesReferences(models.Model):
     Invoice = models.ForeignKey(T_SPOSInvoices, related_name='SPOSInvoicesReferences', on_delete=models.CASCADE)
     Order = models.IntegerField()
     class Meta:
-        db_table = "TC_SPOSInvoicesReferences"       
+        db_table = "TC_SPOSInvoicesReferences" 
+
+class M_ServiceSettings(models.Model):
+    Party = models.IntegerField()    
+    ServiceSettingsID=models.IntegerField()
+    Flag=models.BooleanField(default=False)
+    Value=models.CharField(max_length=50,null=True,blank=True )
+    Access=models.BooleanField(default=False)
+    CreatedOn=models.DateTimeField(auto_now_add=True)
+    UpdatedON=models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table="M_ServiceSettings"
