@@ -61,12 +61,12 @@ class SweetPosServiceSettingsImportView(CreateAPIView):
                     
                     ServiceSetting_Serializer.save()
                     log_entry = create_transaction_logNew(request, ServiceSettings_Data, 0, '', 413, 0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Settings Updated Successfully','Data' :[]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Service Settings Updated Successfully','Data' :[]})
                 else:
-                    log_entry = create_transaction_logNew(request, ServiceSettings_Data, 0, 'Settings Update:'+str(ServiceSetting_Serializer.errors), 412, 0)
+                    log_entry = create_transaction_logNew(request, ServiceSettings_Data, 0, 'Service Settings Update:'+str(ServiceSetting_Serializer.errors), 412, 0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': str(ServiceSetting_Serializer.errors), 'Data' :[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, ServiceSettings_Data, 0, 'Settings Mobile Update:'+str(e), 33, 0)
+            log_entry = create_transaction_logNew(request, ServiceSettings_Data, 0, 'Service Settings Update:'+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})  
         
