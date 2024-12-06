@@ -335,6 +335,13 @@ class M_ServiceSettings(models.Model):
     Value=models.CharField(max_length=50,null=True,blank=True )
     Access=models.BooleanField(default=False)
     CreatedOn=models.DateTimeField(auto_now_add=True)
-    UpdatedON=models.DateTimeField(auto_now_add=True)
+    UpdatedOn=models.DateTimeField(auto_now=True)
     class Meta:
         db_table="M_ServiceSettings"
+
+# class M_SchemeMaster(models.Model):
+#     QRData=  models.CharField(max_length=100 )      
+#     SchemeType=models.IntegerField()
+#     Item=models.IntegerField(null=True,blank=True)
+#     Party=models.IntegerField(null=True,blank=True)
+#     IsActive=models.BooleanField(default=False)
