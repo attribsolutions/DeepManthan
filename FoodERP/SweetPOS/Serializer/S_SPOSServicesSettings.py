@@ -16,6 +16,5 @@ class SPOSServicesSettingstSerializer(serializers.Serializer):
 class SPOSServicesSettingstSerializer1(serializers.ModelSerializer):
     class Meta:
         model = M_ServiceSettings
-        fields = ['Flag', 'Value', 'Access','UpdatedOn']
-        read_only_fields = ['UpdatedOn']      
+        fields = ['Flag', 'Value', 'Access']        
     
