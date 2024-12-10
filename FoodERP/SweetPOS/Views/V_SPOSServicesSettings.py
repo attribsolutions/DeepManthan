@@ -42,22 +42,17 @@ class SweetPosServiceSettingsImportView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
     
     
-    def put(self, request,id=0):
+    def patch(self, request,id=0):
         ServiceSettings_Data = JSONParser().parse(request)
-        updated_fields = [X for X, value in ServiceSettings_Data.items() if value is not None]
         
-        # If more than one field is provided, return an error
-        if len(updated_fields) > 1:
-            return JsonResponse({'StatusCode': 406, 'Status': False,'Message': 'Only one field can be updated at a time.','Data': []})
+        ServiceSettingsID=ServiceSettings_Data['ServiceSettingsID']        
         try:
             with transaction.atomic():
-                SettingID = M_ServiceSettings.objects.get(id=id)      
-                # print(SettingID.UpdatedOn)          
+                SettingID = M_ServiceSettings.objects.get(Party=id,ServiceSettingsID=ServiceSettingsID)      
+                        
                 ServiceSetting_Serializer = SPOSServicesSettingstSerializer1(
-                    SettingID, data=ServiceSettings_Data)                 
-                       
-                if ServiceSetting_Serializer.is_valid():
-                    # return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': ServiceSetting_Serializer, 'Data' :[]})
+                    SettingID, data=ServiceSettings_Data, partial=True)  
+                if ServiceSetting_Serializer.is_valid():                   
                     
                     ServiceSetting_Serializer.save()
                     log_entry = create_transaction_logNew(request, ServiceSettings_Data, 0, '', 413, 0)
