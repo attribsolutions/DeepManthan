@@ -133,7 +133,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     GROUP BY X.id, X.InvoiceDate, M_States.id, M_States.Name, Y.GSTPercentage''',(Party, FromDate, ToDate,Party, FromDate, ToDate))
                 
                 B2CL2 = B2B3Serializer1(B2CLquery, many=True).data
-             
+               
                 B2CLquery2 = T_Invoices.objects.raw('''SELECT 1 AS id, 
                             SUM(NoOfInvoices) AS NoOfInvoices, 
                             SUM(TotalInvoiceValue) AS TotalInvoiceValue
@@ -379,65 +379,65 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                              'Cess Amount': None }]
                 
                 # Example data for the six sheet CDNUR
-                EXEMPquery = T_Invoices.objects.raw('''SELECT 1 as id , 'Inter-State supplies to registered persons' Description,sum(TC_InvoiceItems.Amount) Total
+                EXEMPquery = T_Invoices.objects.raw('''SELECT 1 as id , 'Inter-State supplies to registered persons' Descriptionn,sum(TC_InvoiceItems.Amount) Total
                         FROM T_Invoices
                         JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
                         JOIN M_Parties a ON a.id=T_Invoices.Party_id
                         JOIN M_Parties b ON b.id=T_Invoices.Customer_id  
-                        WHERE Party_id= %s and T_Invoices.InvoiceDate BETWEEN %s AND %s and b.GSTIN != '' and TC_InvoiceItems.GSTPercentage= 0  and a.State_id != b.State_id group by id,Description
+                        WHERE Party_id= %s and T_Invoices.InvoiceDate BETWEEN %s AND %s and b.GSTIN != '' and TC_InvoiceItems.GSTPercentage= 0  and a.State_id != b.State_id group by id,Descriptionn
                         UNION
-                        SELECT 1 as id , 'Inter-State supplies to registered persons' Description,sum(Y.Amount) Total
+                        SELECT 1 as id , 'Inter-State supplies to registered persons' Descriptionn,sum(Y.Amount) Total
                         FROM SweetPOS.T_SPOSInvoices X
                         JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id=X.id
                         JOIN M_Parties a ON a.id=X.Party
                         JOIN M_Parties b ON b.id=X.Customer
-                        WHERE X.Party= %s and X.InvoiceDate BETWEEN %s AND %s and b.GSTIN != '' and Y.GSTPercentage= 0  and a.State_id != b.State_id group by id,Description                                                        
+                        WHERE X.Party= %s and X.InvoiceDate BETWEEN %s AND %s and b.GSTIN != '' and Y.GSTPercentage= 0  and a.State_id != b.State_id group by id,Descriptionn                                                        
                         UNION
-                        SELECT 1 as id, 'Intra-State supplies to registered persons' Description,sum(TC_InvoiceItems.Amount) Total
+                        SELECT 1 as id, 'Intra-State supplies to registered persons' Descriptionn,sum(TC_InvoiceItems.Amount) Total
                         FROM T_Invoices
                         JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
                         JOIN M_Parties a ON a.id=T_Invoices.Party_id
                         JOIN M_Parties b ON b.id=T_Invoices.Customer_id
-                        WHERE Party_id= %s  and T_Invoices.InvoiceDate BETWEEN  %s AND %s  and b.GSTIN != '' and TC_InvoiceItems.GSTPercentage = 0  and a.State_id = b.State_id group by id,Description
+                        WHERE Party_id= %s  and T_Invoices.InvoiceDate BETWEEN  %s AND %s  and b.GSTIN != '' and TC_InvoiceItems.GSTPercentage = 0  and a.State_id = b.State_id group by id,Descriptionn
                         UNION
-                        SELECT 1 as id, 'Intra-State supplies to registered persons' Description,sum(Y.Amount) Total
+                        SELECT 1 as id, 'Intra-State supplies to registered persons' Descriptionn,sum(Y.Amount) Total
                         FROM SweetPOS.T_SPOSInvoices X
                         JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id=X.id
                         JOIN M_Parties a ON a.id=X.Party
                         JOIN M_Parties b ON b.id=X.Customer
-                        WHERE X.Party= %s  and X.InvoiceDate BETWEEN  %s AND %s  and b.GSTIN != '' and Y.GSTPercentage = 0  and a.State_id = b.State_id group by id,Description                                                        
+                        WHERE X.Party= %s  and X.InvoiceDate BETWEEN  %s AND %s  and b.GSTIN != '' and Y.GSTPercentage = 0  and a.State_id = b.State_id group by id,Descriptionn                                                       
                         UNION
-                        SELECT 1 as id, 'Inter-State supplies to unregistered persons' Description,sum(TC_InvoiceItems.Amount) Total
+                        SELECT 1 as id, 'Inter-State supplies to unregistered persons' Descriptionn,sum(TC_InvoiceItems.Amount) Total
                         FROM T_Invoices
                         JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
                         JOIN M_Parties a ON a.id=T_Invoices.Party_id
                         JOIN M_Parties b ON b.id=T_Invoices.Customer_id
-                        WHERE Party_id= %s  and T_Invoices.InvoiceDate BETWEEN %s AND %s and b.GSTIN = '' and TC_InvoiceItems.GSTPercentage = 0  and a.State_id != b.State_id group by id,Description
+                        WHERE Party_id= %s  and T_Invoices.InvoiceDate BETWEEN %s AND %s and b.GSTIN = '' and TC_InvoiceItems.GSTPercentage = 0  and a.State_id != b.State_id group by id,Descriptionn
                         UNION
-                        SELECT 1 as id, 'Inter-State supplies to unregistered persons' Description,sum(Y.Amount) Total
+                        SELECT 1 as id, 'Inter-State supplies to unregistered persons' Descriptionn,sum(Y.Amount) Total
                         FROM SweetPOS.T_SPOSInvoices X
                         JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id=X.id
                         JOIN M_Parties a ON a.id=X.Party
                         JOIN M_Parties b ON b.id=X.Customer
-                        WHERE X.Party= %s  and X.InvoiceDate BETWEEN %s AND %s and b.GSTIN = '' and Y.GSTPercentage = 0  and a.State_id != b.State_id group by id,Description     
+                        WHERE X.Party= %s  and X.InvoiceDate BETWEEN %s AND %s and b.GSTIN = '' and Y.GSTPercentage = 0  and a.State_id != b.State_id group by id,Descriptionn     
                         UNION                                                   
-                        SELECT 1 as id, 'Intra-State supplies to unregistered persons' Description,sum(TC_InvoiceItems.Amount) Total
+                        SELECT 1 as id, 'Intra-State supplies to unregistered persons' Descriptionn,sum(TC_InvoiceItems.Amount) Total
                         FROM T_Invoices
                         JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
                         JOIN M_Parties a ON a.id=T_Invoices.Party_id
                         JOIN M_Parties b ON b.id=T_Invoices.Customer_id
-                        WHERE Party_id=%s  and T_Invoices.InvoiceDate BETWEEN %s AND %s and b.GSTIN = '' and TC_InvoiceItems.GSTPercentage = 0  and a.State_id = b.State_id group by id,Description
+                        WHERE Party_id=%s  and T_Invoices.InvoiceDate BETWEEN %s AND %s and b.GSTIN = '' and TC_InvoiceItems.GSTPercentage = 0  and a.State_id = b.State_id group by id,Descriptionn
                         UNION
-                        SELECT 1 as id, 'Intra-State supplies to unregistered persons' Description,sum(Y.Amount) Total
+                        SELECT 1 as id, 'Intra-State supplies to unregistered persons' Descriptionn,sum(Y.Amount) Total
                         FROM SweetPOS.T_SPOSInvoices X
                         JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id=X.id
                         JOIN M_Parties a ON a.id=X.Party
                         JOIN M_Parties b ON b.id=X.Customer
-                        WHERE X.Party=%s  and X.InvoiceDate BETWEEN %s AND %s and b.GSTIN = '' and Y.GSTPercentage = 0  and a.State_id = b.State_id group by id,Description                                                        
+                        WHERE X.Party=%s  and X.InvoiceDate BETWEEN %s AND %s and b.GSTIN = '' and Y.GSTPercentage = 0  and a.State_id = b.State_id group by id,Descriptionn                                                        
                         ''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
-                                # CustomPrint(str(EXEMPquery.query))
+                
                 EXEMP2 = EXEMPSerializer(EXEMPquery, many=True).data
-                     
+                 
                 EXEMPquery2= T_Invoices.objects.raw(''' SELECT 1 as id, '' AA,sum(A.Total) TotalNilRatedSupplies,'' TotalExemptedSupplies,'' TotalNonGSTSupplies
                 FROM (SELECT 1 as id , 'Inter-State supplies to registered persons' Description,sum(TC_InvoiceItems.Amount) Total,'' TotalExemptedSupplies,'' TotalNonGSTSupplies
                         FROM T_Invoices
@@ -496,7 +496,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         WHERE X.Party=%s  and X.InvoiceDate BETWEEN %s AND %s and b.GSTIN = '' and Y.GSTPercentage = 0  and a.State_id = b.State_id group by id,Description)A''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
                            
                 EXEMP1 = EXEMP2Serializer2(EXEMPquery2, many=True).data
-                
+            
                 if not EXEMP1:
                     EXEMP1 = [{
                              'Total Nil Rated Supplies': None,

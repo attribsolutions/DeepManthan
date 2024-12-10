@@ -233,18 +233,16 @@ class CDNURSerializer2(serializers.Serializer):
        
 class EXEMPSerializer(serializers.Serializer):
     # id = serializers.IntegerField()
-    Description=serializers.CharField(max_length=100)
-    NilRatedSupplies=FloatDecimalField()
-    Exempted_OtherThanNilRatedNonGSTSupply=serializers.CharField(max_length=100)
-    NonGSTSupplies=serializers.CharField(max_length=100)
-    # Total=FloatDecimalField()
+    Descriptionn=serializers.CharField(max_length=100)
+    Total=FloatDecimalField()
+    
     
     def to_representation(self, obj):
         representation = super().to_representation(obj)
-        representation ['Description'] = representation.pop('Description')
-        representation ['Nil Rated Supplies'] = representation.pop('NilRatedSupplies')
-        representation ['Exempted Other Than NilRated Non GST Supply'] = representation.pop('Exempted_OtherThanNilRatedNonGSTSupply')
-        representation ['Non GST Supplies'] = representation.pop('NonGSTSupplies')
+        representation ['Description'] = representation.pop('Descriptionn')
+        representation ['Nil Rated Supplies'] = representation.pop('Total')
+        representation ['Exempted Other Than NilRated Non GST Supply'] = ''
+        representation ['Non GST Supplies'] = ''
         return representation
     
     
