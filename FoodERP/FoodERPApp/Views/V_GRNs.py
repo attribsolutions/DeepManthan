@@ -87,8 +87,8 @@ class GRNListFilterView(CreateAPIView):
                                 "GRNNumber": a['GRNNumber'],
                                 "FullGRNNumber": a['FullGRNNumber'],
                                 "InvoiceNumber": a['InvoiceNumber'],
-                                "FullInvoiceNumber":a['GRNReferences'][0]['Invoice']['FullInvoiceNumber'],
-                                "InvoiceDate": a['GRNReferences'][0]['Invoice']['InvoiceDate'],
+                                "FullInvoiceNumber":a['GRNReferences'][0]['Invoice']['FullInvoiceNumber'] if a['GRNReferences'][0]['Invoice'] else a['InvoiceNumber'],
+                                "InvoiceDate": a['GRNReferences'][0]['Invoice']['InvoiceDate'] if a['GRNReferences'][0]['Invoice'] else "",
                                 "GrandTotal": a['GrandTotal'],
                                 "Party": a['Party']['id'],
                                 "PartyName": a['Party']['Name'],
@@ -97,7 +97,7 @@ class GRNListFilterView(CreateAPIView):
 
                             })
                     # print(GRNListData)
-                    #for log
+                    #for log.
                     if Supplier == '':
                         y = 0
                     else:
