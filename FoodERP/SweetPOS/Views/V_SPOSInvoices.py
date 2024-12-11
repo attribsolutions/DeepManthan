@@ -766,8 +766,7 @@ class FranchiseInvoiceEditView(CreateAPIView):
         try:
             with transaction.atomic():
                 query1 = TC_SPOSInvoicesReferences.objects.filter(Invoice=id).values('Order')
-                # print(query1.query)
-          
+              
                 Orderdata = list()
                 query = T_SPOSInvoices.objects.filter(id=id).values('Customer','InvoiceDate','Vehicle')
                 Customer=query[0]['Customer']
@@ -786,7 +785,6 @@ class FranchiseInvoiceEditView(CreateAPIView):
                                                         JOIN FoodERP.M_Items ON M_Items.id = SweetPOS.TC_SPOSInvoiceItems.Item
                                                         JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.id = SweetPOS.TC_SPOSInvoiceItems.Unit
                                                         Where SweetPOS.TC_SPOSInvoiceItems.Invoice_id=%s ''',([id]))
-                print(Itemsquery)
                 if Itemsquery:
                     InvoiceEditSerializer = SPOSInvoiceEditItemSerializer(Itemsquery, many=True).data
                     
@@ -803,7 +801,6 @@ class FranchiseInvoiceEditView(CreateAPIView):
                                                     fooderp.GetTodaysDateMRP({ItemID}, CURDATE(), 2, 0, {Customer}, 0) AS MRP,
                                                     {BaseUnitQuantity} AS BaseUnitQuantity,
                                                     {GST} AS GST''')
-                        print(ratemrpquery)
                         
                         InvoiceEdit=SPOSInvoiceEditSerializer(ratemrpquery,many=True).data
                         InvoiceDatalist =[]
@@ -856,7 +853,7 @@ class FranchiseInvoiceEditView(CreateAPIView):
                         })       
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Orderdata[0]})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})  
 
             
     
