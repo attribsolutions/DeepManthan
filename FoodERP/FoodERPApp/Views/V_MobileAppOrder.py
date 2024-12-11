@@ -62,7 +62,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                             return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'A similar order already exists in the system, AppOrderNumber : '+data['AppOrderNumber']})
                         else:
 
-                            log_entry = create_transaction_logNew(request, data, Supplier,'checkduplicateMobileOrder :'+ checkduplicate.query,149,0,0,0,Customer)
+                            log_entry = create_transaction_logNew(request, data, Supplier, checkduplicate.query,149,0,0,0,Customer)
 
                             for aa in data['OrderItem']:
                                 # Check Item Is Exist
