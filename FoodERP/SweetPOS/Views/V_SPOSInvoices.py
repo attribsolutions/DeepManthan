@@ -65,10 +65,10 @@ class SPOSInvoiceView(CreateAPIView):
                         Invoicedata['Driver'] = 0
                         Invoicedata['SaleID'] =0
                         Invoicedata['MobileNo'] =Invoicedata['Mobile']
-                        if Invoicedata['Customer'] == 0:
+                        if Invoicedata['CustomerID'] == 0:
                             Invoicedata['Customer'] = 43194
                         else:
-                            Invoicedata['Customer'] = Invoicedata['Customer']
+                            Invoicedata['Customer'] = Invoicedata['CustomerID']
                             
                         if 'Vehicle' in Invoicedata and Invoicedata['Vehicle'] == "":
                             Invoicedata['Vehicle'] = None
@@ -94,7 +94,7 @@ class SPOSInvoiceView(CreateAPIView):
                             #     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'ERPItemId is not mapped.', 'Data':[]})
                             # else:
                             ItemId=InvoiceItem['ERPItemID']
-                            unit= int(InvoiceItem['Unit'])
+                            unit= int(InvoiceItem['UnitID'])
                             # if InvoiceItem['UnitID'] == 1:
                             #     unit=2
                             # else: 
@@ -125,11 +125,11 @@ class SPOSInvoiceView(CreateAPIView):
                             InvoiceItem['Item'] = ItemId
                             InvoiceItem['IGST'] = InvoiceItem['IGSTAmount']
                             InvoiceItem['BatchCode'] = '0'
-                            InvoiceItem['POSItemID'] = InvoiceItem['Item']
+                            InvoiceItem['POSItemID'] = InvoiceItem['ItemID']
                             InvoiceItem['SaleItemID']=0
                             InvoiceItem['SaleID']=0
                             InvoiceItem['HSNCode']=InvoiceItem['HSNCode']
-                            InvoiceItem['Party']=InvoiceItem['Party']
+                            InvoiceItem['Party']=InvoiceItem['PartyID']
                             InvoiceItem['IsMixItem'] = InvoiceItem.get('IsMixItem') or 0  
                             InvoiceItem['MixItemId'] = InvoiceItem.get('MixItemId', None) 
                             BaseUnitQuantity=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,0,0).GetBaseUnitQuantity()
@@ -526,7 +526,9 @@ class SPOSMaxDeletedInvoiceIDView(CreateAPIView):
                     
                 if user is not None: 
                     
-                    QueryForMaxSalesID=T_SPOSDeletedInvoices.objects.raw('''SELECT 1 id,ifnull(max(DeletedTableAutoID),0) MaxSaleID FROM SweetPOS.T_SPOSDeletedInvoices where Party=%s and clientID=%s''', [DivisionID ,ClientID])
+                    QueryForMaxSalesID=T_SPOSDeletedInvoices.objects.raw('''SELECT 1 id,ifnull(max(DeletedTableAutoID),0) MaxSaleID 
+                                                                         FROM SweetPOS.T_SPOSDeletedInvoices 
+                                                                         where Party=%s and clientID=%s''', [DivisionID ,ClientID])
                     for row in QueryForMaxSalesID:
                         maxSaleID=row.MaxSaleID
 
@@ -856,5 +858,4 @@ class FranchiseInvoiceEditView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})  
 
             
-    
    
