@@ -183,6 +183,7 @@ def UnitDropdown(ItemID, PartyForRate, BatchID=0):
             "Rate" : Rate,
             "BaseUnitQuantityNoUnit": q0[0]["BaseUnitQuantity"],
             "DeletedMCUnitsUnitID": d['UnitID__id'],
+            "IsBase" : d['IsBase']
 
         })
         # CustomPrint(UnitDetails)
