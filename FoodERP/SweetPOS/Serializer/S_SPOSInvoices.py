@@ -19,6 +19,33 @@ class SPOSInvoicesReferencesSerializer(serializers.ModelSerializer):
 
 class SPOSInvoiceSerializer(serializers.ModelSerializer):
     SaleItems = SPOSInvoiceItemsSerializer(many=True)
+    # SPOSInvoicesReferences = SPOSInvoicesReferencesSerializer(many=True)
+    
+    class Meta:
+        model = T_SPOSInvoices
+        fields = '__all__'
+
+    def create(self, validated_data):
+        
+        InvoiceItems_data = validated_data.pop('SaleItems')
+        # InvoicesReferences_data = validated_data.pop('SPOSInvoicesReferences')
+        
+        
+        InvoiceID = T_SPOSInvoices.objects.create(**validated_data)
+        
+        for InvoiceItem_data in InvoiceItems_data:
+            
+            InvoiceItemID =TC_SPOSInvoiceItems.objects.create(Invoice=InvoiceID, **InvoiceItem_data)
+            
+        # for InvoicesReference_data in InvoicesReferences_data:
+          
+        #     InvoicesReferences = TC_SPOSInvoicesReferences.objects.create(Invoice=InvoiceID, **InvoicesReference_data)
+            
+        
+        return InvoiceID 
+
+class SPOSInvoiceSerializer1(serializers.ModelSerializer):
+    SaleItems = SPOSInvoiceItemsSerializer(many=True)
     SPOSInvoicesReferences = SPOSInvoicesReferencesSerializer(many=True)
     
     class Meta:
@@ -42,7 +69,7 @@ class SPOSInvoiceSerializer(serializers.ModelSerializer):
             InvoicesReferences = TC_SPOSInvoicesReferences.objects.create(Invoice=InvoiceID, **InvoicesReference_data)
             
         
-        return InvoiceID   
+        return InvoiceID      
     
     
 
