@@ -140,9 +140,14 @@ class SPOSInvoiceView(CreateAPIView):
                             InvoiceItem['QtyInKg'] = float(QtyInKg)
                             QtyInBox=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,4,0).ConvertintoSelectedUnit()
                             InvoiceItem['QtyInBox'] = float(QtyInBox)
+                           
+                        if 'SPOSInvoicesReferences' in Invoicedata:
+                            Invoice_serializer = SPOSInvoiceSerializer1(data=Invoicedata)
+                        else:
                             
                             Invoice_serializer = SPOSInvoiceSerializer(data=Invoicedata)
-                            
+                        
+                        
                         if Invoice_serializer.is_valid():
                             Invoice = Invoice_serializer.save()
                             
