@@ -319,7 +319,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     vehicle = M_Vehicles.objects.filter(id=b['Vehicle_id']).values('VehicleNumber')
 
                     # CPartyName = M_SweetPOSUser.objects.using('sweetpos_db').filter(id=b['CreatedBy']).values('LoginName') 
-                    # CPartyName = M_Users.objects.filter(id=b['CreatedBy']).values('LoginName') 
+                    CPartyName = M_Users.objects.filter(id=b['CreatedBy']).values('LoginName') 
                     
                     party = Party
                     customer = customers[0]['id']
@@ -332,8 +332,8 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     b['CustomerGSTIN'] = customers[0]['GSTIN'] 
                     b['CustomerPAN'] = customers[0]['PAN'] 
                     b['CustomerPartyType'] = customers[0]['PartyType'] 
-                    b['CreatedBy'] = parties[0]['id']
-                    # b['CreatedByName'] = CPartyName[0]['LoginName']
+                    b['CreatedBy'] = b['CreatedBy']
+                    b['CreatedByName'] = CPartyName[0]['LoginName']
                     b['Identify_id'] = 2
                     b['VehicleNo'] = vehicle[0]['VehicleNumber'] if vehicle else ''
                     Spos_Invoices.append(b) 
