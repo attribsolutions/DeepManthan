@@ -346,6 +346,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                 combined_invoices.extend(Spos_Invoices) 
                 InvoiceListData = list()
                 for a in combined_invoices:
+                        
                         Invoice_serializer = list()
                         if a['Identify_id'] == 1:
                             q = TC_InvoiceUploads.objects.filter(Invoice=a["id"])
@@ -387,7 +388,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                                 "VehicleID":a['Vehicle_id'],
                                 "VehicleNo": a['VehicleNo'],
                                 "CreatedBy": a['CreatedBy'],
-                                "CreatedByName" : a['LoginName'],
+                                "CreatedByName" : a['CreatedByName'],
                                 "CreatedOn": a['CreatedOn'],
                                 "InvoiceUploads": Invoice_serializer,
                                 "CustomerPartyType": a['CustomerPartyType'],
