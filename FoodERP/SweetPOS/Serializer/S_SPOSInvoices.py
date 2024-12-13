@@ -58,11 +58,14 @@ class SPOSInvoiceSerializer1(serializers.ModelSerializer):
         InvoicesReferences_data = validated_data.pop('SPOSInvoicesReferences')
         
         
+        
         InvoiceID = T_SPOSInvoices.objects.create(**validated_data)
+        ClientSaleID = T_SPOSInvoices.objects.filter(id=InvoiceID.id).update(ClientSaleID=InvoiceID.id)
         
         for InvoiceItem_data in InvoiceItems_data:
             
             InvoiceItemID =TC_SPOSInvoiceItems.objects.create(Invoice=InvoiceID, **InvoiceItem_data)
+            
             
         for InvoicesReference_data in InvoicesReferences_data:
           
