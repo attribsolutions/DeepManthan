@@ -49,16 +49,24 @@ class SPOSInvoiceView(CreateAPIView):
                         # else:
                         
                         # ==========================Get Max Invoice Number=====================================================
-                        a = GetInvoiceDetails.GetPOSInvoiceNumber(Party,SaleDate,ClientID)
-                        # Invoicedata['InvoiceNumber'] = a
-                        b = GetInvoiceDetails.GetPOSInvoicePrifix(Party)
-                        # Invoicedata['FullInvoiceNumber'] = b+""+str(a)
+                        
+                        if  'FullInvoiceNumber' in Invoicedata:
+                            pass
+                        else:    
+                            a = GetInvoiceDetails.GetPOSInvoiceNumber(Party,SaleDate,ClientID)
+                            b = GetInvoiceDetails.GetPOSInvoicePrifix(Party)
+                            
                         #================================================================================================== 
                         
                         Invoicedata['TCSAmount']=0.0
-                        Invoicedata['InvoiceNumber'] = a
+                        if 'FullInvoiceNumber' in Invoicedata:
+                            Invoicedata['InvoiceNumber'] = Invoicedata['BillNumber']
+                            Invoicedata['FullInvoiceNumber'] = Invoicedata['FullInvoiceNumber']
+                        else:   
+                            Invoicedata['FullInvoiceNumber'] = b+""+str(a)
+                            Invoicedata['InvoiceNumber'] = a
+                        
                         Invoicedata['InvoiceDate'] = Invoicedata['SaleDate']
-                        Invoicedata['FullInvoiceNumber'] = b+""+str(a)
                         Invoicedata['Party'] = Invoicedata['DivisionID']
                         Invoicedata['GrandTotal'] =Invoicedata['RoundedAmount']
                         Invoicedata['RoundOffAmount'] =Invoicedata['RoundOffAmount']
@@ -140,9 +148,14 @@ class SPOSInvoiceView(CreateAPIView):
                             InvoiceItem['QtyInKg'] = float(QtyInKg)
                             QtyInBox=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,4,0).ConvertintoSelectedUnit()
                             InvoiceItem['QtyInBox'] = float(QtyInBox)
+                           
+                        if 'SPOSInvoicesReferences' in Invoicedata:
+                            Invoice_serializer = SPOSInvoiceSerializer1(data=Invoicedata)
+                        else:
                             
                             Invoice_serializer = SPOSInvoiceSerializer(data=Invoicedata)
-                            
+                        
+                        
                         if Invoice_serializer.is_valid():
                             Invoice = Invoice_serializer.save()
                             

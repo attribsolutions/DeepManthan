@@ -319,7 +319,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     vehicle = M_Vehicles.objects.filter(id=b['Vehicle_id']).values('VehicleNumber')
 
                     # CPartyName = M_SweetPOSUser.objects.using('sweetpos_db').filter(id=b['CreatedBy']).values('LoginName') 
-                    # CPartyName = M_Users.objects.filter(id=b['CreatedBy']).values('LoginName') 
+                    CPartyName = M_Users.objects.filter(id=b['CreatedBy']).values('LoginName') 
                     
                     party = Party
                     customer = customers[0]['id']
@@ -332,8 +332,8 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     b['CustomerGSTIN'] = customers[0]['GSTIN'] 
                     b['CustomerPAN'] = customers[0]['PAN'] 
                     b['CustomerPartyType'] = customers[0]['PartyType'] 
-                    b['CreatedBy'] = parties[0]['id']
-                    # b['CreatedByName'] = CPartyName[0]['LoginName']
+                    b['CreatedBy'] = b['CreatedBy']
+                    b['CreatedByName'] = CPartyName[0]['LoginName']
                     b['Identify_id'] = 2
                     b['VehicleNo'] = vehicle[0]['VehicleNumber'] if vehicle else ''
                     Spos_Invoices.append(b) 
@@ -341,11 +341,13 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                 
                 for aa in Invoices_query:
                         aa['CreatedBy'] = 0
+                        aa['CreatedByName']=""
                         aa['Identify_id'] = 1 
                         combined_invoices.append(aa)
                 combined_invoices.extend(Spos_Invoices) 
                 InvoiceListData = list()
                 for a in combined_invoices:
+                        
                         Invoice_serializer = list()
                         if a['Identify_id'] == 1:
                             q = TC_InvoiceUploads.objects.filter(Invoice=a["id"])
@@ -387,7 +389,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                                 "VehicleID":a['Vehicle_id'],
                                 "VehicleNo": a['VehicleNo'],
                                 "CreatedBy": a['CreatedBy'],
-                                # "CreatedByName" : a['LoginName'],
+                                "CreatedByName" : a['CreatedByName'],
                                 "CreatedOn": a['CreatedOn'],
                                 "InvoiceUploads": Invoice_serializer,
                                 "CustomerPartyType": a['CustomerPartyType'],
