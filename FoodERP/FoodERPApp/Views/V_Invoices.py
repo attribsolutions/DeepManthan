@@ -387,7 +387,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                                 "VehicleID":a['Vehicle_id'],
                                 "VehicleNo": a['VehicleNo'],
                                 "CreatedBy": a['CreatedBy'],
-                                # "CreatedByName" : a['LoginName'],
+                                "CreatedByName" : a['LoginName'],
                                 "CreatedOn": a['CreatedOn'],
                                 "InvoiceUploads": Invoice_serializer,
                                 "CustomerPartyType": a['CustomerPartyType'],
