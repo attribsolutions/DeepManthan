@@ -341,6 +341,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                 
                 for aa in Invoices_query:
                         aa['CreatedBy'] = 0
+                        aa['CreatedByName']=""
                         aa['Identify_id'] = 1 
                         combined_invoices.append(aa)
                 combined_invoices.extend(Spos_Invoices) 
