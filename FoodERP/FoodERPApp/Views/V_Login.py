@@ -64,7 +64,8 @@ class UserListView(CreateAPIView):
                 Logindata = JSONParser().parse(request)
                 UserID = Logindata['UserID']   
                 RoleID=  Logindata['RoleID']  
-                CompanyID=Logindata['CompanyID']        
+                CompanyID=Logindata['CompanyID'] 
+                PartyID = Logindata.get('PartyID', None)       
                 
                 if (RoleID == 1):
                     employees = M_Employees.objects.filter(Company_id=CompanyID).values_list('id',flat=True)                
@@ -81,7 +82,10 @@ class UserListView(CreateAPIView):
                     else:
                         Clause= {}
                     employees = M_Employees.objects.filter(Company_id=CompanyID).values_list('id',flat=True)                
-                    Usersdata = M_Users.objects.filter(Employee__in=employees,**Clause)               
+                    Usersdata = M_Users.objects.filter(Employee__in=employees,**Clause)
+                     
+                if PartyID:
+                    Usersdata = Usersdata.filter(UserRole__Party__id=PartyID)              
                 if Usersdata.exists():
                     Usersdata_Serializer = UserListSerializer(Usersdata, many=True).data
                     UserData = list()
@@ -124,8 +128,8 @@ class UserListView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Logindata,0,"User List Not available",136,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  'Records Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'UserList:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0,0,'UserList:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class UserListViewSecond(CreateAPIView):
