@@ -333,15 +333,22 @@ class ManagementEmployeePartiesFilterView(CreateAPIView):
                 ManagementEmpParties_data = JSONParser().parse(request)
                 EmployeeID = ManagementEmpParties_data['Employee']
                 CompanyID = ManagementEmpParties_data['Company']
-                query = M_Parties.objects.raw('''SELECT  a.party id,a.PartyName,a.PartyTypeName,a.StateName,a.DistrictName,b.PartyID from (SELECT M_Parties.id AS Party,M_Parties.Name PartyName,M_PartyType.Name PartyTypeName,M_States.Name StateName,M_Districts.Name DistrictName 
+                query = M_Parties.objects.raw('''SELECT  a.party id,a.PartyName,a.PartyTypeName,a.StateName,a.DistrictName,b.PartyID, a.ClusterName,
+                                              a.SubClusterName
+                                              from (SELECT M_Parties.id AS Party,M_Parties.Name PartyName,M_PartyType.Name PartyTypeName,
+                                              M_States.Name StateName,M_Districts.Name DistrictName,M_Cluster.Name as ClusterName, M_SubCluster.Name as SubClusterName 
                 From M_Parties
                 JOIN M_PartyType ON M_PartyType.id=M_Parties.PartyType_id 
                 JOIN M_States ON M_States.id=M_Parties.State_id
                 JOIN M_Districts ON M_Districts.id=M_Parties.District_id
+                Left JOIN M_PartyDetails  ON M_Parties.id = M_PartyDetails.Party_id and M_PartyDetails.Group_id is null
+				Left JOIN M_Cluster  ON M_PartyDetails.Cluster_id = M_Cluster.id
+				Left JOIN M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id
                 Where  M_PartyType.Company_id=%s AND M_PartyType.IsRetailer=0 OR M_PartyType.IsFranchises =1 )a
                 left join 
                 (select Party_id PartyID from MC_ManagementParties where MC_ManagementParties.Employee_id=%s)b
                 ON  a.Party = b.PartyID''', ([CompanyID], [EmployeeID]))
+                
                 Parties_serializer2 = M_PartiesSerializerFourth(query, many=True).data
                 GetAllData = list()
                 for a in Parties_serializer2:
@@ -351,7 +358,9 @@ class ManagementEmployeePartiesFilterView(CreateAPIView):
                         'PartyType': a['PartyTypeName'],
                         'State': a['StateName'],
                         'District': a['DistrictName'],
-                        'Party': a['PartyID']
+                        'Party': a['PartyID'],
+                        'ClusterName' : a['ClusterName'],
+                        'SubClusterName' : a['SubClusterName']
                     })
                     
                 # q1=M_PartyType.objects.filter(Company=CompanyID,IsRetailer=0,IsSCM=1)
