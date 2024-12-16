@@ -315,6 +315,8 @@ class M_PartiesSerializerFourth(serializers.Serializer):
     StateName = serializers.CharField(max_length=500)
     DistrictName = serializers.CharField(max_length=500)
     PartyID = serializers.IntegerField()
+    ClusterName = serializers.CharField(max_length=500)
+    SubClusterName = serializers.CharField(max_length=500)
     
     
     # City=CitiesSerializerSecond()
