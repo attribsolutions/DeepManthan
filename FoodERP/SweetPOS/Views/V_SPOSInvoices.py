@@ -812,8 +812,8 @@ class FranchiseInvoiceEditView(CreateAPIView):
                       
                      
                         ratemrpquery = M_Items.objects.raw(f''' SELECT 1 AS id, 
-                                                    fooderp.RateCalculationFunction1(0, {ItemID}, {Customer}, {Unit}, 0, 0, 0, 0) AS Rate,
-                                                    fooderp.GetTodaysDateMRP({ItemID}, CURDATE(), 2, 0, {Customer}, 0) AS MRP,
+                                                    FoodERP.RateCalculationFunction1(0, {ItemID}, {Customer}, {Unit}, 0, 0, 0, 0) AS Rate,
+                                                    FoodERP.GetTodaysDateMRP({ItemID}, CURDATE(), 2, 0, {Customer}, 0) AS MRP,
                                                     {BaseUnitQuantity} AS BaseUnitQuantity,
                                                     {GST} AS GST''')
                         
