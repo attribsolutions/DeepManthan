@@ -14,6 +14,9 @@ from rest_framework.authentication import BasicAuthentication
 import pdb
 from FoodERPApp.Views.V_CommFunction import create_transaction_logNew
 from FoodERPApp.models import *
+from rest_framework.authentication import BasicAuthentication
+from rest_framework.exceptions import AuthenticationFailed
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 def BasicAuthenticationfunction(request):
     auth_header = request.META.get('HTTP_AUTHORIZATION')
@@ -145,9 +148,16 @@ class MachineTypeSaveView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
         
 class MachineTypeListView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
-    @transaction.atomic()
+     
+    authentication_classes = [BasicAuthentication, JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+ 
+    @transaction.atomic
     def post(self, request):
+       
+        if not request.user or not request.user.is_authenticated:
+            raise AuthenticationFailed("Authentication failed.")
+        
         MachineType_Data = JSONParser().parse(request)
         try:
             with transaction.atomic():

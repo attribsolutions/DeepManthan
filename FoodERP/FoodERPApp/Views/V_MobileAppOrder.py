@@ -55,16 +55,14 @@ class T_MobileAppOrdersView(CreateAPIView):
                         Orderitem=list()
                         
 
-                        # checkduplicate=T_Orders.objects.filter(FullOrderNumber=data['AppOrderNumber'],Supplier_id=data['FoodERPSupplierID'])
-                        checkduplicate=T_Orders.objects.filter(FullOrderNumber__iexact=data['AppOrderNumber'].strip(),Supplier_id=data['FoodERPSupplierID']).exists()
-                         # print("checkduplicate",checkduplicate)
-                        
-                        if checkduplicate:
+                        checkduplicate=T_Orders.objects.filter(FullOrderNumber=AppOrderNumber,Supplier_id=Supplier,OrderDate=OrderDate)
+                        ordercount=checkduplicate.count()
+                        if ordercount > 0:
                             log_entry = create_transaction_logNew(request, data, Supplier, 'A similar order already exists in the system, AppOrderNumber : '+data['AppOrderNumber'],161,0,0,0,Customer)
                             return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'A similar order already exists in the system, AppOrderNumber : '+data['AppOrderNumber']})
                         else:
 
-                            log_entry = create_transaction_logNew(request, data, Supplier, f'checkduplicate=T_Orders.objects.filter(FullOrderNumber__iexact=data[{AppOrderNumber}].strip(),Supplier_id=data[{Supplier}]).exists()',149,0,0,0,Customer)
+                            # log_entry = create_transaction_logNew(request, data, Supplier, '',149,0,0,0,Customer)
 
                             for aa in data['OrderItem']:
                                 # Check Item Is Exist
