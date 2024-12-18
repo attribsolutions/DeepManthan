@@ -522,7 +522,6 @@ class T_OrdersViewSecond(CreateAPIView):
                                 
                                 aaaa = UnitwiseQuantityConversion(
                                     b['Item']['id'], b['Quantity'], b['Unit']['id'], 0, 0, 0, 1).GetConvertingBaseUnitQtyBaseUnitName()
-                                print(aaaa)
                                 
                                 if (aaaa == b['Unit']['UnitID']['Name']):
                                     bb=''
