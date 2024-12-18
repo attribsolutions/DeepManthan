@@ -91,17 +91,17 @@ class OrderItemSupplier(CreateAPIView):
                 Company = ItemSupplier_Data['CompanyID']
                 Party = ItemSupplier_Data['PartyID']
 
-                ItemSupplierquery= T_Orders.objects.raw('''SELECT 1 id ,ifNULL(s.id,0)itemSupplierid,Quantity,
-                M_Items.Name MaterialName,s.Name ItemSupplierName, M_Items.id ItemID,
+                ItemSupplierquery= T_Orders.objects.raw('''SELECT 1 id ,ifNULL(s.id,0)itemSupplierid,TC_OrderItems.Unit_id as UnitID,
+                M_Items.Name MaterialName,s.Name ItemSupplierName, M_Items.id ItemID,SUM(TC_OrderItems.Quantity) AS Quantity,
                 SUM(TC_OrderItems.QtyInNo)QtyInNo,SUM(TC_OrderItems.QtyInKg)QtyInKg,SUM(TC_OrderItems.QtyInBox)QtyInBox
                 FROM T_Orders
                 join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id 
                 join M_Items on M_Items.id=TC_OrderItems.Item_id  
                 LEFT JOIN M_ItemSupplier I ON I.item_id=M_Items.id 
                 left join M_Parties s on I.Supplier_id=s.id                 
-                where  OrderDate between %s and %s  And T_Orders.Supplier_id=%s And IsDeleted=0
-                Group By M_Items.id,s.id order by s.id desc''',[FromDate,ToDate,Party])
-                CustomPrint(ItemSupplierquery.query)              
+                where  OrderDate between %s and %s  And T_Orders.Supplier_id=%s And IsDeleted=0 And IsConfirm=1
+                Group By M_Items.id,s.id,TC_OrderItems.Unit_id
+                order by s.id desc''',[FromDate,ToDate,Party])            
                 if ItemSupplierquery:                   
                     Supplier_List=list()  
                     ItemData = []
