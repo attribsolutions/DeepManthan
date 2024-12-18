@@ -602,6 +602,7 @@ class T_OrdersViewSecond(CreateAPIView):
                             "OrderAmount": a['OrderAmount'],
                             "AdvanceAmount": a['AdvanceAmount'],
                             "Description": a['Description'],
+                            "SAPOrderNo" :  a['SAPResponse'],
                             "Customer": a['Customer']['id'],
                             "CustomerSAPCode": a['Customer']['SAPPartyCode'],
                             "CustomerName": a['Customer']['Name'],
