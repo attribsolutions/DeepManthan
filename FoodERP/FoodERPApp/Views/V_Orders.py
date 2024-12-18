@@ -522,6 +522,7 @@ class T_OrdersViewSecond(CreateAPIView):
                                 
                                 aaaa = UnitwiseQuantityConversion(
                                     b['Item']['id'], b['Quantity'], b['Unit']['id'], 0, 0, 0, 1).GetConvertingBaseUnitQtyBaseUnitName()
+                                print(aaaa)
                                 
                                 if (aaaa == b['Unit']['UnitID']['Name']):
                                     bb=''
@@ -557,7 +558,7 @@ class T_OrdersViewSecond(CreateAPIView):
                                     "Rate": b['Rate'],
                                     "Unit": b['Unit']['id'],
                                     "PrimaryUnitName":b['Unit']['UnitID']['Name'],
-                                    "UnitName": bb,
+                                    "UnitName": b['Unit']['BaseUnitConversion'],
                                     "SAPUnitName": b['Unit']['UnitID']['SAPUnit'],
                                     "BaseUnitQuantity": b['BaseUnitQuantity'],
                                     "GST": b['GST']['id'],
