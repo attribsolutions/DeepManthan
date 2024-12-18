@@ -78,7 +78,7 @@ class PartyPrefixsSerializer(serializers.ModelSerializer):
 class PartyAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_PartyAddress
-        fields = ['Address', 'FSSAINo', 'PIN', 'IsDefault', 'fssaidocument']  
+        fields = ['Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'fssaidocument']  
         
 class MC_PartySubPartySerializer(serializers.ModelSerializer):
     class Meta:
