@@ -48,12 +48,10 @@ class GetInvoiceDetails:
             Return_year= GetYear(args[1])       
             fs,fe=Return_year 
 
-            MaxInvoiceNumber=T_SPOSInvoices.objects.filter(Party=args[0],InvoiceDate__range=(fs,fe),ClientID=args[2]).values('InvoiceNumber').order_by('-id')[:1] 
-            print(MaxInvoiceNumber.query)   
+            MaxInvoiceNumber=T_SPOSInvoices.objects.filter(Party=args[0],InvoiceDate__range=(fs,fe),ClientID=args[2]).values('InvoiceNumber').order_by('-id')[:1]   
             if MaxInvoiceNumber:
                 max_invoice = int(MaxInvoiceNumber[0]['InvoiceNumber'])
                 a = max_invoice + 1
-                print(a)
             else:
                 a = 1  
 
