@@ -7,31 +7,36 @@ from django.http import JsonResponse
 
 class QRCodeView(CreateAPIView):
         
-        permission_classes = ()
-        
+        permission_classes = ()        
 
         @transaction.atomic()
         def get(self, request,coupon_code):
             try:
                 with transaction.atomic():   
     
-    
+                    print("=========================Test1====================================")
                     qr = qrcode.QRCode(
                         version=1,
                         error_correction=qrcode.constants.ERROR_CORRECT_L,
                         box_size=10,
                         border=4,
                     )
+                    print("=========================Test2====================================")
                     qr.add_data(coupon_code)
                     qr.make(fit=True)
-
+                    print("=========================Test3====================================")
                     # Create an image for the QR code
                     img = qr.make_image(fill_color="black", back_color="white")
+                    print("=========================Test4====================================")
 
                     # Save the image in memory as a PNG file
                     buffer = BytesIO()
+
                     img.save(buffer, format="PNG")
+                    # img.save("D:\Pradnya\DeepManthan\qr_code.png", format="PNG")
+                    print("=========================Test5====================================")
                     buffer.seek(0)
+                    print("=========================Test6====================================")
 
                     # Return the image as an HTTP response
                     return HttpResponse(buffer, content_type="image/png")
