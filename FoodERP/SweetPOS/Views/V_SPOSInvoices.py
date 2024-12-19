@@ -141,7 +141,7 @@ class SPOSInvoiceView(CreateAPIView):
                             InvoiceItem['IsMixItem'] = InvoiceItem.get('IsMixItem') or 0  
                             InvoiceItem['MixItemId'] = InvoiceItem.get('MixItemId', None) 
                             BaseUnitQuantity=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,0,0).GetBaseUnitQuantity()
-                            InvoiceItem['BaseUnitQuantity'] =  float(BaseUnitQuantity)
+                            InvoiceItem['BaseUnitQuantity'] =  round(BaseUnitQuantity)
                             QtyInNo=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,1,0).ConvertintoSelectedUnit()
                             InvoiceItem['QtyInNo'] =  float(QtyInNo)
                             QtyInKg=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,2,0).ConvertintoSelectedUnit()
@@ -783,10 +783,11 @@ class FranchiseInvoiceEditView(CreateAPIView):
                 query1 = TC_SPOSInvoicesReferences.objects.filter(Invoice=id).values('Order')
               
                 Orderdata = list()
-                query = T_SPOSInvoices.objects.filter(id=id).values('Customer','InvoiceDate','Vehicle')
+                query = T_SPOSInvoices.objects.filter(id=id).values('Customer','InvoiceDate','Vehicle','AdvanceAmount')
                 Customer=query[0]['Customer']
                 InvoiceDate=query[0]['InvoiceDate']
                 Vehicle=query[0]['Vehicle']
+                AdvanceAmount = query[0].get('AdvanceAmount', 0)
                
                 Itemsquery= TC_SPOSInvoiceItems.objects.raw('''SELECT SweetPOS.TC_SPOSInvoiceItems.id,SweetPOS.TC_SPOSInvoiceItems.Item,FoodERP.M_Items.Name ItemName,M_Items.BaseUnitID_id MIUnitID,
                                                         SweetPOS.TC_SPOSInvoiceItems.Quantity,SweetPOS.TC_SPOSInvoiceItems.MRPValue,
@@ -863,9 +864,11 @@ class FranchiseInvoiceEditView(CreateAPIView):
                         "OrderIDs":[str(query1[0]['Order'])],
                         "OrderItemDetails":OrderItemDetails,
                         "InvoiceDate":InvoiceDate,
-                        "Vehicle":Vehicle
+                        "Vehicle":Vehicle,
+                        "AdvanceAmount": AdvanceAmount
                         
-                        })       
+                        }) 
+             
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Orderdata[0]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})  
