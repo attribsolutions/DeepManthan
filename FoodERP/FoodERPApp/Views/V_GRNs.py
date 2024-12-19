@@ -422,7 +422,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             "OrderAmount": OrderSerializedata[0]['OrderAmount'],
                             "Customer": OrderSerializedata[0]['CustomerID'],
                             "PriceListId":OrderSerializedata[0]['PriceListId'],
-                            "InvoiceNumber":" ",
+                            "InvoiceNumber":"",
                             "OrderItem": OrderItemDetails                            
                         })
                         log_entry = create_transaction_logNew(request, OrderItemSerializedata, OrderSerializedata[0]['CustomerID'],'OrderItemDetails',73,0,0,0,OrderSerializedata[0]['id'])
