@@ -36,4 +36,4 @@ class QRCodeView(CreateAPIView):
                     # Return the image as an HTTP response
                     return HttpResponse(buffer, content_type="image/png")
             except Exception as e:
-                raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+                raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
