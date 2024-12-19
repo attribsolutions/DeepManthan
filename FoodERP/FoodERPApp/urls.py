@@ -1,6 +1,8 @@
 from django.urls import re_path as url ,path
 from rest_framework_simplejwt import views as jwt_views
 
+from .Views.V_QRCode import *
+
 from .Views.V_MobileAppOrder import *
 
 from .Views.V_Claim import *
@@ -166,6 +168,7 @@ from .Views.V_Country import *
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
+    url(r'^QR/(?P<coupon_code>[a-zA-Z0-9]+)/$',QRCodeView.as_view()),
     url(r'test', AbcView.as_view()),
     url(r'SAPInvoice', SAPInvoiceView.as_view()),
     url(r'SAPOrder', SAPOrderView.as_view()),
