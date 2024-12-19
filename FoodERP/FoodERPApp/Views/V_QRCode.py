@@ -6,11 +6,12 @@ from rest_framework.generics import CreateAPIView
 from django.http import JsonResponse
 
 class QRCodeView(CreateAPIView):
-        
+        print("=========================Test-1====================================")
         permission_classes = ()        
-
+        print("=========================Test0====================================")
         @transaction.atomic()
         def get(self, request,coupon_code):
+            print("=========================Test0.1====================================")
             try:
                 with transaction.atomic():   
     
