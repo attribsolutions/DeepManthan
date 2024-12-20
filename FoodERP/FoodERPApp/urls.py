@@ -168,7 +168,8 @@ from .Views.V_Country import *
 urlpatterns = [
     
     # Master APIs IN Projects Add Page ,List Page
-    url(r'^QR/(?P<coupon_code>[a-zA-Z0-9]+)/$',QRCodeView.as_view()),
+    url(r'QR/(?P<coupon_code>[a-zA-Z0-9]+)$',QRCodeView.as_view()),
+    url(r'QR1/([0-9]+)$',QRCodeView.as_view()),
     url(r'test', AbcView.as_view()),
     url(r'SAPInvoice', SAPInvoiceView.as_view()),
     url(r'SAPOrder', SAPOrderView.as_view()),
