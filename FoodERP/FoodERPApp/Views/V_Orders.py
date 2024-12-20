@@ -520,13 +520,13 @@ class T_OrdersViewSecond(CreateAPIView):
                             # CustomPrint(b)
                             if(b['IsDeleted'] == 0):
                                 
-                                aaaa = UnitwiseQuantityConversion(
-                                    b['Item']['id'], b['Quantity'], b['Unit']['id'], 0, 0, 0, 1).GetConvertingBaseUnitQtyBaseUnitName()
+                                # aaaa = UnitwiseQuantityConversion(
+                                #     b['Item']['id'], b['Quantity'], b['Unit']['id'], 0, 0, 0, 1).GetConvertingBaseUnitQtyBaseUnitName()
                                 
-                                if (aaaa == b['Unit']['UnitID']['Name']):
-                                    bb=''
-                                else:
-                                    bb=aaaa
+                                # if (aaaa == b['Unit']['UnitID']['Name']):
+                                #     bb=''
+                                # else:
+                                #     bb=aaaa
 
                                 q = M_Parties.objects.filter(id=a['Customer']['id'],PartyType=a['Customer']['PartyType']).select_related(
                                 'PartyType').annotate(IsFranchises=F('PartyType__IsFranchises')).values('IsFranchises')
@@ -537,14 +537,24 @@ class T_OrdersViewSecond(CreateAPIView):
                                 q1 = MC_ItemGroupDetails.objects.filter(GroupType=GroupTypeID, Item=b['Item']['id']
                                 ).select_related('Group', 'SubGroup').annotate(
                                     GroupName=F('Group__Name'),
-                                    SubGroupName=F('SubGroup__Name')).order_by('Group__Sequence', 'SubGroup__Sequence','ItemSequence').values('GroupName', 'SubGroupName')
-                                CustomPrint(q1.query)
+                                    SubGroupName=F('SubGroup__Name'),
+                                    GroupSequences =F('Group__Sequence'),
+                                    SubGroupSequences = F('SubGroup__Sequence'),
+                                    ItemSequences = F('ItemSequence')).order_by('Group__Sequence', 'SubGroup__Sequence','ItemSequence').values('GroupName', 'SubGroupName','GroupSequences','SubGroupSequences','ItemSequences')
+                                # print(q1.query)
                                 if q1.exists():
                                     Group = q1[0]['GroupName']
-                                    SubGroup = q1[0]['SubGroupName']  
+                                    SubGroup = q1[0]['SubGroupName']
+                                    GroupSequence =q1[0]['GroupSequences']
+                                    SubGroupSequence = q1[0]['SubGroupSequences']
+                                    ItemSequence = q1[0]['ItemSequences']
                                 else:                              
                                     Group = ""
-                                    SubGroup = "" 
+                                    SubGroup = ""
+                                    GroupSequence =""
+                                    SubGroupSequence = ""
+                                    ItemSequence= ""
+                               
                                 OrderItemDetails.append({
                                     "id": b['id'],
                                     "Item": b['Item']['id'],
@@ -557,7 +567,7 @@ class T_OrdersViewSecond(CreateAPIView):
                                     "Rate": b['Rate'],
                                     "Unit": b['Unit']['id'],
                                     "PrimaryUnitName":b['Unit']['UnitID']['Name'],
-                                    "UnitName": b['Unit']['BaseUnitConversion'],
+                                    "UnitName":  b['Unit']['BaseUnitConversion'],
                                     "SAPUnitName": b['Unit']['UnitID']['SAPUnit'],
                                     "BaseUnitQuantity": b['BaseUnitQuantity'],
                                     "GST": b['GST']['id'],
@@ -580,6 +590,9 @@ class T_OrdersViewSecond(CreateAPIView):
                                     "Comment": b['Comment'],
                                     "Group": Group,
                                     "SubGroup": SubGroup,
+                                    "GroupSequence" : GroupSequence,
+                                    "SubGroupSequence" : SubGroupSequence,
+                                    "ItemSequence" : ItemSequence
                                 })
                                 
                         
@@ -602,7 +615,6 @@ class T_OrdersViewSecond(CreateAPIView):
                             "OrderAmount": a['OrderAmount'],
                             "AdvanceAmount": a['AdvanceAmount'],
                             "Description": a['Description'],
-                            "SAPOrderNo" :  a['SAPResponse'],
                             "Customer": a['Customer']['id'],
                             "CustomerSAPCode": a['Customer']['SAPPartyCode'],
                             "CustomerName": a['Customer']['Name'],
@@ -631,7 +643,7 @@ class T_OrdersViewSecond(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'SingleOrder:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
     def put(self, request, id=0):
         Orderupdatedata = JSONParser().parse(request)
