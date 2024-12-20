@@ -2426,6 +2426,14 @@ class M_ItemSupplier(models.Model):
     class Meta:
         db_table = "M_ItemSupplier"
 
+class M_GiftVoucherCode(models.Model):
+    VoucherType  = models.ForeignKey(M_GeneralMaster, related_name='GiftVoucherType', on_delete=models.PROTECT)
+    VoucherCode = models.CharField(max_length=50)
+    IsActive =models.BooleanField(default=False)
+    UpdatedOn = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "M_GiftVoucherCode"
 
 # class debug_log(models.Model):
 #     debug_message = models.CharField(max_length=300, null=True)
@@ -2443,7 +2451,9 @@ class debug_log(models.Model):
         db_table = 'debug_log'  # Optional: Specifies the exact table name if needed.
 
     def __str__(self):
-        return f"{self.created_at}: {self.debug_message}"        
+        return f"{self.created_at}: {self.debug_message}"   
+
+
     
 
     
