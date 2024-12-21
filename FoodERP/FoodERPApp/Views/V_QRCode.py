@@ -1,4 +1,4 @@
-# import qrcode
+import qrcode
 from django.http import HttpResponse
 from io import BytesIO
 from django.db import transaction
