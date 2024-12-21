@@ -73,6 +73,11 @@ class SPOSInvoiceView(CreateAPIView):
                         Invoicedata['Driver'] = 0
                         Invoicedata['SaleID'] =0
                         Invoicedata['MobileNo'] =Invoicedata['Mobile']
+                        if 'VoucherCode' in Invoicedata:
+                            Invoicedata['VoucherCode'] = Invoicedata['VoucherCode']
+                        else:
+                            Invoicedata['VoucherCode'] = None
+                        
                         if Invoicedata['CustomerID'] == 0:
                             Invoicedata['Customer'] = 43194
                         else:
