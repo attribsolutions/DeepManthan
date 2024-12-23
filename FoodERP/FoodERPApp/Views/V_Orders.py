@@ -113,7 +113,6 @@ class OrderListFilterView(CreateAPIView):
                         q = q2.union(q1)
 
                     else:
-
                         query = T_Orders.objects.filter(OrderDate__range=[
                                                         FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier).select_related('Customer').filter(aaa,bbb)
                         queryForOpenPO = T_Orders.objects.filter(
@@ -135,7 +134,6 @@ class OrderListFilterView(CreateAPIView):
                         else:
                             SubPartyFlag= False
                         
-                        
                         if (Orderdata['DashBoardMode'] == 1):
                             OrderListData.append({
                                 "OrderDate": a['OrderDate'],
@@ -152,14 +150,19 @@ class OrderListFilterView(CreateAPIView):
                             for c in a['OrderReferences']:
                                 if(c['Inward'] == 1):
                                     inward = 1
+                                   
+                            PartyTypeID = a['Supplier']['PartyType']['id'] if a['Supplier']['PartyType'] else None                  
+                           
+                            if PartyTypeID == 19:
+                                Count = TC_SPOSInvoicesReferences.objects.filter(Order=a['id']).count()
+                            else:
+                                Count = TC_InvoicesReferences.objects.filter(Order=a['id']).count()
 
-                            Count = TC_InvoicesReferences.objects.filter(
-                                Order=a['id']).count()
                             if Count == 0:
                                 InvoiceCreated = False
                             else:
                                 InvoiceCreated = True
-                            
+                                                            
                             OrderListData.append({
                                 "id": a['id'],
                                 "OrderDate": a['OrderDate'],
