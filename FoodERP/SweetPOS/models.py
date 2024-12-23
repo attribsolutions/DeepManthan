@@ -83,6 +83,7 @@ class T_SPOSInvoices(models.Model):
     IsDeleted = models.BooleanField(default=False)
     ReferenceInvoiceID = models.IntegerField(null=True,blank=True)
     AdvanceAmount=models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
+    VoucherCode = models.CharField(max_length=50 ,blank=True, null=True)
     class Meta:
         db_table = "T_SPOSInvoices"
 

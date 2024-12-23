@@ -1,6 +1,8 @@
 from django.urls import re_path as url ,path
 from rest_framework_simplejwt import views as jwt_views
 
+from .Views.GiftVouchers import *
+
 from .Views.V_QRCode import *
 
 from .Views.V_MobileAppOrder import *
@@ -767,7 +769,8 @@ urlpatterns = [
               url(r'CountrySave$',CountryCurrencySaveView.as_view()), 
               url(r'GETCountry$',CountryCurrencyListView.as_view()),
               url(r'Country/([0-9]+)$',CountryCurrencyViewSecond.as_view()),
-                
+              url(r'^giftvouchervalidityCheck$',giftvouchervalidityCheck.as_view()),
+              url(r'^giftvouchervalidityCheck/(?P<coupon_code>[a-zA-Z0-9]+)$',giftvouchervalidityCheck.as_view()),  
                 
 
 
