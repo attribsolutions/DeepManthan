@@ -92,14 +92,15 @@ class OrderItemSupplier(CreateAPIView):
                 Party = ItemSupplier_Data['PartyID']
 
                 ItemSupplierquery= T_Orders.objects.raw('''SELECT 1 id ,ifNULL(s.id,0)itemSupplierid,TC_OrderItems.Unit_id as UnitID,
-                M_Items.Name MaterialName,s.Name ItemSupplierName, M_Items.id ItemID,SUM(TC_OrderItems.Quantity) AS Quantity,
+                M_Items.Name MaterialName,s.Name ItemSupplierName, M_Items.id ItemID,SUM(TC_OrderItems.Quantity) AS Quantity,MC_ItemUnits.BaseUnitConversion,
                 SUM(TC_OrderItems.QtyInNo)QtyInNo,SUM(TC_OrderItems.QtyInKg)QtyInKg,SUM(TC_OrderItems.QtyInBox)QtyInBox
                 FROM T_Orders
                 join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id 
                 join M_Items on M_Items.id=TC_OrderItems.Item_id  
+                join MC_ItemUnits on MC_ItemUnits.id=TC_OrderItems.Unit_id
                 LEFT JOIN M_ItemSupplier I ON I.item_id=M_Items.id 
                 left join M_Parties s on I.Supplier_id=s.id                 
-                where  OrderDate between %s and %s  And T_Orders.Supplier_id=%s And IsDeleted=0 And IsConfirm=1
+                where  OrderDate between %s and %s  And T_Orders.Supplier_id=%s And TC_OrderItems.IsDeleted=0 And IsConfirm=1
                 Group By M_Items.id,s.id,TC_OrderItems.Unit_id
                 order by s.id desc''',[FromDate,ToDate,Party])            
                 if ItemSupplierquery:                   
@@ -115,7 +116,9 @@ class OrderItemSupplier(CreateAPIView):
                                     "SKUName": row.MaterialName,                                    
                                     "QtyInNo": float(row.QtyInNo),
                                     "QtyInKg": float(row.QtyInKg),
-                                    "QtyInBox": float(row.QtyInBox),   
+                                    "QtyInBox": float(row.QtyInBox), 
+                                    "Quantity" : float(row.Quantity) ,
+                                    "Unit" : row.BaseUnitConversion
                                         })
                         else:                            
                             ItemData = []
@@ -125,8 +128,9 @@ class OrderItemSupplier(CreateAPIView):
                                     "SKUName": row.MaterialName,                                    
                                     "QtyInNo": float(row.QtyInNo),
                                     "QtyInKg": float(row.QtyInKg),
-                                    "QtyInBox": float(row.QtyInBox)                                    
-                                    
+                                    "QtyInBox": float(row.QtyInBox) ,                                   
+                                    "Quantity" : float(row.Quantity) ,
+                                    "Unit" : row.BaseUnitConversion
                                         })
                                                         
                         
