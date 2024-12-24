@@ -113,7 +113,6 @@ class OrderListFilterView(CreateAPIView):
                         q = q2.union(q1)
 
                     else:
-
                         query = T_Orders.objects.filter(OrderDate__range=[
                                                         FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier).select_related('Customer').filter(aaa,bbb)
                         queryForOpenPO = T_Orders.objects.filter(
@@ -135,7 +134,6 @@ class OrderListFilterView(CreateAPIView):
                         else:
                             SubPartyFlag= False
                         
-                        
                         if (Orderdata['DashBoardMode'] == 1):
                             OrderListData.append({
                                 "OrderDate": a['OrderDate'],
@@ -152,14 +150,19 @@ class OrderListFilterView(CreateAPIView):
                             for c in a['OrderReferences']:
                                 if(c['Inward'] == 1):
                                     inward = 1
+                                   
+                            PartyTypeID = a['Supplier']['PartyType']['id'] if a['Supplier']['PartyType'] else None                  
+                           
+                            if PartyTypeID == 19:
+                                Count = TC_SPOSInvoicesReferences.objects.filter(Order=a['id']).count()
+                            else:
+                                Count = TC_InvoicesReferences.objects.filter(Order=a['id']).count()
 
-                            Count = TC_InvoicesReferences.objects.filter(
-                                Order=a['id']).count()
                             if Count == 0:
                                 InvoiceCreated = False
                             else:
                                 InvoiceCreated = True
-                            
+                                                            
                             OrderListData.append({
                                 "id": a['id'],
                                 "OrderDate": a['OrderDate'],
@@ -493,29 +496,31 @@ class T_OrdersView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
-class T_OrdersViewSecond(CreateAPIView):
+class T_OrdersPrintView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
 
-    def get(self, request, id=0):
+    def post(self, request):
+        OrderData = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                OrderQuery = T_Orders.objects.filter(id=id)
-                if OrderQuery.exists():
-                    OrderSerializedata = T_OrderSerializerThird(
-                        OrderQuery, many=True).data
-                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderSerializedata})
-                    OrderData = list()
-                    for a in OrderSerializedata:
-                        # CustomPrint(a)
-                        OrderTermsAndCondition = list()
-                        for b in a['OrderTermsAndConditions']:
-                            OrderTermsAndCondition.append({
-                                "id": b['TermsAndCondition']['id'],
-                                "TermsAndCondition": b['TermsAndCondition']['Name'],
-                            })
+                OrderIDs = OrderData['OrderIDs'].split(",")
+                OrderData = []
+                
+                for id in OrderIDs:
+                    OrderQuery = T_Orders.objects.filter(id=id)
+                    if OrderQuery.exists():
+                        OrderSerializedata = T_OrderSerializerThird(
+                            OrderQuery, many=True).data
+                        for a in OrderSerializedata:
+                            OrderTermsAndCondition = []
+                            for b in a['OrderTermsAndConditions']:
+                                OrderTermsAndCondition.append({
+                                    "id": b['TermsAndCondition']['id'],
+                                    "TermsAndCondition": b['TermsAndCondition']['Name'],
+                                })
 
-                        OrderItemDetails = list()
+                        OrderItemDetails = []
                         for b in a['OrderItem']:
                             # CustomPrint(b)
                             if(b['IsDeleted'] == 0):
@@ -637,14 +642,22 @@ class T_OrdersViewSecond(CreateAPIView):
                             "OrderItem": OrderItemDetails,
                             "OrderTermsAndCondition": OrderTermsAndCondition
                         })
-                    log_entry = create_transaction_logNew(request, {'OrderID':id}, a['Supplier']['id'],'From:'+a['POFromDate']+','+'To:'+a['POToDate']+','+'Supplier:'+str(a['Supplier']['id']),62,id,a['POFromDate'],a['POToDate'],a['Customer']['id'])
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData[0]})
-                log_entry = create_transaction_logNew(request, {'OrderID':id}, a['Supplier']['id'], 'Order Not Found',62,0,0,0,a['Customer']['id'])
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
-        except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'SingleOrder:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                    else:
+                        continue
 
+                if OrderData:
+                    log_entry = create_transaction_logNew(request, OrderData, 0, "Orders Data Confirm Successfully",62,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData})
+                else:
+                    log_entry = create_transaction_logNew(request, OrderData, 0, "No Orders Found",62,0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'No Orders Found', 'Data': []})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, OrderData, 0,'Orders:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e)})
+
+class T_OrdersViewSecond(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    # authentication__Class = JSONWebTokenAuthentication
     def put(self, request, id=0):
         Orderupdatedata = JSONParser().parse(request)
         try:
