@@ -949,6 +949,7 @@ class TC_OrderItems(models.Model):
     DiscountType = models.CharField(max_length=500,blank=True, null=True)
     Discount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
     DiscountAmount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
+    OrderItem = models.BooleanField(default=False)
 
     class Meta:
         db_table = "TC_OrderItems"
@@ -2431,6 +2432,7 @@ class M_GiftVoucherCode(models.Model):
     VoucherCode = models.CharField(max_length=50)
     IsActive =models.BooleanField(default=False)
     UpdatedOn = models.DateTimeField(auto_now=True)
+    
 
     class Meta:
         db_table = "M_GiftVoucherCode"
