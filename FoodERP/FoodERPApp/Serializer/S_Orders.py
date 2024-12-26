@@ -18,10 +18,16 @@ class M_POTypeserializerSecond(serializers.ModelSerializer):
         fields =  ['id', 'Name','Company', 'Division']
 
 # POST Method
+class M_PartyTypeserializer(serializers.ModelSerializer):
+    class Meta : 
+        model = M_PartyType
+        fields = '__all__'
+        
 class PartiesSerializerSecond(serializers.ModelSerializer):
+    PartyType = M_PartyTypeserializer(read_only=True)
     class Meta:
         model = M_Parties
-        fields = ['id','Name','SAPPartyCode','PAN','GSTIN']
+        fields = ['id','Name','SAPPartyCode','PAN','GSTIN','PartyType']
         
     def to_representation(self, instance):
         # get representation from ModelSerializer
@@ -216,6 +222,7 @@ class T_OrderSerializerSecond(serializers.ModelSerializer):
     ShippingAddress=PartyAddressSerializerSecond(read_only=True) 
     OrderReferences= GRNReferanceSerializer(read_only=True,many=True)
     POType = M_POTypeserializer(read_only=True)
+    
     class Meta:
         model = T_Orders
         fields = '__all__'

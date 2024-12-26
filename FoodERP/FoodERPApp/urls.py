@@ -164,6 +164,8 @@ from .Views.V_ItemSupplierAssign import *
 from .Views.V_Country import *
 
 
+
+
 # from .Views.V_FTP import *
 
 
@@ -272,6 +274,7 @@ urlpatterns = [
 
 # Order All APIs
             url(r'TestOrderget/([0-9]+)$',TestOrdersView.as_view()),
+            url(r'OrdersPrint$', T_OrdersPrintView.as_view()),
             url(r'Orders/([0-9]+)$', T_OrdersViewSecond.as_view()),
             url(r'Orders$', T_OrdersView.as_view()),
             url(r'OrdersFilter$', OrderListFilterView.as_view()),
