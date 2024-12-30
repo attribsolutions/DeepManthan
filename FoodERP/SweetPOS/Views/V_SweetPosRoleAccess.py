@@ -231,7 +231,7 @@ class MachineTypeListView(CreateAPIView):
 
 class SPOSLoginDetailsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    
+   
     @transaction.atomic()
     def post(self, request):
         LoginData = JSONParser().parse(request)
@@ -243,13 +243,27 @@ class SPOSLoginDetailsView(CreateAPIView):
                 ToDate = datetime.strptime(ToDateStr, '%Y-%m-%d %H:%M:%S')
                 DivisionID = LoginData['DivisionID']
 
-                SPOSLoginDetailsQuery = M_SweetPOSLogin.objects.raw('''SELECT L.id,L.UserName,L.DivisionID,L.ClientID,L.MacID,L.ExePath,
-                                                                    L.ExeVersion,L.CreatedOn,M.MachineName
-                                                                    FROM SweetPOS.M_SweetPOSLogin L
-                                                                    JOIN SweetPOS.M_SweetPOSMachine M ON L.ClientID = M.id 
-                                                                    WHERE L.CreatedOn BETWEEN %s AND %s AND L.DivisionID=%s''',[FromDate,ToDate,DivisionID])
-                SPOSLoginDetailsList = list()
+                if DivisionID == 0:
+                    SPOSLoginDetailsQuery = M_SweetPOSLogin.objects.raw('''
+                        SELECT L.id, L.UserName, L.DivisionID, L.ClientID, L.MacID, L.ExePath,
+                               L.ExeVersion, L.CreatedOn, M.MachineName
+                        FROM SweetPOS.M_SweetPOSLogin L
 
+                        JOIN SweetPOS.M_SweetPOSMachine M ON L.ClientID = M.id
+
+                        WHERE L.CreatedOn BETWEEN %s AND %s''', [FromDate, ToDate])
+                else:
+                    SPOSLoginDetailsQuery = M_SweetPOSLogin.objects.raw('''
+                        SELECT L.id, L.UserName, L.DivisionID, L.ClientID, L.MacID, L.ExePath,
+                               L.ExeVersion, L.CreatedOn, M.MachineName
+                        FROM SweetPOS.M_SweetPOSLogin L
+
+                        JOIN SweetPOS.M_SweetPOSMachine M ON L.ClientID = M.id 
+                        WHERE L.CreatedOn BETWEEN %s AND %s AND L.DivisionID = %s''', [FromDate, ToDate, DivisionID])
+
+
+                SPOSLoginDetailsList = list()
+ 
                 for a in SPOSLoginDetailsQuery:
                     SPOSLoginDetailsList.append({
                         "id": a.id,
@@ -262,12 +276,20 @@ class SPOSLoginDetailsView(CreateAPIView):
                         "ExeVersion": a.ExeVersion,
                         "CreatedOn": a.CreatedOn
                     })
-                    
-                log_entry = create_transaction_logNew(request, LoginData, 0, 'SPOSLoginDetails', 422, 0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SPOSLoginDetailsList})
+
+                if SPOSLoginDetailsList:
+                    log_entry = create_transaction_logNew(request, LoginData, 0, 'SPOSLoginDetails', 422, 0, FromDate, ToDate, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SPOSLoginDetailsList})
+                else:
+                    log_entry = create_transaction_logNew(request, LoginData, 0, "SPOSLoginDetails Not available", 422, 0, FromDate, ToDate, 0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'SPOSLoginDetails Not available', 'Data': []})
+
+ 
         except Exception as e:
-            log_entry = create_transaction_logNew(request, LoginData, 0, 'SPOSLoginDetails:'+str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, LoginData, 0, 'SPOSLoginDetails:' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+
+
         
 class MachineTypeUpdateView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
