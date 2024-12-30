@@ -32,14 +32,16 @@ class SweetPosServiceSettingsImportView(CreateAPIView):
                 
                 ServicesSettings_serializer = SPOSServicesSettingstSerializer(ServiceSettingsData, many=True).data
                 
-                log_entry = create_transaction_logNew(request, ServicesSettings_serializer,0,'',429,0)
+                log_entry = create_transaction_logNew(request, ServicesSettings_serializer,id,'',429,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': ServicesSettings_serializer})
         except  M_SweetPOSRoleAccess.DoesNotExist:
-            log_entry = create_transaction_logNew(request, 0,0,'GETSweetPOSServiceSettingDetails'+'Service Settings Not available',429,0)
+            log_entry = create_transaction_logNew(request, 0,id,'GETSweetPOSServiceSettingDetails'+'Service Settings Not available',429,0)
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Service Settings Not available', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0,0,'GETSweetPOSServiceSettingDetails:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
+    
+    
     
     
     def patch(self, request,id=0):
@@ -55,10 +57,10 @@ class SweetPosServiceSettingsImportView(CreateAPIView):
                 if ServiceSetting_Serializer.is_valid():                   
                     
                     ServiceSetting_Serializer.save()
-                    log_entry = create_transaction_logNew(request, ServiceSettings_Data, 0, '', 430, 0)
+                    log_entry = create_transaction_logNew(request, ServiceSettings_Data, id, '', 430, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Service Settings Updated Successfully','Data' :[]})
                 else:
-                    log_entry = create_transaction_logNew(request, ServiceSettings_Data, 0, 'Service Settings Update:'+str(ServiceSetting_Serializer.errors), 430, 0)
+                    log_entry = create_transaction_logNew(request, ServiceSettings_Data, id, 'Service Settings Update:'+str(ServiceSetting_Serializer.errors), 430, 0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': str(ServiceSetting_Serializer.errors), 'Data' :[]})
         except Exception as e:
