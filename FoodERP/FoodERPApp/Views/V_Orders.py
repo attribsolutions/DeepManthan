@@ -593,6 +593,7 @@ class T_OrdersPrintView(CreateAPIView):
                                     "Discount":b['Discount'],
                                     "DiscountAmount":b['DiscountAmount'],
                                     "Comment": b['Comment'],
+                                    "IsHighlightItemInPrint" : b['OrderItem'],
                                     "Group": Group,
                                     "SubGroup": SubGroup,
                                     "GroupSequence" : GroupSequence,
