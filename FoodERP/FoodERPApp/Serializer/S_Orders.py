@@ -48,7 +48,7 @@ class TC_OrderTermsAndConditionsSerializer(serializers.ModelSerializer):
     class Meta:
         model=TC_OrderTermsAndConditions
         fields =['TermsAndCondition','IsDeleted']
-
+  
 class T_OrderSerializer(serializers.ModelSerializer):
     OrderItem = TC_OrderItemsSerializer(many=True)
     OrderTermsAndConditions=TC_OrderTermsAndConditionsSerializer(many=True)
