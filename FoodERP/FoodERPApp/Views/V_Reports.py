@@ -1403,6 +1403,7 @@ class ProductAndMarginReportView(CreateAPIView):
     @transaction.atomic()
     def post(self, request):
         data = JSONParser().parse(request)
+        
         try:
             with transaction.atomic():
                 today = date.today()
@@ -1415,21 +1416,20 @@ class ProductAndMarginReportView(CreateAPIView):
                 SubGroupID = data['SubGroup'].split(",")
                 ItemID = data['Item'].split(",")
                 PartyTypeID = [int(i) for i in PartyTypeID]
-                CustomPrint(PartyTypeID)
                 try:
                     if(PriceListID):
                         PriceListID = int(PriceListID)
                     else:
                         if len(PartyTypeID) > 0:
-                           CustomPrint("Shruti123")
-                           party_type_ids_str = ','.join(PartyTypeID)
-                           pricelistPartytype=M_PriceList.objects.raw(f''' SELECT id,Name,ShortName FROM M_PriceList WHERE PLPartyType_id in({party_type_ids_str}) order by Sequence''')
-                           PriceListIDComma = [str(item.id) for item in pricelistPartytype]
+                           PartyTypeIDs = ','.join(map(str, PartyTypeID))
+                           PriceListQuery=M_PriceList.objects.raw(f''' SELECT id,Name,ShortName,CalculationPath
+                                                                      FROM M_PriceList 
+                                                                      WHERE PLPartyType_id in({PartyTypeIDs}) order by Sequence''')
+                           
+                           PriceListIDComma = [str(item.id) for item in PriceListQuery]
                            PriceListID= ','.join(PriceListIDComma)
-                        #    CustomPrint(PriceListID)
                         else:
                             PriceListID=0                   
-                    # CustomPrint(PriceListID)
                 except (ValueError, TypeError):
                     PriceListID = 0
 
@@ -1567,7 +1567,7 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id in (%s
                                     all_ids.extend(pp) 
                                     all_ids = list(set(all_ids))
                                     all_ids_tuple = tuple(all_ids)
-                                    pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName FROM M_PriceList where id in %s order by Sequence''',[all_ids_tuple])
+                                    pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName,CalculationPath FROM M_PriceList where id in %s order by Sequence''',[all_ids_tuple])
                          
                         CustomPrint(pricelistquery.query)
                         ItemMargins = list()
