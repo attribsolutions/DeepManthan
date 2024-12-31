@@ -64,7 +64,8 @@ class UserListView(CreateAPIView):
                 Logindata = JSONParser().parse(request)
                 UserID = Logindata['UserID']   
                 RoleID=  Logindata['RoleID']  
-                CompanyID=Logindata['CompanyID'] 
+                CompanyID=Logindata['CompanyID']
+                PartyID = Logindata.get('PartyID', None) 
                        
                 
                 if (RoleID == 1):
@@ -83,6 +84,9 @@ class UserListView(CreateAPIView):
                         Clause= {}
                     employees = M_Employees.objects.filter(Company_id=CompanyID).values_list('id',flat=True)                
                     Usersdata = M_Users.objects.filter(Employee__in=employees,**Clause)
+                     
+                if PartyID:
+                    Usersdata = Usersdata.filter(UserRole__Party__id=PartyID)     
                              
                 if Usersdata.exists():
                     Usersdata_Serializer = UserListSerializer(Usersdata, many=True).data
