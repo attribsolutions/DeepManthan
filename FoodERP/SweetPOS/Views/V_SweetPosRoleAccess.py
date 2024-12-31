@@ -246,19 +246,19 @@ class SPOSLoginDetailsView(CreateAPIView):
                 if DivisionID == 0:
                     SPOSLoginDetailsQuery = M_SweetPOSLogin.objects.raw('''
                         SELECT L.id, L.UserName, L.DivisionID, L.ClientID, L.MacID, L.ExePath,
-                               L.ExeVersion, L.CreatedOn, M.MachineName
+                               L.ExeVersion, L.CreatedOn, M.MachineName, P.Name AS DivisionName
                         FROM SweetPOS.M_SweetPOSLogin L
 
                         JOIN SweetPOS.M_SweetPOSMachine M ON L.ClientID = M.id
-
+                        LEFT JOIN FoodERP.M_Parties P ON L.DivisionID = P.id
                         WHERE L.CreatedOn BETWEEN %s AND %s''', [FromDate, ToDate])
                 else:
                     SPOSLoginDetailsQuery = M_SweetPOSLogin.objects.raw('''
                         SELECT L.id, L.UserName, L.DivisionID, L.ClientID, L.MacID, L.ExePath,
-                               L.ExeVersion, L.CreatedOn, M.MachineName
+                               L.ExeVersion, L.CreatedOn, M.MachineName, P.Name AS DivisionName
                         FROM SweetPOS.M_SweetPOSLogin L
-
                         JOIN SweetPOS.M_SweetPOSMachine M ON L.ClientID = M.id 
+                        LEFT JOIN M_Parties P ON L.DivisionID = P.id
                         WHERE L.CreatedOn BETWEEN %s AND %s AND L.DivisionID = %s''', [FromDate, ToDate, DivisionID])
 
 
@@ -269,6 +269,7 @@ class SPOSLoginDetailsView(CreateAPIView):
                         "id": a.id,
                         "UserName": a.UserName,
                         "DivisionID": a.DivisionID,
+                        "DivisionName": a.DivisionName,
                         "ClientID": a.ClientID,
                         "MacID": a.MacID,
                         "MachineName": a.MachineName,
