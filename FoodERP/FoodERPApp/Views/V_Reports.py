@@ -1421,15 +1421,18 @@ class ProductAndMarginReportView(CreateAPIView):
                         PriceListID = int(PriceListID)
                     else:
                         if len(PartyTypeID) > 0:
-                           PartyTypeIDs = ','.join(map(str, PartyTypeID))
-                           PriceListQuery=M_PriceList.objects.raw(f''' SELECT id,Name,ShortName,CalculationPath
+                            PartyTypeIDs = ','.join(map(str, PartyTypeID))
+                            PriceListQuery=M_PriceList.objects.raw(f''' SELECT id,Name,ShortName,CalculationPath
                                                                       FROM M_PriceList 
                                                                       WHERE PLPartyType_id in({PartyTypeIDs}) order by Sequence''')
                            
-                           PriceListIDComma = [str(item.id) for item in PriceListQuery]
-                           PriceListID= ','.join(PriceListIDComma)
+                            PriceListIDComma = [str(item.id) for item in PriceListQuery]
+                            if PriceListIDComma:  
+                                PriceListID = ','.join(PriceListIDComma)
+                            else:
+                                PriceListID = 0
                         else:
-                            PriceListID=0                   
+                            PriceListID = 0               
                 except (ValueError, TypeError):
                     PriceListID = 0
 
