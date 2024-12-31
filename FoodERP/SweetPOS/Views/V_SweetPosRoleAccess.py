@@ -258,7 +258,7 @@ class SPOSLoginDetailsView(CreateAPIView):
                                L.ExeVersion, L.CreatedOn, M.MachineName, P.Name AS DivisionName
                         FROM SweetPOS.M_SweetPOSLogin L
                         JOIN SweetPOS.M_SweetPOSMachine M ON L.ClientID = M.id 
-                        LEFT JOIN M_Parties P ON L.DivisionID = P.id
+                        LEFT JOIN FoodERP.M_Parties P ON L.DivisionID = P.id
                         WHERE L.CreatedOn BETWEEN %s AND %s AND L.DivisionID = %s''', [FromDate, ToDate, DivisionID])
 
 
