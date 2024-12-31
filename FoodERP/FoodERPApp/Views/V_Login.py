@@ -66,30 +66,52 @@ class UserListView(CreateAPIView):
                 RoleID=  Logindata['RoleID']  
                 CompanyID=Logindata['CompanyID']
                 PartyID = Logindata.get('PartyID', None) 
-                       
                 
-                if (RoleID == 1):
+                
+                if (RoleID == 2):
                     employees = M_Employees.objects.filter(Company_id=CompanyID).values_list('id',flat=True)                
-                    Usersdata = M_Users.objects.filter(Employee__in=employees) 
+                    Usersdata = M_Users.objects.filter(Employee__in=employees)
+                     
                 else:                
-                     
-                    Usersdata = M_Users.objects.filter(CreatedBy=UserID) 
-                    SettingQuery=M_Settings.objects.filter(id=47).values("DefaultValue")
-                    RoleID_List=str(SettingQuery[0]['DefaultValue'])                    
-                    RoleID_list = [int(x) for x in RoleID_List.split(",")]
+                    Usersdata = M_Users.objects.raw(f'''SELECT M_Users.id, M_Users.password, M_Users.last_login, M_Users.LoginName, M_Users.isActive, 
+                    M_Users.isSendOTP, M_Users.isLoginUsingMobile, M_Users.isLoginUsingEmail, M_Users.AdminPassword, M_Users.OTP, 
+                    M_Users.CreatedBy, M_Users.CreatedOn, M_Users.UpdatedBy, M_Users.UpdatedOn, M_Users.Employee_id, 
+                    M_Users.POSRateType, M_Users.IsLoginPermissions
+                    FROM M_Users 
+                    JOIN M_Employees ON Employee_id = M_Employees.id
+                    JOIN MC_EmployeeParties ON MC_EmployeeParties.Employee_id = M_Employees.id
+                    WHERE Party_id IN ({PartyID})''')
+                    
+                    # Usersdata = M_Users.objects.filter(CreatedBy=UserID) 
+                    # print(Usersdata.query)
+                    # print(Usersdata)
+                    # SettingQuery=M_Settings.objects.filter(id=47).values("DefaultValue")
+                    # print(SettingQuery)
+                    # RoleID_List=str(SettingQuery[0]['DefaultValue'])
+                    # print(RoleID_List)                    
+                    # RoleID_list = [int(x) for x in RoleID_List.split(",")]
                     # print(RoleID_list)
-                    if RoleID in RoleID_list:                    
-                        Clause= {'Employee__CreatedBy': UserID}
-                    else:
-                        Clause= {}
-                    employees = M_Employees.objects.filter(Company_id=CompanyID).values_list('id',flat=True)                
-                    Usersdata = M_Users.objects.filter(Employee__in=employees,**Clause)
+                    # if RoleID in RoleID_list: 
+                    #     print("aaaaaaaaaaa")                   
+                    #     Clause= {'Employee__CreatedBy': UserID}
+                    #     print(Clause)
+                    # else:
+                    #     print("bbbbbbbbbbbbb")
+                    #     Clause= {}
+                    # employees = M_Employees.objects.filter(Company_id=CompanyID).values_list('id',flat=True)   
+                    # print(employees)             
+                    # Usersdata = M_Users.objects.filter(Employee__in=employees,**Clause)
+                    # print(Usersdata)
+                    # print(Usersdata.query)
                      
-                if PartyID:
-                    Usersdata = Usersdata.filter(UserRole__Party__id=PartyID)     
+                # if PartyID:
+                #     print("cccccccccc")
+                #     Usersdata = Usersdata.filter(UserRole__Party__id=PartyID)  
+                #     print(Usersdata.query)   
                              
-                if Usersdata.exists():
+                if Usersdata:
                     Usersdata_Serializer = UserListSerializer(Usersdata, many=True).data
+                    # print(Usersdata_Serializer)
                     UserData = list()
                        
                     for a in Usersdata_Serializer:
