@@ -102,7 +102,8 @@ class OrderItemSupplier(CreateAPIView):
                 left join M_Parties s on I.Supplier_id=s.id                 
                 where  OrderDate between %s and %s  And T_Orders.Supplier_id=%s And TC_OrderItems.IsDeleted=0 And IsConfirm=1
                 Group By M_Items.id,s.id,TC_OrderItems.Unit_id
-                order by s.id desc''',[FromDate,ToDate,Party])            
+                order by  M_Items.Name ASC''',[FromDate,ToDate,Party])  
+                print(ItemSupplierquery.query)          
                 if ItemSupplierquery:                   
                     Supplier_List=list()  
                     ItemData = []
