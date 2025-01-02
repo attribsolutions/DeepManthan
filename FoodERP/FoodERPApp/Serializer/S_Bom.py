@@ -13,7 +13,7 @@ class M_BOMSerializer(serializers.ModelSerializer):
     BOMItems = MC_BOMItemsSerializer(many=True)
     class Meta:
         model = M_BillOfMaterial
-        fields = ['BomDate','EstimatedOutputQty','Comment','IsActive','IsVDCItem','Item','Unit','Company','CreatedBy','ReferenceBom','BOMItems']  
+        fields = ['BomDate','EstimatedOutputQty','Comment','IsActive','IsVDCItem','Item','Unit','Company','CreatedBy','ReferenceBom','BOMItems','Party']  
         
     def create(self, validated_data):
         BomItems_data = validated_data.pop('BOMItems')
@@ -92,14 +92,16 @@ class StockQtyserializer(serializers.Serializer):
     Item_id=serializers.IntegerField()  
      
 class BOMReportSerializer(serializers.Serializer):
-    BOM_id = serializers.IntegerField()
+    id = serializers.IntegerField()
     PartyID = serializers.IntegerField()
     PartyName = serializers.CharField()
     CategoryName = serializers.CharField()
+    BOMItemID=serializers.IntegerField()
     BOMItem = serializers.CharField()
     LOTQuantity = serializers.FloatField()
+    IngredianceID=serializers.IntegerField()
     Ingrediance = serializers.CharField()
-    Quantity = serializers.FloatField()
-    # UnitId = serializers.IntegerField()  # This corresponds to the primary key of MC_ItemUnits
+    # Quantity = serializers.FloatField()
+    UnitId = serializers.IntegerField() 
     UnitName=serializers.CharField()
-    QuantityTotal = serializers.FloatField()
+    # QuantityTotal = serializers.FloatField()
