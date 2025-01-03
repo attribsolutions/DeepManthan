@@ -510,8 +510,7 @@ class T_OrdersPrintView(CreateAPIView):
                 for id in OrderIDs:
                     OrderQuery = T_Orders.objects.filter(id=id)
                     if OrderQuery.exists():
-                        OrderSerializedata = T_OrderSerializerThird(
-                            OrderQuery, many=True).data
+                        OrderSerializedata = T_OrderSerializerThird(OrderQuery, many=True).data
                         for a in OrderSerializedata:
                             OrderTermsAndCondition = []
                             for b in a['OrderTermsAndConditions']:
@@ -621,6 +620,7 @@ class T_OrdersPrintView(CreateAPIView):
                             "OrderAmount": a['OrderAmount'],
                             "AdvanceAmount": a['AdvanceAmount'],
                             "Description": a['Description'],
+                            "SAPOrderNo" :  a['SAPResponse'],
                             "Customer": a['Customer']['id'],
                             "CustomerSAPCode": a['Customer']['SAPPartyCode'],
                             "CustomerName": a['Customer']['Name'],
