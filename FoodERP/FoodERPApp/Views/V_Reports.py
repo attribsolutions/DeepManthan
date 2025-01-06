@@ -1877,7 +1877,7 @@ class BillBookingReportView(CreateAPIView):
                 Party = Data['Party']
                 GRNData=list()
               
-                BillBookingquery =TC_GRNItems.objects.raw(f'''SELECT 1 id,GRNDate,FullGRNNumber ,Sum(TC_GRNItems.BasicAmount)BasicAmount, 
+                BillBookingquery =TC_GRNItems.objects.raw(f'''SELECT  T_GRNs.id,GRNDate,FullGRNNumber ,Sum(TC_GRNItems.BasicAmount)BasicAmount, 
                 Sum(TC_GRNItems.CGST)CGST,Sum(TC_GRNItems.SGST)SGST 
                 ,M_Parties.Name ,Sum(TC_GRNItems.Amount)Amount FROM T_GRNs
                 JOIN TC_GRNItems ON  TC_GRNItems.Grn_id =T_GRNs.id  
@@ -1886,6 +1886,7 @@ class BillBookingReportView(CreateAPIView):
                 if BillBookingquery:                     
                     for row in BillBookingquery:                       
                         GRNData.append({
+                            "id":row.id,
                             "GRNDate":row.GRNDate,
                             "BillNumber":row.FullGRNNumber,
                             "Debit":row.BasicAmount,
