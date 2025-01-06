@@ -1892,7 +1892,7 @@ class BillBookingReportView(CreateAPIView):
                             "Debit":row.BasicAmount,
                             "CGST":row.CGST,
                             "SGST":row.SGST,
-                            "Supplier Name":row.Name,
+                            "SupplierName":row.Name,
                             "Credit":row.Amount                            
                         }) 
                         # GRNData.append({
