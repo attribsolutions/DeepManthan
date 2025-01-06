@@ -1865,3 +1865,51 @@ class FranchiseSecondarySaleReportView(CreateAPIView):
             log_entry = create_transaction_logNew(request, Data, 0, 'FranchiseSaleReport:'+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
+class BillBookingReportView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    @transaction.atomic()
+    def post(self, request):
+        Data = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                FromDate = Data['FromDate']
+                ToDate = Data['ToDate']
+                Party = Data['Party']
+                GRNData=list()
+              
+                BillBookingquery =TC_GRNItems.objects.raw(f'''SELECT  T_GRNs.id,GRNDate,FullGRNNumber ,Sum(TC_GRNItems.BasicAmount)BasicAmount, 
+                Sum(TC_GRNItems.CGST)CGST,Sum(TC_GRNItems.SGST)SGST 
+                ,M_Parties.Name ,Sum(TC_GRNItems.Amount)Amount FROM T_GRNs
+                JOIN TC_GRNItems ON  TC_GRNItems.Grn_id =T_GRNs.id  
+                JOIN M_Parties ON M_Parties.id= T_GRNs.Party_id
+                WHERE  GrnDate Between '{FromDate}' and '{ToDate}' and T_GRNs.Customer_id={Party} group by TC_GRNItems.GRN_id ,M_Parties.Name ''')
+                if BillBookingquery:                     
+                    for row in BillBookingquery:                       
+                        GRNData.append({
+                            "id":row.id,
+                            "GRNDate":row.GRNDate,
+                            "BillNumber":row.FullGRNNumber,
+                            "Debit":row.BasicAmount,
+                            "CGST":row.CGST,
+                            "SGST":row.SGST,
+                            "SupplierName":row.Name,
+                            "Credit":row.Amount                            
+                        }) 
+                        # GRNData.append({
+                        #     "Date": row.GRNDate,
+                        #     "BillNumber": row.FullGRNNumber,
+                        #     "Particulares": [
+                        #         {"Description": "Purchase", "Debit": row.BasicAmount, "Credit": None},
+                        #         {"Description": "CGST", "Debit": row.CGST, "Credit": None},
+                        #         {"Description": "SGST", "Debit": row.SGST, "Credit": None},
+                        #         {"Description": f"Supplier Name {row.Name}", "Debit": None, "Credit": row.Amount},
+                        #     ]
+                        # }) 
+                      
+                log_entry = create_transaction_logNew(request, Data, Party, '', 431, 0, FromDate, ToDate, 0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': GRNData})  
+            log_entry = create_transaction_logNew(request, Data, 0, "Data Not Available", 431, 0, FromDate, ToDate, 0)
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Data Not Available', 'Data': []}) 
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, Data, 0, 'BillBookingReport:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
