@@ -1894,17 +1894,7 @@ class BillBookingReportView(CreateAPIView):
                             "SGST":row.SGST,
                             "SupplierName":row.Name,
                             "Credit":row.Amount                            
-                        }) 
-                        # GRNData.append({
-                        #     "Date": row.GRNDate,
-                        #     "BillNumber": row.FullGRNNumber,
-                        #     "Particulares": [
-                        #         {"Description": "Purchase", "Debit": row.BasicAmount, "Credit": None},
-                        #         {"Description": "CGST", "Debit": row.CGST, "Credit": None},
-                        #         {"Description": "SGST", "Debit": row.SGST, "Credit": None},
-                        #         {"Description": f"Supplier Name {row.Name}", "Debit": None, "Credit": row.Amount},
-                        #     ]
-                        # }) 
+                        })                          
                       
                 log_entry = create_transaction_logNew(request, Data, Party, '', 431, 0, FromDate, ToDate, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': GRNData})  
@@ -1912,4 +1902,58 @@ class BillBookingReportView(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Data Not Available', 'Data': []}) 
         except Exception as e:
             log_entry = create_transaction_logNew(request, Data, 0, 'BillBookingReport:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+        
+        
+        
+class DemandVsSupplyReportView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    @transaction.atomic()
+    def post(self, request):
+        Data = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                FromDate = Data['FromDate']
+                ToDate = Data['ToDate']
+                Party = Data['Party']
+                DemandVsSupplyData=list()                
+                print(FromDate,ToDate,Party)
+                DemandVsReportquery =TC_OrderItems.objects.raw(f'''SELECT A.*,B.QtyInKg SupplyInKg, B.QtyInNo SupplyInNo 
+                FROM (
+                select T_Orders.id,M_Parties.Name PartyName, OrderDate, M_Items.Name ItemName, SUM(QtyInKg) QtyInKg, SUM(QtyInNo) QtyInNo FROM T_Orders 
+                JOIN TC_OrderItems on Order_id = T_Orders.id 
+                JOIN M_Parties ON Customer_id = M_Parties.id
+                JOIN M_Items ON Item_id = M_Items.id
+                WHERE IsDeleted = 0 AND OrderDate BETWEEN '{FromDate}' AND '{ToDate}' AND Customer_id={Party} 
+                Group By M_Parties.Name, OrderDate, M_Items.Name) A
+                LEFT JOIN (
+                select M_Parties.Name PartyName, InvoiceDate, M_Items.Name ItemName, SUM(QtyInKg) QtyInKg, SUM(QtyInNo) QtyInNo FROM T_Invoices 
+                JOIN TC_InvoiceItems on Invoice_id = T_Invoices.id 
+                JOIN M_Parties ON Customer_id = M_Parties.id
+                JOIN M_Items ON Item_id = M_Items.id
+                WHERE InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}' AND Customer_id={Party}
+                Group By M_Parties.Name, InvoiceDate, M_Items.Name) B
+                ON A.PartyName = B.PartyName AND A.OrderDate = B.InvoiceDate AND A.ItemName = B.ItemName
+                WHERE A.QtyInKg != B.QtyInKg Order By A.PartyName, OrderDate''')
+                print(DemandVsReportquery.query)  
+                if DemandVsReportquery:  
+                    print("SHRUR")              
+                    for row in DemandVsReportquery:                       
+                        DemandVsSupplyData.append({
+                            "id":row.id,
+                            "PartyName":row.PartyName,
+                            "OrderDate":row.OrderDate,
+                            "ItemName":row.ItemName,
+                            "QtyInKg":row.QtyInKg,
+                            "QtyInNo":row.QtyInNo,
+                            "SupplyInKg":row.SupplyInKg,
+                            "SupplyInNo":row.SupplyInNo                            
+                        })                          
+                      
+                log_entry = create_transaction_logNew(request, Data, Party, '', 432, 0, FromDate, ToDate, 0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': DemandVsSupplyData})  
+            log_entry = create_transaction_logNew(request, Data, 0, "Data Not Available", 431, 0, FromDate, ToDate, 0)
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Data Not Available', 'Data': []}) 
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, Data, 0, 'DemandVsReportReport:'+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
