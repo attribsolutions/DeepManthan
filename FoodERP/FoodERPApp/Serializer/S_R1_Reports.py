@@ -31,12 +31,12 @@ class B2B3Serializer1(serializers.Serializer):
     InvoiceValue=FloatDecimalField()
     PlaceOfSupply=serializers.CharField(max_length=100)
     ReverseCharge=serializers.CharField(max_length=100)
-    ApplicableOfTaxRate=FloatDecimalField() 
-    TaxableValue=FloatDecimalField()
+    ApplicableOfTaxRate=serializers.CharField(max_length=100) 
+    TaxableValue=serializers.CharField(max_length=100)
     IGST=FloatDecimalField()
     CGST=FloatDecimalField()
     SGST=FloatDecimalField()
-    CessAmount=FloatDecimalField()
+    CessAmount=serializers.CharField(max_length=100)
     IRN=serializers.CharField(max_length=100)
     IRNDate=serializers.CharField(max_length=100)
     
@@ -114,7 +114,7 @@ class B2CSSerializer(serializers.Serializer):
 class B2CSSerializer2(serializers.Serializer):
     # id = serializers.IntegerField()
     TotalTaxableValue =FloatDecimalField() 
-    TotalCess =FloatDecimalField() 
+    TotalCess =serializers.CharField(max_length=100) 
     
     def to_representation(self, obj):
         representation = super().to_representation(obj)
@@ -133,13 +133,13 @@ class CDNRSerializer1(serializers.Serializer):
     NoteTypeName=serializers.CharField(max_length=100)    
     PlaceOfSupply=serializers.CharField(max_length=100)
     ReverseCharge=serializers.CharField(max_length=100)
-    NoteValue =FloatDecimalField()    
+    NoteValue =serializers.CharField(max_length=100)    
     Rate=FloatDecimalField()
     TaxableValue=FloatDecimalField() 
     IGST=FloatDecimalField()
     CGST=FloatDecimalField()
     SGST=FloatDecimalField()
-    CessAmount=FloatDecimalField()    
+    CessAmount=serializers.CharField(max_length=100)    
     IRN = serializers.CharField(max_length=500) 
     EINvoiceCreatedON=serializers.CharField(max_length=100)  
       
@@ -170,7 +170,7 @@ class CDNRSerializer2(serializers.Serializer):
     NoOfNotes  = serializers.IntegerField()
     TotalInvoiceValue =FloatDecimalField()
     TotalTaxableValue =FloatDecimalField()
-    TotalCess=FloatDecimalField() 
+    TotalCess=serializers.IntegerField()
     
     def to_representation(self, obj):
         representation = super().to_representation(obj)
@@ -193,10 +193,10 @@ class CDNURSerializer(serializers.Serializer):
     NoteType=serializers.CharField(max_length=100)
     PlaceOfSupply=serializers.CharField(max_length=100)
     NoteValue=FloatDecimalField()
-    ApplicableOfTaxRate=FloatDecimalField()
+    ApplicableOfTaxRate=serializers.CharField(max_length=100)
     Rate=FloatDecimalField()
     TaxableValue=FloatDecimalField()
-    CessAmount=FloatDecimalField()
+    CessAmount=serializers.CharField(max_length=100)
     
         
     def to_representation(self, obj):
@@ -219,7 +219,7 @@ class CDNURSerializer2(serializers.Serializer):
     NoOfNotes  = serializers.IntegerField()
     TotalNoteValue =FloatDecimalField()
     TotalTaxableValue =FloatDecimalField()
-    TotalCess=FloatDecimalField() 
+    TotalCess=serializers.IntegerField()   
     
     def to_representation(self, obj):
         representation = super().to_representation(obj)
@@ -303,7 +303,7 @@ class HSN2Serializer2(serializers.Serializer):
     TotalIntegratedTaxAmount=FloatDecimalField()
     TotalCentralTaxAmount=FloatDecimalField()
     TotalStateUTTaxAmount=FloatDecimalField()
-    TotalCessAmount=FloatDecimalField() 
+    TotalCessAmount=serializers.CharField(max_length=100) 
     
     def to_representation(self, obj):
         representation = super().to_representation(obj)
