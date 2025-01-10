@@ -773,7 +773,8 @@ urlpatterns = [
               url(r'^giftvouchervalidityCheck/(?P<coupon_code>[a-zA-Z0-9]+)$',giftvouchervalidityCheck.as_view()), 
 #Bill Booking
             url(r'BillBookingReport$',BillBookingReportView.as_view()),
-                
+#Demand Vs Supply Report For Franchises.
+             url(r'DemandVsSupplyReport$',DemandVsSupplyReportView.as_view()),     
 
 
               
