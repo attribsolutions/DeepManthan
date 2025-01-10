@@ -285,6 +285,7 @@ where IsDeleted = 0 AND T_Orders.id=%s''',[OrderID])
 
                 })
                 
+                
                 jsonbody=json.dumps(payload[0])
                 
                 # CustomPrint(jsonbody)
@@ -317,15 +318,15 @@ where IsDeleted = 0 AND T_Orders.id=%s''',[OrderID])
                     # CustomPrint(jsonbody)
                     aa = T_Orders.objects.filter(id=OrderID).update(
                         SAPResponse=data_dict['entry']['content']['m:properties']['d:Stats'])
-                    log_entry = create_transaction_logNew(request, jsonbody, 0, OrderID,321,0)
+                    log_entry = create_transaction_logNew(request, jsonbody, Customer, OrderID,321,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Send Successfully ', 'Data': []})
                 else:
                     index = a.find('error')
                     if index != -1:
-                        log_entry = create_transaction_logNew(request, jsonbody, 0, 'SAPOrderSend:'+str(data_dict['error']['innererror']['errordetails']['errordetail'][0]['message']),322,0)
+                        log_entry = create_transaction_logNew(request, jsonbody, Customer, 'SAPOrderSend:'+str(data_dict['error']['innererror']['errordetails']['errordetail'][0]['message']),322,0)
                         return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': data_dict['error']['innererror']['errordetails']['errordetail'][0]['message'], 'Data': []})
                     else:
-                        log_entry = create_transaction_logNew(request, jsonbody, 0, '',323,0)
+                        log_entry = create_transaction_logNew(request, jsonbody, Customer, '',323,0)
                         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Another exception raised from SAP', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'SAPOrderSend:'+str(Exception(e)),33,0)
