@@ -1935,7 +1935,7 @@ class DemandVsSupplyReportView(CreateAPIView):
                 Group By M_Parties.Name, InvoiceDate, M_Items.Name) B
                 ON A.PartyName = B.PartyName AND A.OrderDate = B.InvoiceDate AND A.ItemName = B.ItemName
                 WHERE A.QtyInKg != B.QtyInKg Order By A.PartyName, OrderDate''')
-                print(DemandVsReportquery.query)  
+                # print(DemandVsReportquery.query)  
                 if DemandVsReportquery:  
                     print("SHRUR")              
                     for row in DemandVsReportquery:                       
@@ -1944,10 +1944,10 @@ class DemandVsSupplyReportView(CreateAPIView):
                             "PartyName":row.PartyName,
                             "OrderDate":row.OrderDate,
                             "ItemName":row.ItemName,
-                            "QtyInKg":row.QtyInKg,
-                            "QtyInNo":row.QtyInNo,
-                            "SupplyInKg":row.SupplyInKg,
-                            "SupplyInNo":row.SupplyInNo                            
+                            "QtyInKg":round(row.QtyInKg,2),
+                            "QtyInNo":round(row.QtyInNo,2),
+                            "SupplyInKg":round(row.SupplyInKg,2),
+                            "SupplyInNo":round(row.SupplyInNo,2)                            
                         })                          
                       
                 log_entry = create_transaction_logNew(request, Data, Party, '', 432, 0, FromDate, ToDate, 0)
