@@ -190,7 +190,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     
                 # Example data for the third sheet B2CS  
                 B2CSquery = T_Invoices.objects.raw('''SELECT 1 as id, 'OE' Type,concat(M_States.StateCode,'-',M_States.Name)PlaceOfSupply,T_Invoices.FullInvoiceNumber AS InvoiceNumber, T_Invoices.InvoiceDate AS InvoiceDate,
-                sum(T_Invoices.GrandTotal ) AS InvoiceValue,
+                sum(TC_InvoiceItems.IGST+TC_InvoiceItems.CGST +TC_InvoiceItems.SGST) AS InvoiceValue,
                 TC_InvoiceItems.GSTPercentage AS  ApplicableOfTaxRate , sum(TC_InvoiceItems.BasicAmount) TaxableValue, SUM(TC_InvoiceItems.IGST)AS IGST,SUM(TC_InvoiceItems.CGST)AS CGST,
                 SUM(TC_InvoiceItems.SGST)AS SGST,'0' CessAmount from T_Invoices 
                 JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
@@ -203,7 +203,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 group  by M_States.id,M_States.Name,TC_InvoiceItems.GSTPercentage,InvoiceDate
 
                 UNION
-                SELECT 1 as id, 'OE' Type,concat(M_States.StateCode,'-',M_States.Name)PlaceOfSupply,X.FullInvoiceNumber AS InvoiceNumber, X.InvoiceDate AS InvoiceDate, sum(X.GrandTotal) AS InvoiceValue,
+                SELECT 1 as id, 'OE' Type,concat(M_States.StateCode,'-',M_States.Name)PlaceOfSupply,X.FullInvoiceNumber AS InvoiceNumber, X.InvoiceDate AS InvoiceDate, sum(Y.IGST+Y.CGST+Y.SGST) AS InvoiceValue,
                 Y.GSTPercentage AS  ApplicableOfTaxRate ,sum(Y.BasicAmount) TaxableValue ,SUM(Y.IGST) AS IGST,SUM(Y.CGST) AS CGST, SUM(Y.SGST) AS SGST ,'0' CessAmount
                 from SweetPOS.T_SPOSInvoices X JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id=X.id
                 JOIN M_Parties a ON a.id=X.Party
