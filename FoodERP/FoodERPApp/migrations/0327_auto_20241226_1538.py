@@ -16,9 +16,5 @@ class Migration(migrations.Migration):
             name='OrderItem',
             field=models.BooleanField(default=False),
         ),
-        migrations.AlterField(
-            model_name='m_giftvouchercode',
-            name='VoucherType',
-            field=models.ForeignKey(db_column='VoucherType_id', on_delete=django.db.models.deletion.PROTECT, related_name='GiftVoucherType', to='FoodERPApp.M_GeneralMaster'),
-        ),
+        
     ]
