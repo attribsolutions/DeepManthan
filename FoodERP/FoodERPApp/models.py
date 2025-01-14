@@ -1161,7 +1161,7 @@ class M_BillOfMaterial(models.Model):
         db_table = "M_BillOfMaterial"
       
 class MC_BillOfMaterialItems(models.Model): 
-    Quantity = models.DecimalField(max_digits=15, decimal_places=3)
+    Quantity = models.DecimalField(max_digits=15, decimal_places=4)
     BOM = models.ForeignKey(M_BillOfMaterial, related_name='BOMItems', on_delete=models.CASCADE) 
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT) 
     Unit = models.ForeignKey(MC_ItemUnits, related_name='BOMItemUnitID', on_delete=models.PROTECT)
@@ -2432,7 +2432,11 @@ class M_GiftVoucherCode(models.Model):
     VoucherCode = models.CharField(max_length=50)
     IsActive =models.BooleanField(default=False)
     UpdatedOn = models.DateTimeField(auto_now=True)
-    
+    # InvoiceDate = models.DateField()
+    # InvoiceNumber =  models.CharField(max_length=500)
+    # InvoiceAmount = models.DecimalField(max_digits=20, decimal_places=2)
+    # Party = models.IntegerField()
+    # client = models.IntegerField()
 
     class Meta:
         db_table = "M_GiftVoucherCode"
@@ -2455,7 +2459,43 @@ class debug_log(models.Model):
     def __str__(self):
         return f"{self.created_at}: {self.debug_message}"   
 
+class M_SchemeType(models.Model):
+    SchemeTypeName = models.CharField(max_length=100)
+    UsageTime = models.CharField(max_length=50)
+    UsageType = models.CharField(max_length=50)
+    BillEffect = models.BooleanField(default=False)
+    IsQRApplicable = models.BooleanField(default=False)
+    class Meta:
+        db_table = "M_SchemeType"
 
+class M_Scheme(models.Model):
+    SchemeName = models.CharField(max_length=100)    
+    SchemeTypeID = models.ForeignKey(M_SchemeType,related_name='SchemeTypeID', on_delete=models.CASCADE) 
+    SchemeValue = models.IntegerField()
+    ValueIn=models.CharField(max_length=100)
+    FromPeriod=models.DateField(null=True,blank=True)
+    ToPeriod=models.DateField(null=True,blank=True)
+    FreeItemID=models.IntegerField(null=True,blank=True)
+    VoucherLimit=models.IntegerField(null=True,blank=True)
+    QRPrefix=models.CharField(max_length=50)
+    IsActive=models.BooleanField(default=False)
+    BillAbove=models.CharField(max_length=500,null=True)
+
+    class Meta:
+        db_table = "M_Scheme"
+
+class M_SchemeQRs(models.Model):
+    SchemeID=models.ForeignKey(M_Scheme,related_name='SchemeIDforQR', on_delete=models.CASCADE)
+    QRCode = models.CharField(max_length=100) 
+    class Meta:
+        db_table = "MC_SchemeQRs"
+
+class MC_SchemeParties(models.Model):
+    SchemeID = models.ForeignKey(M_Scheme,related_name='SchemeIDForParties', on_delete=models.CASCADE)
+    PartyID = models.IntegerField()
+  
+    class Meta:
+        db_table = "MC_SchemeParties"
     
 
     
