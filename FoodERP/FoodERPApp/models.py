@@ -2461,7 +2461,7 @@ class debug_log(models.Model):
 
 class M_SchemeType(models.Model):
     SchemeTypeName = models.CharField(max_length=100)
-    Usage = models.CharField(max_length=50)
+    UsageTime = models.CharField(max_length=50)
     UsageType = models.CharField(max_length=50)
     BillEffect = models.BooleanField(default=False)
     IsQRApplicable = models.BooleanField(default=False)
@@ -2473,12 +2473,13 @@ class M_Scheme(models.Model):
     SchemeTypeID = models.ForeignKey(M_SchemeType,related_name='SchemeTypeID', on_delete=models.CASCADE) 
     SchemeValue = models.IntegerField()
     ValueIn=models.CharField(max_length=100)
-    FromPeriod=models.DateField()
-    ToPeriod=models.DateField()
-    FreeItemID=models.IntegerField()
-    VoucherLimit=models.IntegerField()
+    FromPeriod=models.DateField(null=True,blank=True)
+    ToPeriod=models.DateField(null=True,blank=True)
+    FreeItemID=models.IntegerField(null=True,blank=True)
+    VoucherLimit=models.IntegerField(null=True,blank=True)
     QRPrefix=models.CharField(max_length=50)
     IsActive=models.BooleanField(default=False)
+    BillAbove=models.CharField(max_length=500,null=True)
 
     class Meta:
         db_table = "M_Scheme"
