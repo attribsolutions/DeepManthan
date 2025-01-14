@@ -23,12 +23,14 @@ class SchemeView(CreateAPIView):
                     JOIN M_SchemeType ON M_Scheme.SchemeTypeID_id=M_SchemeType.id 
                     JOIN MC_SchemeParties ON MC_SchemeParties.SchemeID_id=M_Scheme.id
                     Where PartyID={Party} and IsActive=1''');
-                    
-                    for Scheme in SchemeDetails:
+                    data = []
+                    for Scheme in SchemeDetails:   
                         
-                        scheme_dict = {}
-                        if Scheme.id not in scheme_dict:
-                            scheme_dict[Scheme.id] ={
+                        qr_codes = M_SchemeQRs.objects.filter(SchemeID_id=Scheme.id).values('id', 'QRCode')
+                        qr_list = []
+                        for qr in qr_codes:           
+                            qr_list.append({"QRID": qr['id'], "QRCode": qr['QRCode']})
+                        scheme_data={
                                 "SchemeId": Scheme.id,
                                 "SchemeName":Scheme.SchemeName,
                                 "SchemeValue":Scheme.SchemeValue,
@@ -45,23 +47,17 @@ class SchemeView(CreateAPIView):
                                 "UsageType":Scheme.UsageType,
                                 "BillEffect":Scheme.BillEffect,                                     
                                 "IsQrApplicable":Scheme.IsQrApplicable,
-                                'QR_Codes': []    
+                                'QR_Codes': qr_list    
                             }
-                        qr_codes = M_SchemeQRs.objects.filter(SchemeID_id=Scheme.id).values('id', 'QRCode')
-                        for qr in qr_codes:
-                            scheme_dict[Scheme.id]["QR_Codes"].append({
-                                "QRID": qr['id'],
-                                "QRCode": qr['QRCode']
-                            })             
-                
-                    SchemeList = list(scheme_dict.values())
-                   
-                    if SchemeList:
-                        log_entry = create_transaction_logNew(request, PartyData, 0, 'SchemeDetails:' + str(SchemeList), 433, 0)
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SchemeList})
-                    else:
-                        log_entry = create_transaction_logNew(request, PartyData, Party, 'Record Not Found', 433, 0)
-                        return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+                            
+                        data.append(scheme_data)
+                        
+                if data:                    
+                    log_entry = create_transaction_logNew(request, PartyData, 0, 'SchemeDetails:' + str(data), 433, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': data})
+                else:
+                    log_entry = create_transaction_logNew(request, PartyData, Party, 'Record Not Found', 433, 0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
                     log_entry = create_transaction_logNew(request, PartyData, 0, 'SchemeDetails:' + str(e), 33, 0)
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})       
