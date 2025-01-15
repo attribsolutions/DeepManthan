@@ -161,7 +161,8 @@ class SPOSInvoiceView(CreateAPIView):
                             Invoice_serializer = SPOSInvoiceSerializer(data=Invoicedata)
                         if Invoicedata['SPOSInvoicesReferences']:
                             ReferenceData = Invoicedata['SPOSInvoicesReferences']
-                        
+                        else:
+                            ReferenceData=0
                         
                         if Invoice_serializer.is_valid():
                             Invoice = Invoice_serializer.save()
