@@ -2487,6 +2487,7 @@ class M_Scheme(models.Model):
 class M_SchemeQRs(models.Model):
     SchemeID=models.ForeignKey(M_Scheme,related_name='SchemeIDforQR', on_delete=models.CASCADE)
     QRCode = models.CharField(max_length=100) 
+    
     class Meta:
         db_table = "MC_SchemeQRs"
 
