@@ -22,7 +22,7 @@ class SchemeView(CreateAPIView):
                     BillAbove,UsageType,BillEffect,IsQrApplicable,IsActive from M_Scheme 
                     JOIN M_SchemeType ON M_Scheme.SchemeTypeID_id=M_SchemeType.id 
                     JOIN MC_SchemeParties ON MC_SchemeParties.SchemeID_id=M_Scheme.id
-                    Where PartyID={Party} and IsActive=1''');
+                    Where PartyID_id={Party} and IsActive=1''');
                     data = []
                     for Scheme in SchemeDetails:   
                         
