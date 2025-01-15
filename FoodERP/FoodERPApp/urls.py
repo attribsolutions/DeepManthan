@@ -163,6 +163,8 @@ from .Views.V_ItemSupplierAssign import *
 
 from .Views.V_Country import *
 
+from .Views.V_Scheme import *
+
 
 
 
@@ -772,9 +774,13 @@ urlpatterns = [
               url(r'^giftvouchervalidityCheck$',giftvouchervalidityCheck.as_view()),
               url(r'^giftvouchervalidityCheck/(?P<coupon_code>[a-zA-Z0-9]+)$',giftvouchervalidityCheck.as_view()), 
 #Bill Booking
-            url(r'BillBookingReport$',BillBookingReportView.as_view()),
+              url(r'BillBookingReport$',BillBookingReportView.as_view()),
 #Demand Vs Supply Report For Franchises.
-             url(r'DemandVsSupplyReport$',DemandVsSupplyReportView.as_view()),     
+              url(r'DemandVsSupplyReport$',DemandVsSupplyReportView.as_view()),    
+             
+#Scheme Details:
+              url(r'SchemeDetails$',SchemeView.as_view()), 
+ 
 
 
               
