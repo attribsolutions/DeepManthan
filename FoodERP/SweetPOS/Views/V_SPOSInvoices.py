@@ -160,6 +160,8 @@ class SPOSInvoiceView(CreateAPIView):
                             
                             Invoice_serializer = SPOSInvoiceSerializer(data=Invoicedata)
                         
+                        ReferenceData = Invoicedata['SPOSInvoicesReferences']
+                        
                         
                         if Invoice_serializer.is_valid():
                             Invoice = Invoice_serializer.save()
@@ -174,7 +176,7 @@ class SPOSInvoiceView(CreateAPIView):
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data':[]})
                             
                 log_entry = create_transaction_logNew(request, inputdata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastIDs),383,0,0,0, 0)    
-                return JsonResponse({'status_code': 200, 'Success': True,  'Message': 'Invoice Save Successfully','TransactionID':LastIDs, 'Data':[]})
+                return JsonResponse({'status_code': 200, 'Success': True,  'Message': 'Invoice Save Successfully','TransactionID':LastIDs,'OrderID':ReferenceData,'Data':[]})
         except Exception as e:
             log_entry = create_transaction_logNew(request, inputdata, 0,'InvoiceSave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
