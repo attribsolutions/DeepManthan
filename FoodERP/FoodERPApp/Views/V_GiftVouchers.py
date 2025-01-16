@@ -59,13 +59,9 @@ class giftvouchervalidityCheck(CreateAPIView):
                 # if user is not None:
                 
                     VoucherCode = giftvoucherData['VoucherCode']
-                    InvoiceDate = giftvoucherData['InvoiceDate']
-                    InvoiceNumber = giftvoucherData['InvoiceNumber']
-                    InvoiceAmount = giftvoucherData['InvoiceAmount']
-                    
-                    InvoiceDate = InvoiceDate if InvoiceDate else None
-                    InvoiceNumber = InvoiceNumber if InvoiceNumber else None
-                    InvoiceAmount = InvoiceAmount if InvoiceAmount else None
+                    InvoiceDate = giftvoucherData.get('InvoiceDate', None)
+                    InvoiceNumber = giftvoucherData.get('InvoiceNumber', None)
+                    InvoiceAmount = giftvoucherData.get('InvoiceAmount', None)
                     
                     giftvoucherData = M_GiftVoucherCode.objects.filter(VoucherCode=VoucherCode,IsActive=1).update(IsActive=0,InvoiceDate=InvoiceDate,
                                                                        InvoiceNumber=InvoiceNumber, InvoiceAmount=InvoiceAmount)
