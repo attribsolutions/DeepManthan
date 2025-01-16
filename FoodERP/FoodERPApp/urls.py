@@ -1,7 +1,7 @@
 from django.urls import re_path as url ,path
 from rest_framework_simplejwt import views as jwt_views
 
-from .Views.GiftVouchers import *
+from .Views.V_GiftVouchers import *
 
 from .Views.V_QRCode import *
 
@@ -772,7 +772,9 @@ urlpatterns = [
               url(r'GETCountry$',CountryCurrencyListView.as_view()),
               url(r'Country/([0-9]+)$',CountryCurrencyViewSecond.as_view()),
               url(r'^giftvouchervalidityCheck$',giftvouchervalidityCheck.as_view()),
-              url(r'^giftvouchervalidityCheck/(?P<coupon_code>[a-zA-Z0-9]+)$',giftvouchervalidityCheck.as_view()), 
+              url(r'^giftvouchervalidityCheck/(?P<coupon_code>[a-zA-Z0-9]+)$',giftvouchervalidityCheck.as_view()),
+              url(r'^GiftVoucherList$',GiftVoucherList.as_view()), 
+              
 #Bill Booking
               url(r'BillBookingReport$',BillBookingReportView.as_view()),
 #Demand Vs Supply Report For Franchises.
