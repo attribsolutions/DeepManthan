@@ -96,11 +96,52 @@ class GiftVoucherList(CreateAPIView):
                 GiftVoucher_Data_serializer = GiftVoucherSerializer(GiftVoucher_Data,many=True)
                 # log_entry = create_transaction_logNew(request, GiftVoucher_Data_serializer,0,'',328,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': GiftVoucher_Data_serializer.data})
-        except  M_Cluster.DoesNotExist:
+        except  M_GiftVoucherCode.DoesNotExist:
             # log_entry = create_transaction_logNew(request,0,0,'GiftVoucher Does Not Exist',328,0)
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'GiftVoucher Not available', 'Data': []})
         except Exception as e:
             # log_entry = create_transaction_logNew(request, 0, 0,'GETAllGiftVoucher:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
+        
+     
+    @transaction.atomic()
+    def put(self, request, id=0):
+        GiftVoucher_Data = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                GiftVoucherDataByID = M_GiftVoucherCode.objects.get(id=id)
+                GiftVoucher_Data_serializer = GiftVoucherSerializer(
+                    GiftVoucherDataByID, data=GiftVoucherSerializer)
+                if GiftVoucher_Data_serializer.is_valid():
+                    GiftVoucher_Data_serializer.save()
+                    # log_entry = create_transaction_logNew(request, GiftVoucher_Data,0,'GiftVoucherID:'+str(id),330,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GiftVoucher_Data Updated Successfully','Data' :[]})
+                else:
+                    # log_entry = create_transaction_logNew(request, GiftVoucher_Data,0,'GiftVoucherEdit:'+str(Cluster_data_serializer.errors),34,0)
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': GiftVoucher_Data_serializer.errors, 'Data' :[]})
+        except Exception as e:
+            # log_entry = create_transaction_logNew(request, GiftVoucher_Data, 0,'GiftVoucherEdit:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
+        
+        
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        try:
+            with transaction.atomic():
+                GiftVoucher_Data = M_GiftVoucherCode.objects.get(id=id)
+                GiftVoucher_Data.delete()
+                # log_entry = create_transaction_logNew(request, 0,0,'GiftVoucherID:'+str(id),332,0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GiftVoucher_Data Deleted Successfully','Data':[]})
+        except M_GiftVoucherCode.DoesNotExist:
+            # log_entry = create_transaction_logNew(request, 0,0,'GiftVoucher_Data Not available',332,0)
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'GiftVoucher_Data Not available', 'Data': []})
+        except IntegrityError:  
+            # log_entry = create_transaction_logNew(request, 0,0,'GiftVoucher_Data used in another table',8,0)    
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'GiftVoucher_Data used in another table', 'Data': []})
+        except Exception as e:
+            # log_entry = create_transaction_logNew(request, 0,0,'GiftVoucherDeleted:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})   
+
     
     
