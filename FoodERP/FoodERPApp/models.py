@@ -2432,9 +2432,9 @@ class M_GiftVoucherCode(models.Model):
     VoucherCode = models.CharField(max_length=50)
     IsActive =models.BooleanField(default=False)
     UpdatedOn = models.DateTimeField(auto_now=True)
-    InvoiceDate = models.DateField()
-    InvoiceNumber =  models.CharField(max_length=500)
-    InvoiceAmount = models.DecimalField(max_digits=20, decimal_places=2)
+    InvoiceDate = models.DateField(null=True, blank=True)  
+    InvoiceNumber = models.CharField(max_length=500, null=True, blank=True)  
+    InvoiceAmount = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True) 
     Party = models.IntegerField()
     client = models.IntegerField()
 
