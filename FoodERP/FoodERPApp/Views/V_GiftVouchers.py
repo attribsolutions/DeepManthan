@@ -59,9 +59,13 @@ class giftvouchervalidityCheck(CreateAPIView):
                 # if user is not None:
                 
                     VoucherCode = giftvoucherData['VoucherCode']
-                    InvoiceDate = giftvoucherData.get('InvoiceDate')
-                    InvoiceNumber = giftvoucherData.get('InvoiceNumber')
-                    InvoiceAmount = giftvoucherData.get('InvoiceAmount')
+                    InvoiceDate = giftvoucherData['InvoiceDate']
+                    InvoiceNumber = giftvoucherData['InvoiceNumber']
+                    InvoiceAmount = giftvoucherData['InvoiceAmount']
+                    
+                    InvoiceDate = InvoiceDate if InvoiceDate else None
+                    InvoiceNumber = InvoiceNumber if InvoiceNumber else None
+                    InvoiceAmount = InvoiceAmount if InvoiceAmount else None
                     
                     giftvoucherData = M_GiftVoucherCode.objects.filter(VoucherCode=VoucherCode,IsActive=1).update(IsActive=0,InvoiceDate=InvoiceDate,
                                                                        InvoiceNumber=InvoiceNumber, InvoiceAmount=InvoiceAmount)
@@ -70,11 +74,7 @@ class giftvouchervalidityCheck(CreateAPIView):
                         return JsonResponse({'StatusCode': 200, 'Status': True,'Message': 'Successfully marked Gift voucher Code is used', 'Data': []})
                     else:
                         # log_entry = create_transaction_logNew(request, Cluster_data_serializer,0,'',329,0)
-                        return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Giftvoucher Code is InValid', 'Data': []})
-                # else:
-                #     # log_entry = create_transaction_logNew(request,0, DivisionID, "ItemList Not available",392,0)
-                #     return JsonResponse({'status': False, 'status_code': 401, 'message': 'Unauthorized'}, status=401) 
-        
+                        return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Giftvoucher Code is InValid', 'Data': []})       
         except Exception as e:
             # log_entry = create_transaction_logNew(request, 0, 0,'GETSingleCluster:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})    
