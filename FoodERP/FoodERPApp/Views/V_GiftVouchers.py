@@ -62,9 +62,8 @@ class giftvouchervalidityCheck(CreateAPIView):
                     InvoiceDate = giftvoucherData.get('InvoiceDate')
                     InvoiceNumber = giftvoucherData.get('InvoiceNumber')
                     InvoiceAmount = giftvoucherData.get('InvoiceAmount')
-                    Party = giftvoucherData.get('Party')
                     
-                    giftvoucherData = M_GiftVoucherCode.objects.filter(VoucherCode=VoucherCode,IsActive=1,Party=Party).update(IsActive=0,InvoiceDate=InvoiceDate,
+                    giftvoucherData = M_GiftVoucherCode.objects.filter(VoucherCode=VoucherCode,IsActive=1).update(IsActive=0,InvoiceDate=InvoiceDate,
                                                                        InvoiceNumber=InvoiceNumber, InvoiceAmount=InvoiceAmount)
                     if giftvoucherData :
                         # log_entry = create_transaction_logNew(request, Cluster_data_serializer,0,'',329,0)
