@@ -36,7 +36,7 @@ class giftvouchervalidityCheck(CreateAPIView):
                         return JsonResponse({'StatusCode': 200, 'Status': True,'Message': 'Giftvoucher Code is Valid', 'Data': []})
                     else:
                         
-                        return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Giftvoucher Code is InValid', 'Data': []})
+                        return JsonResponse({'StatusCode': 204, 'Status': False,'Message': 'Giftvoucher Code is InValid', 'Data': []})
                 # else:
                 #     # log_entry = create_transaction_logNew(request,0, DivisionID, "ItemList Not available",392,0)
                 #     return JsonResponse({'status': False, 'status_code': 401, 'message': 'Unauthorized'}) 
@@ -70,7 +70,7 @@ class giftvouchervalidityCheck(CreateAPIView):
                         return JsonResponse({'StatusCode': 200, 'Status': True,'Message': 'Successfully marked Gift voucher Code is used', 'Data': []})
                     else:
                         # log_entry = create_transaction_logNew(request, Cluster_data_serializer,0,'',329,0)
-                        return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Giftvoucher Code is InValid', 'Data': []})       
+                        return JsonResponse({'StatusCode': 204, 'Status': False,'Message': 'Giftvoucher Code is InValid', 'Data': []})       
         except Exception as e:
             # log_entry = create_transaction_logNew(request, 0, 0,'GETSingleCluster:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})    
@@ -93,7 +93,7 @@ class GiftVoucherList(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': GiftVoucher_Data_serializer.data})
         except  M_GiftVoucherCode.DoesNotExist:
             # log_entry = create_transaction_logNew(request,0,0,'GiftVoucher Does Not Exist',328,0)
-            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'GiftVoucher Not available', 'Data': []})
+            return JsonResponse({'StatusCode': 204, 'Status': False,'Message':  'GiftVoucher Not available', 'Data': []})
         except Exception as e:
             # log_entry = create_transaction_logNew(request, 0, 0,'GETAllGiftVoucher:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
@@ -114,7 +114,7 @@ class GiftVoucherList(CreateAPIView):
                 else:
                     # log_entry = create_transaction_logNew(request, GiftVoucher_Data,0,'GiftVoucherEdit:'+str(Cluster_data_serializer.errors),34,0)
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': GiftVoucher_Data_serializer.errors, 'Data' :[]})
+                    return JsonResponse({'StatusCode': 406, 'Status': False, 'Message': GiftVoucher_Data_serializer.errors, 'Data' :[]})
         except Exception as e:
             # log_entry = create_transaction_logNew(request, GiftVoucher_Data, 0,'GiftVoucherEdit:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
@@ -130,10 +130,10 @@ class GiftVoucherList(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GiftVoucher_Data Deleted Successfully','Data':[]})
         except M_GiftVoucherCode.DoesNotExist:
             # log_entry = create_transaction_logNew(request, 0,0,'GiftVoucher_Data Not available',332,0)
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'GiftVoucher_Data Not available', 'Data': []})
+            return JsonResponse({'StatusCode': 204, 'Status': False, 'Message':'GiftVoucher_Data Not available', 'Data': []})
         except IntegrityError:  
             # log_entry = create_transaction_logNew(request, 0,0,'GiftVoucher_Data used in another table',8,0)    
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'GiftVoucher_Data used in another table', 'Data': []})
+            return JsonResponse({'StatusCode': 204, 'Status': False, 'Message':'GiftVoucher_Data used in another table', 'Data': []})
         except Exception as e:
             # log_entry = create_transaction_logNew(request, 0,0,'GiftVoucherDeleted:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})   
