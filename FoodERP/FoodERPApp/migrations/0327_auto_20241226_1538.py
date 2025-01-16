@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('FoodERPApp', '0326_m_giftvouchercode'),
+        ('FoodERPApp', '0325_m_users_isloginpermissions'),
     ]
 
     operations = [

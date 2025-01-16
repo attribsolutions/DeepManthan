@@ -43,19 +43,9 @@ class Migration(migrations.Migration):
                 'db_table': 'M_SchemeType',
             },
         ),
+        
         migrations.CreateModel(
-            name='MC_SchemeParties',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('PartyID', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='SchemeParty', to='FoodERPApp.M_Parties')),
-                ('SchemeID', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='SchemeIDForParties', to='FoodERPApp.M_Scheme')),
-            ],
-            options={
-                'db_table': 'MC_SchemeParties',
-            },
-        ),
-        migrations.CreateModel(
-            name='M_SchemeQRs',
+            name='MC_SchemeQRs',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('QRCode', models.CharField(max_length=100)),
