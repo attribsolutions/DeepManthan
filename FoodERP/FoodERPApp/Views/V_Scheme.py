@@ -19,10 +19,10 @@ class SchemeView(CreateAPIView):
                 Party = PartyData['Party']
                 if user is not None:
                     SchemeDetails = M_Scheme.objects.raw(f'''select M_Scheme.id,SchemeName,SchemeValue,ValueIn,FromPeriod,ToPeriod,FreeItemID,VoucherLimit,QrPrefix,SchemeTypeName,SchemeTypeID_id,UsageTime,
-                    BillAbove,UsageType,BillEffect,IsQrApplicable from M_Scheme 
+                    BillAbove,UsageType,BillEffect,IsQrApplicable,IsActive from M_Scheme 
                     JOIN M_SchemeType ON M_Scheme.SchemeTypeID_id=M_SchemeType.id 
                     JOIN MC_SchemeParties ON MC_SchemeParties.SchemeID_id=M_Scheme.id
-                    Where PartyID={Party} and IsActive=1''');
+                    Where PartyID_id={Party} and IsActive=1''');
                     data = []
                     for Scheme in SchemeDetails:   
                         
@@ -41,6 +41,7 @@ class SchemeView(CreateAPIView):
                                 "VoucherLimit":Scheme.VoucherLimit,
                                 "BillAbove":Scheme.BillAbove,
                                 "QrPrefix":Scheme.QrPrefix,
+                                "IsActive":Scheme.IsActive,
                                 "SchemeTypeID_id":Scheme.SchemeTypeID_id,
                                 "SchemeTypeName":Scheme.SchemeTypeName,
                                 "UsageTime":Scheme.UsageTime,
