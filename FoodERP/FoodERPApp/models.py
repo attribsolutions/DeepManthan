@@ -2432,11 +2432,11 @@ class M_GiftVoucherCode(models.Model):
     VoucherCode = models.CharField(max_length=50)
     IsActive =models.BooleanField(default=False)
     UpdatedOn = models.DateTimeField(auto_now=True)
-    # InvoiceDate = models.DateField()
-    # InvoiceNumber =  models.CharField(max_length=500)
-    # InvoiceAmount = models.DecimalField(max_digits=20, decimal_places=2)
-    # Party = models.IntegerField()
-    # client = models.IntegerField()
+    InvoiceDate = models.DateField()
+    InvoiceNumber =  models.CharField(max_length=500)
+    InvoiceAmount = models.DecimalField(max_digits=20, decimal_places=2)
+    Party = models.IntegerField()
+    client = models.IntegerField()
 
     class Meta:
         db_table = "M_GiftVoucherCode"
@@ -2487,7 +2487,7 @@ class M_Scheme(models.Model):
 class M_SchemeQRs(models.Model):
     SchemeID=models.ForeignKey(M_Scheme,related_name='SchemeIDforQR', on_delete=models.CASCADE)
     QRCode = models.CharField(max_length=100) 
-    
+
     class Meta:
         db_table = "MC_SchemeQRs"
 
