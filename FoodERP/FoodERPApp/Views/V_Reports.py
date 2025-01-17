@@ -1918,9 +1918,9 @@ class DemandVsSupplyReportView(CreateAPIView):
                 Party = Data['Party']
                 DemandVsSupplyData=list()                
                 # print(FromDate,ToDate,Party)
-                DemandVsReportquery =TC_OrderItems.objects.raw(f'''SELECT A.*,B.QtyInKg SupplyInKg, B.QtyInNo SupplyInNo 
+                DemandVsReportquery =TC_OrderItems.objects.raw(f'''SELECT ROW_NUMBER() OVER (ORDER BY A.PartyName, A.OrderDate) AS id,A.*,B.QtyInKg SupplyInKg, B.QtyInNo SupplyInNo 
                 FROM (
-                select T_Orders.id,M_Parties.Name PartyName, OrderDate, M_Items.Name ItemName, SUM(QtyInKg) QtyInKg, SUM(QtyInNo) QtyInNo FROM T_Orders 
+                select M_Parties.Name PartyName, OrderDate, M_Items.Name ItemName, SUM(QtyInKg) QtyInKg, SUM(QtyInNo) QtyInNo FROM T_Orders 
                 JOIN TC_OrderItems on Order_id = T_Orders.id 
                 JOIN M_Parties ON Customer_id = M_Parties.id
                 JOIN M_Items ON Item_id = M_Items.id
