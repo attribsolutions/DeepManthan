@@ -1794,7 +1794,7 @@ class FranchiseSecondarySaleReportView(CreateAPIView):
                 #         where T_Invoices.InvoiceDate between %s and %s '''
                 
                 SPOSInvoicequery ='''Select X.id, M_Parties.Name FranchiseName, M_Parties.SAPPartyCode SAPCode, M_Parties.Name SAPName, 
-                                X.InvoiceDate SaleDate, X.ClientID, M_Items.CItemID , X.FullInvoiceNumber BillNumber, M_Items.Name ItemName, 
+                                X.InvoiceDate SaleDate, X.ClientID, M_Items.id as CItemID, X.FullInvoiceNumber BillNumber, M_Items.Name ItemName, 
                                 Y.Quantity, M_Units.Name UnitName, Y.MRPValue Rate, Y.Amount, M_Items.IsCBMItem, X.MobileNo, 
                                 M_Items.SAPItemCode MaterialSAPCode,Y.QtyInNo,Y.QtyInKg, Y.GSTPercentage, Y.BasicAmount
                         from SweetPOS.T_SPOSInvoices X
