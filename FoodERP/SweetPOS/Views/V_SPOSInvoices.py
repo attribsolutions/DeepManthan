@@ -239,7 +239,7 @@ class SPOSInvoiceViewSecond(CreateAPIView):
                     A = "Action is not defined"
                 # CustomPrint(characters)
                 # CustomPrint(id)
-                InvoiceQuery = T_SPOSInvoices.objects.raw(f'''SELECT SPOSInv.id,InvoiceDate,InvoiceNumber,FullInvoiceNumber,TCSAmount,GrandTotal,RoundOffAmount,Customer,
+                InvoiceQuery = T_SPOSInvoices.objects.raw(f'''SELECT SPOSInv.id,InvoiceDate,InvoiceNumber,FullInvoiceNumber,AdvanceAmount,TCSAmount,GrandTotal,RoundOffAmount,Customer,
                                                           cust.Name CustomerName,cust.GSTIN CustomerGSTIN,cust.MobileNo CustomerMobileNo,
 Party,party.Name PartyName,party.GSTIN PartyGSTIN,party.MobileNo PartyMobileNo,M_Drivers.Name DriverName,M_Vehicles.VehicleNumber,SPOSInv.CreatedOn,
 custaddr.FSSAINo CustomerFSSAI ,custaddr.Address CustomerAddress,
@@ -414,6 +414,7 @@ WHERE SPOSInv.Invoice_id = {a.id}''')
                             "CompanyName":a.CompanyName,
                             "CashierName" :a.CashierName,
                             "AlternateContactNo":a.AlternateContactNo,
+                            "AdvanceAmount" : a.AdvanceAmount,
                             # End Add Extra Fields
                             "InvoiceItems": InvoiceItemDetails,
                             "InvoicesReferences": InvoiceReferenceDetails,
