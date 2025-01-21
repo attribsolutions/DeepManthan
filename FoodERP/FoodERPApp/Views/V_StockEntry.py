@@ -397,9 +397,9 @@ class StockEntryItemsView(CreateAPIView):
                                                             GetTodaysDateMRP(M_Items.id, CURDATE(), 1, 0,  {PartyID},0) AS MRPID,
                                                             GSTHsnCodeMaster(M_Items.id, CURDATE(), 1, {PartyID},0) AS GSTID,
                                                             GetTodaysDateRate(M_Items.id, CURDATE(),  %s, 0, 1) AS Rate,
-                                                            FORMAT(IFNULL(O.ClosingBalance, 0), 15) AS CurrentStock 
+                                                            FORMAT(IFNULL(O.ClosingBalance, 0), 15) AS CurrentStock
                                                             FROM M_Items 
-                                                            JOIN MC_PartyItems ON MC_PartyItems.Item_id = M_Items.id
+                                                            JOIN MC_PartyItems ON MC_PartyItems.Item_id = M_Items.id and IsCBMItem=1
                                                             LEFT JOIN SweetPOS.O_SPOSDateWiseLiveStock O ON O.Item = M_Items.id AND O.StockDate = CURRENT_DATE and Party= {PartyID}
                                                             {ItemsGroupJoinsandOrderby[1]}
                                                             WHERE MC_PartyItems.Party_id = %s 
