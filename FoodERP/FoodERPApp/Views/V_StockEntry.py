@@ -404,17 +404,26 @@ class StockEntryItemsView(CreateAPIView):
                                                             {ItemsGroupJoinsandOrderby[1]}
                                                             WHERE MC_PartyItems.Party_id = %s 
                                                             {ItemsGroupJoinsandOrderby[2]}''', ([PartyID],[PartyID],[PartyID]))
-                # print(Itemquery)
                 if not Itemquery:
                     log_entry = create_transaction_logNew(request, Logindata, 0, 'Franchise Items Not available', 102, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available', 'Data': []})
                 
+                StockEntryDates = {}
+                StockDateQuery = f'''SELECT O.id, O.Item, MAX(O.StockDate) AS LastStockEntryDate
+                    FROM SweetPOS.O_SPOSDateWiseLiveStock O
+                    WHERE O.Party = {PartyID}
+                    GROUP BY O.Item'''
+                StockDateResults = O_SPOSDateWiseLiveStock.objects.raw(StockDateQuery)
+                for date in StockDateResults:
+                    StockEntryDates[date.Item] = date.LastStockEntryDate
+                    
                 FranchiseItemsList = [{
                     "Item": item.id,
                     "ItemName": item.ItemName,
                     'GroupName': item.GroupName,
                     'SubGroupName' : item.SubGroupName,
                     'CurrentStock': item.CurrentStock,
+                    "LastStockEntryDate": StockEntryDates.get(item.id), 
                     "ItemUnitDetails": [{
                         "Unit": unit.id,
                         "BaseUnitQuantity": unit.BaseUnitQuantity,  
