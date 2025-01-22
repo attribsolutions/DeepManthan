@@ -409,9 +409,9 @@ class StockEntryItemsView(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available', 'Data': []})
 
                 LastStockEntryQuery = '''SELECT O.id, MAX(O.StockDate) AS LastStockEntryDate
-                    FROM SweetPOS.O_SPOSDateWiseLiveStock O
+                    FROM SweetPOS.T_SPOSStock O
                     WHERE O.Party = %s'''
-                LastStockEntry = O_SPOSDateWiseLiveStock.objects.raw(LastStockEntryQuery, [PartyID])
+                LastStockEntry = T_SPOSStock.objects.raw(LastStockEntryQuery, [PartyID])
                 LastStockEntryDate = None
                 for date in LastStockEntry:
                     LastStockEntryDate = date.LastStockEntryDate
