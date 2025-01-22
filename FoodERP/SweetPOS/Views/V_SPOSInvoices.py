@@ -242,10 +242,8 @@ class SPOSInvoiceViewSecond(CreateAPIView):
                                                           cust.Name CustomerName,cust.GSTIN CustomerGSTIN,cust.MobileNo CustomerMobileNo,
 Party,party.Name PartyName,party.GSTIN PartyGSTIN,party.MobileNo PartyMobileNo,M_Drivers.Name DriverName,M_Vehicles.VehicleNumber,
 SPOSInv.CreatedOn,custaddr.FSSAINo CustomerFSSAI ,custaddr.Address CustomerAddress, partyaddr.FSSAINo PartyFSSAI,
-partyaddr.Address PartyAddress,MC_PartyBanks.BranchName,MC_PartyBanks.IFSC,MC_PartyBanks.AccountNo,
-M_Bank.Name BankName,MC_PartyBanks.IsDefault,custstate.Name CustState,partystate.Name PartyState,
-SPOSIU.AckNo, SPOSIU.Irn, SPOSIU.QRCodeUrl, SPOSIU.EInvoicePdf, SPOSIU.EwayBillNo, SPOSIU.EwayBillUrl, SPOSIU.EInvoiceCreatedBy, 
-SPOSIU.EInvoiceCreatedOn, SPOSIU.EwayBillCreatedBy,
+partyaddr.Address PartyAddress,MC_PartyBanks.BranchName,MC_PartyBanks.IFSC,MC_PartyBanks.AccountNo,M_Bank.Name BankName,MC_PartyBanks.IsDefault,custstate.Name CustState,partystate.Name PartyState,
+SPOSIU.AckNo, SPOSIU.Irn, SPOSIU.QRCodeUrl, SPOSIU.EInvoicePdf, SPOSIU.EwayBillNo, SPOSIU.EwayBillUrl, SPOSIU.EInvoiceCreatedBy, SPOSIU.EInvoiceCreatedOn, SPOSIU.EwayBillCreatedBy,
 SPOSIU.EwayBillCreatedOn, SPOSIU.EInvoiceCanceledBy, SPOSIU.EInvoiceCanceledOn, SPOSIU.EwayBillCanceledBy, SPOSIU.EwayBillCanceledOn, 
 SPOSIU.EInvoiceIsCancel, SPOSIU.EwayBillIsCancel,c.name as CompanyName,u.LoginName as CashierName,party.AlternateContactNo
 FROM SweetPOS.T_SPOSInvoices SPOSInv
@@ -428,7 +426,7 @@ WHERE SPOSInv.Invoice_id = {a.id}''')
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Invoice Data Not available ', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'SingleInvoice:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})        
         
 
 class UpdateCustomerVehiclePOSInvoiceView(CreateAPIView):
