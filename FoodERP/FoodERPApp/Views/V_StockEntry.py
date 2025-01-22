@@ -404,11 +404,18 @@ class StockEntryItemsView(CreateAPIView):
                                                             {ItemsGroupJoinsandOrderby[1]}
                                                             WHERE MC_PartyItems.Party_id = %s 
                                                             {ItemsGroupJoinsandOrderby[2]}''', ([PartyID],[PartyID],[PartyID]))
-                # print(Itemquery)
                 if not Itemquery:
                     log_entry = create_transaction_logNew(request, Logindata, 0, 'Franchise Items Not available', 102, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available', 'Data': []})
-                
+
+                LastStockEntryQuery = '''SELECT O.id, MAX(O.StockDate) AS LastStockEntryDate
+                    FROM SweetPOS.O_SPOSDateWiseLiveStock O
+                    WHERE O.Party = %s'''
+                LastStockEntry = O_SPOSDateWiseLiveStock.objects.raw(LastStockEntryQuery, [PartyID])
+                LastStockEntryDate = None
+                for date in LastStockEntry:
+                    LastStockEntryDate = date.LastStockEntryDate
+                    
                 FranchiseItemsList = [{
                     "Item": item.id,
                     "ItemName": item.ItemName,
@@ -436,7 +443,7 @@ class StockEntryItemsView(CreateAPIView):
                 } for item in Itemquery]
                 
                 log_entry = create_transaction_logNew(request, Logindata, PartyID, 'Franchise Items List', 102, 0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': FranchiseItemsList})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '',  'LastStockEntryDate': LastStockEntryDate, 'Data': FranchiseItemsList})
 
         except Exception as e:
             log_entry = create_transaction_logNew(request, Logindata, 0, 'FetchStock_Items:' + str(e), 33, 0)
