@@ -791,12 +791,13 @@ class FranchiseInvoiceEditView(CreateAPIView):
                 query1 = TC_SPOSInvoicesReferences.objects.filter(Invoice=id).values('Order')
               
                 Orderdata = list()
-                query = T_SPOSInvoices.objects.filter(id=id).values('Customer','InvoiceDate','Vehicle','AdvanceAmount')
+                query = T_SPOSInvoices.objects.filter(id=id).values('Customer','InvoiceDate','Vehicle','AdvanceAmount','CreatedBy')
                 Customer=query[0]['Customer']
                 InvoiceDate=query[0]['InvoiceDate']
                 Vehicle=query[0]['Vehicle']
                 AdvanceAmount = query[0].get('AdvanceAmount', 0)
-               
+                CreatedBy = query[0].get('CreatedBy', 0)
+                
                 Itemsquery= TC_SPOSInvoiceItems.objects.raw('''SELECT SweetPOS.TC_SPOSInvoiceItems.id,SweetPOS.TC_SPOSInvoiceItems.Item,FoodERP.M_Items.Name ItemName,M_Items.BaseUnitID_id MIUnitID,
                                                         SweetPOS.TC_SPOSInvoiceItems.Quantity,SweetPOS.TC_SPOSInvoiceItems.MRPValue,
                                                         SweetPOS.TC_SPOSInvoiceItems.Rate,SweetPOS.TC_SPOSInvoiceItems.Unit, FoodERP.MC_ItemUnits.BaseUnitConversion UnitName,
@@ -873,8 +874,8 @@ class FranchiseInvoiceEditView(CreateAPIView):
                         "OrderItemDetails":OrderItemDetails,
                         "InvoiceDate":InvoiceDate,
                         "Vehicle":Vehicle,
-                        "AdvanceAmount": AdvanceAmount
-                        
+                        "AdvanceAmount": AdvanceAmount,
+                        "CreatedBy" : CreatedBy
                         }) 
              
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Orderdata[0]})
