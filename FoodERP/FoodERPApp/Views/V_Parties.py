@@ -282,6 +282,10 @@ class BulkRetailerDataView(CreateAPIView):
         try:
             with transaction.atomic():
                 for aa in Retailerdata['BulkData']:
+                    for address in aa.get('PartyAddress', []):
+                        if address.get('FSSAIExipry', '') == '':
+                            address['FSSAIExipry'] = None 
+                            
                     Retailer_serializer = M_PartiesSerializer(data=aa)
                     if Retailer_serializer.is_valid():
                         Retailer = Retailer_serializer.save()
@@ -364,7 +368,7 @@ FROM
       LEFT JOIN
     (SELECT Setting_id SettingID, M_PartySettingsDetails.Value,M_PartySettingsDetails.Image,M_PartySettingsDetails.id AS ImageID FROM M_PartySettingsDetails WHERE
         M_PartySettingsDetails.Party_id =%s) c ON a.Setting = c.SettingID ''', ([CompanyID], [PartyID]))
-                
+      
                 a = PartiesSettingsDetailsListSerializer(query, many=True,context= {'request': request}).data
                 log_entry = create_transaction_logNew(request,a, PartyID,'',98,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': a})
