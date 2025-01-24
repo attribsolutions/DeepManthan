@@ -8,7 +8,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.authentication import JWTAuthentication
-
+from ..Views.V_CommFunction import *
 from SweetPOS.Views.SweetPOSCommonFunction import BasicAuthenticationfunction
 from rest_framework.authentication import BasicAuthentication
 from ..models import *
@@ -62,17 +62,45 @@ class giftvouchervalidityCheck(CreateAPIView):
                     InvoiceDate = giftvoucherData.get('InvoiceDate', None)
                     InvoiceNumber = giftvoucherData.get('InvoiceNumber', None)
                     InvoiceAmount = giftvoucherData.get('InvoiceAmount', None)
+                    Party = giftvoucherData.get('Party', None)
+                    client = giftvoucherData.get('client', 0)
+                    
+                    VoucherExists = M_GiftVoucherCode.objects.filter(VoucherCode=VoucherCode).exists()
+
+                    if not VoucherExists:
+                        log_entry = create_transaction_logNew(request, giftvoucherData,Party,'',435,0)
+                        return JsonResponse({'StatusCode': 404,'Status': False,
+                            'Message': f"Invalid VoucherCode '{VoucherCode}'. Do you want to continue saving the bill without using the voucher?",'Data': []})
+                
+                    VoucherDetails = M_GiftVoucherCode.objects.filter(VoucherCode=VoucherCode, IsActive=0).first()
+
+                    if VoucherDetails:
+                        PartyName = "N/A"
+                        if VoucherDetails.Party:
+                            party = M_Parties.objects.filter(id=VoucherDetails.Party).first()
+                            PartyName = party.Name if party else "N/A"
+
+                        Invoice_Date = VoucherDetails.InvoiceDate.strftime('%Y-%m-%d') if VoucherDetails.InvoiceDate else "N/A"
+                        Invoice_Number = VoucherDetails.InvoiceNumber if VoucherDetails.InvoiceNumber else "N/A"
+
+                        message = (
+                            f"The voucher code '{VoucherCode}' is invalid as it has already been used with the following details:" + "\n"
+                            f"- PartyName: {PartyName}" + "\n"
+                            f"- InvoiceDate: {Invoice_Date}" + "\n"
+                            f"- InvoiceNumber: {Invoice_Number}" + "\n"
+                            "Would you like to proceed without applying the voucher?"
+                        )
+                        log_entry = create_transaction_logNew(request, giftvoucherData,Party,'',435,0)
+                        return JsonResponse({'StatusCode': 204, 'Status': False, 'Message': message, 'Data': []})
                     
                     giftvoucherData = M_GiftVoucherCode.objects.filter(VoucherCode=VoucherCode,IsActive=1).update(IsActive=0,InvoiceDate=InvoiceDate,
-                                                                       InvoiceNumber=InvoiceNumber, InvoiceAmount=InvoiceAmount)
+                                                                       InvoiceNumber=InvoiceNumber, InvoiceAmount=InvoiceAmount, Party=Party, client=client )
                     if giftvoucherData :
-                        # log_entry = create_transaction_logNew(request, Cluster_data_serializer,0,'',329,0)
-                        return JsonResponse({'StatusCode': 200, 'Status': True,'Message': 'Successfully marked Gift voucher Code is used', 'Data': []})
-                    else:
-                        # log_entry = create_transaction_logNew(request, Cluster_data_serializer,0,'',329,0)
-                        return JsonResponse({'StatusCode': 204, 'Status': False,'Message': 'Giftvoucher Code is InValid', 'Data': []})       
+                        log_entry = create_transaction_logNew(request, giftvoucherData,Party,'',435,0)
+                        return JsonResponse({'StatusCode': 200, 'Status': True,'Message': 'Successfully Marked Gift Voucher Code is Used', 'Data': []})
+                          
         except Exception as e:
-            # log_entry = create_transaction_logNew(request, 0, 0,'GETSingleCluster:'+str(e),33,0)
+            log_entry = create_transaction_logNew(request, giftvoucherData, 0,'GETVoucherData:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})    
         
 
