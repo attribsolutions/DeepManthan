@@ -43,7 +43,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                                     TC_OrderItems.GST_id,M_GSTHSNCode.HSNCode,TC_OrderItems.GSTPercentage,M_MarginMaster.id MarginID,M_MarginMaster.Margin,TC_OrderItems.BasicAmount,
                                     TC_OrderItems.GSTAmount,TC_OrderItems.CGST,TC_OrderItems.SGST,TC_OrderItems.IGST,TC_OrderItems.CGSTPercentage,TC_OrderItems.SGSTPercentage,
                                     TC_OrderItems.IGSTPercentage,TC_OrderItems.Amount,M_Parties.Name CustomerName,M_Parties.PAN,MC_PartySubParty.IsTCSParty,
-                                    T_Orders.OrderDate,M_Parties.id CustomerID,M_Parties.GSTIN,T_Orders.FullOrderNumber,(select BaseUnitQuantity from MC_ItemUnits where IsDeleted=0  and UnitID_id=2 and Item_id=ItemID)Weightage,
+                                    T_Orders.OrderDate,T_Orders.AdvanceAmount,M_Parties.id CustomerID,M_Parties.GSTIN,T_Orders.FullOrderNumber,(select BaseUnitQuantity from MC_ItemUnits where IsDeleted=0  and UnitID_id=2 and Item_id=ItemID)Weightage,
                                     (Select PartyType_id from M_Parties where M_Parties.id={Party})PartyTypeID
                                     FROM TC_OrderItems
                                     join T_Orders on T_Orders.id=TC_OrderItems.Order_id
@@ -169,6 +169,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                                 "CustomerGSTIN" : b.GSTIN,
                                 "CustomerID" : Customer,
                                 "OrderNumber" : b.FullOrderNumber,
+                                "AdvanceAmount" : b.AdvanceAmount,
                                 "OrderItemDetails":OrderItemDetails
                             })
                     else :

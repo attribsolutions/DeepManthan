@@ -225,7 +225,6 @@ class SPOSInvoiceViewSecond(CreateAPIView):
 
     def get(self, request, id=0,characters=None):
         try:
-            
             with transaction.atomic():
                 if characters:
                     if characters == "P":
@@ -239,13 +238,14 @@ class SPOSInvoiceViewSecond(CreateAPIView):
                     A = "Action is not defined"
                 # CustomPrint(characters)
                 # CustomPrint(id)
-                InvoiceQuery = T_SPOSInvoices.objects.raw(f'''SELECT SPOSInv.id,InvoiceDate,InvoiceNumber,FullInvoiceNumber,TCSAmount,GrandTotal,RoundOffAmount,Customer,
+                InvoiceQuery = T_SPOSInvoices.objects.raw(f'''SELECT SPOSInv.id,InvoiceDate,InvoiceNumber,FullInvoiceNumber,AdvanceAmount,TCSAmount,GrandTotal,RoundOffAmount,Customer,
                                                           cust.Name CustomerName,cust.GSTIN CustomerGSTIN,cust.MobileNo CustomerMobileNo,
-Party,party.Name PartyName,party.GSTIN PartyGSTIN,party.MobileNo PartyMobileNo,M_Drivers.Name DriverName,M_Vehicles.VehicleNumber,SPOSInv.CreatedOn,
-custaddr.FSSAINo CustomerFSSAI ,custaddr.Address CustomerAddress,
-partyaddr.FSSAINo PartyFSSAI,partyaddr.Address PartyAddress,MC_PartyBanks.BranchName,MC_PartyBanks.IFSC,MC_PartyBanks.AccountNo,M_Bank.Name BankName,MC_PartyBanks.IsDefault,custstate.Name CustState,partystate.Name PartyState
-,IU.AckNo, IU.Irn, IU.QRCodeUrl, IU.EInvoicePdf, IU.EwayBillNo, IU.EwayBillUrl, IU.EInvoiceCreatedBy, IU.EInvoiceCreatedOn, IU.EwayBillCreatedBy, IU.EwayBillCreatedOn, IU.EInvoiceCanceledBy, IU.EInvoiceCanceledOn, IU.EwayBillCanceledBy, IU.EwayBillCanceledOn, 
-IU.EInvoiceIsCancel, IU.EwayBillIsCancel,c.name as CompanyName,u.LoginName as CashierName,party.AlternateContactNo
+Party,party.Name PartyName,party.GSTIN PartyGSTIN,party.MobileNo PartyMobileNo,M_Drivers.Name DriverName,M_Vehicles.VehicleNumber,
+SPOSInv.CreatedOn,custaddr.FSSAINo CustomerFSSAI ,custaddr.Address CustomerAddress, partyaddr.FSSAINo PartyFSSAI,
+partyaddr.Address PartyAddress,MC_PartyBanks.BranchName,MC_PartyBanks.IFSC,MC_PartyBanks.AccountNo,M_Bank.Name BankName,MC_PartyBanks.IsDefault,custstate.Name CustState,partystate.Name PartyState,
+SPOSIU.AckNo, SPOSIU.Irn, SPOSIU.QRCodeUrl, SPOSIU.EInvoicePdf, SPOSIU.EwayBillNo, SPOSIU.EwayBillUrl, SPOSIU.EInvoiceCreatedBy, SPOSIU.EInvoiceCreatedOn, SPOSIU.EwayBillCreatedBy,
+SPOSIU.EwayBillCreatedOn, SPOSIU.EInvoiceCanceledBy, SPOSIU.EInvoiceCanceledOn, SPOSIU.EwayBillCanceledBy, SPOSIU.EwayBillCanceledOn, 
+SPOSIU.EInvoiceIsCancel, SPOSIU.EwayBillIsCancel,c.name as CompanyName,u.LoginName as CashierName,party.AlternateContactNo
 FROM SweetPOS.T_SPOSInvoices SPOSInv
 join FoodERP.M_Parties cust on cust.id=SPOSInv.Customer
 join FoodERP.M_Parties party on party.id=SPOSInv.Party 
@@ -257,11 +257,10 @@ left join FoodERP.MC_PartyBanks on MC_PartyBanks.Party_id=SPOSInv.Party and MC_P
 left join FoodERP.M_Bank on M_Bank.id=MC_PartyBanks.Bank_id
 left join FoodERP.M_States custstate on custstate.id=cust.State_id
 left join FoodERP.M_States partystate on partystate.id=party.State_id
-left join FoodERP.TC_InvoiceUploads IU on IU.Invoice_id=SPOSInv.id    
+left JOIN SweetPOS.TC_SPOSInvoiceUploads SPOSIU  ON SPOSIU.Invoice_id = SPOSInv.id    
 left join FoodERP.C_Companies c on party.Company_id=c.id  
 left join FoodERP.M_Users u on SPOSInv.CreatedBy=u.id                                                      
 where SPOSInv.id={id}''') 
-                # print(InvoiceQuery.query)
                 if InvoiceQuery:
                     # InvoiceSerializedata = InvoiceSerializerSecond(InvoiceQuery, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceSerializedata})
@@ -361,7 +360,6 @@ WHERE SPOSInv.Invoice_id = {a.id}''')
                             "IsDefault" : a.IsDefault
                         })
 
-                        
                         InvoiceUploads=list()
                         if a.AckNo :
                             InvoiceUploads.append({
@@ -383,7 +381,6 @@ WHERE SPOSInv.Invoice_id = {a.id}''')
                                 "EwayBillIsCancel" :a.EwayBillIsCancel
 
                             })
-                            
                         InvoiceData.append({
                             "id": a.id,
                             "InvoiceDate": a.InvoiceDate,
@@ -414,6 +411,7 @@ WHERE SPOSInv.Invoice_id = {a.id}''')
                             "CompanyName":a.CompanyName,
                             "CashierName" :a.CashierName,
                             "AlternateContactNo":a.AlternateContactNo,
+                            "AdvanceAmount" : a.AdvanceAmount,
                             # End Add Extra Fields
                             "InvoiceItems": InvoiceItemDetails,
                             "InvoicesReferences": InvoiceReferenceDetails,
@@ -793,12 +791,13 @@ class FranchiseInvoiceEditView(CreateAPIView):
                 query1 = TC_SPOSInvoicesReferences.objects.filter(Invoice=id).values('Order')
               
                 Orderdata = list()
-                query = T_SPOSInvoices.objects.filter(id=id).values('Customer','InvoiceDate','Vehicle','AdvanceAmount')
+                query = T_SPOSInvoices.objects.filter(id=id).values('Customer','InvoiceDate','Vehicle','AdvanceAmount','CreatedBy')
                 Customer=query[0]['Customer']
                 InvoiceDate=query[0]['InvoiceDate']
                 Vehicle=query[0]['Vehicle']
                 AdvanceAmount = query[0].get('AdvanceAmount', 0)
-               
+                CreatedBy = query[0].get('CreatedBy', 0)
+                
                 Itemsquery= TC_SPOSInvoiceItems.objects.raw('''SELECT SweetPOS.TC_SPOSInvoiceItems.id,SweetPOS.TC_SPOSInvoiceItems.Item,FoodERP.M_Items.Name ItemName,M_Items.BaseUnitID_id MIUnitID,
                                                         SweetPOS.TC_SPOSInvoiceItems.Quantity,SweetPOS.TC_SPOSInvoiceItems.MRPValue,
                                                         SweetPOS.TC_SPOSInvoiceItems.Rate,SweetPOS.TC_SPOSInvoiceItems.Unit, FoodERP.MC_ItemUnits.BaseUnitConversion UnitName,
@@ -875,8 +874,8 @@ class FranchiseInvoiceEditView(CreateAPIView):
                         "OrderItemDetails":OrderItemDetails,
                         "InvoiceDate":InvoiceDate,
                         "Vehicle":Vehicle,
-                        "AdvanceAmount": AdvanceAmount
-                        
+                        "AdvanceAmount": AdvanceAmount,
+                        "CreatedBy" : CreatedBy
                         }) 
              
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Orderdata[0]})
