@@ -121,27 +121,30 @@ class giftvouchervalidityCheck(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, giftvoucherData, 0, 'GETVoucherData:' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+        
+        
+        
 
 class GiftVoucherList(CreateAPIView):
     
     authentication_classes = [BasicAuthentication, JWTAuthentication]
     permission_classes = [IsAuthenticated]
            
-    @transaction.atomic()
-    def get(self, request ):
-        try:
-            with transaction.atomic():
+    # @transaction.atomic()
+    # def get(self, request ):
+    #     try:
+    #         with transaction.atomic():
                 
-                GiftVoucher_Data = M_GiftVoucherCode.objects.all()
-                GiftVoucher_Data_serializer = GiftVoucherSerializer(GiftVoucher_Data,many=True)
-                log_entry = create_transaction_logNew(request, GiftVoucher_Data_serializer,0,'',437,0)
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': GiftVoucher_Data_serializer.data})
-        except  M_GiftVoucherCode.DoesNotExist:
-            log_entry = create_transaction_logNew(request,0,0,'GiftVoucher Does Not Exist',437,0)
-            return JsonResponse({'StatusCode': 204, 'Status': False,'Message':  'GiftVoucher Not available', 'Data': []})
-        except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'GETAllGiftVoucher:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
+    #             GiftVoucher_Data = M_GiftVoucherCode.objects.all()
+    #             GiftVoucher_Data_serializer = GiftVoucherSerializer(GiftVoucher_Data,many=True)
+    #             log_entry = create_transaction_logNew(request, GiftVoucher_Data_serializer,0,'',437,0)
+    #             return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': GiftVoucher_Data_serializer.data})
+    #     except  M_GiftVoucherCode.DoesNotExist:
+    #         log_entry = create_transaction_logNew(request,0,0,'GiftVoucher Does Not Exist',437,0)
+    #         return JsonResponse({'StatusCode': 204, 'Status': False,'Message':  'GiftVoucher Not available', 'Data': []})
+    #     except Exception as e:
+    #         log_entry = create_transaction_logNew(request, 0, 0,'GETAllGiftVoucher:'+str(e),33,0)
+    #         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
         
      
     @transaction.atomic()
@@ -183,5 +186,32 @@ class GiftVoucherList(CreateAPIView):
             log_entry = create_transaction_logNew(request, 0,0,'GiftVoucherDeleted:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})   
 
-    
-    
+        
+    @transaction.atomic()
+    def post(self, request):
+        if not request.user or not request.user.is_authenticated:
+            raise AuthenticationFailed("Authentication failed.")
+
+        data = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                FromDate = data.get('FromDate', None)
+                ToDate = data.get('ToDate', None)
+                PartyID = data.get('PartyID', None)
+               
+                valid_vouchers = M_GiftVoucherCode.objects.filter(Party=PartyID, IsActive=False,UpdatedOn__date__range=[FromDate, ToDate]
+                                                                ).values( 'VoucherCode', 'InvoiceDate', 'InvoiceNumber', 'InvoiceAmount')
+                if not valid_vouchers.exists():
+                    log_entry = create_transaction_logNew(request,data,PartyID,'GiftVoucher Does Not Exist',437,0)
+                    return JsonResponse({'StatusCode': 404,'Status': False,'Message': "No valid voucher codes found for the specified criteria.",'Data': []})
+                vouchers_list = list(valid_vouchers)
+                log_entry = create_transaction_logNew(request, data,PartyID,'',437,0)
+                return JsonResponse({'StatusCode': 200,'Status': True,'Message': "Valid VoucherCodes retrieved successfully.",'Data': vouchers_list })
+
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, data, 0, 'ValidVoucherData: ' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400,'Status': False,'Message': str(e),'Data': [] })
+
+
+        
+        
