@@ -32,7 +32,7 @@ class giftvouchervalidityCheck(CreateAPIView):
                     log_entry = create_transaction_logNew(request, 0, 0, '', 436, 0)
                     return JsonResponse({
                         'StatusCode': 404, 'Status': False,
-                         'Message': f"Invalid VoucherCode '<b style=\"color: #FF5733;\">{coupon_code}</b>'."
+                         'Message': f"Invalid VoucherCode '<b style=\"color: #FF5733;\">{coupon_code}</b>'.<br></br>"
                          f"Do you want to continue saving the bill without using the voucher?", 'Data': []})
 
                 if VoucherDetails.IsActive == 0:
@@ -85,7 +85,7 @@ class giftvouchervalidityCheck(CreateAPIView):
                 if not voucher_details:
                     log_entry = create_transaction_logNew(request, giftvoucherData, Party, '', 435, 0)
                     return JsonResponse({'StatusCode': 404,'Status': False,
-                                        'Message': f"Invalid VoucherCode '<b style=\"color: #FF5733;\">{VoucherCode}</b>'."
+                                        'Message': f"Invalid VoucherCode '<b style=\"color: #FF5733;\">{VoucherCode}</b>'.<br></br>"
                                                     f"Do you want to continue saving the bill without using the voucher?", 'Data': []})
                 if voucher_details.IsActive == 0:
                     PartyName = "N/A"
