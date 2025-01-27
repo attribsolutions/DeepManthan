@@ -32,8 +32,8 @@ class giftvouchervalidityCheck(CreateAPIView):
                     log_entry = create_transaction_logNew(request, 0, 0, '', 436, 0)
                     return JsonResponse({
                         'StatusCode': 404, 'Status': False,
-                         'Message': f"Invalid VoucherCode '{coupon_code}'."+ "\n"
-                         f"Do you want to continue saving the bill without using the voucher?",'Data': []})
+                         'Message': f"Invalid VoucherCode '<b style=\"color: #FF5733;\">{coupon_code}</b>'."
+                         f"Do you want to continue saving the bill without using the voucher?", 'Data': []})
 
                 if VoucherDetails.IsActive == 0:
                     PartyName = "N/A"
@@ -45,13 +45,14 @@ class giftvouchervalidityCheck(CreateAPIView):
                     Invoice_Number = VoucherDetails.InvoiceNumber if VoucherDetails.InvoiceNumber else "N/A"
 
                     message = (
-                        f"The VoucherCode '{coupon_code}' it has already been used."+ "\n"
-                        f"With the following details:" + "\n"
-                        f"- FranchiseName: {PartyName}" + "\n"
-                        f"- InvoiceDate: {Invoice_Date}" + "\n"
-                        f"- InvoiceNumber: {Invoice_Number}" + "\n"
-                        "Would you like to proceed without applying the voucher?"
-                    )
+                                f"The VoucherCode <b style=\"color: #4CAF50;\">'{coupon_code}'</b> has already been used.<br>"
+                                f"With the following details:<br>"
+                                f"- <span style=\"color: #444444;\">FranchiseName:</span> <span style=\"color: #007BFF;\">{PartyName}</span><br>"
+                                f"- <span style=\"color: #444444;\">InvoiceDate:</span> <span style=\"color: #007BFF;\">{Invoice_Date}</span><br>"
+                                f"- <span style=\"color: #444444;\">InvoiceNumber:</span> <span style=\"color: #007BFF;\">{Invoice_Number}</span><br>"
+                                f"<b></br>Would you like to proceed without applying the voucher?</b>"
+                            )
+
                     log_entry = create_transaction_logNew(request, 0, 0, '', 436, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': False, 'Message': message, 'Data': []})
 
@@ -84,8 +85,8 @@ class giftvouchervalidityCheck(CreateAPIView):
                 if not voucher_details:
                     log_entry = create_transaction_logNew(request, giftvoucherData, Party, '', 435, 0)
                     return JsonResponse({'StatusCode': 404,'Status': False,
-                                        'Message': f"Invalid VoucherCode '{VoucherCode}'."+ "\n"
-                                                   f"Do you want to continue saving the bill without using the voucher?",'Data': []})
+                                        'Message': f"Invalid VoucherCode '<b style=\"color: #FF5733;\">{VoucherCode}</b>'."
+                                                    f"Do you want to continue saving the bill without using the voucher?", 'Data': []})
                 if voucher_details.IsActive == 0:
                     PartyName = "N/A"
                     if voucher_details.Party:
@@ -96,13 +97,13 @@ class giftvouchervalidityCheck(CreateAPIView):
                     Invoice_Number = voucher_details.InvoiceNumber if voucher_details.InvoiceNumber else "N/A"
 
                     message = (
-                        f"The VoucherCode '{VoucherCode}' it has already been used."+ "\n"
-                        f"With the following details:" + "\n"
-                        f"- FranchiseName: {PartyName}" + "\n"
-                        f"- InvoiceDate: {Invoice_Date}" + "\n"
-                        f"- InvoiceNumber: {Invoice_Number}" + "\n"
-                        "Would you like to proceed without applying the voucher?"
-                    )
+                                f"The VoucherCode <b style=\"color: #4CAF50;\">'{VoucherCode}'</b> has already been used.<br>"
+                                f"With the following details:<br>"
+                                f"- <span style=\"color: #444444;\">FranchiseName:</span> <span style=\"color: #007BFF;\">{PartyName}</span><br>"
+                                f"- <span style=\"color: #444444;\">InvoiceDate:</span> <span style=\"color: #007BFF;\">{Invoice_Date}</span><br>"
+                                f"- <span style=\"color: #444444;\">InvoiceNumber:</span> <span style=\"color: #007BFF;\">{Invoice_Number}</span><br>"
+                                f"<b></br>Would you like to proceed without applying the voucher?</b>"
+                            )
                     
                     log_entry = create_transaction_logNew(request, giftvoucherData, Party, '', 435, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': False, 'Message': message,'Data': []})
