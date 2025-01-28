@@ -239,20 +239,22 @@ class SAPOrderView(CreateAPIView):
                 OrderID = data["Order"]
                 payload = list()
                 Items =list()
-                query=T_Orders.objects.raw('''select (5000000+T_Orders.id)id ,C.SAPPartyCode CustomerID,T_Orders.OrderDate DocDate,
-                                           M_PartyType.SAPIndicator Indicator,
-TC_OrderItems.id ItemNo,M_Items.SAPItemCode Material,S.SAPPartyCode Plant,M_Units.SAPUnit Unit,
-(case when M_Items.SAPUnitID = 1 then TC_OrderItems.QtyInNo else TC_OrderItems.QtyInKg end)Quantity
-
-from T_Orders 
-join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id
-join M_Parties S on S.id=T_Orders.Supplier_id
-join M_Parties C on C.id=T_Orders.Customer_id
-join M_PartyType on M_PartyType.id=C.PartyType_id
-join M_Items on M_Items.id=TC_OrderItems.Item_id
-join M_Units on M_Units.id=M_Items.SAPUnitID
-where IsDeleted = 0 AND T_Orders.id=%s''',[OrderID])
+                ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(0,1).split('!')              
                 
+                query=T_Orders.objects.raw(f'''select (5000000+T_Orders.id)id ,C.SAPPartyCode CustomerID,T_Orders.OrderDate DocDate,
+                                           M_PartyType.SAPIndicator Indicator,
+                TC_OrderItems.id ItemNo,M_Items.SAPItemCode Material,S.SAPPartyCode Plant,M_Units.SAPUnit Unit,
+                (case when M_Items.SAPUnitID = 1 then TC_OrderItems.QtyInNo else TC_OrderItems.QtyInKg end)Quantity,{ItemsGroupJoinsandOrderby[0]}
+
+                from T_Orders 
+                join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id
+                join M_Parties S on S.id=T_Orders.Supplier_id
+                join M_Parties C on C.id=T_Orders.Customer_id
+                join M_PartyType on M_PartyType.id=C.PartyType_id
+                join M_Items on M_Items.id=TC_OrderItems.Item_id
+                join M_Units on M_Units.id=M_Items.SAPUnitID
+                {ItemsGroupJoinsandOrderby[1]}
+                where IsDeleted = 0 AND T_Orders.id=%s {ItemsGroupJoinsandOrderby[2]}''',[OrderID])                
                 for row in query:
                     
                     date_obj = datetime.strptime(str(row.DocDate), '%Y-%m-%d')
@@ -268,8 +270,7 @@ where IsDeleted = 0 AND T_Orders.id=%s''',[OrderID])
                                             "Quantity": str(round(row.Quantity,3)),
                                             "Unit": str(row.Unit),
                                             "Plant": str(row.Plant),
-                                            "Batch": ""
-                                        
+                                            "Batch": ""                                        
                                         })
                 
                 payload.append({
@@ -280,11 +281,9 @@ where IsDeleted = 0 AND T_Orders.id=%s''',[OrderID])
                         "OrderNo": OrderNo,
                         "Stats": "1",
                         "CancelFlag": "",
-                        "OrderItemSet": Items       
-
+                        "OrderItemSet": Items  
 
                 })
-                
                 
                 jsonbody=json.dumps(payload[0])
                 
@@ -298,8 +297,6 @@ where IsDeleted = 0 AND T_Orders.id=%s''',[OrderID])
                     'Content-Type': 'application/json',
                     'Cookie': 'SAP_SESSIONID_CSP_900=zUHoJ83NYxxPWHzOoQ8TsJOcV2HvGxHtptICAEHiAA8%3d; sap-usercontext=sap-client=900'
                 }
-               
-                
                 
                 response = requests.request("POST", url, headers=headers, data=jsonbody)
                 # Convert XML to OrderedDict
