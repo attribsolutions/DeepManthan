@@ -25,7 +25,7 @@ class SPOSCashierSummaryList(CreateAPIView):
                 CashierSummaryQuery=T_SPOSInvoices.objects.raw(f'''SELECT 1 as id , SPOSIn.InvoiceDate,
                 Users.LoginName CashierName ,
                 SUM(SPOSIn.GrandTotal)Amount,count(SPOSIn.id)InvoiceCount,
-                sum(case when MobileNo !=''  then 1 else 0 end)Mobile_Count
+                sum(case when MobileNo !=''  then 1 else 0 end)Mobile_Count,Count(VoucherCode)VoucherCode
                 from SweetPOS.T_SPOSInvoices SPOSIn
                 -- JOIN SweetPOS.M_SweetPOSUser SPOSUser ON SPOSUser.id=SPOSIn.CreatedBy -- Comment For changing M_SweetPOSUser to M_Users
                 JOIN FoodERP.M_Users Users ON Users.id=SPOSIn.CreatedBy
@@ -44,7 +44,8 @@ class SPOSCashierSummaryList(CreateAPIView):
                             "CashierName":row.CashierName,
                             "Amount":row.Amount, 
                             "InvoiceCount" : row.InvoiceCount,
-                            "MobilenoCount" :   row.Mobile_Count                        
+                            "MobilenoCount" :   row.Mobile_Count,
+                            "VoucherCodeCount" :row.VoucherCode                    
                             
                         })
 
