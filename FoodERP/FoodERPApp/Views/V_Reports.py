@@ -1977,7 +1977,7 @@ class PendingGRNInvoicesAPIView(CreateAPIView):
                                                             JOIN M_Parties cust ON cust.id = T_Invoices.Customer_id
                                                             JOIN  M_PartyType pt ON cust.PartyType_id = pt.id
                                                             LEFT JOIN  TC_GRNReferences ON T_Invoices.id = TC_GRNReferences.Invoice_id
-                                                            WHERE TC_GRNReferences.Invoice_id IS NULL AND pt.IsRetailer = 0  
+                                                            WHERE TC_GRNReferences.Invoice_id IS NULL AND pt.IsRetailer = 0 AND  T_Invoices.Hide = 0
                                                             AND cust.id IN (%s)  
                                                             GROUP BY cust.Name''' % ','.join(map(str, PartyIDs)))
 
