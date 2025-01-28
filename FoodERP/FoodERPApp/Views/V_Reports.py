@@ -1960,21 +1960,27 @@ class DemandVsSupplyReportView(CreateAPIView):
             log_entry = create_transaction_logNew(request, Data, 0, 'DemandVsReportReport:'+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
      
+
 class PendingGRNInvoicesAPIView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
+
     @transaction.atomic()
-    
     def get(self, request):
         try:
-            with transaction.atomic():                                          
-                PendingGRNQuery = T_Invoices.objects.raw('''Select 1 as id, cust.Name as CustomerName,
-                                                     COUNT(T_Invoices.id) AS PendingGRNCount
-                                                     From T_Invoices
-                                                     JOIN M_Parties cust ON cust.id = T_Invoices.Customer_id
-                                                     LEFT JOIN TC_GRNReferences ON T_Invoices.id = TC_GRNReferences.Invoice_id
-                                                     WHERE TC_GRNReferences.Invoice_id IS NULL
-                                                     GROUP BY cust.Name''')
-             
+            with transaction.atomic():
+                employee = request.user.Employee_id  
+                
+                PartyIDs = MC_ManagementParties.objects.filter(Employee=employee).values_list('Party_id', flat=True)
+
+                PendingGRNQuery = T_Invoices.objects.raw('''SELECT 1 AS id, cust.Name AS CustomerName,COUNT(T_Invoices.id) AS PendingGRNCount
+                                                            FROM T_Invoices
+                                                            JOIN M_Parties cust ON cust.id = T_Invoices.Customer_id
+                                                            JOIN  M_PartyType pt ON cust.PartyType_id = pt.id
+                                                            LEFT JOIN  TC_GRNReferences ON T_Invoices.id = TC_GRNReferences.Invoice_id
+                                                            WHERE TC_GRNReferences.Invoice_id IS NULL AND pt.IsRetailer = 0  
+                                                            AND cust.id IN (%s)  
+                                                            GROUP BY cust.Name''' % ','.join(map(str, PartyIDs)))
+
                 response_data = [
                     {
                         "CustomerName": result.CustomerName,
@@ -1985,12 +1991,11 @@ class PendingGRNInvoicesAPIView(CreateAPIView):
 
                 if response_data:
                     log_entry = create_transaction_logNew(request, response_data, 0, '', 434, 0)
-                    return JsonResponse({'StatusCode': 200,'Status': True,'Message': 'Pending GRN invoices retrieved successfully.', 'Data': response_data})
+                    return JsonResponse({'StatusCode': 200,'Status': True,'Message': 'Pending GRN invoices retrieved successfully.','Data': response_data})
                 else:
                     log_entry = create_transaction_logNew(request, response_data, 0, "No pending GRNs Available", 434, 0)
-                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'No pending GRN invoices found.','Data': [] })
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'No pending GRN invoices found.','Data': []})
 
         except Exception as e:
-                log_entry = create_transaction_logNew(request, 0, 0, 'PendingGRNsReport:'+str(e), 33, 0)
-                return JsonResponse({'StatusCode': 400,'Status': False,'Message': str(e),'Data': [] })
-
+            log_entry = create_transaction_logNew(request, 0, 0, 'PendingGRNsReport:' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400,'Status': False,'Message': str(e),  'Data': [] })
