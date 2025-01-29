@@ -165,7 +165,7 @@ from .Views.V_Country import *
 
 from .Views.V_Scheme import *
 
-
+from .Views.V_POSToSAPExport import *
 
 
 # from .Views.V_FTP import *
@@ -353,6 +353,8 @@ urlpatterns = [
             url(r'GRN/([0-9]+)$',T_GRNViewSecond.as_view()),
             url(r'GRN$', T_GRNView.as_view()),
             url(r'GRNFilter$', GRNListFilterView.as_view()),
+            url(r'GRNSaveforCSS$', GRNSaveforCSSView.as_view()),
+            
             
 # GRN All API's
 
@@ -785,6 +787,9 @@ urlpatterns = [
              
 #Scheme Details:
               url(r'SchemeDetails$',SchemeView.as_view()), 
+
+#SAPExport:
+              url(r'SAPExportDetails$',SAPExportViewDetails.as_view()), 
  
 
 
