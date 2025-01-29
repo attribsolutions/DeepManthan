@@ -792,3 +792,35 @@ class GetOrderDetailsForGrnView(CreateAPIView):
             log_entry = create_transaction_logNew(request, 0, 0,'MakeOrdersGrn:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
     
+#GRN Save for CSS
+
+class GRNSaveforCSSView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def post(self, request):
+        GRNdata = JSONParser().parse(request)
+        try:
+            Customer = GRNdata['Customer']
+            InvoiceNumber = GRNdata['InvoiceNumber']
+            InvoiceDate = GRNdata['InvoiceDate']
+
+            ExistingGRN = T_GRNs.objects.filter(Customer_id=Customer, InvoiceNumber=InvoiceNumber, InvoiceDate=InvoiceDate).exists()
+            if ExistingGRN:
+                log_entry = create_transaction_logNew(request, GRNdata, 0, 'GRN already exists with the provided details', 440, 0)
+                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'GRN already exists with the provided details', 'Data': []})
+            log_entry = create_transaction_logNew(request, GRNdata, 0, '', 440, 0)
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GRN can be saved', 'Data': []})
+
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, GRNdata, 0, 'GRNSaveforCSS:' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+
+
+
+
+
+
+
+
+
