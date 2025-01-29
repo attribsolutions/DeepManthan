@@ -165,7 +165,7 @@ from .Views.V_Country import *
 
 from .Views.V_Scheme import *
 
-
+from .Views.V_POSToSAPExport import *
 
 
 # from .Views.V_FTP import *
@@ -787,6 +787,9 @@ urlpatterns = [
              
 #Scheme Details:
               url(r'SchemeDetails$',SchemeView.as_view()), 
+
+#SAPExport:
+              url(r'SAPExportDetails$',SAPExportViewDetails.as_view()), 
  
 
 
