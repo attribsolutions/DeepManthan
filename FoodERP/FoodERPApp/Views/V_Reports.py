@@ -1918,22 +1918,25 @@ class DemandVsSupplyReportView(CreateAPIView):
                 FromDate = Data['FromDate']
                 ToDate = Data['ToDate']
                 Party = Data['Party']
-                DemandVsSupplyData=list()                
+                DemandVsSupplyData = []                
                 # print(FromDate,ToDate,Party)
+                
+                PartyDetails = f"AND Customer_id = {Party}" if Party != 0 else ""
+                
                 DemandVsReportquery =TC_OrderItems.objects.raw(f'''SELECT ROW_NUMBER() OVER (ORDER BY A.PartyName, A.OrderDate) AS id,A.*,B.QtyInKg SupplyInKg, B.QtyInNo SupplyInNo 
                 FROM (
                 select M_Parties.Name PartyName, OrderDate, M_Items.Name ItemName, SUM(QtyInKg) QtyInKg, SUM(QtyInNo) QtyInNo FROM T_Orders 
                 JOIN TC_OrderItems on Order_id = T_Orders.id 
                 JOIN M_Parties ON Customer_id = M_Parties.id
                 JOIN M_Items ON Item_id = M_Items.id
-                WHERE IsDeleted = 0 AND OrderDate BETWEEN '{FromDate}' AND '{ToDate}' AND Customer_id={Party} 
+                WHERE IsDeleted = 0 AND OrderDate BETWEEN '{FromDate}' AND '{ToDate}'  {PartyDetails}
                 Group By M_Parties.Name, OrderDate, M_Items.Name) A
                 LEFT JOIN (
                 select M_Parties.Name PartyName, InvoiceDate, M_Items.Name ItemName, SUM(QtyInKg) QtyInKg, SUM(QtyInNo) QtyInNo FROM T_Invoices 
                 JOIN TC_InvoiceItems on Invoice_id = T_Invoices.id 
                 JOIN M_Parties ON Customer_id = M_Parties.id
                 JOIN M_Items ON Item_id = M_Items.id
-                WHERE InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}' AND Customer_id={Party}
+                WHERE InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}'  {PartyDetails}
                 Group By M_Parties.Name, InvoiceDate, M_Items.Name) B
                 ON A.PartyName = B.PartyName AND A.OrderDate = B.InvoiceDate AND A.ItemName = B.ItemName
                 WHERE A.QtyInKg != B.QtyInKg Order By A.PartyName, OrderDate''')
