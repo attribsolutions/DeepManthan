@@ -300,14 +300,14 @@ class M_ItemsViewSecond(CreateAPIView):
                                     "IsShowUnit":d['IsShowUnit'] 
                                 })
                             
-                        ImagesDetails=list()
-                        for e in a['ItemImagesDetails']:
-                            ImagesDetails.append({
-                                "id": e['id'],
-                                "Item_pic": e['Item_pic'],
-                                "ImageType": e['ImageType']['id'],
-                                "ImageTypeName": e['ImageType']['Name'], 
-                            })        
+                        # ImagesDetails=list()
+                        # for e in a['ItemImagesDetails']:
+                        #     ImagesDetails.append({
+                        #         "id": e['id'],
+                        #         "Item_pic": e['Item_pic'],
+                        #         "ImageType": e['ImageType']['id'],
+                        #         "ImageTypeName": e['ImageType']['Name'], 
+                        #     })        
                         
                         DivisionDetails=list()
                         for f in a['ItemDivisionDetails']:
@@ -425,7 +425,7 @@ class M_ItemsViewSecond(CreateAPIView):
                             "ItemCategoryDetails" : CategoryDetails,
                             "ItemGroupDetails" : GroupDetails,
                             "ItemUnitDetails": UnitDetails, 
-                            "ItemImagesDetails" : ImagesDetails,
+                            # "ItemImagesDetails" : ImagesDetails,
                             "ItemDivisionDetails": DivisionDetails,
                             "ItemMRPDetails":MRPDetails,
                             "ItemMarginDetails":MarginDetails, 
