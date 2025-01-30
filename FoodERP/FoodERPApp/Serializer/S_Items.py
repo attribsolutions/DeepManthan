@@ -81,7 +81,7 @@ class ItemSerializer(serializers.ModelSerializer):
     
     ItemUnitDetails = ItemUnitsSerializer(many=True)
     
-    ItemImagesDetails = ItemImagesSerializer(many=True)
+    # ItemImagesDetails = ItemImagesSerializer(many=True)
     
     ItemDivisionDetails = ItemDivisionsSerializer(many=True) 
     
@@ -95,13 +95,13 @@ class ItemSerializer(serializers.ModelSerializer):
    
     class Meta:
         model = M_Items
-        fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode','SAPItemCode', 'isActive', 'IsSCM', 'CanBeSold', 'CanBePurchase', 'BrandName', 'Tag','Length','Breadth','Height','StoringCondition','Grammage','CreatedBy', 'UpdatedBy','ItemCategoryDetails','ItemGroupDetails', 'ItemUnitDetails', 'ItemImagesDetails', 'ItemDivisionDetails', 'ItemMRPDetails', 'ItemMarginDetails', 'ItemGSTHSNDetails', 'ItemShelfLife','IsCBMItem','IsMixItem' ]
+        fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode','SAPItemCode', 'isActive', 'IsSCM', 'CanBeSold', 'CanBePurchase', 'BrandName', 'Tag','Length','Breadth','Height','StoringCondition','Grammage','CreatedBy', 'UpdatedBy','ItemCategoryDetails','ItemGroupDetails', 'ItemUnitDetails', 'ItemDivisionDetails', 'ItemMRPDetails', 'ItemMarginDetails', 'ItemGSTHSNDetails', 'ItemShelfLife','IsCBMItem','IsMixItem' ]
        
     def create(self, validated_data):
         ItemCategorys_data = validated_data.pop('ItemCategoryDetails')
         ItemGroups_data = validated_data.pop('ItemGroupDetails')
         ItemUnits_data = validated_data.pop('ItemUnitDetails')
-        ItemImages_data = validated_data.pop('ItemImagesDetails')
+        # ItemImages_data = validated_data.pop('ItemImagesDetails')
         ItemDivisions_data = validated_data.pop('ItemDivisionDetails')
         ItemMRPs_data = validated_data.pop('ItemMRPDetails')
         ItemMargins_data = validated_data.pop('ItemMarginDetails')
@@ -119,9 +119,9 @@ class ItemSerializer(serializers.ModelSerializer):
         
             ItemUnits = MC_ItemUnits.objects.create(Item=ItemID,**ItemUnit_data)
             
-        if ItemImages_data != '':
-            for ItemImage_data in ItemImages_data:
-                ItemImage = MC_ItemImages.objects.create(Item=ItemID, **ItemImage_data)
+        # if ItemImages_data != '':
+        #     for ItemImage_data in ItemImages_data:
+        #         ItemImage = MC_ItemImages.objects.create(Item=ItemID, **ItemImage_data)
         
         for ItemDivision_data in ItemDivisions_data:
             ItemDivision = MC_PartyItems.objects.create(Item=ItemID, **ItemDivision_data)    
@@ -205,9 +205,9 @@ class ItemSerializer(serializers.ModelSerializer):
         
         
         
-        if validated_data['ItemImagesDetails'] != '':    
-            for d in instance.ItemImagesDetails.all():
-                d.delete()
+        # if validated_data['ItemImagesDetails'] != '':    
+        #     for d in instance.ItemImagesDetails.all():
+        #         d.delete()
             
         for e in instance.ItemDivisionDetails.all():
             e.delete()
@@ -237,9 +237,9 @@ class ItemSerializer(serializers.ModelSerializer):
 
         
             
-        if validated_data['ItemImagesDetails'] != '':
-            for ItemImage_data in validated_data['ItemImagesDetails']:
-                ItemImage = MC_ItemImages.objects.create(Item=instance, **ItemImage_data)
+        # if validated_data['ItemImagesDetails'] != '':
+        #     for ItemImage_data in validated_data['ItemImagesDetails']:
+        #         ItemImage = MC_ItemImages.objects.create(Item=instance, **ItemImage_data)
         
         for ItemDivision_data in validated_data['ItemDivisionDetails']:
             ItemDivision = MC_PartyItems.objects.create(Item=instance, **ItemDivision_data)    
