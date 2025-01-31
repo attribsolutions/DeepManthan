@@ -1093,7 +1093,7 @@ class T_GRNs(models.Model):
     Comment = models.CharField(max_length=500 ,null=True,blank=True)
     Reason = models.ForeignKey(M_GeneralMaster, related_name='GRNReason', on_delete=models.PROTECT)
     InvoiceDate = models.DateField(null=True,blank=True)
-
+    IsSave = models.BooleanField(default=False)  
     class Meta:
         db_table = "T_GRNs"
 
