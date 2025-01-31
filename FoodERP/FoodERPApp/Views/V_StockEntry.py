@@ -397,18 +397,25 @@ class StockEntryItemsView(CreateAPIView):
                                                             GetTodaysDateMRP(M_Items.id, CURDATE(), 1, 0,  {PartyID},0) AS MRPID,
                                                             GSTHsnCodeMaster(M_Items.id, CURDATE(), 1, {PartyID},0) AS GSTID,
                                                             GetTodaysDateRate(M_Items.id, CURDATE(),  %s, 0, 1) AS Rate,
-                                                            FORMAT(IFNULL(O.ClosingBalance, 0), 15) AS CurrentStock 
+                                                            FORMAT(IFNULL(O.ClosingBalance, 0), 15) AS CurrentStock
                                                             FROM M_Items 
-                                                            JOIN MC_PartyItems ON MC_PartyItems.Item_id = M_Items.id
+                                                            JOIN MC_PartyItems ON MC_PartyItems.Item_id = M_Items.id and IsCBMItem=1
                                                             LEFT JOIN SweetPOS.O_SPOSDateWiseLiveStock O ON O.Item = M_Items.id AND O.StockDate = CURRENT_DATE and Party= {PartyID}
                                                             {ItemsGroupJoinsandOrderby[1]}
                                                             WHERE MC_PartyItems.Party_id = %s 
                                                             {ItemsGroupJoinsandOrderby[2]}''', ([PartyID],[PartyID],[PartyID]))
-                # print(Itemquery)
                 if not Itemquery:
                     log_entry = create_transaction_logNew(request, Logindata, 0, 'Franchise Items Not available', 102, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available', 'Data': []})
-                
+
+                LastStockEntryQuery = '''SELECT O.id, MAX(O.StockDate) AS LastStockEntryDate
+                    FROM SweetPOS.T_SPOSStock O
+                    WHERE O.Party = %s'''
+                LastStockEntry = T_SPOSStock.objects.raw(LastStockEntryQuery, [PartyID])
+                LastStockEntryDate = None
+                for date in LastStockEntry:
+                    LastStockEntryDate = date.LastStockEntryDate
+                    
                 FranchiseItemsList = [{
                     "Item": item.id,
                     "ItemName": item.ItemName,
@@ -436,7 +443,7 @@ class StockEntryItemsView(CreateAPIView):
                 } for item in Itemquery]
                 
                 log_entry = create_transaction_logNew(request, Logindata, PartyID, 'Franchise Items List', 102, 0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': FranchiseItemsList})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '',  'LastStockEntryDate': LastStockEntryDate, 'Data': FranchiseItemsList})
 
         except Exception as e:
             log_entry = create_transaction_logNew(request, Logindata, 0, 'FetchStock_Items:' + str(e), 33, 0)

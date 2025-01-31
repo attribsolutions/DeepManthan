@@ -94,6 +94,8 @@ class T_OrderSerializer(serializers.ModelSerializer):
             'ShippingAddress', instance.ShippingAddress)
         instance.UpdatedBy = validated_data.get(
             'UpdatedBy', instance.UpdatedBy) 
+        instance.AdvanceAmount = validated_data.get(
+            'AdvanceAmount', instance.AdvanceAmount) 
                 
         instance.save()
 
@@ -355,6 +357,7 @@ class OrderEditserializer(serializers.Serializer):
     DiscountAmount = serializers.DecimalField(max_digits=20, decimal_places=2)
     StockQuantity = serializers.DecimalField(max_digits=20, decimal_places=3)
     Weightage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    # OrderItem=serializers.BooleanField(default=False)
     # def to_representation(self, instance):
     #     data = super().to_representation(instance)
     #     if data['StockQuantity'] is None:

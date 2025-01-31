@@ -1794,9 +1794,9 @@ class FranchiseSecondarySaleReportView(CreateAPIView):
                 #         where T_Invoices.InvoiceDate between %s and %s '''
                 
                 SPOSInvoicequery ='''Select X.id, M_Parties.Name FranchiseName, M_Parties.SAPPartyCode SAPCode, M_Parties.Name SAPName, 
-                                X.InvoiceDate SaleDate, X.ClientID, M_Items.CItemID , X.FullInvoiceNumber BillNumber, M_Items.Name ItemName, 
+                                X.InvoiceDate SaleDate, X.ClientID, M_Items.id CItemID, X.FullInvoiceNumber BillNumber, M_Items.Name ItemName, 
                                 Y.Quantity, M_Units.Name UnitName, Y.MRPValue Rate, Y.Amount, M_Items.IsCBMItem, X.MobileNo, 
-                                M_Items.SAPItemCode MaterialSAPCode,Y.QtyInNo,Y.QtyInKg, Y.GSTPercentage, Y.BasicAmount
+                                M_Items.SAPItemCode MaterialSAPCode,Y.QtyInNo,Y.QtyInKg, Y.GSTPercentage, Y.BasicAmount, Y.HSNCode,X.VoucherCode
                         from SweetPOS.T_SPOSInvoices X
                         join SweetPOS.TC_SPOSInvoiceItems Y on Y.Invoice_id = X.id 
                         join FoodERP.M_Parties on M_Parties.id = X.Party
@@ -1855,7 +1855,9 @@ class FranchiseSecondarySaleReportView(CreateAPIView):
                         "QtyInNo":round(a.QtyInNo,3),
                         "QtyInKg":round(a.QtyInKg,3),
                         "GSTPercentage":a.GSTPercentage,
-                        "BasicAmount":a.BasicAmount
+                        "BasicAmount":a.BasicAmount,
+                        "HSNCode" : a.HSNCode,
+                        "VoucherCode":a.VoucherCode
                         })
                     log_entry = create_transaction_logNew(request, Data, Party, '', 414, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReportdataList})  
@@ -1916,22 +1918,25 @@ class DemandVsSupplyReportView(CreateAPIView):
                 FromDate = Data['FromDate']
                 ToDate = Data['ToDate']
                 Party = Data['Party']
-                DemandVsSupplyData=list()                
+                DemandVsSupplyData = []                
                 # print(FromDate,ToDate,Party)
-                DemandVsReportquery =TC_OrderItems.objects.raw(f'''SELECT A.*,B.QtyInKg SupplyInKg, B.QtyInNo SupplyInNo 
+                
+                PartyDetails = f"AND Customer_id = {Party}" if Party != 0 else ""
+                
+                DemandVsReportquery =TC_OrderItems.objects.raw(f'''SELECT ROW_NUMBER() OVER (ORDER BY A.PartyName, A.OrderDate) AS id,A.*,B.QtyInKg SupplyInKg, B.QtyInNo SupplyInNo 
                 FROM (
-                select T_Orders.id,M_Parties.Name PartyName, OrderDate, M_Items.Name ItemName, SUM(QtyInKg) QtyInKg, SUM(QtyInNo) QtyInNo FROM T_Orders 
+                select M_Parties.Name PartyName, OrderDate, M_Items.Name ItemName, SUM(QtyInKg) QtyInKg, SUM(QtyInNo) QtyInNo FROM T_Orders 
                 JOIN TC_OrderItems on Order_id = T_Orders.id 
                 JOIN M_Parties ON Customer_id = M_Parties.id
                 JOIN M_Items ON Item_id = M_Items.id
-                WHERE IsDeleted = 0 AND OrderDate BETWEEN '{FromDate}' AND '{ToDate}' AND Customer_id={Party} 
+                WHERE IsDeleted = 0 AND OrderDate BETWEEN '{FromDate}' AND '{ToDate}'  {PartyDetails}
                 Group By M_Parties.Name, OrderDate, M_Items.Name) A
                 LEFT JOIN (
                 select M_Parties.Name PartyName, InvoiceDate, M_Items.Name ItemName, SUM(QtyInKg) QtyInKg, SUM(QtyInNo) QtyInNo FROM T_Invoices 
                 JOIN TC_InvoiceItems on Invoice_id = T_Invoices.id 
                 JOIN M_Parties ON Customer_id = M_Parties.id
                 JOIN M_Items ON Item_id = M_Items.id
-                WHERE InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}' AND Customer_id={Party}
+                WHERE InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}'  {PartyDetails}
                 Group By M_Parties.Name, InvoiceDate, M_Items.Name) B
                 ON A.PartyName = B.PartyName AND A.OrderDate = B.InvoiceDate AND A.ItemName = B.ItemName
                 WHERE A.QtyInKg != B.QtyInKg Order By A.PartyName, OrderDate''')
@@ -1957,3 +1962,43 @@ class DemandVsSupplyReportView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, Data, 0, 'DemandVsReportReport:'+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+     
+
+class PendingGRNInvoicesAPIView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def get(self, request):
+        try:
+            with transaction.atomic():
+                employee = request.user.Employee_id  
+                
+                PartyIDs = MC_ManagementParties.objects.filter(Employee=employee).values_list('Party_id', flat=True)
+
+                PendingGRNQuery = T_Invoices.objects.raw('''SELECT 1 AS id, cust.Name AS CustomerName,COUNT(T_Invoices.id) AS PendingGRNCount
+                                                            FROM T_Invoices
+                                                            JOIN M_Parties cust ON cust.id = T_Invoices.Customer_id
+                                                            JOIN  M_PartyType pt ON cust.PartyType_id = pt.id
+                                                            LEFT JOIN  TC_GRNReferences ON T_Invoices.id = TC_GRNReferences.Invoice_id
+                                                            WHERE TC_GRNReferences.Invoice_id IS NULL AND pt.IsRetailer = 0 AND  T_Invoices.Hide = 0
+                                                            AND cust.id IN (%s)  
+                                                            GROUP BY cust.Name''' % ','.join(map(str, PartyIDs)))
+
+                response_data = [
+                    {
+                        "CustomerName": result.CustomerName,
+                        "PendingGRNCount": result.PendingGRNCount
+                    }
+                    for result in PendingGRNQuery
+                ]
+
+                if response_data:
+                    log_entry = create_transaction_logNew(request, response_data, 0, '', 434, 0)
+                    return JsonResponse({'StatusCode': 200,'Status': True,'Message': 'Pending GRN invoices retrieved successfully.','Data': response_data})
+                else:
+                    log_entry = create_transaction_logNew(request, response_data, 0, "No pending GRNs Available", 434, 0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'No pending GRN invoices found.','Data': []})
+
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0, 'PendingGRNsReport:' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400,'Status': False,'Message': str(e),  'Data': [] })
