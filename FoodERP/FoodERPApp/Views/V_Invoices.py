@@ -1196,8 +1196,8 @@ class FranchisesCashierList(CreateAPIView):
                     for row in FranchisesCashierQuery:
                         print(row)
                         CashierDetails.append({                            
-                            "Cashier_id":row.id,
-                            "CashierName":row.LoginName 
+                            "value":row.id,
+                            "label":row.LoginName 
                         })
                     print(CashierDetails)
                     log_entry = create_transaction_logNew( request, POSCashierdata, Party, '', 441, 0,0,0,0)
