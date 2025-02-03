@@ -274,8 +274,14 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                 FromDate = Invoicedata['FromDate']
                 ToDate = Invoicedata['ToDate']
                 Customer = Invoicedata['Customer']
-                Party = Invoicedata['Party']
-               
+                Party = Invoicedata['Party']                                
+                PaymentMode=Invoicedata['paymentMode'] 
+                InvoiceAmount=Invoicedata['invoiceAmount'] 
+                InvoiceNumber=Invoicedata['InvoiceNumber']
+                # Cashier=Invoicedata['cashier']
+                Item=Invoicedata['Item']
+                # EInvoice=Invoicedata['EInvoiceCreated']
+                # EWayBill=Invoicedata['EWayBillCreated']
                 filter_args = {
                         'InvoiceDate__range': (FromDate, ToDate),
                         'Party': Party
@@ -301,20 +307,75 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                 SPOS_filter_args = {
                         'InvoiceDate__range': (FromDate, ToDate),
                         'Party': Party
+                        
                     }
                 if Customer:
-                    SPOS_filter_args['Customer'] = Customer
+                    # print("Customer")
+                    if isinstance(Customer, list):  
+                        SPOS_filter_args['Customer__in'] = Customer  
+                    else:
+                        SPOS_filter_args['Customer'] = Customer  
+                if PaymentMode:
+                    # print("PaymentMode")
+                    payment_filters = []  # Empty OR condition
+                    if PaymentMode.get("Cash", False):
+                        # payment_filters |= Q(PaymentType="Cash")
+                        payment_filters.append("Cash")
+                        # print(payment_filters)
+                    if PaymentMode.get("Card", False):
+                        # payment_filters |= Q(PaymentType="Card")
+                        payment_filters.append("Card")
+                    if PaymentMode.get("UPI", False):
+                        # payment_filters |= Q(PaymentType="UPI")
+                        payment_filters.append("UPI")
+                if payment_filters:
+                    SPOS_filter_args["PaymentType__in"] = payment_filters
+                    
+                if InvoiceAmount:
+                    # print("InvoiceAmount")
+                    if InvoiceAmount.get("Less_Than", False) and InvoiceAmount["Between_Value_1"]:                    
+                        SPOS_filter_args["GrandTotal__lt"] = InvoiceAmount["Between_Value_1"]
+
+                    if InvoiceAmount.get("Greater_Than", False) and InvoiceAmount["Between_Value_1"]:                    
+                        SPOS_filter_args["GrandTotal__gt"] = InvoiceAmount["Between_Value_1"]
+
+                    if InvoiceAmount.get("Between", False) and InvoiceAmount["Between_Value_1"] and InvoiceAmount["Between_Value_2"]:                        
+                        SPOS_filter_args["GrandTotal__range"] = (InvoiceAmount["Between_Value_1"], InvoiceAmount["Between_Value_2"])    
+                if InvoiceNumber:
+                    # print("InvoiceNumber")
+                    if InvoiceNumber.get("Less_Than", False) and InvoiceNumber["Between_Value_1"]:                        
+                        SPOS_filter_args["InvoiceNumber__lt"] = InvoiceNumber["Between_Value_1"]
+
+                    if InvoiceNumber.get("Greater_Than", False) and InvoiceNumber["Between_Value_1"]:                       
+                        SPOS_filter_args["InvoiceNumber__gt"] = InvoiceNumber["Between_Value_1"]
+
+                    if InvoiceNumber.get("Between", False) and InvoiceNumber["Between_Value_1"] and InvoiceNumber["Between_Value_2"]:                        
+                        SPOS_filter_args["InvoiceNumber__range"] = (InvoiceNumber["Between_Value_1"], InvoiceNumber["Between_Value_2"])
+               
+                if Item:
+                    spos_invoice_ids = TC_SPOSInvoiceItems.objects.filter(Item__in=Item).values_list('Invoice', flat=True)
+                    SPOS_filter_args['id__in'] = spos_invoice_ids
+                    print(SPOS_filter_args)
+                # if EInvoice:
+                #     e_invoice_ids = TC_SPOSInvoiceUploads.objects.filter(EInvoiceCreatedOn__isnull=False).values_list('SPOSInvoice', flat=True)
+                #     SPOS_filter_args['id__in'] = e_invoice_ids if 'id__in' not in SPOS_filter_args else list(set(SPOS_filter_args['id__in']) & set(e_invoice_ids))
+                #     print(SPOS_filter_args) 
+                # if EWayBill:
+                #     e_waybill_ids = TC_SPOSInvoiceUploads.objects.filter(EWayBillCreatedOn__isnull=False).values_list('Invoice', flat=True)
+                #     SPOS_filter_args['id__in'] = e_waybill_ids if 'id__in' not in SPOS_filter_args else list(set(SPOS_filter_args['id__in']) & set(e_waybill_ids))
+                #     print(SPOS_filter_args)
                 SposInvoices_query = T_SPOSInvoices.objects.using('sweetpos_db').filter(IsDeleted = 0).filter(**SPOS_filter_args).order_by('-InvoiceDate').annotate(
                         Party_id=F('Party'),
-                        Customer_id=F('Customer'),
+                        Customer_id=F('Customer'),                        
                         Vehicle_id=F('Vehicle')).values(
                     'id', 'InvoiceDate','PaymentType', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal',
                     'RoundOffAmount', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id', 'Party_id',
                     'Vehicle_id', 'TCSAmount', 'Hide','MobileNo','CreatedBy'
                 )
-    
+                print(SposInvoices_query.query)
                 Spos_Invoices = []
                 for b in SposInvoices_query:
+                    # print("SHRUTI")
                     parties = M_Parties.objects.filter(id=Party).values('id', 'Name')
                     customers = M_Parties.objects.filter(id=b['Customer_id']).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
                     vehicle = M_Vehicles.objects.filter(id=b['Vehicle_id']).values('VehicleNumber')
@@ -338,6 +399,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     b['Identify_id'] = 2
                     b['VehicleNo'] = vehicle[0]['VehicleNumber'] if vehicle else ''
                     Spos_Invoices.append(b) 
+                    print(Spos_Invoices)
                 combined_invoices = []
                 
                 for aa in Invoices_query:
@@ -354,8 +416,13 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                             q = TC_InvoiceUploads.objects.filter(Invoice=a["id"])
                             Invoice_serializer = InvoiceUploadsSerializer(q, many=True).data
                         if a['Identify_id'] == 2:
-                            q=TC_SPOSInvoiceUploads.objects.filter(Invoice=a["id"])
-                            Invoice_serializer.extend(SPOSInvoiceSerializer(q, many=True).data)
+                            # q=TC_SPOSInvoiceUploads.objects.filter(Invoice=a["id"])
+                            # Invoice_serializer.extend(SPOSInvoiceSerializer(q, many=True).data)
+                            q = TC_SPOSInvoiceUploads.objects.filter(Invoice=a["id"])
+                            if Invoicedata.get("EInvoiceCreated", False):
+                                q = q.filter(EInvoiceCreatedOn__isnull=False)
+                            if Invoicedata.get("EWayBillCreated", False):
+                                q = q.filter(EWayBillCreatedOn__isnull=False)
 
                         if (Invoicedata['DashBoardMode'] == 1):
                             InvoiceListData.append({
@@ -402,6 +469,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                                 "MobileNo":a['MobileNo']
                                 
                             }) 
+                # print(InvoiceListData)
                 if InvoiceListData:
                     log_entry = create_transaction_logNew(request, Invoicedata, Party, 'From:'+FromDate+','+'To:'+ToDate, 35, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
