@@ -346,16 +346,18 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                     if not OrderQuery:
                         log_entry = create_transaction_logNew(request, 0, 0,"Records Not Found",29,0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Records Not Found', 'Data': []})
-                    else:
-                        item = ""
-                        OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True).data
-                        OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list,IsDeleted=0).order_by('Item')
-                        OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data                       
-                        Ordersquery = T_Orders.objects.filter(Customer_id=OrderSerializedata[0]['CustomerID']).values('id')
+                     # Check if GRN exists for any of the given OrderIDs
+                    grn_exists = TC_GRNReferences.objects.filter(Order_id__in=Order_list).exists()
+                    IsSave = 2 if grn_exists else 1
+                    item = ""
+                    OrderSerializedata = OrderSerializerForGrn(OrderQuery,many=True).data
+                    OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list,IsDeleted=0).order_by('Item')
+                    OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data                       
+                    Ordersquery = T_Orders.objects.filter(Customer_id=OrderSerializedata[0]['CustomerID']).values('id')
                         # Convert QuerySet to a list to make it JSON serializable
                         # query_list = list(query)
                         # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': query_list})
-                        for b in OrderItemSerializedata:
+                    for b in OrderItemSerializedata:
                                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': b})
                                 Item= b['Item']['id']
                                 Batchquery1 = TC_OrderItems.objects.filter(Item_id=Item, Order_id__in=Ordersquery).values('id')
@@ -416,17 +418,18 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                     "UnitDetails":UnitDetails
                                    
                                 })     
-                        OrderData.append({
+                    OrderData.append({
                             "Supplier": OrderSerializedata[0]['id'],
                             "SupplierName": OrderSerializedata[0]['SupplierName'],
                             "OrderAmount": OrderSerializedata[0]['OrderAmount'],
                             "Customer": OrderSerializedata[0]['CustomerID'],
                             "PriceListId":OrderSerializedata[0]['PriceListId'],
                             "InvoiceNumber":"",
+                            "IsSave": IsSave,
                             "OrderItem": OrderItemDetails                            
-                        })
-                        log_entry = create_transaction_logNew(request, OrderItemSerializedata, OrderSerializedata[0]['CustomerID'],'OrderItemDetails',73,0,0,0,OrderSerializedata[0]['id'])
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData[0]})
+                    })
+                    log_entry = create_transaction_logNew(request, OrderItemSerializedata, OrderSerializedata[0]['CustomerID'],'OrderItemDetails',73,0,0,0,OrderSerializedata[0]['id'])
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData[0]})
                     
                 elif Mode == 2: #Make GRN from VDCChallan
                     # CustomPrint("Shrutiiiiii")

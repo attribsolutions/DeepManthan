@@ -77,7 +77,7 @@ class M_PartiesFilterView(CreateAPIView):
 
                 elif(IsSCMCompany == 0):  # Admin
                                         
-                        if(RoleID == 16):
+                        if(RoleID == 16 or RoleID == 35):
                             
                             q0 = MC_PartySubParty.objects.filter(Party=PartyID).values('SubParty')
                        
