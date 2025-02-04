@@ -166,6 +166,7 @@ from .Views.V_Country import *
 from .Views.V_Scheme import *
 
 from .Views.V_POSToSAPExport import *
+from .Views.V_InvoiceToFTPforSAP import *
 
 
 # from .Views.V_FTP import *
@@ -790,7 +791,10 @@ urlpatterns = [
 
 #SAPExport:
               url(r'SAPExportDetails$',SAPExportViewDetails.as_view()), 
- 
+              url(r'InvoiceSAPExportDetails$',InvoiceSendToFTPForSAP.as_view()), 
+              
+#Cashier Details:
+              url(r'FranchisesCashierDetails$',FranchisesCashierList.as_view()), 
 
 
               

@@ -278,10 +278,10 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                 PaymentMode=Invoicedata['paymentMode'] 
                 InvoiceAmount=Invoicedata['invoiceAmount'] 
                 InvoiceNumber=Invoicedata['InvoiceNumber']
-                # Cashier=Invoicedata['cashier']
+                Cashier=Invoicedata['cashier']
                 Item=Invoicedata['Item']
-                # EInvoice=Invoicedata['EInvoiceCreated']
-                # EWayBill=Invoicedata['EWayBillCreated']
+                EInvoice = Invoicedata.get("EInvoice", {})
+                EWayBill = Invoicedata.get("EWayBill", {})
                 filter_args = {
                         'InvoiceDate__range': (FromDate, ToDate),
                         'Party': Party
@@ -315,6 +315,12 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         SPOS_filter_args['Customer__in'] = Customer  
                     else:
                         SPOS_filter_args['Customer'] = Customer  
+                if Cashier:
+                    if isinstance(Cashier, list):  
+                        SPOS_filter_args['CreatedBy__in'] = Cashier  
+                    else:
+                        SPOS_filter_args['CreatedBy'] = Cashier 
+                    
                 if PaymentMode:
                     # print("PaymentMode")
                     payment_filters = []  # Empty OR condition
@@ -356,14 +362,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     spos_invoice_ids = TC_SPOSInvoiceItems.objects.filter(Item__in=Item).values_list('Invoice', flat=True)
                     SPOS_filter_args['id__in'] = spos_invoice_ids
                     print(SPOS_filter_args)
-                # if EInvoice:
-                #     e_invoice_ids = TC_SPOSInvoiceUploads.objects.filter(EInvoiceCreatedOn__isnull=False).values_list('SPOSInvoice', flat=True)
-                #     SPOS_filter_args['id__in'] = e_invoice_ids if 'id__in' not in SPOS_filter_args else list(set(SPOS_filter_args['id__in']) & set(e_invoice_ids))
-                #     print(SPOS_filter_args) 
-                # if EWayBill:
-                #     e_waybill_ids = TC_SPOSInvoiceUploads.objects.filter(EWayBillCreatedOn__isnull=False).values_list('Invoice', flat=True)
-                #     SPOS_filter_args['id__in'] = e_waybill_ids if 'id__in' not in SPOS_filter_args else list(set(SPOS_filter_args['id__in']) & set(e_waybill_ids))
-                #     print(SPOS_filter_args)
+                
                 SposInvoices_query = T_SPOSInvoices.objects.using('sweetpos_db').filter(IsDeleted = 0).filter(**SPOS_filter_args).order_by('-InvoiceDate').annotate(
                         Party_id=F('Party'),
                         Customer_id=F('Customer'),                        
@@ -418,11 +417,18 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         if a['Identify_id'] == 2:
                             # q=TC_SPOSInvoiceUploads.objects.filter(Invoice=a["id"])
                             # Invoice_serializer.extend(SPOSInvoiceSerializer(q, many=True).data)
-                            q = TC_SPOSInvoiceUploads.objects.filter(Invoice=a["id"])
-                            if Invoicedata.get("EInvoiceCreated", False):
-                                q = q.filter(EInvoiceCreatedOn__isnull=False)
-                            if Invoicedata.get("EWayBillCreated", False):
-                                q = q.filter(EWayBillCreatedOn__isnull=False)
+                            if EInvoice.get("EInvoiceCreated", False) and not EInvoice.get("EInvoiceNotCreated", False):
+                                q = q.filter(EInvoiceCreatedOn__isnull=False)  # Only created
+
+                            elif not EInvoice.get("EInvoiceCreated", False) and EInvoice.get("EInvoiceNotCreated", False):
+                                q = q.filter(EInvoiceCreatedOn__isnull=True)   # Only not created
+
+                            # Apply E-Way Bill filters
+                            if EWayBill.get("EWayBillCreated", False) and not EWayBill.get("EWayBillNotCreated", False):
+                                q = q.filter(EWayBillCreatedOn__isnull=False)  # Only created
+
+                            elif not EWayBill.get("EWayBillCreated", False) and EWayBill.get("EWayBillNotCreated", False):
+                                q = q.filter(EWayBillCreatedOn__isnull=True)   # Only not created
 
                         if (Invoicedata['DashBoardMode'] == 1):
                             InvoiceListData.append({
@@ -1167,6 +1173,41 @@ class InvoiceBulkDeleteView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, invoice_data,0,'InvoiceIDsNotDeleted:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+        
+class FranchisesCashierList(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    
+    def post(self, request):
+        POSCashierdata = JSONParser().parse(request)
+        print(POSCashierdata)
+        try:
+            with transaction.atomic():
+                
+                Party = POSCashierdata['Party']
+                print(Party)               
+                FranchisesCashierQuery=M_Users.objects.raw(f''' Select M_Users.id ,M_Users.LoginName  
+                from MC_EmployeeParties 
+                JOIN M_Users ON M_Users.Employee_id=MC_EmployeeParties.Employee_id
+                where Party_id  in(Select id from M_Parties where PartyType_id=19) and party_id={Party}''') 
+                print(FranchisesCashierQuery.query)               
+                if FranchisesCashierQuery:
+                    print("Shruti")
+                    CashierDetails=list()
+                    for row in FranchisesCashierQuery:
+                        print(row)
+                        CashierDetails.append({                            
+                            "value":row.id,
+                            "label":row.LoginName 
+                        })
+                    print(CashierDetails)
+                    log_entry = create_transaction_logNew( request, POSCashierdata, Party, '', 441, 0,0,0,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': CashierDetails})
+                log_entry = create_transaction_logNew( request, POSCashierdata, Party, 'Data Not Found', 441, 0,0,0,0)           
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+
+        except Exception as e:
+            log_entry = create_transaction_logNew( request, POSCashierdata, 0, 'Cashier:'+str(e), 33,0,0,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 
