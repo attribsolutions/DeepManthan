@@ -337,8 +337,8 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                 OrderItemDetails = list()
                 
                 # Check if GRN exists for any of the given OrderIDs
-                    grn_exists = TC_GRNReferences.objects.filter(Order_id__in=Order_list).exists()
-                    IsSave = 2 if grn_exists else 1
+                grn_exists = TC_GRNReferences.objects.filter(Order_id__in=Order_list).exists()
+                IsSave = 2 if grn_exists else 1
                
                 if Mode == 1:
                     OrderQuery=T_Orders.objects.raw('''SELECT T_Orders.Supplier_id id,M_Parties.Name SupplierName,sum(T_Orders.OrderAmount) OrderAmount ,T_Orders.Customer_id CustomerID,P.PriceList_id PriceListId
