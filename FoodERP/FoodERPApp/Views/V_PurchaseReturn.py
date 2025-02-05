@@ -24,9 +24,10 @@ class PurchaseReturnListView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request, id=0):
+        Returndata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Returndata = JSONParser().parse(request)
+                
                 FromDate = Returndata['FromDate']
                 ToDate = Returndata['ToDate']
                 Customer = Returndata['CustomerID']
@@ -60,7 +61,7 @@ class PurchaseReturnListView(CreateAPIView):
           
                 query = T_PurchaseReturn.objects.filter(ReturnDate__range=[FromDate, ToDate]).filter( cust ).filter(par)
                 
-                # print(query.query)
+                # CustomPrint(query.query)
                 if query:
                     Return_serializer = PurchaseReturnSerializerSecond(query, many=True).data
                     ReturnListData = list()
@@ -240,6 +241,7 @@ class PurchaseReturnView(CreateAPIView):
     @transaction.atomic()
     def post(self, request,format=None):
         try:
+            
             with transaction.atomic():
                 
                 '''Image Upload Code start'''
@@ -264,26 +266,32 @@ class PurchaseReturnView(CreateAPIView):
                     "Mode" : request.POST.get('Mode'),
                     "PurchaseReturnReferences" : purchase_return_references,
                     "ReturnItems" : return_items
-                }
+                } 
                 
                 '''Image Upload code END'''
                 # PurchaseReturndata = JSONParser().parse(request)
                 Party = PurchaseReturndata['Party']
                 Date = PurchaseReturndata['ReturnDate']
-                Mode = PurchaseReturndata['Mode']
-                
-
+                Mode = PurchaseReturndata['Mode'] 
+                customerid=PurchaseReturndata['Customer']
+               
                 c = GetMaxNumber.GetPurchaseReturnNumber(Party,Date)
-                PurchaseReturndata['ReturnNo'] = str(c)
-                if Mode == 1: # Sales Return
-                    d= 'SRN'
-                else:
-                    d = GetPrifix.GetPurchaseReturnPrifix(Party)
-                    
-                PurchaseReturndata['FullReturnNumber'] = str(d)+""+str(c)
-
+                
+                PurchaseReturndata['ReturnNo'] = str(c)               
+               
+                if (Mode == str(1)): # Sales Return    
+                    # d= 'SRN'
+                    d = GetPrifix.GetPurchaseReturnPrifix(Party) 
+                else :                   
+                    d = GetPrifix.GetPurchaseReturnPrifix(customerid)  
+                 
+                #  comment for Prifix get None
+                # PurchaseReturndata['FullReturnNumber'] = str(d)+""+str(c)
+                PurchaseReturndata['FullReturnNumber'] = (str(d) if d is not None else "") + str(c)
+                # print("PurchaseReturndata",PurchaseReturndata)
+                
                 item = ""
-
+                
                 query = T_PurchaseReturn.objects.filter(Party_id=Party).values('id')
                 O_BatchWiseLiveStockList=list()
                 O_LiveBatchesList=list()
@@ -298,7 +306,7 @@ class PurchaseReturnView(CreateAPIView):
                         img['Image']=file 
                        
                     '''Image Upload Code End'''
-                    
+            
                     SaleableItemReason=MC_SettingsDetails.objects.filter(SettingID=14).values('Value')
                     value_str = SaleableItemReason[0]['Value']
                     # Split the string by ',' and convert the resulting substrings to integers
@@ -310,6 +318,7 @@ class PurchaseReturnView(CreateAPIView):
                              
                     query1 = TC_PurchaseReturnItems.objects.filter(Item_id=a['Item'], BatchDate=date.today(), PurchaseReturn_id__in=query).values('id')
                     query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
+                    
                     if(item == ""):
                         item = a['Item']
                         b = query1.count()
@@ -499,18 +508,45 @@ class ReturnItemAddView(CreateAPIView):
     # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self, request, id=0):
+    def get(self, request, id=0,Party=0):
         try:
             with transaction.atomic():
-                query = M_Items.objects.filter(id=id)
-                if query.exists():
+                # query = M_Items.objects.filter(id=id).values('id','Name')
+                query = M_Items.objects.raw('''select id ,name ,
+                                                round(GetTodaysDateMRP(%s,curdate(),2,0,0,0),2)MRPValue,                                                
+                                                round(GetTodaysDateRate(%s,curdate(),0,0,2,0),2)RateValue,
+                                                round(GSTHsnCodeMaster(%s,curdate(),2,0,0),2)GSTPercentage,
+                                                GetTodaysDateMRP(%s,curdate(),1,0,0,0)MRPID,
+                                                GSTHsnCodeMaster(%s,curdate(),1,0,0)GSTID,
+                                                GetTodaysDateRate(%s,curdate(),0,0,1,0)RateID
+                                                from M_Items where id =%s''',[id,id,id,id,id,id,id])
+                # CustomPrint(query.query)
+                
+                if query:
                     # return JsonResponse({'query':  str(Itemsquery.query)})
-                    Itemsdata = ItemSerializerSecond(query, many=True).data
+                    # Itemsdata = M_ItemsSerializer02(query, many=True).data
                     # return JsonResponse({'query':  Itemsdata})
                     Itemlist = list()
                     InvoiceItems=list()
-                    for a in Itemsdata:
-                        Item=a['id']
+                    ItemGSTDetails = list()
+                    ItemMRPDetails = list()
+                    ItemRateDetails=list()
+                    for a in query:
+                        Item=a.id
+                        ItemMRPDetails.append({
+                                        "MRP": a.MRPID,
+                                        "MRPValue": a.MRPValue,
+                                    })
+                        ItemRateDetails.append({
+                                        "Rate": a.RateID,
+                                        "RateValue": a.RateValue,
+                                         })                        
+                        
+                        ItemGSTDetails.append({
+                                "GST": a.GSTID,
+                                "GSTPercentage": a.GSTPercentage,   
+                            })
+                        
                         Unitquery = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0)
                         if Unitquery.exists():
                             Unitdata = Mc_ItemUnitSerializerThird(Unitquery, many=True).data
@@ -522,37 +558,39 @@ class ReturnItemAddView(CreateAPIView):
                                 "IsBase": c['IsBase'],
                                 "UnitName": c['BaseUnitConversion'],
                             })
+
                         
-                        MRPquery = M_MRPMaster.objects.filter(Item_id=Item).order_by('-id')
-                        if MRPquery.exists():
-                            MRPdata = ItemMRPSerializerSecond(MRPquery, many=True).data
-                            ItemMRPDetails = list()
-                            unique_MRPs = set()
+                        # MRPquery = M_MRPMaster.objects.filter(Item_id=Item).order_by('-id')
+                        # if MRPquery.exists():
+                        #     MRPdata = ItemMRPSerializerSecond(MRPquery, many=True).data
+                        #     ItemMRPDetails = list()
+                        #     unique_MRPs = set()
                             
-                            for d in MRPdata:
-                                MRPs = d['MRP']
-                                if MRPs not in unique_MRPs:
-                                    ItemMRPDetails.append({
-                                        "MRP": d['id'],
-                                        "MRPValue": MRPs,
-                                    })
-                                    unique_MRPs.add(MRPs)
+                        #     for d in MRPdata:
+                        #         MRPs = d['MRP']
+                        #         if MRPs not in unique_MRPs:
+                        #             ItemMRPDetails.append({
+                        #                 "MRP": d['id'],
+                        #                 "MRPValue": MRPs,
+                        #             })
+                        #             unique_MRPs.add(MRPs)
                         
-                        GSTquery = M_GSTHSNCode.objects.filter(Item_id=Item).order_by('-id')[:3] 
-                        if GSTquery.exists():
-                            Gstdata = ItemGSTHSNSerializerSecond(GSTquery, many=True).data
-                            ItemGSTDetails = list()
-                            for e in Gstdata:
-                                ItemGSTDetails.append({
-                                "GST": e['id'],
-                                "GSTPercentage": e['GSTPercentage'],   
-                            }) 
+                        # GSTquery = M_GSTHSNCode.objects.filter(Item_id=Item).order_by('-id')[:3] 
+                        # if GSTquery.exists():
+                        #     Gstdata = ItemGSTHSNSerializerSecond(GSTquery, many=True).data
+                            
+                        #     for e in Gstdata:
+                        #         ItemGSTDetails.append({
+                        #         "GST": e['id'],
+                        #         "GSTPercentage": e['GSTPercentage'],   
+                        #     }) 
                         InvoiceItems.append({
-                            "Item": a['id'],
-                            "ItemName": a['Name'],
+                            "Item": a.id,
+                            "ItemName": a.Name,
                             "ItemUnitDetails": ItemUnitDetails, 
                             "ItemMRPDetails":ItemMRPDetails,
-                            "ItemGSTDetails":ItemGSTDetails
+                            "ItemGSTDetails":ItemGSTDetails,
+                            "ItemRateDetails":ItemRateDetails
                         })
                     
                     Itemlist.append({"InvoiceItems":InvoiceItems}) 
@@ -582,17 +620,26 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                 ItemID = PurchaseReturndata['ItemID']
                 BatchCode = PurchaseReturndata['BatchCode']
                 CustomerID =PurchaseReturndata['Customer']
-
+                PartyID = PurchaseReturndata['Party']
+                
                 Itemquery = M_Items.objects.filter(id=ItemID).values("id","Name")
                 Item =Itemquery[0]["id"]
                 Unitquery = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0,UnitID_id=1).values("id")
-                MRPquery = M_MRPMaster.objects.filter(Item_id=Item).order_by('-id')
+                
+                
+                # MRPquery = M_MRPMaster.objects.filter(Item_id=Item ).order_by('-id')
+                # if not MRPquery:
+                #     MRPquery = M_MRPMaster.objects.filter(Item_id=Item ).order_by('-id')
+                
+                MRPquery=MRPListFun(Item,CustomerID,0)
+                # print(MRPquery)
                 if MRPquery.exists():
-                    MRPdata = ItemMRPSerializerSecond(MRPquery, many=True).data
+                    # MRPdata = ItemMRPSerializerSecond(MRPquery, many=True).data
                     ItemMRPDetails = list()
                     unique_MRPs = set()
-                    for d in MRPdata:
+                    for d in MRPquery:
                         MRPs = d['MRP']
+                        # print(MRPs)
                         CalculatedRateusingMRPMargin=RateCalculationFunction(0,Item,CustomerID,0,1,0,0,MRPs).RateWithGST()
                         Rate=CalculatedRateusingMRPMargin[0]["NoRatewithOutGST"]
                         if MRPs not in unique_MRPs:
@@ -612,11 +659,12 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                     #     "Rate" : round(Rate,2),
                     # })
 
-                GSTquery = M_GSTHSNCode.objects.filter(Item_id=Item).order_by('-id')[:3] 
+                # GSTquery = M_GSTHSNCode.objects.filter(Item_id=Item).order_by('-id')[:3] 
+                GSTquery=GSTListFun(Item,CustomerID,0)
                 if GSTquery.exists():
-                    Gstdata = ItemGSTHSNSerializerSecond(GSTquery, many=True).data
+                    # Gstdata = ItemGSTHSNSerializerSecond(GSTquery, many=True).data
                     ItemGSTDetails = list()
-                    for e in Gstdata:
+                    for e in GSTquery:
                         ItemGSTDetails.append({
                         "GST": e['id'],
                         "GSTPercentage": e['GSTPercentage'],   
@@ -632,7 +680,7 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                     
                     for ad in StockQtySerialize_data:
                         Rate=RateCalculationFunction(ad['LiveBatche']['id'],ad['Item']['id'],CustomerID,0,1,0,0).RateWithGST()
-                        # print(Rate)
+                        # CustomPrint(Rate)
 
                         if(ad['LiveBatche']['MRP']['id'] is None):
                             MRPValue=ad['LiveBatche']['MRPValue']
@@ -744,7 +792,7 @@ class SalesReturnconsolidatePurchaseReturnView(CreateAPIView):
                     for b in PurchaseReturnSerializer:
                         Rate=RateCalculationFunction(0,b['Item']['id'],Party,0,1,0,0,b['MRPValue']).RateWithGST()
                         Imagequery = TC_PurchaseReturnItemImages.objects.filter(PurchaseReturnItem_id=b['id'])
-                        # print(query.query)
+                        # CustomPrint(query.query)
                         ReturnItemImages = list()
                         if Imagequery.exists():
                             ReturnImagesdata = PurchaseReturnItemImageSerializer2(Imagequery, many=True).data

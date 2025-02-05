@@ -5,50 +5,53 @@ from rest_framework.permissions import IsAuthenticated
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_GRNs import *
-from ..Serializer.S_Challan import *
 from ..Serializer.S_Bom import * 
 from ..Serializer.S_Invoices import * 
+from ..Serializer.S_Challan import *
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 from ..models import  *
+
 
 class ChallanItemsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
     @transaction.atomic()
     def post(self, request, id=0 ):
+        ChallanitemsData = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                ChallanitemsData = JSONParser().parse(request)
                 Company=ChallanitemsData['Company']
                 Query = MC_BillOfMaterialItems.objects.filter(BOM__IsVDCItem=1,BOM__Company=Company).select_related('BOM','Item').values('Item').distinct()
+                CustomPrint(Query.query)
                 ItemList = list()
                 for a in Query:
                     ItemList.append(a['Item'])
                 y=tuple(ItemList)
                 Itemsquery = M_Items.objects.filter(id__in=y,isActive=1)
+                CustomPrint(Itemsquery.query)
                 Itemsdata = M_ItemsSerializer01(Itemsquery,many=True).data    
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data':Itemsdata})      
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
 class ChallanItemStockView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
     @transaction.atomic()
     def post(self, request, id=0 ):
+        ChallanItemData = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                ChallanItemData = JSONParser().parse(request)
                 Item = ChallanItemData['Item']
                 Party = ChallanItemData['Party']
                         
-                obatchwisestockquery= O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=Party,BaseUnitQuantity__gt=0)
-              
-                if obatchwisestockquery == "":
+                obatchwisestockquery= O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=Party,BaseUnitQuantity__gt=0)                
+                if obatchwisestockquery == "":                    
                     StockQtySerialize_data =[]
-                else: 
+                else:                     
                     StockQtySerialize_data = StockQtyserializerForInvoice(obatchwisestockquery, many=True).data
                     stockDatalist = list()
+                    # CustomPrint(StockQtySerialize_data)
                     for d in StockQtySerialize_data:
                         
                         stockDatalist.append({
@@ -66,125 +69,147 @@ class ChallanItemStockView(CreateAPIView):
                             "MRPValue": d['LiveBatche']['MRP']['MRP'],
                             "GSTPercentage" : d['LiveBatche']['GST']['GSTPercentage'],
                             "GST": d['LiveBatche']['GST']['id'],
-                            "HSNCode": d['LiveBatche']['GST']['HSNCode'],
+                            # "HSNCode": d['LiveBatche']['GST']['HSNCode'],
                             "GSTPercentage": d['LiveBatche']['GST']['GSTPercentage'],
                             "UnitName":d['Unit']['UnitID'], 
                             "Unit":d['Unit']['BaseUnitConversion'], 
                             "BaseUnitQuantity":d['BaseUnitQuantity'], 
                             }) 
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': stockDatalist})           
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': stockDatalist})   
+                    # CustomPrint(stockDatalist)        
         except Exception as e:
             
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+        
 class ChallanView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def post(self, request, id=0):
+        Challandata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Challandata = JSONParser().parse(request)
-                GRN = Challandata['GRN']
-                if GRN == "":
+                # GRN = Challandata['GRN']
+                # if GRN == "":
                     ChallanDate = Challandata['ChallanDate']
                     Party = Challandata['Party']
                     a = GetMaxNumber.GetChallanNumber(Party,ChallanDate)
                     Challandata['ChallanNumber'] = a
                     b = GetPrifix.GetChallanPrifix(Party)
-                    Challandata['FullChallanNumber'] = str(b)+""+str(a)
+                    Challandata['FullChallanNumber'] = b+""+str(a)
+                    CustomPrint(Challandata)
                     ChallanItems = Challandata['ChallanItems']
-        
+                    # CustomPrint(ChallanItems)
+                    # CustomPrint("Shruti")
                     BatchWiseLiveStockList=list()
+                    CustomPrint(ChallanItems)
                     for ChallanItem in ChallanItems:
+                        CustomPrint(ChallanItem['Item'])
+                        # CustomPrint(ChallanItem['Quantity'])
+                        # CustomPrint(ChallanItem['BaseUnitQuantity'])
+                        # CustomPrint(ChallanItem['BatchID'])
+                        # CustomPrint(Challandata['Customer'])
+                        # CustomPrint("FFFFFFFF")                                              
+                        BaseUnitQuantity=UnitwiseQuantityConversion(ChallanItem['Item'],ChallanItem['Quantity'],ChallanItem['Unit'],0,0,0,0).GetBaseUnitQuantity()
+                        ChallanItem['BaseUnitQuantity'] =  round(BaseUnitQuantity,3) 
+                        # QtyInNo=UnitwiseQuantityConversion(ChallanItem['Item'],ChallanItem['Quantity'],ChallanItem['Unit'],0,0,1,0).ConvertintoSelectedUnit()
+                        # ChallanItem['QtyInNo'] =  float(QtyInNo)
+                        # QtyInKg=UnitwiseQuantityConversion(ChallanItem['Item'],ChallanItem['Quantity'],ChallanItem['Unit'],0,0,2,0).ConvertintoSelectedUnit()
+                        # ChallanItem['QtyInKg'] =  float(QtyInKg)
+                        # QtyInBox=UnitwiseQuantityConversion(ChallanItem['Item'],ChallanItem['Quantity'],ChallanItem['Unit'],0,0,4,0).ConvertintoSelectedUnit()
+                        # ChallanItem['QtyInBox'] = float(QtyInBox)
                         BatchWiseLiveStockList.append({
                             "Item" : ChallanItem['Item'],
                             "Quantity" : ChallanItem['Quantity'],
                             "BaseUnitQuantity" : ChallanItem['BaseUnitQuantity'],
-                            "LiveBatche" : ChallanItem['BatchID'],
-                            "Item" : ChallanItem['Item'],
-                            "Party" : ChallanItem['Party'],
+                            "LiveBatche" : ChallanItem['BatchID'],                           
+                            "Party" : Party,
+                            # "Customer:":Challandata['Customer'],
                         })
-                        
+                    CustomPrint(BatchWiseLiveStockList)
                     Challandata.update({"BatchWiseLiveStockGRNID":BatchWiseLiveStockList}) 
-                    Challan_serializer = ChallanSerializer(data=Challandata)
+                    # CustomPrint(Challandata)
+                    Challan_serializer = ChallanSerializer(data=Challandata) 
+                    # CustomPrint(Challan_serializer)                  
                     if Challan_serializer.is_valid():
                         # return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.data, 'Data':[]})
                         Challan_serializer.save()
-                        return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Challan Save Successfully', 'Data':[]})
+                        return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'IB Sales Order Save Successfully', 'Data':[]})
                     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.errors, 'Data':[]})
-                else:
+                # else:
    
-                    GRNdata = T_GRNs.objects.get(id=GRN)
-                    GRN_serializer = T_GRNSerializerForGETSecond(GRNdata).data
-                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRN_serializer})
-                    GRNItemListData = list()
-                    for b in GRN_serializer['GRNItems']:
-                        GRNItemListData.append({
-                            "Item": b['Item']['id'],
-                            "ItemName": b['Item']['Name'],
-                            "Quantity": b['Quantity'],
-                            "Unit": b['Unit']['id'],
-                            "UnitName": b['Unit']['BaseUnitConversion'],
-                            "BaseUnitQuantity": b['BaseUnitQuantity'],
-                            "MRP": b['MRP'],
-                            "ReferenceRate": b['ReferenceRate'],
-                            "Rate": b['Rate'],
-                            "BasicAmount": b['BasicAmount'],
-                            "TaxType": b['TaxType'],
-                            "GST": b['GST']['id'],
-                            "GSTPercentage": b['GST']['GSTPercentage'],
-                            "HSNCode": b['GST']['HSNCode'],
-                            "GSTAmount": b['GSTAmount'],
-                            "Amount": b['Amount'],
-                            "DiscountType": b['DiscountType'],
-                            "Discount": b['Discount'],
-                            "DiscountAmount": b['DiscountAmount'],
-                            "CGST": b['CGST'],
-                            "SGST": b['SGST'],
-                            "IGST": b['IGST'],
-                            "CGSTPercentage": b['CGSTPercentage'],
-                            "SGSTPercentage": b['SGSTPercentage'],
-                            "IGSTPercentage": b['IGSTPercentage'],
-                            "BatchDate": b['BatchDate'],
-                            "BatchCode": b['BatchCode'],
-                            "SystemBatchDate": b['SystemBatchDate'],
-                            "SystemBatchCode": b['SystemBatchCode'],                            
-                        })
-                    GRNListData = list()
-                    a = GRN_serializer
-                    GRNListData.append({
-                        "GRN": a['id'],
-                        "ChallanDate": a['GRNDate'],
-                        "Party": a['Customer']['id'],
-                        "PartyName": a['Customer']['Name'],
-                        "GrandTotal": a['GrandTotal'],
-                        "Customer": a['Party']['id'],
-                        "CustomerName": a['Party']['Name'],
-                        "CreatedBy": a['CreatedBy'],
-                        "UpdatedBy": a['UpdatedBy'],
-                        "RoundOffAmount":"",
-                        "ChallanItems": GRNItemListData,
-                        "BatchWiseLiveStockGRNID":a['BatchWiseLiveStockGRNID']
-                    })
-                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData[0]})
-                    Party = GRNListData[0]['Party']
-                    ChallanDate = GRNListData[0]['ChallanDate']
-                    # ==========================Get Max Invoice Number=====================================================
-                    a = GetMaxNumber.GetChallanNumber(Party,ChallanDate)
-                    GRNListData[0]['ChallanNumber'] = a
-                    b = GetPrifix.GetChallanPrifix(Party)
-                    GRNListData[0]['FullChallanNumber'] = str(b)+""+str(a)
-                    #==================================================================================================
-                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData[0]}) 
-                    Challan_serializer = ChallanSerializer(data=GRNListData[0])
-                    if Challan_serializer.is_valid():
-                        # return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.data, 'Data':[]})
-                        Challan_serializer.save()
-                        return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Challan Save Successfully', 'Data':[]})
-                    return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.errors, 'Data':[]})
+                #     GRNdata = T_GRNs.objects.get(id=GRN)
+                #     GRN_serializer = T_GRNSerializerForGETSecond(GRNdata).data
+                #     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRN_serializer})
+                #     GRNItemListData = list()
+                #     for b in GRN_serializer['GRNItems']:
+                #         GRNItemListData.append({
+                #             "Item": b['Item']['id'],
+                #             "ItemName": b['Item']['Name'],
+                #             "Quantity": b['Quantity'],
+                #             "Unit": b['Unit']['id'],
+                #             "UnitName": b['Unit']['BaseUnitConversion'],
+                #             "BaseUnitQuantity": b['BaseUnitQuantity'],
+                #             "MRP": b['MRP'],
+                #             "ReferenceRate": b['ReferenceRate'],
+                #             "Rate": b['Rate'],
+                #             "BasicAmount": b['BasicAmount'],
+                #             "TaxType": b['TaxType'],
+                #             "GST": b['GST']['id'],
+                #             "GSTPercentage": b['GST']['GSTPercentage'],
+                #             "HSNCode": b['GST']['HSNCode'],
+                #             "GSTAmount": b['GSTAmount'],
+                #             "Amount": b['Amount'],
+                #             "DiscountType": b['DiscountType'],
+                #             "Discount": b['Discount'],
+                #             "DiscountAmount": b['DiscountAmount'],
+                #             "CGST": b['CGST'],
+                #             "SGST": b['SGST'],
+                #             "IGST": b['IGST'],
+                #             "CGSTPercentage": b['CGSTPercentage'],
+                #             "SGSTPercentage": b['SGSTPercentage'],
+                #             "IGSTPercentage": b['IGSTPercentage'],
+                #             "BatchDate": b['BatchDate'],
+                #             "BatchCode": b['BatchCode'],
+                #             "SystemBatchDate": b['SystemBatchDate'],
+                #             "SystemBatchCode": b['SystemBatchCode'],  
+                                                  
+                #         })
+                #     GRNListData = list()
+                #     a = GRN_serializer
+                #     GRNListData.append({
+                #         "GRN": a['id'],
+                #         "ChallanDate": a['GRNDate'],
+                #         "Party": a['Customer']['id'],
+                #         "PartyName": a['Customer']['Name'],
+                #         "GrandTotal": a['GrandTotal'],
+                #         "Customer": a['Party']['id'],
+                #         "CustomerName": a['Party']['Name'],
+                #         "CreatedBy": a['CreatedBy'],
+                #         "UpdatedBy": a['UpdatedBy'],
+                #         "RoundOffAmount":"",
+                #         "ChallanItems": GRNItemListData,
+                #         "BatchWiseLiveStockGRNID":a['BatchWiseLiveStockGRNID']
+                #     })
+                #     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData[0]})
+                #     Party = GRNListData[0]['Party']
+                #     ChallanDate = GRNListData[0]['ChallanDate']
+                #     # ==========================Get Max Invoice Number=====================================================
+                #     a = GetMaxNumber.GetChallanNumber(Party,ChallanDate)
+                #     GRNListData[0]['ChallanNumber'] = a
+                #     b = GetPrifix.GetChallanPrifix(Party)
+                #     GRNListData[0]['FullChallanNumber'] = b+""+str(a)
+                #     #==================================================================================================
+                #     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData[0]}) 
+                #     Challan_serializer = ChallanSerializer(data=GRNListData[0])
+                #     if Challan_serializer.is_valid():
+                #         # return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.data, 'Data':[]})
+                #         Challan_serializer.save()
+                #         return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Challan Save Successfully', 'Data':[]})
+                #     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.errors, 'Data':[]})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': e.__dict__, 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data': []})
  
  
         
@@ -204,11 +229,102 @@ class ChallanView(CreateAPIView):
                     UpdateQuery=O_BatchWiseLiveStock.objects.filter(LiveBatche=a['LiveBatch']).update(BaseUnitQuantity = float(selectQuery[0]['BaseUnitQuantity'])+float(BaseUnitQuantity11))
                 Invoicedata = T_Challan.objects.get(id=id)
                 Invoicedata.delete()
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Challan Delete Successfully', 'Data':[]})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'IB Sales Order Delete Successfully', 'Data':[]})
         except T_Challan.DoesNotExist:
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Challan Not available', 'Data': []})
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'IB Sales Order Not available', 'Data': []})
         except IntegrityError:   
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Challan used in another table', 'Data': []})
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'IB Sales Order used in another table', 'Data': []})
+
+    @transaction.atomic()
+    def get(self, request, id=0):
+        try:
+            with transaction.atomic():
+                
+                BranchInvoiceQuery = T_Challan.objects.filter(id=id)
+                CustomPrint(BranchInvoiceQuery.query)
+                
+                if BranchInvoiceQuery.exists():
+                    BranchInvoiceSerializedata = ChallanSerializerSecond(BranchInvoiceQuery, many=True).data
+                    CustomPrint(BranchInvoiceSerializedata)
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': BranchInvoiceSerializedata})
+                    BranchInvoiceData = list()
+                    for a in BranchInvoiceSerializedata:
+                        BranchInvoiceItemDetails = list()
+                        InvoiceItemDetails = list()                       
+                            
+                        for b in a['ChallanItems']:
+                            aaaa=UnitwiseQuantityConversion(b['Item']['id'],b['Quantity'],b['Unit']['id'],0,0,0,0).GetConvertingBaseUnitQtyBaseUnitName()
+                            if (aaaa == b['Unit']['UnitID']['Name']):
+                                bb=""
+                            else:
+                                bb=aaaa   
+                            BranchInvoiceItemDetails.append({
+                                "Item": b['Item']['id'],
+                                "ItemName": b['Item']['Name'],
+                                "Quantity": b['Quantity'],
+                                "MRP": b['MRP']['id'],
+                                "MRPValue": 0,
+                                "Rate": b['Rate'],
+                                "TaxType": b['TaxType'],
+                                "Unit": b['Unit']['id'],
+                                "UnitName": bb,
+                                "BaseUnitQuantity": b['BaseUnitQuantity'],
+                                "PrimaryUnitName":b['Unit']['UnitID']['Name'],
+                                # "GSTPercentage": b['GSTPercentage'],
+                                "BasicAmount": b['BasicAmount'],
+                                "GSTAmount": b['GSTAmount'],
+                                "CGST": b['CGST'],
+                                "SGST": b['SGST'],
+                                "IGST": b['IGST'],
+                                "CGSTPercentage": b['CGSTPercentage'],
+                                "SGSTPercentage": b['SGSTPercentage'],
+                                "IGSTPercentage": b['IGSTPercentage'],
+                                "Amount": b['Amount'],
+                                "BatchCode": b['BatchCode'],
+                                "BatchDate": b['BatchDate'],
+                                "Discount":0,
+                                "DiscountAmount":0
+                            })                          
+                        # Address = GetPartyAddressDetails(
+                        #             a['Party']['id']).PartyAddress()
+                                
+                        # CustomPrint(Address)
+                        BranchInvoiceData.append({
+                            "id": a['id'],
+                            "InvoiceDate": a['ChallanDate'],
+                            "InvoiceNumber": a['ChallanNumber'],
+                            "FullInvoiceNumber": a['FullChallanNumber'],
+                            "GrandTotal": a['GrandTotal'],
+                            # "RoundOffAmount":a['RoundOffAmount'],
+                            "Customer": a['Customer']['id'],
+                            "CustomerName": a['Customer']['Name'],
+                            "CustomerGSTIN": a['Customer']['GSTIN'],
+                            "Party": a['Party']['id'],
+                            "PartyName": a['Party']['Name'],
+                            "PartyGSTIN": a['Party']['GSTIN'],
+                             "Customer": a['Customer']['id'],
+                            "CustomerName": a['Customer']['Name'],
+                            "CustomerGSTIN": a['Customer']['GSTIN'],
+                            "CustomerMobileNo": a['Customer']['MobileNo'],
+                            "Party": a['Party']['id'],
+                            "PartyName": a['Party']['Name'],
+                            "PartyGSTIN": a['Party']['GSTIN'],
+                            "PartyMobileNo": a['Party']['MobileNo'],
+                            "PartyFSSAINo": a['Party']['PartyAddress'][0]['FSSAINo'],
+                            "CustomerFSSAINo": a['Customer']['PartyAddress'][0]['FSSAINo'],
+                            "PartyState": a['Party']['State']['Name'],
+                            "CustomerState": a['Customer']['State']['Name'],
+                            "PartyAddress": a['Party']['PartyAddress'][0]['Address'],                            
+                            "CustomerAddress":  a['Customer']['PartyAddress'][0]['Address'],                            
+                            "DriverName":"",
+                            "VehicleNo": "",
+                            "InvoiceItems": BranchInvoiceItemDetails,
+                        })
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': BranchInvoiceData[0]})
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Branch Invoice Data Not available ', 'Data': []})
+        except Exception as e:
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})                  
+
 
 
 class ChallanListFilterView(CreateAPIView):
@@ -217,9 +333,9 @@ class ChallanListFilterView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request, id=0):
+        Challandata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Challandata = JSONParser().parse(request)
                 FromDate = Challandata['FromDate']
                 ToDate = Challandata['ToDate']
                 Customer = Challandata['Customer']
@@ -248,4 +364,125 @@ class ChallanListFilterView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ChallanListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})        
+        
+        
+class DemandDetailsForChallan(CreateAPIView):
+        
+    permission_classes = (IsAuthenticated,)   
+
+    def post(self, request, id=0):
+        Demanddata = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                # CustomPrint(Demanddata)
+                Party = Demanddata['Party']                
+                DemandIDs = Demanddata['OrderIDs']
+                DemandDate=Demanddata['DemandDate']
+                # CustomPrint(DemandDate)
+                # Demand_list = DemandIDs.split(",")    
+                Demand_list = DemandIDs              
+                Demanddata = list() 
+                CustomerName1 = M_Parties.objects.filter(id=Party).values('Name')
+                CustomerName1=CustomerName1[0]['Name']
+                for DemandID in Demand_list: 
+                    DemandItemDetails = list()
+                    DemandItemQuery=TC_DemandItems.objects.raw(f'''SELECT 1 as id,TC_DemandItems.ID DemandID,M_Items.id ItemID,M_Items.Name ItemName,TC_DemandItems.Quantity,Rate,Unit_id,
+                    MC_ItemUnits.BaseUnitConversion,MC_ItemUnits.UnitID_id MUnitID,MC_ItemUnits.BaseUnitQuantity ConversionUnit,TC_DemandItems.BaseUnitQuantity,
+                    TC_DemandItems.GST_id,M_GSTHSNCode.HSNCode,M_MRPMaster.MRP ItemMRP,
+                    TC_DemandItems.GSTAmount,TC_DemandItems.CGST,TC_DemandItems.SGST,TC_DemandItems.IGST,TC_DemandItems.CGSTPercentage,TC_DemandItems.SGSTPercentage,
+                    TC_DemandItems.IGSTPercentage,TC_DemandItems.Amount,TC_DemandItems.BasicAmount, 
+                    M_Parties.Name CustomerName,M_Parties.PAN,
+                    T_Demands.DemandDate,M_Parties.id CustomerID,M_Parties.GSTIN,T_Demands.FullDemandNumber FROM  TC_DemandItems
+                    JOIN T_Demands ON T_Demands.id=TC_DemandItems.Demand_id
+                    JOIN M_Parties on M_Parties.id=T_Demands.Customer_id
+                    JOIN M_Items ON M_Items.id=TC_DemandItems.Item_id
+                    JOIN MC_ItemUnits on MC_ItemUnits.id=TC_DemandItems.Unit_id
+                    JOIN M_GSTHSNCode on M_GSTHSNCode.id=TC_DemandItems.GST_id
+                    JOIN M_MRPMaster ON M_MRPMaster.id=TC_DemandItems.MRP_id
+                    WHERE TC_DemandItems.Demand_id={DemandIDs} and TC_DemandItems.IsDeleted=0''')
+                    # CustomPrint(DemandItemQuery.query)
+                            
+                    for b in DemandItemQuery:                       
+                        # CustomPrint(b)
+                        Customer=Party
+                        Item= b.ItemID                         
+                        obatchwisestockquery= O_BatchWiseLiveStock.objects.raw(f'''SELECT 1 as id ,BatchDate,BaseUnitConversion,BatchCode,SystemBatchDate,SystemBatchCode,Round(GetTodaysDateRate({Item},'{DemandDate}',{Customer},0,2),2) AS Rate, O_BatchWiseLiveStock.id, O_BatchWiseLiveStock.Quantity, O_BatchWiseLiveStock.OriginalBaseUnitQuantity, O_BatchWiseLiveStock.BaseUnitQuantity, O_BatchWiseLiveStock.IsDamagePieces, O_BatchWiseLiveStock.CreatedBy,
+                        O_BatchWiseLiveStock.CreatedOn, O_BatchWiseLiveStock.GRN_id, O_BatchWiseLiveStock.InterBranchInward_id, 
+                        O_BatchWiseLiveStock.Item_id ItemID, O_BatchWiseLiveStock.LiveBatche_id, O_BatchWiseLiveStock.Party_id, 
+                        O_BatchWiseLiveStock.Production_id, O_BatchWiseLiveStock.PurchaseReturn_id, O_BatchWiseLiveStock.Unit_id,O_LiveBatches.GST_id LiveBatcheGSTID,
+                        O_BatchWiseLiveStock.BaseUnitQuantity ,(case when O_LiveBatches.GST_id is null then O_LiveBatches.GSTPercentage else M_GSTHSNCode.GSTPercentage end )GST
+                        FROM O_BatchWiseLiveStock left  join O_LiveBatches on O_BatchWiseLiveStock.LiveBatche_id=O_LiveBatches.id 
+                        left join MC_ItemUnits on MC_ItemUnits.id=O_BatchWiseLiveStock.Unit_id
+                        left join M_GSTHSNCode on M_GSTHSNCode.id=O_LiveBatches.GST_id
+                        WHERE O_BatchWiseLiveStock.BaseUnitQuantity > 0 AND O_BatchWiseLiveStock.Item_id = {Item} AND 
+                        O_BatchWiseLiveStock.Party_id = {Customer}''')
+                        # CustomPrint(obatchwisestockquery.query)     
+                        stockDatalist = list()
+                        if not obatchwisestockquery:
+                            stockDatalist =[]
+                        else:   
+                            for d in obatchwisestockquery:
+                              
+                                stockDatalist.append({                                    
+                                    "Item":d.ItemID,
+                                    "BatchDate":d.BatchDate,
+                                    "BatchCode":d.BatchCode,
+                                    "SystemBatchDate":d.SystemBatchDate,
+                                    "SystemBatchCode":d.SystemBatchCode,   
+                                    "LiveBatcheGSTID" : d.LiveBatcheGSTID,
+                                    "LiveBatche_id":d.LiveBatche_id,
+                                    "Rate":round(d.Rate,2),                                   
+                                    "GSTPercentage" : d.GST,
+                                    "UnitId":d.Unit_id,
+                                    "UnitName":d.BaseUnitConversion, 
+                                    "BaseUnitQuantity":d.BaseUnitQuantity,
+                                    "Quantity":d.Quantity,    
+                                    "OriginalBaseUnitQuantity":d.OriginalBaseUnitQuantity,                                
+                                    }) 
+                                CustomPrint(stockDatalist) 
+                        DemandItemDetails.append({                                            
+                            
+                            "Item": b.ItemID,
+                            "ItemName": b.ItemName,
+                            "Quantity": b.Quantity,                            
+                            "Rate": b.Rate,
+                            "Unit": b.Unit_id,
+                            "UnitName":b.BaseUnitConversion,
+                            "DeletedMCUnitsUnitID": b.MUnitID,
+                            "ConversionUnit": b.ConversionUnit,
+                            "BaseUnitQuantity": b.BaseUnitQuantity,
+                            "GST": b.GST_id,          
+                            "HSNCode": b.HSNCode,                           
+                            "BasicAmount": b.BasicAmount,
+                            "GSTAmount": b.GSTAmount,
+                            "CGST": b.CGST,
+                            "SGST": b.SGST,
+                            "IGST": b.IGST,
+                            "CGSTPercentage": b.CGSTPercentage,
+                            "SGSTPercentage": b.SGSTPercentage,
+                            "IGSTPercentage": b.IGSTPercentage,
+                            "Amount": b.Amount,  
+                            "MRP":b.ItemMRP,                         
+                            "UnitDetails":UnitDropdown(b.ItemID,Customer,0),
+                            "StockDetails":stockDatalist
+                            })
+                        CustomPrint(DemandItemDetails)
+                        Demanddata.append({
+                                "DemandIDs":DemandIDs,
+                                "DemandDate" :  b.DemandDate,
+                                "CustomerName" : CustomerName1,                        
+                                "CustomerPAN" : b.PAN,
+                                "CustomerGSTIN" : b.GSTIN,
+                                "CustomerID" : Customer,
+                                "DemandNumber" : b.FullDemandNumber,
+                                "DemandItemDetails":DemandItemDetails
+                            })
+                log_entry = create_transaction_logNew(request, Demanddata, 0,0,32,0,0,0,Customer)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Demanddata[0]})
+        except Exception as e:
+                log_entry = create_transaction_logNew(request, 0, 0,'DemandDetailsForChallan:'+str (e),33,0)
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+            
+            
+    

@@ -186,9 +186,16 @@ class PurchaseReturnItemImageSerializer2(serializers.ModelSerializer):
         model = TC_PurchaseReturnItemImages
         fields = ['id','Item_pic', 'Image']
 
+    # def get_Image(self, obj):
+    #     if obj.Image:
+    #         media_url = f"https://cbmfooderp.com/api/downloadQr/{obj.id}/3"
+    #         return media_url
+    #     return None
+    
     def get_Image(self, obj):
         if obj.Image:
-            media_url = f"http://cbmfooderp.com:8000/downloadQr/{obj.id}/3"
+            url_prefix = NewURLPrefix()
+            media_url = f"{url_prefix}downloadQr/{obj.id}/3"
             return media_url
         return None
 
@@ -270,13 +277,13 @@ class ReturnApproveQtySerializer(serializers.ModelSerializer):
         fields = ['O_LiveBatchesList','ReturnItem']
     
     def create(self, validated_data):
-        # print(validated_data)
+        # CustomPrint(validated_data)
         
         ReturnItem_data=validated_data.pop('ReturnItem')
         O_LiveBatchesLists_data=validated_data.pop('O_LiveBatchesList')
         
         for ReturnItem in ReturnItem_data:
-            # print(ReturnItem["primarySourceID"],ReturnItem["ApprovedByCompany"])
+            # CustomPrint(ReturnItem["primarySourceID"],ReturnItem["ApprovedByCompany"])
             # Approved=TC_PurchaseReturnItems.objects.filter(id=ReturnItem["primarySourceID"]).update(ApprovedByCompany=ReturnItem["ApprovedByCompany"],FinalApprovalDate=ReturnItem["FinalApprovalDate"],primarySourceID=ReturnItem["primarySourceID"])
             
             if ReturnItem["ApprovedByCompany"] is not None:
@@ -286,15 +293,15 @@ class ReturnApproveQtySerializer(serializers.ModelSerializer):
                     
                     ApprovedRate  = b["Rate"]
                     ApprovedBasicAmount = round(b["Rate"] * ReturnItem["ApprovedByCompany"],2)
-                    # print(b['DiscountType'],'kkkkkkkkkkkk')
+                    # CustomPrint(b['DiscountType'],'kkkkkkkkkkkk')
                     if b['DiscountType'] == '2': 
-                        # print('2"""""""2"2"""')
+                        # CustomPrint('2"""""""2"2"""')
                         disCountAmt = ApprovedBasicAmount - (ApprovedBasicAmount / ((100 + b['Discount']) / 100)) 
                     else:
-                        # print('11!!!!!!!!!!!!!',b['Discount'])
+                        # CustomPrint('11!!!!!!!!!!!!!',b['Discount'])
                         disCountAmt =  ReturnItem["ApprovedByCompany"] * b['Discount']
                     
-                    # print(disCountAmt)
+                    # CustomPrint(disCountAmt)
                     ApprovedDiscountAmount = round(disCountAmt,2)
                     ApprovedBasicAmount= ApprovedBasicAmount-disCountAmt
                     

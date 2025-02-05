@@ -40,7 +40,7 @@ class ProductionList(CreateAPIView):
                 ToDate = Productiondata['ToDate']
                 query = T_Production.objects.filter(ProductionDate__range=[FromDate,ToDate])
                 if query:
-                    Production_Serializer = H_ProductionSerializerforGET(query, many=True).data
+                    Production_Serializer = H_ProductionSerializerforGET(query, many=True).data                  
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Production_Serializer})  
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Record Not Found','Data': []})
         except Exception as e:
@@ -58,59 +58,91 @@ class ProductionView(CreateAPIView):
             with transaction.atomic():
                 Productiondata = JSONParser().parse(request)
                 Customer = Productiondata['Division']
-                Item = Productiondata['Item']
-                
-                query1 = T_Production.objects.filter(Item_id=Item, BatchDate=date.today()).values('id')
-                
+                Item = Productiondata['Item']  
+                PrintedBatchCode=Productiondata['PrintedBatchCode']
+                NoOfLotsQty=Productiondata['NumberOfLot']
+                NoOfQuantity=Productiondata['EstimatedQuantity']
+                Materialissueid=Productiondata['ProductionMaterialIssue'][0]['MaterialIssue']
+                query1 = T_Production.objects.filter(Item_id=Item, BatchDate=date.today()).values('id')                
                 BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(Item, Customer, query1.count())
                 
                 BaseUnitQuantity=UnitwiseQuantityConversion(Item,Productiondata['ActualQuantity'],Productiondata['Unit'],0,0,0,1).GetBaseUnitQuantity()
                 
-                Gst = GSTHsnCodeMaster(Item, Productiondata['ProductionDate']).GetTodaysGstHsnCode()
+                Gst = GSTHsnCodeMaster(Item, Productiondata['ProductionDate']).GetTodaysGstHsnCode()                
                 GSTID = Gst[0]['Gstid']
-
+                GSTValue=Gst[0]['GST']                
+                
+                # MRPs=M_MRPMaster.objects.raw(f'''SELECT 1 id ,GetTodaysDateMRP({Item},'{ProductionDate}',1,0,0,0) MRPID,GetTodaysDateMRP({Item},'{ProductionDate}',2,0,0,0) MRPValue ''') 
+                # first_row = MRPs[0]
+                # MRPID = first_row.MRPID               
+                # MRPValue=first_row.MRPValue
+                # CustomPrint(MRPID)
+                # CustomPrint(MRPValue)
+               
+                
+                # ProductionItemCount=T_Production.objects.filter(Item_id=Item, ProductionDate=ProductionDate).count()
+                # ProductionItemCount_str = str(ProductionItemCount)
+                
+                # CustomPrint(Productiondata['BatchCode'])
                 Productiondata['BatchCode'] = BatchCode
+                # CustomPrint(ProductionItemCount_str)
+                # productionbatchcode = Productiondata['BatchCode'] 
+                # CustomPrint(Productiondata['BatchCode'])
                 Productiondata['BatchDate'] = date.today()
                 O_BatchWiseLiveStockList=list()
                 O_LiveBatchesList=list()
                 O_BatchWiseLiveStockList.append({
+                    
                     "Item": Productiondata['Item'],
                     "Quantity": Productiondata['ActualQuantity'],
                     "Unit": Productiondata['Unit'],
                     "BaseUnitQuantity": BaseUnitQuantity,
                     "OriginalBaseUnitQuantity": BaseUnitQuantity,
                     "Party": Customer,
-                    "CreatedBy":Productiondata['CreatedBy'],
-                    
-                    
+                    "CreatedBy":Productiondata['CreatedBy'],                    
                     })
-
+                
                 O_LiveBatchesList.append({
                     
-                    "MRP": Productiondata['MRP'],
-                    "Rate": Productiondata['Rate'],
+                    "MRP": "",
+                    "Rate":"",
                     "GST": GSTID,
                     "SystemBatchDate": Productiondata['BatchDate'],
                     "SystemBatchCode": Productiondata['BatchCode'],
                     "BatchDate": Productiondata['BatchDate'],
-                    "BatchCode": Productiondata['PrintedBatchCode'],
+                    "BatchCode": PrintedBatchCode,
                     "ItemExpiryDate":Productiondata['BestBefore'],
                     "OriginalBatchBaseUnitQuantity" : BaseUnitQuantity,
-                    "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList                   
+                    "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList, 
+                    "MRPValue":0,
+                    "GSTPercentage":GSTValue,
                     
-                    })    
-
-                # print(GRNdata)
-                Productiondata.update({"O_LiveBatchesList":O_LiveBatchesList}) 
+                    }) 
+                # CustomPrint(O_LiveBatchesList)   
                 
+                # print(GRNdata)
+                Productiondata.update({"O_LiveBatchesList":O_LiveBatchesList})                 
                 Production_Serializer = H_ProductionSerializer(data=Productiondata)
-                if Production_Serializer.is_valid():
-                    Production_Serializer.save()
+                # CustomPrint(Production_Serializer)
+                if Production_Serializer.is_valid():                    
+                    Production_Serializer.save() 
+                    MaterialissueNOofLots = T_MaterialIssue.objects.filter(id=Materialissueid).values('RemainNumberOfLot','RemaninLotQuantity')
+                    if MaterialissueNOofLots:
+                        RemaningLots=MaterialissueNOofLots[0]['RemainNumberOfLot']
+                        RamaningQty = float(MaterialissueNOofLots[0]['RemaninLotQuantity']) 
+                        RemainNumberOfLot=float(RemaningLots)-float(NoOfLotsQty)
+                        RemaninQuantity=float(RamaningQty)-float(NoOfQuantity) 
+                    if(RemaningLots==NoOfLotsQty):                      
+                       query = T_MaterialIssue.objects.filter(id=Materialissueid).update(Status=2,RemainNumberOfLot=RemainNumberOfLot,RemaninLotQuantity=RemaninQuantity)
+                    else:                       
+                       query = T_MaterialIssue.objects.filter(id=Materialissueid).update(Status=1,RemainNumberOfLot=RemainNumberOfLot,RemaninLotQuantity=RemaninQuantity)                   
+                    
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Production Save Successfully', 'Data':[]})
                 else:
+                    
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Production_Serializer.errors, 'Data': []})
-        except Exception as e:
+        except Exception as e:            
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})       
 
 class ProductionViewSecond(RetrieveAPIView):
@@ -137,6 +169,26 @@ class ProductionViewSecond(RetrieveAPIView):
                 for a in O_BatchWiseLiveStockData:
                     if (a['OriginalBaseUnitQuantity'] != a['BaseUnitQuantity']) :
                         return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Production Quantity Used in another Transaction', 'Data': []})  
+                CustomPrint(id)
+                MaterialissueidOnProd = TC_ProductionMaterialIssue.objects.filter(Production_id=id).values('MaterialIssue_id')
+                CustomPrint(MaterialissueidOnProd.query)
+                Productioninfo = T_Production.objects.filter(id=id).values('EstimatedQuantity','NumberOfLot')  
+                CustomPrint(Productioninfo.query)              
+                PLot=Productioninfo[0]['NumberOfLot']
+                CustomPrint(PLot)
+                PQuantity=Productioninfo[0]['EstimatedQuantity']
+                CustomPrint(PQuantity)
+                Materialissueid=MaterialissueidOnProd[0]['MaterialIssue_id']
+                CustomPrint(Materialissueid)
+                query1 = T_MaterialIssue.objects.filter(id=Materialissueid).values('RemainNumberOfLot','RemaninLotQuantity','NumberOfLot')
+                ActualLot=query1[0]['RemainNumberOfLot']+PLot
+                ActualQty=float(query1[0]['RemaninLotQuantity'])+float(PQuantity)
+                orignalLot=query1[0]['NumberOfLot']                
+                if(orignalLot==ActualLot):
+                     Status=0
+                else:
+                     Status=1
+                query = T_MaterialIssue.objects.filter(id=Materialissueid).update(Status=Status,RemainNumberOfLot=ActualLot,RemaninLotQuantity=ActualQty)
                 Productiondata = T_Production.objects.get(id=id)
                 Productiondata.delete()
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Production  Deleted Successfully', 'Data':[]})

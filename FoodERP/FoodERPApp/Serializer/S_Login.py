@@ -22,16 +22,23 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_Users
         fields = '__all__'
-        extra_kwargs = {'password': {'write_only': True}}
+        extra_kwargs = {
+                        'password': {'write_only': True}
+                        }
 
     def create(self, validated_data):
         Roles_data = validated_data.pop('UserRole')
+        is_login_permissions = validated_data.pop('IsLoginPermissions', True)
         user = M_Users.objects.create_user(**validated_data)
+        user.IsLoginPermissions = is_login_permissions
+        user.save()
+
         for Role_data in Roles_data:
             MC_UserRoles.objects.create(User=user, **Role_data)
         return user
     
     def update(self, instance, validated_data):
+        
         
         # for (key, value) in validated_data.items():
         #     setattr(instance, key, value)
@@ -44,12 +51,16 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             'isLoginUsingMobile', instance.isLoginUsingMobile)
         instance.isLoginUsingEmail = validated_data.get(
             'isLoginUsingEmail', instance.isLoginUsingEmail)
+        instance.IsLoginPermissions = validated_data.get(
+            'IsLoginPermissions', instance.IsLoginPermissions)
         # instance.AdminPassword = validated_data.get(
         #     'password', instance.password)   
         instance.UpdatedBy = validated_data.get(
             'UpdatedBy', instance.UpdatedBy)
         instance.Employee_id = validated_data.get(
-            'Employee_id', instance.Employee_id)                       
+            'Employee_id', instance.Employee_id)
+        instance.POSRateType = validated_data.get(
+            'POSRateType', instance.POSRateType)
         
         # password = validated_data.pop('password', None)
         # if password is not None:
@@ -85,38 +96,38 @@ class FindUserSerializer(serializers.Serializer):
     LoginName=serializers.CharField(max_length=128)
 
 class UserLoginSerializer(serializers.Serializer):
-    
-    LoginName = serializers.CharField(max_length=255)
-    password = serializers.CharField(max_length=128, write_only=True)
-    token = serializers.CharField(max_length=255, read_only=True)
-    refreshtoken = serializers.CharField(max_length=255, read_only=True)
-    EmployeeID = serializers.CharField(max_length=255, read_only=True)
-    UserID= serializers.CharField(max_length=255, read_only=True)
+    pass
+    # LoginName = serializers.CharField(max_length=255)
+    # password = serializers.CharField(max_length=128, write_only=True)
+    # token = serializers.CharField(max_length=255, read_only=True)
+    # refreshtoken = serializers.CharField(max_length=255, read_only=True)
+    # EmployeeID = serializers.CharField(max_length=255, read_only=True)
+    # UserID= serializers.CharField(max_length=255, read_only=True)
 
     
-    def validate(self, data):
-        LoginName = data.get("LoginName", None)
-        password = data.get("password", None)
+    # def validate(self, data):
+    #     LoginName = data.get("LoginName", None)
+    #     password = data.get("password", None)
         
-        user = authenticate(LoginName=LoginName, password=password)
+    #     user = authenticate(LoginName=LoginName, password=password)
         
-        if user is None:
-            raise serializers.ValidationError('Incorrect Username or Password.')
-        try:
-            refresh = RefreshToken.for_user(user)
-            access_token = str(refresh.access_token)
-            refresh_token = str(refresh)
-            update_last_login(None, user)
-        except M_Users.DoesNotExist:
-            raise serializers.ValidationError('User with given Username and Password does not exists')
-            # return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'User with given LoginName and password does not exists', 'Data':[]})
-        return {
-            'LoginName': user.LoginName,
-            'EmployeeID':user.Employee_id,
-            'token': access_token,
-            'UserID' : user.id,
-            'refreshtoken': refresh_token
-        }
+    #     if user is None:
+    #         raise serializers.ValidationError('Incorrect Username or Password.')
+    #     try:
+    #         refresh = RefreshToken.for_user(user)
+    #         access_token = str(refresh.access_token)
+    #         refresh_token = str(refresh)
+    #         update_last_login(None, user)
+    #     except M_Users.DoesNotExist:
+    #         raise serializers.ValidationError('User with given Username and Password does not exists')
+            
+    #     return {
+    #         'LoginName': user.LoginName,
+    #         'EmployeeID':user.Employee_id,
+    #         'token': access_token,
+    #         'UserID' : user.id,
+    #         'refreshtoken': refresh_token
+    #     }
 
 
 class RolesSerializer(serializers.ModelSerializer):
@@ -226,8 +237,14 @@ class SingleGetUserListUserPartiesSerializer(serializers.Serializer):
 class SingleGetUserListUserPartyRoleSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     Role_id = serializers.IntegerField()
-    RoleName=serializers.CharField(max_length=500)    
+    RoleName=serializers.CharField(max_length=500)  
     
+class MultipeRoleForOneUser(serializers.Serializer):  
+    id = serializers.IntegerField()
+    Party_id = serializers.IntegerField()
+    PartyName=serializers.CharField(max_length=500)
+    Role= serializers.IntegerField()
+    RoleName=serializers.CharField(max_length=500)  
 
     
     

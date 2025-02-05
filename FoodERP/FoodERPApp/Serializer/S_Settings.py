@@ -19,9 +19,17 @@ class PartiesSettingsDetailsListSerializer(serializers.Serializer):
     Value  = serializers.CharField(max_length=500)
     Image = serializers.SerializerMethodField()
     ImageID = serializers.IntegerField()
+    
+    # def get_Image(self, obj):
+    #     if obj.Image:
+    #         media_url = f"https://cbmfooderp.com/api/downloadQr/{obj.ImageID}/1"  # Replace with your actual media URL prefix from settings
+    #         return media_url
+    #     return None
+    
     def get_Image(self, obj):
         if obj.Image:
-            media_url = f"http://cbmfooderp.com:8000/downloadQr/{obj.ImageID}/1"  # Replace with your actual media URL prefix from settings
+            url_prefix = NewURLPrefix()
+            media_url = f"{url_prefix}downloadQr/{obj.ImageID}/1"
             return media_url
         return None
     

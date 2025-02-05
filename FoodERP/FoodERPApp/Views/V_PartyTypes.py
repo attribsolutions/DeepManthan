@@ -12,7 +12,6 @@ from .V_CommFunction import *
 class PartyTypeListView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
-    # authentication__Class = JSONWebTokenAuthentication
     
     @transaction.atomic()
     def post(self, request):
@@ -51,7 +50,7 @@ class PartyTypeListView(CreateAPIView):
                     log_entry = create_transaction_logNew(request,PartyType_Data,0,'PartyType Not available',185,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Party Type Not available', 'Data':[]})
                 else:    
-                    PartyTypes_Serializer = PartyTypeSerializer(query, many=True).data
+                    PartyTypes_Serializer = PartTypeSerializerSecond(query, many=True).data
                     if p==0:
                         data=PartyTypes_Serializer
                     else:
@@ -60,13 +59,12 @@ class PartyTypeListView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': data})   
         except Exception as e:
                 log_entry = create_transaction_logNew(request,0,0,'PartyTypeList:'+str(Exception(e)),33,0)
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class PartyTypeView(CreateAPIView):
     
     permission_classes = (IsAuthenticated,)
-    # authentication__Class = JSONWebTokenAuthentication
     
     @transaction.atomic()
     def post(self, request):
@@ -85,7 +83,7 @@ class PartyTypeView(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PartyTypedata_Serializer.errors, 'Data':[]})
         except Exception as e:
                 log_entry = create_transaction_logNew(request,0,0,'PartyTypeSave:'+str(Exception(e)),33,0)
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
             
         
     @transaction.atomic()
@@ -106,7 +104,7 @@ class PartyTypeView(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PartyTypedata_Serializer.errors, 'Data':[]})
         except Exception as e:
                 log_entry = create_transaction_logNew(request,0,0,Exception(e),33,0)
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
 
     @transaction.atomic()

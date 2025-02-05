@@ -6,7 +6,7 @@ from ..Serializer.S_Items import *
 class PartiesSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = M_Parties
-        fields = ['id', 'Name', 'Email', 'MobileNo', 'AlternateContactNo', 'Taluka', 'City', 'GSTIN', 'PAN', 'IsDivision', 'MkUpMkDn', 'isActive']
+        fields = ['id', 'Name', 'Email', 'MobileNo', 'AlternateContactNo', 'City', 'GSTIN', 'PAN', 'IsDivision', 'MkUpMkDn', 'isActive']
 
 class UnitSerializerThird(serializers.ModelSerializer):
     class Meta:
@@ -138,7 +138,7 @@ class IBChallanSerializerSecond(serializers.ModelSerializer):
     Party = PartiesSerializerSecond(read_only=True)
  
     class Meta:
-        model = T_InterbranchChallan
+        model = T_Challan
         fields = '__all__'    
 
 class IBChallanSerializerForDelete(serializers.ModelSerializer):

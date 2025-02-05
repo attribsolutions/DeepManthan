@@ -15,9 +15,9 @@ class M_EmployeeTypeView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request, id=0):
+        M_EmployeeTypedata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                M_EmployeeTypedata = JSONParser().parse(request)
                 M_EmployeeType_serializer = M_EmployeeTypeSerializer(data=M_EmployeeTypedata)
                 if M_EmployeeType_serializer.is_valid():
                     EmployeeType = M_EmployeeType_serializer.save()
@@ -29,7 +29,7 @@ class M_EmployeeTypeView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  M_EmployeeType_serializer.errors,  'Data':[]})
         except Exception :
-            log_entry = create_transaction_logNew(request, 0, 0,'EmployeeTypeSave:'+'Exception Found',33,0)
+            log_entry = create_transaction_logNew(request, M_EmployeeTypedata, 0,'EmployeeTypeSave:'+'Exception Found',33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  'Exception Found', 'Data': []})
                    
 class M_EmployeeTypeFilterView(CreateAPIView):
@@ -39,9 +39,9 @@ class M_EmployeeTypeFilterView(CreateAPIView):
     
     @transaction.atomic()
     def post(self, request):
+        EmployeeType_data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                EmployeeType_data = JSONParser().parse(request)
                 Company = EmployeeType_data['CompanyID']
                 query = M_EmployeeTypes.objects.filter(Company=Company)
                 
@@ -52,7 +52,7 @@ class M_EmployeeTypeFilterView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, EmployeeType_data, 0,'EmployeeType Not available',233,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Employee Type Not available', 'Data': []})    
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'EmployeeTypeList'+str(e),33,0)
+            log_entry = create_transaction_logNew(request, EmployeeType_data, 0,'EmployeeTypeList'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})                  
 
 
@@ -66,7 +66,7 @@ class M_EmployeeTypeViewSecond(RetrieveAPIView):
             with transaction.atomic():
                 EmployeeType_data = M_EmployeeTypes.objects.get(id=id)
                 EmployeeType_Serializer = M_EmployeeTypeSerializer(EmployeeType_data)
-                log_entry = create_transaction_logNew(request, 0, 0,'',234,id)
+                log_entry = create_transaction_logNew(request, 0, 0,'EmployeeID:'+str(id),234,id)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'', 'Data': EmployeeType_Serializer.data})
         except M_EmployeeTypes.DoesNotExist:
             log_entry = create_transaction_logNew(request, 0, 0,'Employee Type Not available',234,0)
@@ -74,9 +74,9 @@ class M_EmployeeTypeViewSecond(RetrieveAPIView):
 
     @transaction.atomic()
     def put(self, request, id=0):
+        EmployeeType_data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                EmployeeType_data = JSONParser().parse(request)
                 EmployeeType_dataByID = M_EmployeeTypes.objects.get(id=id)
                 EmployeeType_Serializer = M_EmployeeTypeSerializer(EmployeeType_dataByID, data=EmployeeType_data)
                 if EmployeeType_Serializer.is_valid():
@@ -89,7 +89,7 @@ class M_EmployeeTypeViewSecond(RetrieveAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': EmployeeType_Serializer.errors, 'Data' : []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'EmployeeTypeEdit:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, EmployeeType_data, 0,'EmployeeTypeEdit:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
 
     @transaction.atomic()
@@ -104,5 +104,5 @@ class M_EmployeeTypeViewSecond(RetrieveAPIView):
             log_entry = create_transaction_logNew(request, 0, 0,'EmployeeType Not available',236,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'EmployeeType Not available', 'Data': []}) 
         except IntegrityError:   
-            log_entry = create_transaction_logNew(request, 0, 0,'EmployeeTypeDelete'+'EmployeeType used in another table',8,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'EmployeeTypeDelete:'+'EmployeeType used in another table',8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'EmployeeType used in another table', 'Data': []})   

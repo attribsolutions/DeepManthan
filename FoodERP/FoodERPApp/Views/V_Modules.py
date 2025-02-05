@@ -26,14 +26,14 @@ class H_ModulesView(CreateAPIView):
                 log_entry = create_transaction_logNew(request,Modules_Serializer, 0,'Modules Not available',267,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Modules Not available', 'Data': []})    
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'GETAllModules:'+str(Exception),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request,0, 0,'GETAllModules:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
          
     @transaction.atomic()
     def post(self, request):
+        Modulesdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Modulesdata = JSONParser().parse(request)
                 Modules_Serializer = H_ModulesSerializer(data=Modulesdata)
                 if Modules_Serializer.is_valid():
                     Modules_Serializer.save()
@@ -44,8 +44,8 @@ class H_ModulesView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Modules_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'ModuleSave:'+str(Exception),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})       
+            log_entry = create_transaction_logNew(request,Modulesdata, 0,'ModuleSave:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})       
 
 class H_ModulesViewSecond(RetrieveAPIView):
     
@@ -67,9 +67,9 @@ class H_ModulesViewSecond(RetrieveAPIView):
 
     @transaction.atomic()
     def put(self, request, id=0):
+        Modulesdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Modulesdata = JSONParser().parse(request)
                 ModulesdataByID = H_Modules.objects.get(id=id)
                 Modules_Serializer = H_ModulesSerializer(ModulesdataByID, data=Modulesdata)
                 if Modules_Serializer.is_valid():
@@ -81,8 +81,8 @@ class H_ModulesViewSecond(RetrieveAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Modules_Serializer.errors,'Data' :[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'ModuleUpdate:'+str(Exception),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})            
+            log_entry = create_transaction_logNew(request,Modulesdata, 0,'ModuleUpdate:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})            
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -91,7 +91,7 @@ class H_ModulesViewSecond(RetrieveAPIView):
                 Modulesdata = H_Modules.objects.get(id=id)
                 Modulesdata.delete()
                 log_entry = create_transaction_logNew(request,0, 0,'',271,0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Module  Deleted Successfully', 'Data':[]})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Module Deleted Successfully', 'Data':[]})
         except H_Modules.DoesNotExist:
             log_entry = create_transaction_logNew(request,0, 0,'Module Not available',271,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Module Not available', 'Data': []})    

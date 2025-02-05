@@ -5,7 +5,8 @@ from django.core.validators import MaxValueValidator,MinValueValidator
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.utils.translation import gettext_lazy as _
 from django.db import connection
-
+from django.db.models import UniqueConstraint
+from datetime import datetime 
 # from activity_log.models import UserMixin
 
 # Create your models here.
@@ -18,11 +19,26 @@ def CustomPrint(value):
     for row in printvalue:
        printvalue=row.IsActive
     if printvalue is True:
-       
-        print(value)      
-    else:
-       
-        print()
+        print(value) 
+        
+# FUNCTION FOR NEW URL PATTERN
+def NewURLPrefix():
+    newurl = M_Settings.objects.get(id=46)
+    return newurl.DefaultValue
+     
+# def GetYear(TDate):
+#     date = datetime.strptime(TDate, "%Y-%m-%d").date()
+#     #initialize the current year
+#     year_of_date=date.year     
+#     #initialize the current financial year start date
+#     financial_year_start_date = datetime.strptime(str(year_of_date)+"-04-01","%Y-%m-%d").date()       
+#     if date<financial_year_start_date:           
+#         fs=  str(financial_year_start_date.year-1)+'-04-01'            
+#         fe=  str(financial_year_start_date.year)+'-03-31'        
+#     else:
+#         fs= str(financial_year_start_date.year)+ '-04-01'           
+#         fe= str(financial_year_start_date.year+1)+'-03-31'     
+#     return fs,fe
 
 def DBNameFun(a):
                 
@@ -37,6 +53,16 @@ def DBNameFun(a):
 def upload_to(instance,filename):
     return 'post/{filename}'.format(filename=filename) 
  
+
+class M_Country(models.Model): 
+    Country = models.CharField(max_length=500)
+    Currency = models.CharField(max_length=500) 
+    CurrencySymbol = models.CharField(max_length=500) 
+    Weight = models.CharField(max_length=500)
+    IsTaxApplicable = models.BooleanField(default=False)
+    
+    class Meta:
+        db_table = "M_Country"
 
 class C_CompanyGroups(models.Model):
 
@@ -87,6 +113,7 @@ class M_PartyType(models.Model):
     Company = models.ForeignKey(C_Companies, related_name='PartyTypeCompany',on_delete=models.PROTECT)
     IsFranchises = models.BooleanField(default=False)
     SAPIndicator = models.CharField(max_length=20)
+    Country = models.ForeignKey(M_Country, related_name='PartyTypeCountry',on_delete=models.PROTECT,null=True, blank=True)  
  
     class Meta:
         db_table = 'M_PartyType'
@@ -136,6 +163,9 @@ class M_PriceList(models.Model):
     class Meta:
         db_table = 'M_PriceList'        
 
+
+
+
 class M_States(models.Model):
     Name = models.CharField(max_length=100)
     StateCode = models.CharField(max_length=100)
@@ -143,7 +173,7 @@ class M_States(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
-
+    # Country = models.ForeignKey(M_Country, related_name='PartyTypeCountry',on_delete=models.PROTECT,null=True, blank=True)
     class Meta:
         db_table = "M_States"
 
@@ -199,6 +229,8 @@ class M_Parties(models.Model):
     IsApprovedParty = models.BooleanField(default=False)
     SkyggeID = models.CharField(max_length=500,null=True, blank=True)
     UploadSalesDatafromExcelParty= models.BooleanField(default=False)
+    Country = models.ForeignKey(M_Country, related_name='PartiesCountry',on_delete=models.PROTECT,null=True, blank=True)
+    
     class Meta:
         db_table = 'M_Parties'
         
@@ -249,7 +281,7 @@ class M_Employees(models.Model):
     State = models.ForeignKey(M_States, related_name='EmployeesState', on_delete=models.PROTECT)
     City = models.ForeignKey(M_Cities, related_name='EmployeesCity', on_delete=models.PROTECT,blank=True, null=True)
     PIN = models.CharField(max_length=500,null=True,blank=True)
-  
+    Designation =  models.CharField(max_length=10,blank=True, null=True)
     class Meta:
         db_table = "M_Employees"
 
@@ -308,7 +340,7 @@ class UserManager(BaseUserManager):
     https://docs.djangoproject.com/en/3.0/topics/auth/customizing/#a-full-example
     '''
 
-    def create_user(self,  LoginName, Employee, isActive, isSendOTP, AdminPassword, isLoginUsingMobile, isLoginUsingEmail, CreatedBy,  UpdatedBy, password=None):
+    def create_user(self,  LoginName, Employee, isActive, isSendOTP, AdminPassword, isLoginUsingMobile, isLoginUsingEmail, CreatedBy,  UpdatedBy, POSRateType, password=None):
         """
         Create and return a `User` with  username and password.
         """
@@ -326,6 +358,7 @@ class UserManager(BaseUserManager):
             isLoginUsingMobile=isLoginUsingMobile,
             CreatedBy=CreatedBy,
             UpdatedBy=UpdatedBy,
+            POSRateType=POSRateType
 
 
 
@@ -351,7 +384,9 @@ class M_Users(AbstractBaseUser):
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
     Employee = models.ForeignKey(M_Employees, related_name='UserEmployee', on_delete=models.PROTECT)
-
+    # POSRateType = models.ForeignKey(M_GeneralMaster, related_name='POSRateType', on_delete=models.DO_NOTHING,blank=True, null=True)
+    POSRateType =models.IntegerField(blank=True, null=True)
+    IsLoginPermissions = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'LoginName'
     REQUIRED_FIELDS = []
@@ -438,6 +473,7 @@ class M_Pages(models.Model):
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
     Module = models.ForeignKey(H_Modules, related_name='PagesModule', on_delete=models.PROTECT)
+    IsSweetPOSPage = models.BooleanField(default=False)
 
     class Meta:
         db_table = "M_Pages"
@@ -596,6 +632,7 @@ class M_Group(models.Model):
     UpdatedOn = models.DateTimeField(auto_now=True)    
     GroupType = models.ForeignKey(M_GroupType, related_name='GroupType', on_delete=models.PROTECT)
     Sequence = models.DecimalField(max_digits=5, decimal_places=2,null=True,blank=True)
+    Company = models.ForeignKey(C_Companies, related_name='ItemGroupCompany', on_delete=models.PROTECT)
     class Meta:
         db_table = "M_Group"
 
@@ -661,7 +698,7 @@ class M_Items(models.Model):
     ShortName = models.CharField(max_length=500)
     Sequence = models.DecimalField(max_digits=5, decimal_places=2,null=True,blank=True)
     BarCode = models.CharField(max_length=500,null=True,blank=True) 
-    SAPItemCode = models.CharField(max_length=100,unique=True)
+    SAPItemCode = models.CharField(max_length=100,null=True,blank=True)
     isActive = models.BooleanField(default=False)
     IsSCM = models.BooleanField(default=False)
     CanBeSold = models.BooleanField(default=False)
@@ -684,7 +721,12 @@ class M_Items(models.Model):
     IsFranchisesItem = models.BooleanField(default=False)
     CItemID = models.IntegerField(default=False,null=True,blank=True)
     SAPUnitID = models.IntegerField(default=False,null=True,blank=True)
+    IsCBMItem  = models.BooleanField(default=False)
+    IsMixItem = models.BooleanField(default=False)
     class Meta:
+        constraints = [
+            UniqueConstraint(fields=['Company', 'SAPItemCode'], name='unique_company_sapitemcode')
+        ]
         db_table = "M_Items"
         
         
@@ -705,6 +747,7 @@ class MC_ItemGroupDetails(models.Model):
     GroupType = models.ForeignKey(M_GroupType, related_name='ItemGroupType', on_delete=models.PROTECT)
     Item = models.ForeignKey(M_Items, related_name='ItemGroupDetails', on_delete=models.CASCADE)  
     SubGroup = models.ForeignKey(MC_SubGroup, related_name='ItemSubGroup',null=True, on_delete=models.PROTECT)
+    ItemSequence=models.DecimalField(max_digits=20, decimal_places=2,null=True)
     class Meta:
         db_table = "MC_ItemGroupDetails"
 
@@ -717,6 +760,7 @@ class MC_ItemUnits(models.Model):
     BaseUnitConversion = models.CharField(max_length=500)
     Item = models.ForeignKey(M_Items, related_name='ItemUnitDetails', on_delete=models.CASCADE)
     UnitID = models.ForeignKey(M_Units, related_name='UnitID', on_delete=models.PROTECT)
+    IsShowUnit=models.BooleanField(default=False)
 
     class Meta:
         db_table = "MC_ItemUnits"                
@@ -742,7 +786,7 @@ class M_GSTHSNCode(models.Model):
     UpdatedOn = models.DateTimeField(auto_now=True)
     Company = models.ForeignKey(C_Companies, related_name='GstCompany', on_delete=models.PROTECT)
     Item = models.ForeignKey(M_Items, related_name='ItemGSTHSNDetails', on_delete=models.CASCADE)
-
+    PartyType = models.ForeignKey(M_PartyType, related_name='GSTMasterPartyType', on_delete=models.PROTECT,null=True,blank=True)
     class Meta:
         db_table = "M_GSTHSNCode"          
                    
@@ -773,9 +817,9 @@ class M_MRPMaster(models.Model):
     Item = models.ForeignKey(M_Items, related_name='ItemMRPDetails', on_delete=models.CASCADE)
     'Customer means M_Parties ID'
     Party =models.ForeignKey(M_Parties, related_name='MRPParty', on_delete=models.PROTECT,null=True,blank=True)
-
+    PartyType = models.ForeignKey(M_PartyType, related_name='MRPMasterPartyType', on_delete=models.PROTECT,null=True,blank=True)
     class Meta:
-        db_table = "M_MRPMaster"
+        db_table = "M_MRPMaster"      
 
 class M_MarginMaster(models.Model):
     CommonID = models.IntegerField(null=True,blank=True)
@@ -846,7 +890,7 @@ class MC_PartyPrefixs(models.Model):
        
 class T_Orders(models.Model):
     OrderDate = models.DateField()
-    DeliveryDate = models.DateField()
+    DeliveryDate = models.DateTimeField(auto_now=True)
     OrderNo = models.IntegerField()
     FullOrderNumber = models.CharField(max_length=500)
     OrderAmount = models.DecimalField(max_digits=20, decimal_places=2)
@@ -867,6 +911,7 @@ class T_Orders(models.Model):
     SAPResponse =models.CharField(max_length=500 ,null=True)
     IsConfirm = models.BooleanField(default=False) 
     MobileAppOrderFlag = models.IntegerField(blank=True,null=True) 
+    AdvanceAmount=models.DecimalField(max_digits=20, decimal_places=2)
 
     # Inward = models.PositiveSmallIntegerField(default=0)
     class Meta:
@@ -904,6 +949,7 @@ class TC_OrderItems(models.Model):
     DiscountType = models.CharField(max_length=500,blank=True, null=True)
     Discount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
     DiscountAmount = models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
+    OrderItem = models.BooleanField(default=False)
 
     class Meta:
         db_table = "TC_OrderItems"
@@ -952,6 +998,8 @@ class T_Invoices(models.Model):
     Hide = models.BooleanField(default=False)
     ImportFromExcel= models.BooleanField(default=False)
     DeletedFromSAP = models.BooleanField(default=False)
+    DataRecovery = models.BooleanField(default=False)
+    # IsDataRecovery = models.BooleanField(default=False)
     class Meta:
         db_table = "T_Invoices"
 
@@ -1044,7 +1092,8 @@ class T_GRNs(models.Model):
     Party = models.ForeignKey(M_Parties, related_name='GRNParty', on_delete=models.PROTECT)
     Comment = models.CharField(max_length=500 ,null=True,blank=True)
     Reason = models.ForeignKey(M_GeneralMaster, related_name='GRNReason', on_delete=models.PROTECT)
-
+    InvoiceDate = models.DateField(null=True,blank=True)
+    IsSave = models.IntegerField() 
     class Meta:
         db_table = "T_GRNs"
 
@@ -1089,64 +1138,7 @@ class TC_GRNItems(models.Model):
         db_table = "TC_GRNItems"
              
         
-class T_Challan(models.Model):
-    ChallanDate = models.DateField()
-    ChallanNumber = models.IntegerField()
-    FullChallanNumber = models.CharField(max_length=500)
-    GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
-    CreatedBy = models.IntegerField()
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    UpdatedBy = models.IntegerField()
-    UpdatedOn = models.DateTimeField(auto_now=True)
-    Customer = models.ForeignKey(M_Parties, related_name='ChallanCustomer', on_delete=models.PROTECT)
-    GRN = models.ForeignKey(T_GRNs, on_delete=models.PROTECT,blank=True, null=True)
-    Party = models.ForeignKey(M_Parties, related_name='ChallanParty', on_delete=models.PROTECT)
 
-    class Meta:
-        db_table = "T_Challan"
-
-
-class TC_ChallanItems(models.Model):
-    Quantity = models.DecimalField(max_digits=15, decimal_places=3,null=True,blank=True)
-    BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
-    Rate = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
-    BasicAmount = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
-    TaxType = models.CharField(max_length=500,null=True,blank=True)
-    GSTAmount = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
-    Amount = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
-    DiscountType = models.CharField(max_length=500,blank=True, null=True)
-    Discount = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
-    DiscountAmount = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
-    CGST = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
-    SGST = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
-    IGST = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
-    CGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
-    SGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
-    IGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
-    BatchDate = models.DateField(blank=True, null=True)
-    BatchCode = models.CharField(max_length=500,null=True,blank=True)
-    CreatedOn = models.DateTimeField(auto_now_add=True)
-    Challan = models.ForeignKey(T_Challan, related_name='ChallanItems', on_delete=models.CASCADE)
-    GST = models.ForeignKey(M_GSTHSNCode, related_name='ChallanItemGST',on_delete=models.PROTECT,null=True,blank=True)
-    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT,null=True,blank=True)
-    LiveBatch=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT, blank=True, null=True)
-    MRP = models.ForeignKey(M_MRPMaster, related_name='ChallanItemMRP', on_delete=models.PROTECT,null=True,blank=True)
-    Unit = models.ForeignKey(MC_ItemUnits, related_name='ChallanUnitID', on_delete=models.PROTECT,null=True,blank=True)
-
-    class Meta:
-        db_table = "TC_ChallanItems" 
-        
-        
-class TC_GRNReferences(models.Model):
-    ChallanNo = models.CharField(max_length=500 ,null=True)
-    Inward = models.BooleanField(default=False)
-    Challan = models.ForeignKey(T_Challan, on_delete=models.PROTECT ,null=True)
-    GRN = models.ForeignKey(T_GRNs, related_name='GRNReferences', on_delete=models.CASCADE)
-    Invoice = models.ForeignKey(T_Invoices, on_delete=models.PROTECT ,null=True)
-    Order = models.ForeignKey(T_Orders, related_name='OrderReferences', on_delete=models.PROTECT ,null=True) 
-    class Meta:
-        db_table = "TC_GRNReferences"   
-        unique_together = [['Invoice']] 
 
                   
         
@@ -1164,12 +1156,12 @@ class M_BillOfMaterial(models.Model):
     Company = models.ForeignKey(C_Companies, on_delete=models.PROTECT)
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT) 
     Unit = models.ForeignKey(MC_ItemUnits, related_name='BOMUnitID', on_delete=models.PROTECT)
- 
+    Party =models.ForeignKey(M_Parties, on_delete=models.PROTECT)
     class Meta:
         db_table = "M_BillOfMaterial"
       
 class MC_BillOfMaterialItems(models.Model): 
-    Quantity = models.DecimalField(max_digits=15, decimal_places=3)
+    Quantity = models.DecimalField(max_digits=15, decimal_places=4)
     BOM = models.ForeignKey(M_BillOfMaterial, related_name='BOMItems', on_delete=models.CASCADE) 
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT) 
     Unit = models.ForeignKey(MC_ItemUnits, related_name='BOMItemUnitID', on_delete=models.PROTECT)
@@ -1192,7 +1184,9 @@ class T_WorkOrder(models.Model):
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     Party = models.ForeignKey(M_Parties, on_delete=models.PROTECT)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='WorkOrderUnitID', on_delete=models.PROTECT)
-
+    Status = models.IntegerField(default=False)
+    RemainNumberOfLot = models.IntegerField()
+    RemaninQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     class Meta:
         db_table = "T_WorkOrder"
 
@@ -1221,7 +1215,9 @@ class T_MaterialIssue(models.Model):
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
     Party = models.ForeignKey(M_Parties, on_delete=models.PROTECT)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='MaterialIssueUnitID', on_delete=models.PROTECT)
-
+    Status = models.IntegerField(default=False)
+    RemainNumberOfLot = models.IntegerField()
+    RemaninLotQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     class Meta:
         db_table = "T_MaterialIssue"
 
@@ -1259,7 +1255,7 @@ class T_Production(models.Model):
         StoreLocation = models.CharField(max_length=500)
         PrintedBatchCode = models.CharField(max_length=500)		
         BestBefore = models.DateField()  
-        Remark = models.CharField(max_length=500)	
+        Remark = models.CharField(max_length=500,null=True,blank=True)	
         CreatedBy = models.IntegerField()
         CreatedOn = models.DateTimeField(auto_now_add=True)
         UpdatedBy = models.IntegerField()
@@ -1273,7 +1269,7 @@ class T_Production(models.Model):
             db_table = "T_Production"
 
 class TC_ProductionMaterialIssue(models.Model):
-        MaterialIssue= models.ForeignKey(T_MaterialIssue, related_name='MaterialIssue', on_delete=models.CASCADE)
+        MaterialIssue= models.ForeignKey(T_MaterialIssue, related_name='MaterialIssue', on_delete=models.PROTECT)
         Production= models.ForeignKey(T_Production, related_name='ProductionMaterialIssue', on_delete=models.CASCADE)
     
         class Meta:
@@ -1324,7 +1320,79 @@ class TC_DemandItems(models.Model):
    
     class Meta:
         db_table = "TC_DemandItems"
+
+
+
+class T_Challan(models.Model):
+    ChallanDate = models.DateField()
+    ChallanNumber = models.IntegerField()
+    FullChallanNumber = models.CharField(max_length=500)
+    GrandTotal = models.DecimalField(max_digits=15, decimal_places=2)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    Customer = models.ForeignKey(M_Parties, related_name='ChallanCustomer', on_delete=models.PROTECT)
+    GRN = models.ForeignKey(T_GRNs, on_delete=models.PROTECT,blank=True, null=True)
+    Party = models.ForeignKey(M_Parties, related_name='ChallanParty', on_delete=models.PROTECT)
+    
+
+    class Meta:
+        db_table = "T_Challan"
+
+
+class TC_ChallanItems(models.Model):
+    Quantity = models.DecimalField(max_digits=15, decimal_places=3,null=True,blank=True)
+    BaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
+    Rate = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
+    BasicAmount = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
+    TaxType = models.CharField(max_length=500,null=True,blank=True)
+    GSTAmount = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
+    Amount = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
+    DiscountType = models.CharField(max_length=500,blank=True, null=True)
+    Discount = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
+    DiscountAmount = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
+    CGST = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
+    SGST = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
+    IGST = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
+    CGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
+    SGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
+    IGSTPercentage = models.DecimalField(max_digits=15, decimal_places=2,null=True,blank=True)
+    BatchDate = models.DateField(blank=True, null=True)
+    BatchCode = models.CharField(max_length=500,null=True,blank=True)
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    Challan = models.ForeignKey(T_Challan, related_name='ChallanItems', on_delete=models.CASCADE)
+    GST = models.ForeignKey(M_GSTHSNCode, related_name='ChallanItemGST',on_delete=models.PROTECT,null=True,blank=True)
+    Item = models.ForeignKey(M_Items, on_delete=models.PROTECT,null=True,blank=True)
+    LiveBatch=models.ForeignKey(O_LiveBatches, on_delete=models.PROTECT, blank=True, null=True)
+    MRP = models.ForeignKey(M_MRPMaster, related_name='ChallanItemMRP', on_delete=models.PROTECT,null=True,blank=True)
+    Unit = models.ForeignKey(MC_ItemUnits, related_name='ChallanUnitID', on_delete=models.PROTECT,null=True,blank=True)
+
+    class Meta:
+        db_table = "TC_ChallanItems" 
         
+class TC_ChallanReferences(models.Model):
+    Challan = models.ForeignKey(T_Challan, related_name='ChallanReferences', on_delete=models.CASCADE)
+    Demands = models.ForeignKey(T_Demands, related_name='ChallanDemandReferences', on_delete=models.PROTECT)
+    class Meta:
+        db_table = "TC_ChallanReferences"        
+
+
+
+class TC_GRNReferences(models.Model):
+    ChallanNo = models.CharField(max_length=500 ,null=True)
+    Inward = models.BooleanField(default=False)
+    Challan = models.ForeignKey(T_Challan, on_delete=models.PROTECT ,null=True)
+    GRN = models.ForeignKey(T_GRNs, related_name='GRNReferences', on_delete=models.CASCADE)
+    Invoice = models.ForeignKey(T_Invoices, on_delete=models.PROTECT ,null=True)
+    Order = models.ForeignKey(T_Orders, related_name='OrderReferences', on_delete=models.PROTECT ,null=True) 
+    class Meta:
+        db_table = "TC_GRNReferences"   
+        unique_together = [['Invoice']] 
+        
+
+
+
 
 class T_InterbranchChallan(models.Model):
     IBChallanDate = models.DateField()
@@ -1663,6 +1731,7 @@ class T_CreditDebitNotes(models.Model):
     PurchaseReturn = models.ForeignKey(T_PurchaseReturn,on_delete=models.DO_NOTHING,blank=True, null=True)
     Receipt = models.ForeignKey(T_Receipts,on_delete=models.PROTECT,blank=True, null=True)
     IsDeleted = models.BooleanField(default=False)
+    ImportFromExcel = models.BooleanField(default=False)
  
     class Meta:
         db_table = "T_CreditDebitNotes"
@@ -1828,8 +1897,9 @@ class T_Stock(models.Model):
     IsSaleable= models.BooleanField(default=False)
     BatchCode = models.CharField(max_length=500,blank=True,null=True)
     BatchCodeID = models.CharField(max_length=500,blank=True,null=True)
-    Difference = models.DecimalField(max_digits=20, decimal_places=2,blank=True,null=True)
+    Difference = models.DecimalField(max_digits=20, decimal_places=3,blank=True,null=True)
     IsStockAdjustment = models.BooleanField(default=False)
+    IsDeleted = models.BooleanField(default=False)
     class Meta:
         db_table="T_Stock"        
                 
@@ -2210,7 +2280,7 @@ class T_ClaimTrackingEntry(models.Model):
     Party = models.ForeignKey(M_Parties, related_name='ClaimTrackingParty', on_delete=models.PROTECT) 
     FullClaimNo = models.CharField(max_length=500,blank=True, null=True) 
     PartyType = models.ForeignKey(M_PartyType, related_name='ClaimTrackingPartyType', on_delete=models.PROTECT,blank=True, null=True)
-    Claim = models.ForeignKey(M_Claim,related_name='ClaimTracking', on_delete=models.PROTECT,blank=True, null=True) 
+    Claim = models.ForeignKey(M_Claim,related_name='ClaimTracking', on_delete=models.DO_NOTHING,blank=True, null=True) 
     IsDeleted = models.BooleanField(default=False)
 
     
@@ -2294,3 +2364,139 @@ class T_TargetUploads(models.Model):
 
 
 	
+class M_FinancialYearFirstTransactionLog(models.Model):
+    FinancialYear = models.CharField(max_length=500,null=True)
+    Party = models.IntegerField(default=False)
+    Flag =  models.BooleanField(default=False) 
+
+    class Meta:
+        db_table = "M_FinancialYearFirstTransactionLog"
+        
+        
+class M_RateMaster(models.Model):
+    
+    EffectiveDate = models.DateField()
+    Rate = models.DecimalField(max_digits=20, decimal_places=2)
+    CommonID = models.IntegerField(null=True,blank=True)
+    IsDeleted = models.BooleanField(default=False)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    Company = models.ForeignKey(C_Companies, related_name='RateCompany', on_delete=models.PROTECT)
+    UnitID = models.IntegerField(default=False)
+    # '''Party(DivisionID) means M_Parties ID Where IsDivison Flag check'''
+    # Division =models.ForeignKey(M_Parties, related_name='MRPDivision', on_delete=models.PROTECT,null=True,blank=True)
+    Item = models.ForeignKey(M_Items, related_name='ItemRateDetails', on_delete=models.CASCADE)
+    # 'Customer means M_Parties ID'
+    # Party =models.ForeignKey(M_Parties, related_name='MRPParty', on_delete=models.PROTECT,null=True,blank=True)
+    Party =models.ForeignKey(M_Parties, related_name='RateParty', on_delete=models.PROTECT,null=True,blank=True)
+    PriceList =models.ForeignKey(M_PriceList, related_name='RatePriceList', on_delete=models.PROTECT)
+    class Meta:
+        db_table = "M_RateMaster"       
+        
+
+class M_SAPCustomerLedger(models.Model):
+    CompanyCode = models.CharField(max_length=50)
+    DocumentNo = models.CharField(max_length=50)
+    FiscalYear = models.CharField(max_length=50)
+    DocumentType = models.CharField(max_length=50)
+    PostingDate = models.DateField()
+    DocumentDesc = models.CharField(max_length=100)
+    CustomerCode = models.CharField(max_length=50)
+    CustomerName = models.CharField(max_length=100)
+    DebitCredit = models.CharField(max_length=20)
+    Amount = models.IntegerField()
+    ItemText = models.CharField(max_length=300, null=True)
+    CreatedBy = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    UpdatedBy = models.IntegerField()
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    FileDate = models.DateField()
+
+    class Meta:
+        db_table = "M_SAPCustomerLedger"
+
+
+
+class M_ItemSupplier(models.Model):
+
+    Item= models.ForeignKey(M_Items, related_name='ItemSupplier_Item', on_delete=models.PROTECT)    
+    Supplier= models.ForeignKey(M_Parties, related_name='ItemSupplier_Supplier', on_delete=models.PROTECT)
+
+    class Meta:
+        db_table = "M_ItemSupplier"
+
+class M_GiftVoucherCode(models.Model):
+    VoucherType  = models.ForeignKey(M_GeneralMaster, related_name='GiftVoucherType', on_delete=models.PROTECT)
+    VoucherCode = models.CharField(max_length=50)
+    IsActive =models.BooleanField(default=False)
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    InvoiceDate = models.DateField(null=True, blank=True)  
+    InvoiceNumber = models.CharField(max_length=500, null=True, blank=True)  
+    InvoiceAmount = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True) 
+    Party = models.IntegerField()
+    client = models.IntegerField()
+
+    class Meta:
+        db_table = "M_GiftVoucherCode"
+
+# class debug_log(models.Model):
+#     debug_message = models.CharField(max_length=300, null=True)
+#     CreatedOn = models.DateTimeField(auto_now_add=True)
+
+#     class Meta:
+#         db_table = "debug_log"
+
+class debug_log(models.Model):
+    
+    debug_message = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'debug_log'  # Optional: Specifies the exact table name if needed.
+
+    def __str__(self):
+        return f"{self.created_at}: {self.debug_message}"   
+
+class M_SchemeType(models.Model):
+    SchemeTypeName = models.CharField(max_length=100)
+    UsageTime = models.CharField(max_length=50)
+    UsageType = models.CharField(max_length=50)
+    BillEffect = models.BooleanField(default=False)
+    IsQRApplicable = models.BooleanField(default=False)
+    class Meta:
+        db_table = "M_SchemeType"
+
+class M_Scheme(models.Model):
+    SchemeName = models.CharField(max_length=100)    
+    SchemeTypeID = models.ForeignKey(M_SchemeType,related_name='SchemeTypeID', on_delete=models.CASCADE) 
+    SchemeValue = models.IntegerField()
+    ValueIn=models.CharField(max_length=100)
+    FromPeriod=models.DateField(null=True,blank=True)
+    ToPeriod=models.DateField(null=True,blank=True)
+    FreeItemID=models.IntegerField(null=True,blank=True)
+    VoucherLimit=models.IntegerField(null=True,blank=True)
+    QRPrefix=models.CharField(max_length=50)
+    IsActive=models.BooleanField(default=False)
+    BillAbove=models.CharField(max_length=500,null=True)
+
+    class Meta:
+        db_table = "M_Scheme"
+
+class M_SchemeQRs(models.Model):
+    SchemeID=models.ForeignKey(M_Scheme,related_name='SchemeIDforQR', on_delete=models.CASCADE)
+    QRCode = models.CharField(max_length=100) 
+
+    class Meta:
+        db_table = "MC_SchemeQRs"
+
+class MC_SchemeParties(models.Model):
+    SchemeID = models.ForeignKey(M_Scheme,related_name='SchemeIDForParties', on_delete=models.CASCADE)
+    PartyID = models.IntegerField()
+  
+    class Meta:
+        db_table = "MC_SchemeParties"
+    
+
+    

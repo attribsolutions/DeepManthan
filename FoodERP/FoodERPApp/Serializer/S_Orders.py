@@ -18,10 +18,16 @@ class M_POTypeserializerSecond(serializers.ModelSerializer):
         fields =  ['id', 'Name','Company', 'Division']
 
 # POST Method
+class M_PartyTypeserializer(serializers.ModelSerializer):
+    class Meta : 
+        model = M_PartyType
+        fields = '__all__'
+        
 class PartiesSerializerSecond(serializers.ModelSerializer):
+    PartyType = M_PartyTypeserializer(read_only=True)
     class Meta:
         model = M_Parties
-        fields = ['id','Name','SAPPartyCode','PAN','GSTIN']
+        fields = ['id','Name','SAPPartyCode','PAN','GSTIN','PartyType']
         
     def to_representation(self, instance):
         # get representation from ModelSerializer
@@ -36,19 +42,19 @@ class TC_OrderItemsSerializer(serializers.ModelSerializer):
     
    class Meta:
         model = TC_OrderItems
-        fields = ['Item','Quantity','MRP','Rate','Unit','BaseUnitQuantity','GST','Margin','BasicAmount','GSTAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','Amount','IsDeleted','Comment','MRPValue','GSTPercentage','QtyInBox','QtyInKg','QtyInNo','DiscountType','Discount','DiscountAmount']
+        fields = ['Item','Quantity','MRP','Rate','Unit','BaseUnitQuantity','GST','Margin','BasicAmount','GSTAmount','CGST','SGST','IGST','CGSTPercentage','SGSTPercentage','IGSTPercentage','Amount','IsDeleted','Comment','MRPValue','GSTPercentage','QtyInBox','QtyInKg','QtyInNo','DiscountType','Discount','DiscountAmount','OrderItem']
 
 class TC_OrderTermsAndConditionsSerializer(serializers.ModelSerializer):
     class Meta:
         model=TC_OrderTermsAndConditions
         fields =['TermsAndCondition','IsDeleted']
-
+  
 class T_OrderSerializer(serializers.ModelSerializer):
     OrderItem = TC_OrderItemsSerializer(many=True)
     OrderTermsAndConditions=TC_OrderTermsAndConditionsSerializer(many=True)
     class Meta:
         model = T_Orders
-        fields = ['id','OrderDate','DeliveryDate','Customer','Supplier','OrderNo','FullOrderNumber','OrderType','POType','Division','OrderAmount','Description','BillingAddress','ShippingAddress','CreatedBy', 'UpdatedBy','POFromDate','POToDate','MobileAppOrderFlag','IsConfirm','OrderItem','OrderTermsAndConditions']
+        fields = ['id','OrderDate','DeliveryDate','Customer','Supplier','OrderNo','FullOrderNumber','OrderType','POType','Division','OrderAmount','Description','BillingAddress','ShippingAddress','CreatedBy', 'UpdatedBy','POFromDate','POToDate','MobileAppOrderFlag','IsConfirm','OrderItem','OrderTermsAndConditions','AdvanceAmount']
 
     def create(self, validated_data):
         OrderItems_data = validated_data.pop('OrderItem')
@@ -88,11 +94,13 @@ class T_OrderSerializer(serializers.ModelSerializer):
             'ShippingAddress', instance.ShippingAddress)
         instance.UpdatedBy = validated_data.get(
             'UpdatedBy', instance.UpdatedBy) 
+        instance.AdvanceAmount = validated_data.get(
+            'AdvanceAmount', instance.AdvanceAmount) 
                 
         instance.save()
 
         # for items in instance.OrderItem.all():
-        #     print(items.IsDeleted)
+        #     CustomPrint(items.IsDeleted)
         #     SetFlag=TC_OrderItems.objects.filter(id=items.id).update(IsDeleted=1)
             
             
@@ -216,6 +224,7 @@ class T_OrderSerializerSecond(serializers.ModelSerializer):
     ShippingAddress=PartyAddressSerializerSecond(read_only=True) 
     OrderReferences= GRNReferanceSerializer(read_only=True,many=True)
     POType = M_POTypeserializer(read_only=True)
+    
     class Meta:
         model = T_Orders
         fields = '__all__'
@@ -235,7 +244,7 @@ class T_OrderSerializerSecond(serializers.ModelSerializer):
 class PartiesSerializerThird(serializers.ModelSerializer):
     class Meta:
         model = M_Parties
-        fields = ['id','Name','SAPPartyCode','GSTIN']
+        fields = ['id','Name','SAPPartyCode','GSTIN','PartyType']
 
 
 class UnitSerializerThird(serializers.ModelSerializer):
@@ -308,7 +317,8 @@ class OrderSerializerForGrn(serializers.Serializer):
     id=serializers.IntegerField()
     SupplierName = serializers.CharField(max_length=500)     
     OrderAmount=serializers.DecimalField(max_digits=20, decimal_places=2) 
-    CustomerID =serializers.IntegerField() 
+    CustomerID =serializers.IntegerField()
+    PriceListId=serializers.IntegerField() 
 
 class OrderEditserializer(serializers.Serializer):
     # id=serializers.IntegerField()
@@ -318,14 +328,15 @@ class OrderEditserializer(serializers.Serializer):
     MRP_id=serializers.IntegerField() 
     MRPValue=serializers.DecimalField(max_digits=10, decimal_places=2)
     Rate=serializers.DecimalField(max_digits=10, decimal_places=2)
+    VRate=serializers.DecimalField(max_digits=10, decimal_places=2)
     Unit_id=serializers.IntegerField() 
     UnitName=serializers.CharField(max_length=100)
     BaseUnitQuantity=serializers.DecimalField(max_digits=10, decimal_places=2)
     GST_id=serializers.IntegerField() 
     GSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
     HSNCode=serializers.CharField(max_length=100)
-    Margin_id=serializers.IntegerField() 
-    MarginValue=serializers.DecimalField(max_digits=10, decimal_places=2)
+    # Margin_id=serializers.IntegerField() 
+    # MarginValue=serializers.DecimalField(max_digits=10, decimal_places=2)
     BasicAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
     GSTAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
     CGST=serializers.DecimalField(max_digits=10, decimal_places=2)
@@ -345,6 +356,13 @@ class OrderEditserializer(serializers.Serializer):
     Discount = serializers.DecimalField(max_digits=20, decimal_places=2)
     DiscountAmount = serializers.DecimalField(max_digits=20, decimal_places=2)
     StockQuantity = serializers.DecimalField(max_digits=20, decimal_places=3)
+    Weightage=serializers.DecimalField(max_digits=10, decimal_places=2)
+    # OrderItem=serializers.BooleanField(default=False)
+    # def to_representation(self, instance):
+    #     data = super().to_representation(instance)
+    #     if data['StockQuantity'] is None:
+    #         data['StockQuantity'] = '0.00'
+    #     return data
    
 
 class ReportOrderItemSerializer(serializers.ModelSerializer):

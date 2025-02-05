@@ -161,7 +161,7 @@ class DamageStocktSerializer(serializers.Serializer):
     
 class GenericSaleReportSerializer(serializers.Serializer):
     
-    SAPPartyID=serializers.IntegerField()
+    SAPPartyID=serializers.CharField(max_length=500)
     PartyID=serializers.IntegerField()
     PartyName = serializers.CharField(max_length=500)
     PartyType = serializers.CharField(max_length=500)
@@ -204,6 +204,9 @@ class GenericSaleReportSerializer(serializers.Serializer):
     SubGroup = serializers.CharField(max_length=500) 
     Cluster = serializers.CharField(max_length=500)
     SubCluster = serializers.CharField(max_length=500)
+    BatchNo = serializers.CharField(max_length=500)
+    BatchDate = serializers.DateField()
+    SAPItemID = serializers.CharField(max_length=500)
      
     def to_representation(self, instance):
         # Ensure proper rounding for specific fields
@@ -221,6 +224,7 @@ class RetailerDataExportSerializer(serializers.Serializer):
     SupplierName=serializers.CharField(max_length=500)
     Name = serializers.CharField(max_length=500)
     isActive=serializers.BooleanField()
+    PartyCreation = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
     Email = serializers.CharField(max_length=200)
     MobileNo=serializers.CharField()
     AlternateContactNo=serializers.CharField(max_length=500)
@@ -263,17 +267,17 @@ class ReturnReportSerializer(serializers.Serializer):
     ReturnQtyNos =serializers.DecimalField(max_digits=20, decimal_places=2)
     MRPValue=serializers.DecimalField(max_digits=10, decimal_places=2)
     Rate=serializers.DecimalField(max_digits=10, decimal_places=2)
-    BasicAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
+    BasicAmount=serializers.DecimalField(max_digits=14, decimal_places=2)
     GSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
-    GSTAmount=serializers.DecimalField(max_digits=10, decimal_places=2)
-    Amount=serializers.DecimalField(max_digits=10, decimal_places=2)
+    GSTAmount=serializers.DecimalField(max_digits=14, decimal_places=2)
+    Amount=serializers.DecimalField(max_digits=14, decimal_places=2)
     DiscountType=serializers.CharField(max_length=100)
     Discount = serializers.DecimalField(max_digits=20, decimal_places=2)
     DiscountAmount = serializers.DecimalField(max_digits=20, decimal_places=2)
     BatchDate = serializers.DateField()
     BatchCode = serializers.CharField(max_length=500)
     ReasonForReturn = serializers.CharField(max_length=500)
-    ApprovedQuantityInNo=serializers.DecimalField(max_digits=10, decimal_places=2)
+    ApprovedQuantityInNo=serializers.DecimalField(max_digits=14, decimal_places=2)
     Address = serializers.CharField(max_length=500)
     PIN = serializers.CharField(max_length=500)
     RouteName = serializers.CharField(max_length=500)

@@ -1,15 +1,18 @@
 from ..models import *
 from ..Serializer.S_Orders import *
-from datetime import date 
-import datetime
-import pdb
+
+from django.db.models.functions import Coalesce
+from datetime import datetime 
+
+# import datetime
+# import pdb
 
 def GetYear(TDate):
-    date = datetime.datetime.strptime(TDate, "%Y-%m-%d").date()
+    date = datetime.strptime(str(TDate), "%Y-%m-%d").date()
     #initialize the current year
     year_of_date=date.year     
     #initialize the current financial year start date
-    financial_year_start_date = datetime.datetime.strptime(str(year_of_date)+"-04-01","%Y-%m-%d").date()       
+    financial_year_start_date = datetime.strptime(str(year_of_date)+"-04-01","%Y-%m-%d").date()       
     if date<financial_year_start_date:           
         fs=  str(financial_year_start_date.year-1)+'-04-01'            
         fe=  str(financial_year_start_date.year)+'-03-31'           
@@ -22,7 +25,7 @@ class GetMaxNumber:
     def GetOrderNumber(*args):
         
         # MaxOrderNumber=T_Orders.objects.filter(Division_id=args[0]).filter(OrderType=args[1]).values('OrderNo').order_by('-id')[:1]
-        # print(MaxOrderNumber.query)
+        # CustomPrint(MaxOrderNumber.query)
         # firstdatefinancial = date.today().strftime('%Y-04-01')       
         # b=args[2]
        
@@ -154,7 +157,7 @@ class GetMaxNumber:
         #     else:
         #         a=int(MaxDemandNumber[0]['DemandNo'])
         #         a=a+1
-        Return_year= GetYear(args[1])       
+        Return_year= GetYear(args[2])       
         fs,fe=Return_year  
         MaxDemandNumber=T_Demands.objects.filter(Division_id=args[0],).filter(Customer_id=args[1],DemandDate__range=(fs,fe)).values('DemandNo').order_by('-id')[:1]
         if(not MaxDemandNumber):
@@ -170,8 +173,8 @@ class GetMaxNumber:
         # MaxInvoiceNumber=T_Invoices.objects.filter(Party_id=args[0]).values('InvoiceNumber').order_by('-id')[:1]
         # max_number = T_DeletedInvoices.objects.filter(Party=args[0]).aggregate(max_number=Max('InvoiceNumber'))['max_number']
         
-        # # print(MaxInvoiceNumber)
-        # # print(max_number)
+        # # CustomPrint(MaxInvoiceNumber)
+        # # CustomPrint(max_number)
         
         # firstdatefinancial = date.today().strftime('%Y-04-01')
         # b=args[1]
@@ -192,25 +195,38 @@ class GetMaxNumber:
         #                 a=int(max_number)
         #                 a=a+1
         Return_year= GetYear(args[1])       
-        fs,fe=Return_year  
-        MaxInvoiceNumber=T_Invoices.objects.filter(Party_id=args[0],InvoiceDate__range=(fs,fe)).values('InvoiceNumber').order_by('-id')[:1]        
+        fs,fe=Return_year 
+        
+
+        
+
+        MaxInvoiceNumber=T_Invoices.objects.filter(Party_id=args[0],InvoiceDate__range=(fs,fe)).values('InvoiceNumber').order_by('-id')[:1] 
+             
         max_number = T_DeletedInvoices.objects.filter(Party=args[0],InvoiceDate__range=(fs,fe)).aggregate(max_number=Max('InvoiceNumber'))['max_number']      
-       
-        if(MaxInvoiceNumber or max_number):
-            CustomPrint('hh')
-            max_invoice = int(MaxInvoiceNumber[0]['InvoiceNumber']) if MaxInvoiceNumber[0]['InvoiceNumber'] else 0
-            CustomPrint(max_invoice)
-            max_deleted = int(max_number) if max_number else 0
-            CustomPrint(max_deleted)
+        
+        
+        if MaxInvoiceNumber or max_number:
+            
+            if(MaxInvoiceNumber):   
+                max_invoice = int(MaxInvoiceNumber[0]['InvoiceNumber'])            
+            else:
+                max_invoice = 0
+
+            if(max_number):    
+                max_deleted = int(max_number)         
+            else: 
+                max_deleted =0
+
             if max_invoice > max_deleted:
-                a = max_invoice + 1
-                CustomPrint(a)
+                a = max_invoice + 1                
             else:
                 a = max_deleted + 1
-                CustomPrint(a)
+                
         else:  
-            CustomPrint('hhh1')      
-            a = 1              
+             
+            a = 1  
+
+                    
         return a
     
 
@@ -240,7 +256,7 @@ class GetMaxNumber:
     def GetIBInwardNumber(*args):
         
         # MaxIBInwardNumber=T_InterBranchInward.objects.filter(Customer_id=args[0]).values('IBInwardNumber').order_by('-id')[:1]
-        # # print(str(MaxIBInwardNumber.query))
+        # # CustomPrint(str(MaxIBInwardNumber.query))
         # firstdatefinancial = date.today().strftime('%Y-04-01')
         # b=args[1]
         # if(not MaxIBInwardNumber):
@@ -268,7 +284,7 @@ class GetMaxNumber:
     def GetLoadingSheetNumber(*args):
         
         # MaxLoadingSheetNumber=T_LoadingSheet.objects.filter(Party_id=args[0]).values('No').order_by('-id')[:1]
-        # # print(str(MaxLoadingSheetNumber.query))
+        # # CustomPrint(str(MaxLoadingSheetNumber.query))
         # firstdatefinancial = date.today().strftime('%Y-04-01')
         # b=args[1]
         # if(not MaxLoadingSheetNumber):
@@ -293,7 +309,7 @@ class GetMaxNumber:
     def GetReceiptNumber(*args):
         
         # MaxReceiptNumber=T_Receipts.objects.filter(Party_id=args[0]).values('ReceiptNo').order_by('-id')[:1]
-        # # print(str(MaxReceiptNumber.query))
+        # # CustomPrint(str(MaxReceiptNumber.query))
         # firstdatefinancial = date.today().strftime('%Y-04-01')
         # b=args[1]
         # if(not MaxReceiptNumber):
@@ -318,7 +334,7 @@ class GetMaxNumber:
         
 
         # MaxCreditDebitNumber=T_CreditDebitNotes.objects.filter(Party_id=args[0], NoteType= args[1]).values('NoteNo').order_by('-id')[:1]
-        # # print(str(MaxReceiptNumber.query))
+        # # CustomPrint(str(MaxReceiptNumber.query))
         # firstdatefinancial = date.today().strftime('%Y-04-01')
         # b=args[2]
 
@@ -344,7 +360,7 @@ class GetMaxNumber:
     def GetPurchaseReturnNumber(*args):
         
         # MaxReturnNumber=T_PurchaseReturn.objects.filter(Party_id=args[0]).values('ReturnNo').order_by('-id')[:1]
-        # # print(str(MaxReceiptNumber.query))
+        # # CustomPrint(str(MaxReceiptNumber.query))
         # firstdatefinancial = date.today().strftime('%Y-04-01')
         # b=args[1]
 

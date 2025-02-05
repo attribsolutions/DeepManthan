@@ -26,15 +26,14 @@ class DiscountMastergo(CreateAPIView):
                 log_entry = create_transaction_logNew(request, 0, 0,'DiscountID:'+str(id),110,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Discount Deleted Successfully', 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,Exception(e),32,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
+            log_entry = create_transaction_logNew(request, 0, 0,"DiscountDelete:"+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})   
 
     
     def post(self, request, id=0):
+        Discountdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                
-                Discountdata = JSONParser().parse(request)
                 FromDate = Discountdata['FromDate']
                 ToDate = Discountdata['ToDate']
                 Party = Discountdata['Party']
@@ -42,6 +41,8 @@ class DiscountMastergo(CreateAPIView):
                 PriceList = Discountdata["PriceList"] 
                 Customer = Discountdata["Customer"]
 
+                ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Party,0).split('!')
+                 
                 #for log 
                 if Customer == '':
                     x = 0 
@@ -49,11 +50,14 @@ class DiscountMastergo(CreateAPIView):
                     x = Customer
                 
                 if not Customer:
-                    Discountquery = M_DiscountMaster.objects.raw('''select id,ItemID,ItemName,
+                    Discountquery = M_DiscountMaster.objects.raw(f'''select id,ItemID,ItemName,
                     (case WHEN RecordCount =1 then oldDiscountType else  DiscountType end)DiscountType,
                     (case WHEN RecordCount =1 then oldDiscount else  Discount end)Discount,
-                    GroupTypeName, GroupName,SubGroupName,RecordCount from (SELECT M_DiscountMaster.id,M_Items.id ItemID,M_Items.name ItemName,M_DiscountMaster.DiscountType,M_DiscountMaster.Discount,
-                    ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,
+                    GroupTypeName, GroupName,SubGroupName,RecordCount 
+                    from 
+                    (SELECT M_DiscountMaster.id,M_Items.id ItemID,M_Items.name ItemName,M_DiscountMaster.DiscountType,M_DiscountMaster.Discount,
+                    {ItemsGroupJoinsandOrderby[0]},
+                    
                     (SELECT count(*) FROM M_DiscountMaster where M_DiscountMaster.Party_id = %s AND  M_DiscountMaster.Customer_id is null And PartyType_id=%s and PriceList_id=%s and Item_id=M_Items.id 
                     and (FromDate between %s and %s or ToDate between %s and %s) and IsDeleted=0 )RecordCount,
                     
@@ -66,17 +70,16 @@ class DiscountMastergo(CreateAPIView):
                     LEFT JOIN MC_PartyItems ON Item_id=M_Items.ID AND Party_id = %s 
                     LEFT JOIN  M_DiscountMaster ON M_DiscountMaster.Item_id=M_Items.ID AND M_DiscountMaster.Party_id = %s and  M_DiscountMaster.Customer_id is null AND PartyType_id = %s and PriceList_id=%s 
                     AND FromDate = %s AND ToDate = %s and IsDeleted=0
-                    left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id 
-                    left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
-                    left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id WHERE  MC_PartyItems.Item_id IS NOT NULL ORDER BY M_Items.Sequence)a''', ([Party], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party], [Party], [PartyType], [PriceList], [FromDate], [ToDate]))
-
+                    {ItemsGroupJoinsandOrderby[1]}
+                    WHERE  MC_PartyItems.Item_id IS NOT NULL 
+                    {ItemsGroupJoinsandOrderby[2]})a''', ([Party], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party], [Party], [PartyType], [PriceList], [FromDate], [ToDate]))
                 else:
-                    Discountquery = M_DiscountMaster.objects.raw('''select id,ItemID,ItemName,
+                    Discountquery = M_DiscountMaster.objects.raw(f'''select id,ItemID,ItemName,
                     (case WHEN RecordCount =1 then oldDiscountType else  DiscountType end)DiscountType,
                     (case WHEN RecordCount =1 then oldDiscount else  Discount end)Discount,
-                    GroupTypeName, GroupName,SubGroupName,RecordCount from (SELECT M_DiscountMaster.id,M_Items.id ItemID,M_Items.name ItemName,M_DiscountMaster.DiscountType,M_DiscountMaster.Discount  ,
-                    ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName
-                    ,(SELECT count(*) FROM M_DiscountMaster where M_DiscountMaster.Party_id = %s AND  M_DiscountMaster.Customer_id = %s And PartyType_id=%s and PriceList_id=%s and Item_id=M_Items.id
+                    GroupTypeName, GroupName,SubGroupName,RecordCount from (SELECT M_DiscountMaster.id,M_Items.id ItemID,M_Items.name ItemName,M_DiscountMaster.DiscountType,M_DiscountMaster.Discount,
+                    {ItemsGroupJoinsandOrderby[0]}),
+                    (SELECT count(*) FROM M_DiscountMaster where M_DiscountMaster.Party_id = %s AND  M_DiscountMaster.Customer_id = %s And PartyType_id=%s and PriceList_id=%s and Item_id=M_Items.id
                    
                     and (FromDate between %s and %s or ToDate between %s and %s) and IsDeleted=0 )RecordCount,
                     (SELECT DiscountType FROM M_DiscountMaster where M_DiscountMaster.Party_id = %s AND  M_DiscountMaster.Customer_id = %s And PartyType_id=%s and PriceList_id=%s and Item_id=M_Items.id
@@ -92,15 +95,10 @@ class DiscountMastergo(CreateAPIView):
                     AND M_DiscountMaster.Party_id = %s and  M_DiscountMaster.Customer_id = %s
                     AND PartyType_id = %s and PriceList_id=%s
                     AND FromDate = %s AND ToDate = %s and IsDeleted=0
-                    left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
-                    left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
-                    left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
-                    left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
+                    {ItemsGroupJoinsandOrderby[1]}
                     WHERE  MC_PartyItems.Item_id IS NOT NULL
-                    ORDER BY M_Items.Sequence)a''', ([Party], [Customer], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate],  [ToDate], [Party],[Customer], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party],[Customer],  [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party],  [Party], [Customer], [PartyType], [PriceList], [FromDate], [ToDate]))
-                # print(Discountquery.query)
-
-                
+                    {ItemsGroupJoinsandOrderby[2]})a''', ([Party], [Customer], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate],  [ToDate], [Party],[Customer], [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party],[Customer],  [PartyType], [PriceList], [FromDate], [ToDate], [FromDate], [ToDate], [Party],  [Party], [Customer], [PartyType], [PriceList], [FromDate], [ToDate]))
+            
                 if Discountquery:
                     Discountdata = DiscountMasterSerializer(Discountquery, many=True).data
                     log_entry = create_transaction_logNew(request, Discountdata, Party,'',107,0,FromDate,ToDate,x)
@@ -108,8 +106,8 @@ class DiscountMastergo(CreateAPIView):
                 else:
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':''})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,Exception(e),32,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, Discountdata, 0,"ListOfDiscount:"+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class DiscountMasterSaveView(CreateAPIView):
@@ -119,11 +117,10 @@ class DiscountMasterSaveView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request, id=0):
+        DiscountMaster_data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                DiscountMaster_data = JSONParser().parse(request)
-                Discount_serializer = DiscountSerializer(
-                    data=DiscountMaster_data, many=True)
+                Discount_serializer = DiscountSerializer(data=DiscountMaster_data, many=True)
                 if Discount_serializer.is_valid():
                     Discount = Discount_serializer.save()
                     LastInsertID = Discount[0].id
@@ -133,21 +130,21 @@ class DiscountMasterSaveView(CreateAPIView):
                         log_entry = create_transaction_logNew(request, DiscountMaster_data,DiscountMaster_data[0]['Party'],'From:'+str(DiscountMaster_data[0]['FromDate'])+','+'To:'+str(DiscountMaster_data[0]['ToDate'])+','+'TransactionID:'+str(LastInsertID),108,LastInsertID,DiscountMaster_data[0]['FromDate'],DiscountMaster_data[0]['ToDate'],DiscountMaster_data[0]['Customer'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Discount Master Save Successfully','TransactionID':LastInsertID, 'Data': []})
                 else:
-                    log_entry = create_transaction_logNew(request, DiscountMaster_data,0,Discount_serializer.errors,34,0)
+                    log_entry = create_transaction_logNew(request, DiscountMaster_data,0,"DiscountMasterSave:"+str(Discount_serializer.errors),34,0)
                     transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Discount_serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,Exception(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, DiscountMaster_data, 0,"DiscountMasterSave:"+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class DiscountMasterFilter(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, id=0):
+        Discountdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Discountdata = JSONParser().parse(request)
                 FromDate = Discountdata['FromDate']
                 ToDate = Discountdata['ToDate']
                 Party = Discountdata['Party']
@@ -186,8 +183,8 @@ ORDER BY M_DiscountMaster.id DESC''', ([Party], [today], [today]))
                     log_entry = create_transaction_logNew(request, Discountdata, Party,'DiscountList not available',124,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,Exception(e),32,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, Discountdata, 0,"DiscountList:"+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class DiscountPartyTypeView(CreateAPIView):
@@ -211,8 +208,8 @@ class DiscountPartyTypeView(CreateAPIView):
                     log_entry = create_transaction_logNew(request, PartyTypes_Serializer, 0,'Company:'+str(PartyTypes_Serializer[0]['Company']),125,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': PartyTypes_Serializer})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,Exception(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0, 0,str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
     
 
@@ -236,5 +233,5 @@ class DiscountCustomerView(CreateAPIView):
                     log_entry = create_transaction_logNew(request, M_Parties_serializer,0,'',126,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': M_Parties_serializer})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,Exception(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0, 0,str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})

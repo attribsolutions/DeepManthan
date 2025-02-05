@@ -13,7 +13,7 @@ class M_BOMSerializer(serializers.ModelSerializer):
     BOMItems = MC_BOMItemsSerializer(many=True)
     class Meta:
         model = M_BillOfMaterial
-        fields = ['BomDate','EstimatedOutputQty','Comment','IsActive','IsVDCItem','Item','Unit','Company','CreatedBy','ReferenceBom','BOMItems']  
+        fields = ['BomDate','EstimatedOutputQty','Comment','IsActive','IsVDCItem','Item','Unit','Company','CreatedBy','ReferenceBom','BOMItems','Party']  
         
     def create(self, validated_data):
         BomItems_data = validated_data.pop('BOMItems')
@@ -65,18 +65,43 @@ class MC_BOMItemsSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model =  MC_BillOfMaterialItems
         fields = ['id','Quantity','Item','Unit'] 
+        
+
 
 class  M_BOMSerializerSecond(serializers.ModelSerializer):
     BOMItems = MC_BOMItemsSerializerSecond(many=True,read_only=True)
     Item = M_ItemsSerializer01(read_only=True)
     Unit = ItemUnitsSerializerSecond(read_only=True)
     Company = C_CompanySerializer(read_only=True)
+    LoginName=serializers.CharField(max_length=500)
     class Meta:
         model = M_BillOfMaterial
-        fields = ['id','BomDate','EstimatedOutputQty','Comment','IsActive','IsVDCItem','Item','Unit','Company','CreatedOn','BOMItems'] 
-        
+        fields = ['id','BomDate','EstimatedOutputQty','Comment','IsActive','IsVDCItem','Item','Unit','Company','CreatedOn','BOMItems','CreatedBy','IsDelete','LoginName'] 
+
+class  M_BOMSerializerSecond001(serializers.ModelSerializer):
+    BOMItems = MC_BOMItemsSerializerSecond(many=True,read_only=True)
+    Item = M_ItemsSerializer01(read_only=True)
+    Unit = ItemUnitsSerializerSecond(read_only=True)
+    Company = C_CompanySerializer(read_only=True)    
+    class Meta:
+        model = M_BillOfMaterial
+        fields = ['id','BomDate','EstimatedOutputQty','Comment','IsActive','IsVDCItem','Item','Unit','Company','CreatedOn','BOMItems','CreatedBy','IsDelete']       
 class StockQtyserializer(serializers.Serializer):
     id = serializers.IntegerField()
     actualStock = serializers.DecimalField(max_digits=10, decimal_places=3)
-    Item_id=serializers.IntegerField()        
-             
+    Item_id=serializers.IntegerField()  
+     
+class BOMReportSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    PartyID = serializers.IntegerField()
+    PartyName = serializers.CharField()
+    CategoryName = serializers.CharField()
+    BOMItemID=serializers.IntegerField()
+    BOMItem = serializers.CharField()
+    LOTQuantity = serializers.FloatField()
+    IngredianceID=serializers.IntegerField()
+    Ingrediance = serializers.CharField()
+    # Quantity = serializers.FloatField()
+    UnitId = serializers.IntegerField() 
+    UnitName=serializers.CharField()
+    # QuantityTotal = serializers.FloatField()

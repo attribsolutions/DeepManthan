@@ -5,7 +5,6 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
-
 from FoodERPDBLog.views import create_transaction_logNew2
 from ..Serializer.S_CommFunction import *
 from ..Serializer.S_Mrps import *
@@ -16,6 +15,12 @@ from ..models import *
 from datetime import date
 from ..models import TransactionLogJsonData
 from ..models import M_Settings
+from django.db import connection
+from rest_framework.authentication import BasicAuthentication
+from rest_framework.response import Response
+from django.contrib.auth import authenticate
+import base64
+from rest_framework import status
 
 
 '''Common Functions List
@@ -94,42 +99,99 @@ def create_transaction_logNew(request, data, PartyID, TransactionDetails, Transa
     #     return None
     return log_entry
     
-def UnitDropdown(ItemID, PartyForRate, BatchID=0):
+def MRPListFun(Item,Party,PartyType):
+    PartyTypeQuery=M_Parties.objects.filter(id=Party).values('PartyType')
+    if PartyType: 
+        PartyTypeID=PartyType 
+    else:
+        PartyTypeID= PartyTypeQuery[0]['PartyType']
+    MRPquery = M_MRPMaster.objects.filter(Item_id=Item,Party=Party,PartyType__isnull=True,IsDeleted=0).values('MRP','id').order_by('-id')
+    if not MRPquery:
+        MRPquery = M_MRPMaster.objects.filter(Item_id=Item,Party__isnull=True,PartyType=PartyTypeID,IsDeleted=0).values('MRP','id').order_by('-id')
+        if not MRPquery:
+            MRPquery = M_MRPMaster.objects.filter(Item_id=Item,Party__isnull=True,PartyType__isnull=True,IsDeleted=0).values('MRP','id').order_by('-id')
+    # print(MRPquery.query)
+    return MRPquery
 
+def GSTListFun(Item,Party,PartyType):
+    PartyTypeQuery=M_Parties.objects.filter(id=Party).values('PartyType')
+    if PartyType: 
+        PartyTypeID=PartyType 
+    else:
+        PartyTypeID= PartyTypeQuery[0]['PartyType']
+    GSTquery =M_GSTHSNCode.objects.filter(Item_id=Item,PartyType=PartyTypeID).values('GSTPercentage','id','HSNCode').order_by('-id')[:3]
+    if not GSTquery:
+        GSTquery =M_GSTHSNCode.objects.filter(Item_id=Item,PartyType__isnull=True).values('GSTPercentage','id','HSNCode').order_by('-id')[:3]
+    # print(GSTquery.query)
+    return GSTquery
+def UnitDropdown(ItemID, PartyForRate, BatchID=0):   
     UnitDetails = list()
-    ItemUnitquery = MC_ItemUnits.objects.filter(
-        Item=ItemID, IsDeleted=0)
-    ItemUnitqueryserialize = ItemUnitSerializer(
-        ItemUnitquery, many=True).data
-
-    RateMcItemUnit = ""
-    q = M_Parties.objects.filter(id=PartyForRate).select_related(
-        "PartyType").values("PartyType__IsSCM","PartyType__IsFranchises")
-
-    for d in ItemUnitqueryserialize:
-        if (d['PODefaultUnit'] == True):
-            RateMcItemUnit = d['id']
-        if(q[0]['PartyType__IsSCM'] == 1 or q[0]['PartyType__IsFranchises'] == 1 ):
-            CalculatedRateusingMRPMargin = RateCalculationFunction(
-                0, ItemID, PartyForRate, 0, 0, d['id'], 0).RateWithGST()
-            Rate = CalculatedRateusingMRPMargin[0]["NoRatewithOutGST"]
+    ItemUnitquery = MC_ItemUnits.objects.filter(Item=ItemID, IsDeleted=0,IsShowUnit=1).select_related('UnitID').values('id','BaseUnitQuantity','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion','UnitID__id')
+    # Same Base Unit Quantity then show Only BaseUnit
+    # ItemUnitquery2 = MC_ItemUnits.objects.filter(Item=ItemID, IsDeleted=0 ,IsBase=1).select_related('UnitID').values('id','BaseUnitQuantity','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion','UnitID__id')
+    # BaseUnitQuantity=ItemUnitquery2[0]['BaseUnitQuantity']    
+    # UnitID_List=[]
+    # for unit in ItemUnitquery:
+    #     UnitQuantity=unit['BaseUnitQuantity']
+    #     CustomPrint(UnitQuantity)
+    #     Base=unit['IsBase']         
+    #     if  Base==False:               
+    #         if(BaseUnitQuantity ==UnitQuantity):
+    #             UnitID_List.append(str(unit['id']))  
+    # ItemUnitquery = MC_ItemUnits.objects.filter(Item=ItemID, IsDeleted=0 ).exclude(
+    # id__in=UnitID_List).select_related('UnitID').values('id','BaseUnitQuantity','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion','UnitID__id')
+    # CustomPrint(ItemUnitquery.query)   
+    
+    
+    # CustomPrint(ItemID)
+    q1 = M_Parties.objects.filter(id=PartyForRate ).values("PartyType_id")
+    PartyTypeID=q1[0]['PartyType_id']
+    
+    Q11=M_Settings.objects.filter(id=44).values("DefaultValue")
+    PartyTypeID1=str(Q11[0]['DefaultValue'])
+    PartyTypeID1_list = [int(x) for x in PartyTypeID1.split(",")]
+    
+    for d in ItemUnitquery:
+        # print(d['PODefaultUnit'])
+        # if (d['PODefaultUnit'] == True):
+        RateMcItemUnit = d['id']
+        
+        if PartyTypeID in PartyTypeID1_list:
+            
+            query2 = M_MarginMaster.objects.raw(f'''select 1 as id, RateCalculationFunction1(0,{ItemID}, {PartyForRate},1, 0, 0, 0, 0)RatewithoutGST''')
+            
+            # CalculatedRateusingMRPMargin = RateCalculationFunction(
+            #     0, ItemID, PartyForRate, 0, 0, d['id'], 0).RateWithGST()
+            # Rate = CalculatedRateusingMRPMargin[0]["NoRatewithOutGST"]
+            
+            if query2:
+                rate_without_gst = query2[0].RatewithoutGST
+                if rate_without_gst is not None:
+                    Rate = round(float(rate_without_gst), 2)                    
+                else:
+                    Rate=0.0
+            else:
+                Rate = 0.0
         else:
-            Rate = 0
+            Rate=0.0
 
         q0 = MC_ItemUnits.objects.filter(
             Item=ItemID, UnitID=1, IsDeleted=0).values("BaseUnitQuantity")
-
+        # CustomPrint(q0)
         UnitDetails.append({
             "UnitID": d['id'],
             "UnitName": d['BaseUnitConversion'],
             "BaseUnitQuantity": d['BaseUnitQuantity'],
             "PODefaultUnit": d['PODefaultUnit'],
             "SODefaultUnit": d['SODefaultUnit'],
-            "Rate": round(Rate, 2),
+            # "Rate": round(Rate, 2),
+            "Rate" : Rate,
             "BaseUnitQuantityNoUnit": q0[0]["BaseUnitQuantity"],
-            "DeletedMCUnitsUnitID": d['UnitID']['id'],
+            "DeletedMCUnitsUnitID": d['UnitID__id'],
+            "IsBase" : d['IsBase']
 
         })
+        # CustomPrint(UnitDetails)
     return UnitDetails
 
 
@@ -162,7 +224,7 @@ def GetOpeningBalance(Party, Customer, Date):
     SELECT 4 as id ,T_CreditDebitNotes.CRDRNoteDate AS TransactionDate,(CASE WHEN T_CreditDebitNotes.NoteType_id in (38,40) THEN T_CreditDebitNotes.GrandTotal else 0 End) AS InvoiceAmount ,
     (CASE WHEN T_CreditDebitNotes.NoteType_id in (37,39) THEN T_CreditDebitNotes.GrandTotal else 0 End) ReceiptAmount FROM T_CreditDebitNotes WHERE T_CreditDebitNotes.Party_id=%s AND T_CreditDebitNotes.Customer_id = %s  AND T_CreditDebitNotes.CRDRNoteDate <= %s and IsDeleted=0 ) A   Order By TransactionDate ''', ([
                                     Party], [Customer], [Date],[Party], [Customer], [Date], [Party], [Customer], [Date], [Party], [Customer], [Date]))
-    # print(str(query2.query))
+    # CustomPrint(str(query2.query))
     query2_serializer = OpeningBalanceSerializer(query2, many=True).data
     OpeningBalance = 0.000
     InvoiceAmount = 0.000
@@ -188,9 +250,9 @@ class GetOpeningBalanceView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request, id=0):
+        OpeningBalancedata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                OpeningBalancedata = JSONParser().parse(request)
                 Party = OpeningBalancedata['PartyID']
                 Customer = OpeningBalancedata['CustomerID']
                 ReceiptDate = OpeningBalancedata['ReceiptDate']
@@ -202,7 +264,7 @@ class GetOpeningBalanceView(CreateAPIView):
                 aa.append({"OpeningBalanceAmount": OpeningBalance})
                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': '', 'Data': aa[0]})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 def GetO_BatchWiseLiveStock(ItemID, PartyID):
@@ -252,7 +314,7 @@ class MRPMaster:
 
         TodayDateItemMRPdata = M_MRPMaster.objects.filter(P & D).filter(
             Item_id=self.ItemID, EffectiveDate__lte=self.today, IsDeleted=0).order_by('-EffectiveDate', '-id')[:1]
-        # print(str(TodayDateItemMRPdata.query))
+        # CustomPrint(str(TodayDateItemMRPdata.query))
 
         if TodayDateItemMRPdata.exists():
             MRP_Serializer = M_MRPsSerializer(
@@ -289,7 +351,7 @@ class MRPMaster:
 
         EffectiveDateItemMRPdata = M_MRPMaster.objects.filter(P & D).filter(
             Item_id=self.ItemID, EffectiveDate=self.EffectiveDate, IsDeleted=0).order_by('-EffectiveDate', '-id')[:1]
-        # print(str(EffectiveDateItemMRPdata.query))
+        # CustomPrint(str(EffectiveDateItemMRPdata.query))
 
         if EffectiveDateItemMRPdata.exists():
             MRP_Serializer = M_MRPsSerializer(
@@ -350,7 +412,7 @@ class DiscountMaster:
             ToDate__gte=self.EffectiveDate)
         ItemDiscountdata = M_DiscountMaster.objects.filter(Item_id=self.ItemID, PriceList_id=self.PriceListID, Party=self.PartyID).filter(
             D).filter(P).values("DiscountType", "Discount").order_by('-id')[:1]
-        # print(ItemDiscountdata.query)
+        # CustomPrint(ItemDiscountdata.query)
         if not ItemDiscountdata:
 
             ItemDiscountdata = M_DiscountMaster.objects.filter(Item_id=self.ItemID, PriceList_id=self.PriceListID, Party=self.PartyID, Customer_id__isnull=True).filter(
@@ -395,13 +457,13 @@ class MarginMaster:
 
         ItemMargindata = M_MarginMaster.objects.filter(P).filter(
             Item_id=self.ItemID, PriceList_id=self.PriceListID, EffectiveDate__lte=self.today, IsDeleted=0).order_by('-EffectiveDate', '-id')[:1]
-        # print(str(ItemMargindata.query))
+        # CustomPrint(str(ItemMargindata.query))
         if ItemMargindata.exists:
 
             P = Q(Party_id__isnull=True)
             ItemMargindata = M_MarginMaster.objects.filter(P).filter(
                 Item_id=self.ItemID, PriceList_id=self.PriceListID, EffectiveDate__lte=self.today, IsDeleted=0).order_by('-EffectiveDate', '-id')[:1]
-            # print(ItemMargindata.query)
+            # CustomPrint(ItemMargindata.query)
 
         if ItemMargindata.exists():
             Margin_Serializer = M_MarginsSerializer(
@@ -432,7 +494,7 @@ class MarginMaster:
 
         ItemMargindata = M_MarginMaster.objects.filter(P).filter(
             Item_id=self.ItemID, PriceList_id=self.PriceListID, EffectiveDate=self.EffectiveDate, IsDeleted=0).order_by('-EffectiveDate', '-id')[:1]
-        # print(str(ItemMargindata.query))
+        # CustomPrint(str(ItemMargindata.query))
         # if ItemMargindata.count() == 0:
         if ItemMargindata.exists():
             Margin_Serializer = M_MarginsSerializer(
@@ -452,7 +514,7 @@ class MarginMaster:
 
         ItemMargindata = M_MarginMaster.objects.filter(P).filter(
             Item_id=self.ItemID, PriceList_id=self.PriceListID, EffectiveDate=self.EffectiveDate, IsDeleted=0).order_by('-EffectiveDate', '-id')[:1]
-        # print(str(ItemMargindata.query))
+        # CustomPrint(str(ItemMargindata.query))
 
         if ItemMargindata.exists():
             Margin_Serializer = M_MarginsSerializer(
@@ -476,7 +538,7 @@ class GSTHsnCodeMaster:
 
         TodayDateGstHsncodedata = M_GSTHSNCode.objects.filter(
             Item_id=self.ItemID, EffectiveDate__lte=self.today, IsDeleted=0).order_by('-EffectiveDate', '-id')[:1]
-        # print(str(TodayDateGstHsncodedata.query))
+        # CustomPrint(str(TodayDateGstHsncodedata.query))
         if TodayDateGstHsncodedata.exists():
             GSTHsnCode_Serializer = M_GstHsnCodeSerializer(
                 TodayDateGstHsncodedata, many=True).data
@@ -664,9 +726,9 @@ class RateCalculationFunction:
             Gstfun = GSTHsnCodeMaster(ItemID, self.today).GetTodaysGstHsnCode()
             MRPfun = MRPMaster(ItemID, DivisionID, 0,
                                self.today).GetTodaysDateMRP()
-            # print('MRPfun',MRPfun[0]['TodaysMRP'])
-            # print('Gstfun',Gstfun[0]['GST'])
-            # print('unitfun',MCItemUnit)
+            # CustomPrint('MRPfun',MRPfun[0]['TodaysMRP'])
+            # CustomPrint('Gstfun',Gstfun[0]['GST'])
+            # CustomPrint('unitfun',MCItemUnit)
             if selectedMRP != 0:
                 self.MRP = self.selectedMRP
             else:
@@ -694,7 +756,7 @@ class RateCalculationFunction:
 
         query1 = M_PriceList.objects.filter(
             id=PriceList).values('CalculationPath')
-        # print(query1)
+        # CustomPrint(query1.query)
         self.calculationPath = str(query1[0]['CalculationPath']).split(',')
         self.BaseUnitQantityofselectedunit = q3SelectedUnit[0]['BaseUnitQuantity']
         self.BaseUnitQantityofNoUnit = q3NoUnit[0]['BaseUnitQuantity']
@@ -767,12 +829,12 @@ def ValidationFunForStockTransactions(PartyID, ItemID, TransactionDate):
     for row in q:
         StockAdjustmentDate = row.StockAdjustmentDate
 
-    # print(StockAdjustmentDate, TransactionDate)
+    # CustomPrint(StockAdjustmentDate, TransactionDate)
     if StockAdjustmentDate >= TransactionDate:
-        # print('55555')
+        # CustomPrint('55555')
         return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Transaction not allowed', 'Data': []})
     else:
-        # print('6666')
+        # CustomPrint('6666')
         pass
 
 
@@ -791,3 +853,76 @@ def TransactionDateLogFun(PartyID, ItemID, inputTransactionDate, inputStockAdjus
     else:
         q1 = L_TransactionDateLog.objects.create(OldestTrnDate=inputTransactionDate, NewestTrnDate=inputTransactionDate,
                                                  StockAdjustmentDate=inputStockAdjustmentDate, Party=PartyID, Item=ItemID)
+
+
+class LogTransactionView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def post(self, request):
+        LogData = JSONParser().parse(request)
+        try:
+            PartyID = LogData['PartyID']
+            TransactionID = LogData['TransactionID']
+            FromDate = LogData['FromDate']
+            ToDate = LogData['ToDate']
+            CustomerID = LogData['CustomerID']
+        
+            LogEntry = create_transaction_logNew(request, LogData, PartyID, 'Important Notification', 361, TransactionID, FromDate, ToDate, CustomerID)
+            
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': {'LogEntryID': LogEntry.id}})
+        except Exception as e:
+            transaction.set_rollback(True)  
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': None})
+
+
+
+def Get_Items_ByGroupandPartytype(Party ,GroupType=0):
+    
+    if GroupType > 0:
+        GroupType_id = GroupType
+        if GroupType_id==5:
+            seq = (f'groupdetails.ItemSequence')
+        else:
+            GroupType_id ==1
+            seq=(f'M_Items.Sequence')
+    else: 
+        party_instance = M_Parties.objects.filter(id=Party).values('PartyType_id')
+        
+        if party_instance[0]['PartyType_id'] == 19:
+            GroupType_id = 5
+            seq=(f'groupdetails.ItemSequence')
+        else:
+            GroupType_id = 1
+            seq=(f'M_Items.Sequence')
+            
+    selects = (f'''ifnull(GroupType.Name,'') GroupTypeName,ifnull(Groupss.Name,'') GroupName,ifnull(subgroup.Name,'') SubGroupName ''')
+    
+    joins =(f'''LEFT JOIN FoodERP.MC_ItemGroupDetails groupdetails ON groupdetails.item_id = M_Items.id and groupdetails.GroupType_id= {GroupType_id}
+        LEFT JOIN FoodERP.M_GroupType GroupType ON GroupType.id = groupdetails.GroupType_id  
+        LEFT JOIN FoodERP.M_Group Groupss ON Groupss.id = groupdetails.Group_id
+        LEFT JOIN FoodERP.MC_SubGroup subgroup ON subgroup.id = groupdetails.SubGroup_id''')
+        
+    orderby=(f'''ORDER BY Groupss.Sequence,subgroup.Sequence,{seq}''')
+    
+
+    return selects +'!'+ joins +'!'+ orderby
+
+
+def BasicAuthenticationfunction(request):
+    auth_header = request.META.get('HTTP_AUTHORIZATION')
+    if auth_header:
+                    
+        # Parsing the authorization header
+        auth_type, auth_string = auth_header.split(' ', 1)
+        if auth_type.lower() == 'basic':
+            
+            
+            try:
+                username, password = base64.b64decode(
+                    auth_string).decode().split(':', 1)
+            except (TypeError, ValueError, UnicodeDecodeError):
+                return Response('Invalid authorization header', status=status.HTTP_401_UNAUTHORIZED)
+                
+        user = authenticate(request, username=username, password=password)
+    return user

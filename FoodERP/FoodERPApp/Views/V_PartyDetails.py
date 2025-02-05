@@ -18,27 +18,35 @@ class FileDownloadView(View):
         # link = Imagedata['link']
         # # Replace 'image_url' with the actual URL of the image you want to download.
         # image_url = link
+        
+        url_prefix = NewURLPrefix()
+        
         if int(table)==1: #M_PartySettingsDetails table
             query = M_PartySettingsDetails.objects.filter(id=id).values('Image')
             Image = query[0]['Image']
-            image_url = f'http://cbmfooderp.com:8000/media/{Image}'
+
+            image_url = f"{url_prefix}media/{Image}"
+            # image_url = f'https://cbmfooderp.com/api/media/{Image}'
+
             # image_url = f'http://192.168.1.114:8000/media/{Image}'
             
         elif int(table)==2:  #T_ClaimTrackingEntry
             query = T_ClaimTrackingEntry.objects.filter(id=id).values('CreditNoteUpload')
             Image = query[0]['CreditNoteUpload']
-            image_url = f'http://cbmfooderp.com:8000/media/{Image}'
+            image_url = f"{url_prefix}media/{Image}"
+            # image_url = f'https://cbmfooderp.com/api/media/{Image}'
             # image_url = f'http://192.168.1.114:8000/media/{Image}'
             
         else: # 3 TC_PurchaseReturnItemImages
             '''check serializer PurchaseReturnItemImageSerializer2'''
             query = TC_PurchaseReturnItemImages.objects.filter(id=id).values('Image')
             Image = query[0]['Image']
-            image_url = f'http://cbmfooderp.com:8000/media/{Image}'
-            # image_url = f'http://192.168.1.114:8000/media/{Image}'    
+            image_url = f"{url_prefix}media/{Image}"
+            # image_url = f'https://cbmfooderp.com/api/media/{Image}'
+            # image_url = f'http://192.168.1.114:8000/media/{Image}'  
             
         try:
-            response = requests.get(image_url)
+            response = requests.get(image_url, verify=False)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             return HttpResponse(f"Error: {e}", status=500)
@@ -122,13 +130,13 @@ class GetPartydetailsView(CreateAPIView):
             with transaction.atomic():
                 
                 EmpParties = MC_ManagementParties.objects.filter(Employee=Employee).values('Party')
-                
+                CustomPrint(EmpParties.query)
                 party_values = [str(record['Party']) for record in EmpParties]
                 PartyDetailData= list()
                 if int(Group) > 0:
                     
                     PartydetailsOnclusterdata = M_PartyDetails.objects.raw('''select 1 as id, PartyID, PartyName, Group_id, Cluster_id, ClusterName, SubCluster_id, SubClusterName, Supplier_id, SupplierName,GM, NH, RH, ASM, SE, SO, SR, MT from 
-                                                                            (select id PartyID,Name PartyName from M_Parties where PartyType_id in (9,10,19) and id in %s)a
+                                                                            (select id PartyID,Name PartyName from M_Parties where PartyType_id in (9,10,15,19) and id in %s)a
                                                                             left join 
                                                                             (select  Party_id,M_PartyDetails.Group_id,M_PartyDetails.Cluster_id,M_Cluster.Name ClusterName,M_PartyDetails.SubCluster_id,
                                                                             M_SubCluster.Name SubClusterName,M_PartyDetails.Supplier_id ,a.Name SupplierName, M_PartyDetails.GM, M_PartyDetails.NH,
@@ -144,7 +152,7 @@ class GetPartydetailsView(CreateAPIView):
                 else:
                    
                     PartydetailsOnclusterdata = M_PartyDetails.objects.raw('''select 1 as id, PartyID, PartyName, Group_id, Cluster_id, ClusterName, SubCluster_id, SubClusterName, Supplier_id, SupplierName, GM, NH, RH, ASM, SE, SO, SR, MT from 
-                                                                            (select id PartyID,Name PartyName from M_Parties where PartyType_id in (9,10,19) and id in %s)a
+                                                                            (select id PartyID,Name PartyName from M_Parties where PartyType_id in (9,10,15,19) and id in %s)a
                                                                             left join 
                                                                             (select  Party_id,M_PartyDetails.Group_id,M_PartyDetails.Cluster_id,M_Cluster.Name ClusterName,M_PartyDetails.SubCluster_id,
                                                                             M_SubCluster.Name SubClusterName,M_PartyDetails.Supplier_id ,a.Name SupplierName, M_PartyDetails.GM, M_PartyDetails.NH,
@@ -156,7 +164,7 @@ class GetPartydetailsView(CreateAPIView):
                                                                             LEFT JOIN M_Parties a ON a.id = M_PartyDetails.Supplier_id
                                                                             where Group_id IS NULL)b on a.partyID=b.Party_id  ''',([party_values]))
                 
-                # print(PartydetailsOnclusterdata.query)
+                CustomPrint(PartydetailsOnclusterdata.query)
                 if PartydetailsOnclusterdata:
                     
                     for row in PartydetailsOnclusterdata:

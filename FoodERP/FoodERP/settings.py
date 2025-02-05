@@ -21,7 +21,8 @@ SECRET_KEY = 'django-insecure-t#s!16-8)sy91!+@q2hmdt_yclkuldlx=*g5aw_cb&^+rzr@ty
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost','10.1.201.19','103.135.203.145','192.168.1.114','117.248.109.234','10.4.5.65','cbmfooderp.com','10.4.5.64','183.87.216.229','192.168.1.108'] 
+# ALLOWED_HOSTS = ['localhost','192.168.1.114','www.cbmfooderp.com','cbmfooderp.com','10.4.5.64','10.4.5.68',] 
+ALLOWED_HOSTS = ['localhost','127.0.0.1','www.cbmfooderp.com','cbmfooderp.com','10.4.5.64','10.4.5.68','192.168.1.114','65.254.81.162','43.225.53.91'] 
 
 # Application definition
 CORS_ORIGIN_ALLOW_ALL = True #we allow the all domain to access through API
@@ -36,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
+    'rest_framework_simplejwt',
     'FoodERPApp.apps.FooderpappConfig',
     'FoodERPDBLog.apps.FooderpdblogConfig',
     'SweetPOS.apps.SweetposConfig',
@@ -56,6 +58,9 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'FoodERP.urls'
+
+
+
 
 TEMPLATES = [
     {
@@ -110,26 +115,30 @@ DATABASE_ROUTERS = [
 #         'OPTIONS': { 
 #             'sql_mode': 'STRICT_TRANS_TABLES', 
 #         },
+
 #     },
 # }
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'FoodERP',     
+        'NAME': 'FoodERP',       
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',  
-        'HOST': '10.4.5.64',
+
+        'HOST': '10.4.5.68',   
+
         'PORT': '3306' , 
         'OPTIONS': { 
-            'sql_mode': 'STRICT_TRANS_TABLES', 
+            'sql_mode': 'STRICT_TRANS_TABLES',   
         },
     },
+    
     'transactionlog_db': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'TransactionLog',     
+        'NAME': 'TransactionLog',       
         'USER': 'pk',
-        'PASSWORD': 'P@ssw0rd',  
-        'HOST': '10.4.5.64',
+        'PASSWORD': 'P@ssw0rd',    
+        'HOST': '10.4.5.68',    
         'PORT': '3306' , 
         'OPTIONS': { 
             'sql_mode': 'STRICT_TRANS_TABLES', 
@@ -137,17 +146,17 @@ DATABASES = {
     },
     'sweetpos_db': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'SweetPOS',     
+        'NAME': 'SweetPOS',         
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',  
-        'HOST': '10.4.5.64',
+
+        'HOST': '10.4.5.68',    
+
         'PORT': '3306' , 
         'OPTIONS': { 
             'sql_mode': 'STRICT_TRANS_TABLES', 
         },
-    },
-    
-
+    }, 
 }
 
 CRONJOBS = [
@@ -200,7 +209,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Asia/Calcutta'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
@@ -221,8 +230,8 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-EMAIL_HOST_USER = 'support.mis@chitalegroup.in'
-EMAIL_HOST_PASSWORD = 'zebydcaqvmsfwujb'
+EMAIL_HOST_USER = 'erp.admin@chitalebandhu.in'
+EMAIL_HOST_PASSWORD = 'Admin@123$'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
@@ -239,6 +248,7 @@ REST_FRAMEWORK = {
     #  'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
      'rest_framework.authentication.SessionAuthentication',
      'rest_framework_simplejwt.authentication.JWTAuthentication',
+     
      )
 }
 
@@ -283,3 +293,42 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
+
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'formatters': {
+#         'verbose': {
+#             'format': '{levelname} {asctime} {module} {message}',
+#             'style': '{',
+#         },
+#         'simple': {
+#             'format': '{levelname} {message}',
+#             'style': '{',
+#         },
+#     },
+#     'handlers': {
+#         'console': {
+#             'class': 'logging.StreamHandler',
+#             'formatter': 'verbose',
+#         },
+#         'file': {
+#             'level': 'DEBUG',
+#             'class': 'logging.FileHandler',
+#             'filename': os.path.join(BASE_DIR, 'django_debug.log'),
+#             'formatter': 'verbose',
+#         },
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers': ['console', 'file'],
+#             'level': 'DEBUG',
+#             'propagate': True,
+#         },
+#         'django.request': {
+#             'handlers': ['console', 'file'],
+#             'level': 'DEBUG',
+#             'propagate': False,
+#         },
+#     },
+# }

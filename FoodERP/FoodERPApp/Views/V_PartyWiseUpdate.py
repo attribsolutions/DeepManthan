@@ -8,21 +8,22 @@ from django.db import transaction
 from rest_framework.parsers import JSONParser
 from django.db.models import Q
 from ..Serializer.S_Orders import *
+import datetime
 
 class PartyWiseUpdateView(CreateAPIView):
-
     permission_classes = (IsAuthenticated,)
     # authentication__Class = JSONWebTokenAuthentication
  
     @transaction.atomic() 
     def post(self, request):
+        Party_data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Party_data = JSONParser().parse(request)
+                
                 Party = Party_data['PartyID']
                 Route = Party_data['Route']
                 FilterPartyID = Party_data['FilterPartyID']
-                Type = Party_data['Type']
+                Type = Party_data['Type']               
                 
                 if not (Route == 0):
                     a = Q(Route=Route)
@@ -41,7 +42,7 @@ class PartyWiseUpdateView(CreateAPIView):
                 # q1 = M_Parties.objects.filter(id__in = q0).select_related("PartyType")
 
                 query = MC_PartySubParty.objects.filter(Party = Party).filter(a).filter(b)
-                # print(query.query)
+                # CustomPrint(query.query)
                 if query.exists:
                     PartyID_serializer = PartyWiseSerializer(query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartyID_serializer})
@@ -97,19 +98,25 @@ class PartyWiseUpdateView(CreateAPIView):
                             })
                         
                         elif (Type == 'OpeningBalance'):
-                            query = MC_PartySubPartyOpeningBalance.objects.filter(Party_id=a['Party']['id'],SubParty_id=a['SubParty']['id']).values('OpeningBalanceAmount') 
+                            query = MC_PartySubPartyOpeningBalance.objects.filter(Party_id=a['Party']['id'],SubParty_id=a['SubParty']['id']).values('OpeningBalanceAmount','Date')
+                           
                             if not query:
-                                OpeningBalance = 0.00
+                                OpeningBalance = 0.00                              
+                                OpeningBalanceDate= ""
                             else:
                                 OpeningBalance = query[0]['OpeningBalanceAmount']
+                                OpeningBalanceDate=query[0]["Date"]
                                                              
                             SubPartyListData.append({
                                 "id": a['id'],
                                 "PartyID":a['Party']['id'],
                                 "SubPartyID":a['SubParty']['id'],
                                 "PartyName": a['SubParty']['Name'],
+                                "Date":OpeningBalanceDate,
                                 Type: OpeningBalance,
+                                    
                                 })
+                            
                             
                         else:                           
                             SubPartyListData.append({
@@ -124,8 +131,8 @@ class PartyWiseUpdateView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Party_data, 0,'PartyWiseUpdate:'+str(PartyID_serializer.error),34,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  PartyID_serializer.error, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'PartyWiseUpdate:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, Party_data, 0,'PartyWiseUpdate:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
 
 class PartyWiseUpdateViewSecond(CreateAPIView):
@@ -135,9 +142,9 @@ class PartyWiseUpdateViewSecond(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        Partydata = JSONParser().parse(request) 
         try:
-            with transaction.atomic():
-                Partydata = JSONParser().parse(request)                
+            with transaction.atomic():               
                 Type = Partydata['Type']
                 UpdatedData = Partydata['UpdateData']
 
@@ -155,7 +162,7 @@ class PartyWiseUpdateViewSecond(CreateAPIView):
                         party_instance = M_Parties.objects.get(id=int(Party)) 
                         subparty_instance = M_Parties.objects.get(id=int(a['SubPartyID']))   
                         query = MC_PartySubPartyOpeningBalance.objects.filter(Party=Party,SubParty=a['SubPartyID'])
-                        num_updated = query.update(OpeningBalanceAmount=a['Value1'])
+                        num_updated = query.update(OpeningBalanceAmount=a['Value1'],Date=a['Date'])                        
                         if num_updated == 0:
                             # If no records were updated, insert a new record
                             new_record = MC_PartySubPartyOpeningBalance(
@@ -164,7 +171,8 @@ class PartyWiseUpdateViewSecond(CreateAPIView):
                                 OpeningBalanceAmount=a['Value1'],
                                 Year='2324',
                                 CreatedBy =Partydata['CreatedBy'],
-                                UpdatedBy =Partydata['UpdatedBy'],  
+                                UpdatedBy =Partydata['UpdatedBy'], 
+                                Date=a['Date'] ,
                             )
                             new_record.save()
                             
@@ -173,6 +181,6 @@ class PartyWiseUpdateViewSecond(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Partydata,Partydata['PartyID'], "PartyWise Update Successfully",113,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Update Successfully','PartyID':Partydata['PartyID'], 'Data': []})  
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'PartyWiseSave:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})     
+            log_entry = create_transaction_logNew(request, Partydata, 0,'PartyWiseSave:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})     
 

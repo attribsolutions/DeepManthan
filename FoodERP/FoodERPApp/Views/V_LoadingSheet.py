@@ -19,9 +19,9 @@ class LoadingSheetListView(CreateAPIView):
     
     @transaction.atomic()
     def post(self, request):
+        Loadingsheetdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Loadingsheetdata = JSONParser().parse(request)
                 FromDate = Loadingsheetdata['FromDate']
                 ToDate = Loadingsheetdata['ToDate']
                 Party = Loadingsheetdata['PartyID']
@@ -55,8 +55,8 @@ class LoadingSheetListView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Loadingsheetdata, Party, 'LoadingSheetList Not available',42,0,FromDate,ToDate)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Loading Sheet Not available', 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'LoadingSheetList:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request, Loadingsheetdata,0,'LoadingSheetList:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
 
 
 
@@ -67,9 +67,9 @@ class LoadingSheetView(CreateAPIView):
     
     @transaction.atomic()
     def post(self, request):
+        Loadingsheetdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Loadingsheetdata = JSONParser().parse(request)
                 Party = Loadingsheetdata['Party']
                 Date = Loadingsheetdata['Date']
                 a = GetMaxNumber.GetLoadingSheetNumber(Party,Date)
@@ -85,8 +85,8 @@ class LoadingSheetView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Loadingsheet_Serializer.errors, 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'LoadingSheetSave:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request, Loadingsheetdata,0,'LoadingSheetSave:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
     
     def get(self, request, id=0):
         try:
@@ -160,15 +160,15 @@ class LoadingSheetView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, a['Party']['id'], 'Loadingsheet Not available',49,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0, 'LoadingSheetGETmethod:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0, 0, 'LoadingSheetGETmethod:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
     @transaction.atomic()
     def put(self, request, id=0):
+        Loadingsheetdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Loadingsheetdata = JSONParser().parse(request)
                 LoadingsheetdataByID = T_LoadingSheet.objects.get(id=id)
                 Loadingsheet_Serializer = LoadingSheetSerializer(LoadingsheetdataByID, data=Loadingsheetdata)
                 if Loadingsheet_Serializer.is_valid():
@@ -181,7 +181,7 @@ class LoadingSheetView(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Loadingsheet_Serializer.errors, 'Data':[]})
         except Exception as e:
             # log_entry = create_transaction_logNew(request, 0, 0, Exception(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
         
 
     @transaction.atomic()
@@ -199,8 +199,8 @@ class LoadingSheetView(CreateAPIView):
             log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, 0, 'Loading Sheet used in another table',8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Loading Sheet used in another table', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'LoadingSheetDelete:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request,0, 0,'LoadingSheetDelete:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
         
 class LoadingSheetInvoicesView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -208,9 +208,9 @@ class LoadingSheetInvoicesView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request, id=0):
+        Invoicedata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Invoicedata = JSONParser().parse(request)
                 FromDate = Invoicedata['FromDate']
                 ToDate = Invoicedata['ToDate']
                 Party = Invoicedata['Party']
@@ -241,8 +241,8 @@ class LoadingSheetInvoicesView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Invoicedata,Party,'LoadingSheetInvoice Not Available',46,0,FromDate,ToDate)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'LoadingSheetInvoice:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, Invoicedata, 0,'LoadingSheetInvoice:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 ######################################## Loading Sheet Print API ##################################################
 
@@ -315,12 +315,12 @@ class LoadingSheetPrintView(CreateAPIView):
                     JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id 
                     JOIN MC_ItemUnits ON MC_ItemUnits.id=TC_InvoiceItems.Unit_id 
                     JOIN M_Units ON M_Units.id =MC_ItemUnits.UnitID_id
-                    left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id
+                    left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1
                     left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
                     left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
                     left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
                     WHERE TC_InvoiceItems.Invoice_id IN %s group by TC_InvoiceItems.Item_id, TC_InvoiceItems.MRPValue Order By M_Group.Sequence,MC_SubGroup.Sequence,M_Items.Sequence ''',[Invoicelist])    
-                    # print(Itemsquery.query)
+                    # CustomPrint(Itemsquery.query)
                     InvoiceItemSerializedata = LoadingSheetPrintSerializer(Itemsquery, many=True).data
                     for c in InvoiceItemSerializedata:
                         
@@ -364,8 +364,8 @@ class LoadingSheetPrintView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, b['Party']['id'],'Data Not available',7,0,0,0,b['Customer']['id'])
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Loading Sheet Data Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'LoadingSheetPrint:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0, 0,'LoadingSheetPrint:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 ######################################## MultipleInvoice Loading Sheet Print API ##################################################
 class MultipleInvoicesView(CreateAPIView):
@@ -478,8 +478,8 @@ class MultipleInvoicesView(CreateAPIView):
                             })
                     InvoiceList.append( InvoiceData[0] )  
                     
-                log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, a['Party']['id'],'InvoiceDate:'+InvoiceSerializedata[0]['InvoiceDate'],48,0,0,0,a['Customer']['id'])
+                log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, a['Party']['id'],'InvoiceDate:'+InvoiceSerializedata[0]['InvoiceDate'],48,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceList})        
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0, 'MultipleInvoices:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
+            log_entry = create_transaction_logNew(request, 0, 0, 'MultipleInvoices:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})  

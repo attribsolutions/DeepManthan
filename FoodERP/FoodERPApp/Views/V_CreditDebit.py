@@ -17,9 +17,9 @@ class CreditDebitNoteListView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request, id=0):
+        CreditDebitdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                CreditDebitdata = JSONParser().parse(request)
                 FromDate = CreditDebitdata['FromDate']
                 ToDate = CreditDebitdata['ToDate']
                 Customer = CreditDebitdata['CustomerID']
@@ -66,7 +66,8 @@ class CreditDebitNoteListView(CreateAPIView):
                             "Narration": a['Narration'],
                             "CreatedOn": a['CreatedOn'],
                             "IsRecordDeleted" : a["IsDeleted"],
-                            "CRDRNoteUploads" : a["CRDRNoteUploads"]
+                            "CRDRNoteUploads" : a["CRDRNoteUploads"],
+                            "ImportFromExcel" : a["ImportFromExcel"]
                         })
                     #for log
                     if Customer == '':
@@ -78,9 +79,8 @@ class CreditDebitNoteListView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, CreditDebitdata, Party,'CreditDebitList Not Available',83,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            # CreditDebitData = JSONParser().parse(request)
-            log_entry = create_transaction_logNew(request, 0, 0,'CreditDebitList:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, CreditDebitdata, 0,'CreditDebitList:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class CreditDebitNoteView(CreateAPIView):
@@ -90,9 +90,9 @@ class CreditDebitNoteView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        CreditNotedata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                CreditNotedata = JSONParser().parse(request)
                 Party = CreditNotedata['Party']
                 CRDRNoteDate = CreditNotedata['CRDRNoteDate']
                 NoteType = CreditNotedata['NoteType']
@@ -139,9 +139,8 @@ class CreditDebitNoteView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': CreditNote_Serializer.errors, 'Data': []})
         except Exception as e:
-            # CreditNoteData = JSONParser().parse(request)
-            log_entry = create_transaction_logNew(request, 0, 0,'CreditDebitNoteSave:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, CreditNotedata, 0,'CreditDebitNoteSave:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
     @transaction.atomic()
     def get(self, request, id=0):
@@ -150,7 +149,6 @@ class CreditDebitNoteView(CreateAPIView):
                 query = T_CreditDebitNotes.objects.filter(id=id)
                
                 if query:
-                    
                     CreditDebitNote_serializer = SingleCreditDebitNoteThirdSerializer(query,many=True).data
                     CreditDebitListData = list()
                     # return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': CreditDebitNote_serializer})
@@ -255,17 +253,14 @@ class CreditDebitNoteView(CreateAPIView):
                             "CRDRNoteUploads" : a["CRDRNoteUploads"]
                         })
 
-                else:
-                    log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, a['Party']['id'],'',328,0,0,0,a['Customer']['id'])
-
                 if query:                   
                     log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, a['Party']['id'],'',85,0,0,0,a['Customer']['id'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': CreditDebitListData[0]})
                 log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0,'Record Not Found',29,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'Single CreditdebitNote:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0, 0,'Single CreditdebitNote:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -285,6 +280,101 @@ class CreditDebitNoteView(CreateAPIView):
             log_entry = create_transaction_logNew(request, {'CreditDebitNoteID':id}, 0,'',8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'CreditdebitNote used in another table', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'CreditDebitNoteDelete:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0, 0,'CreditDebitNoteDelete:'+ str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
+class CreditDebitNoteExcelView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)
+    # authentication_class = JSONWebTokenAuthentication
+
+    @transaction.atomic()
+    def post(self, request):
+        CreditNotedata = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                
+                queryaa=T_CreditDebitNotes.objects.filter(CRDRNoteDate=CreditNotedata['BulkData'][0]['CRDRNoteDate'],Party=CreditNotedata['BulkData'][0]['Party'],ImportFromExcel=CreditNotedata['BulkData'][0]['ImportFromExcel'])
+                # queryaa=T_CreditDebitNotes.objects.filter(CRDRNoteDate=CreditNotedata['BulkData'][0]['CRDRNoteDate'],Party=CreditNotedata['BulkData'][0]['Party'] ,IsDeleted=0)
+                if queryaa:
+                    log_entry = create_transaction_logNew(request, CreditNotedata, 0,'CRDRNoteUpload:'+str('CreditNote data has already been uploaded for the date '+ CreditNotedata['BulkData'][0]['CRDRNoteDate']),379,0)
+                    return JsonResponse({'StatusCode': 226, 'Status': True,  'Message': 'CreditNote data has already been uploaded for the date '+ CreditNotedata['BulkData'][0]['CRDRNoteDate'] , 'Data':[]})
+                else:
+                
+                    for aa in CreditNotedata['BulkData']:
+                        aa["NoteNo"]=0
+                        aa["ImportFromExcel"] =1
+                        Party = aa['Party']
+                        CRDRNoteDate = aa['CRDRNoteDate']
+                        NoteType = aa['NoteType']
+
+                        checkduplicate=T_CreditDebitNotes.objects.filter(FullNoteNumber=aa['FullNoteNumber'] ,Party=aa['Party'])
+                        if checkduplicate:
+                            
+                            return JsonResponse({'StatusCode': 226, 'Status': True,  'Message': 'CreditNote No : '+ str(aa['FullNoteNumber']) +' already Uploaded ', 'Data':[]})
+                        else:
+                            
+                            CRDRNoteItems = aa['CRDRNoteItems']
+                            for CRDRNoteItem in CRDRNoteItems:
+                                
+                                UnitMapping=M_UnitMappingMaster.objects.filter(MapUnit=CRDRNoteItem['Unit'],Party=aa['Party']).values("Unit")
+                                if UnitMapping.count() > 0:
+                                    
+                                    MC_UnitID=MC_ItemUnits.objects.filter(UnitID=UnitMapping[0]["Unit"],Item=CRDRNoteItem["Item"],IsDeleted=0).values("id")
+                                    
+                                    CRDRNoteItem['Unit']=MC_UnitID[0]['id']
+                                    
+                                    if MC_UnitID.count() > 0:    
+                                        
+                                        BaseUnitQuantity=UnitwiseQuantityConversion(CRDRNoteItem['Item'],CRDRNoteItem['Quantity'],CRDRNoteItem['Unit'],0,0,0,0).GetBaseUnitQuantity()
+                                        CRDRNoteItem['BaseUnitQuantity'] =  round(BaseUnitQuantity,3) 
+                                        QtyInNo=UnitwiseQuantityConversion(CRDRNoteItem['Item'],CRDRNoteItem['Quantity'],CRDRNoteItem['Unit'],0,0,1,0).ConvertintoSelectedUnit()
+                                        CRDRNoteItem['QtyInNo'] =  float(QtyInNo)
+                                        QtyInKg=UnitwiseQuantityConversion(CRDRNoteItem['Item'],CRDRNoteItem['Quantity'],CRDRNoteItem['Unit'],0,0,2,0).ConvertintoSelectedUnit()
+                                        CRDRNoteItem['QtyInKg'] =  float(QtyInKg)
+                                        QtyInBox=UnitwiseQuantityConversion(CRDRNoteItem['Item'],CRDRNoteItem['Quantity'],CRDRNoteItem['Unit'],0,0,4,0).ConvertintoSelectedUnit()
+                                        CRDRNoteItem['QtyInBox'] = float(QtyInBox)
+                                    else : 
+                                        # log_entry = create_transaction_logNew(request, CreditNotedata, 0, " MC_ItemUnits Data Mapping Missing",39,0)
+                                        return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " MC_ItemUnits Data Mapping Missing", 'Data':[]})
+                                else:
+                                    # log_entry = create_transaction_logNew(request, CreditNotedata, 0, "Unit Data Mapping Missing",40,0)
+                                    return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': " Unit Data Mapping Missing", 'Data':[]})
+                            
+                            CreditNote_Serializer = CreditDebitNoteExcelSerializer(data=aa)
+                            if CreditNote_Serializer.is_valid():
+                                CreditDebit = CreditNote_Serializer.save()
+                                
+                            else:
+                                log_entry = create_transaction_logNew(request, CreditNotedata, Party,'CreditDebitNoteSave:'+str(CreditNote_Serializer.errors),34,0)
+                                transaction.set_rollback(True)
+                                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': CreditNote_Serializer.errors, 'Data': []})
+                    log_entry = create_transaction_logNew(request, CreditNotedata, Party,'CRDRNoteDate:'+aa['CRDRNoteDate'],84,0,0,0,aa['Customer'])
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'CreditNote Data Upload Successfully', 'Data': []})
+        except Exception as e:
+            
+            log_entry = create_transaction_logNew(request,CreditNotedata, 0,'CreditDebitNoteSave:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})                  
+
+
+    @transaction.atomic()
+    def delete(self, request):
+        CreditNote_data = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+               
+                CreditNote_ids = CreditNote_data.get('CreditNote_ID', '').split(',')
+                
+                if not CreditNote_ids:
+                    log_entry = create_transaction_logNew(request, CreditNote_data, 0,'No Invoice IDs provided',352,0)
+                    return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'No CreditNote IDs provided', 'Data': []})
+                
+                T_CreditDebitNotes.objects.filter(id__in=CreditNote_ids).delete()
+                log_entry = create_transaction_logNew(request, CreditNote_data, 0,f'CreditNote_ID: {CreditNote_ids}Deleted Successfully',352,0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bulk CreditNote Delete Successfully', 'Data': []})
+        except IntegrityError:
+            log_entry = create_transaction_logNew(request, 0,0,'CreditNoteIDs used in another table',8,0)     
+            return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, CreditNote_data,0,'CreditNoteIDsNotDeleted:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})

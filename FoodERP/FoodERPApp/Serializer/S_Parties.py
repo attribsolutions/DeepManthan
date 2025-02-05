@@ -26,17 +26,21 @@ class DivisionsSerializer(serializers.ModelSerializer):
         model =  M_Parties
         fields = ['id','Name','PartyType','GSTIN','PartyAddress','SAPPartyCode']
         
-        
+class PartySerializer1(serializers.ModelSerializer):    
+    class Meta:
+        model =  M_Parties
+        fields = ['id','Name']        
 class PartyaddressSecond(serializers.ModelSerializer):
     class Meta:
         model = MC_PartyAddress
         fields = ['Address']
         
 class DivisionsSerializerSecond(serializers.ModelSerializer):
+    PartyType=PartyTypeSerializer(read_only=True)
     Address = serializers.CharField(source='PartyAddress.first.Address')
     class Meta:
         model =  M_Parties
-        fields = ['id', 'Name', 'SAPPartyCode', 'Latitude', 'Longitude', 'MobileNo', 'Address']
+        fields = ['id', 'Name', 'SAPPartyCode', 'Latitude', 'Longitude', 'MobileNo', 'Address' ,'PartyType']
         
     # def to_representation(self, instance):
     #     # get representation from ModelSerializer
@@ -74,7 +78,7 @@ class PartyPrefixsSerializer(serializers.ModelSerializer):
 class PartyAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_PartyAddress
-        fields = ['Address', 'FSSAINo', 'PIN', 'IsDefault', 'fssaidocument']  
+        fields = ['Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'fssaidocument']  
         
 class MC_PartySubPartySerializer(serializers.ModelSerializer):
     class Meta:
@@ -86,42 +90,72 @@ class M_PartiesinstanceSerializer(serializers.ModelSerializer):
         model =  M_Parties
         fields = ['id']       
 
+class CSSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_PartyDetails
+        fields = ['Cluster', 'SubCluster']
+
+class CountrySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = M_Country
+        fields = ['id','Country']
+
 class M_PartiesSerializer(serializers.ModelSerializer):
     PartyAddress = PartyAddressSerializer(many=True)
     PartyPrefix = PartyPrefixsSerializer(many=True)
     PartySubParty = MC_PartySubPartySerializer(many=True)
+    Cluster = serializers.IntegerField(write_only=True,  required=False)  
+    SubCluster = serializers.IntegerField(write_only=True,  required=False)
+    
+
     class Meta:
         model =  M_Parties
         fields = '__all__'
-        
+
+
     def create(self, validated_data):
         PartyType = validated_data.get('PartyType')
-        PartyAddress_data = validated_data.pop('PartyAddress')
-        PartyPrefix_data = validated_data.pop('PartyPrefix')
-        PartySubPartys=validated_data.pop('PartySubParty')
-        PartyID= M_Parties.objects.create(**validated_data)
-        
+        PartyAddress_data = validated_data.pop('PartyAddress', [])
+        PartyPrefix_data = validated_data.pop('PartyPrefix', [])
+        PartySubPartys = validated_data.pop('PartySubParty', [])
+        Cluster_id = validated_data.pop('Cluster', None)
+        Sub_Cluster_id = validated_data.pop('SubCluster', None)
+
+        PartyID = M_Parties.objects.create(**validated_data)
+
         for PartyAddress in PartyAddress_data:
-            Party = MC_PartyAddress.objects.create(Party=PartyID, **PartyAddress) 
+            MC_PartyAddress.objects.create(Party=PartyID, **PartyAddress)
 
         for PartyPrefix in PartyPrefix_data:
-            Partyprefixx = MC_PartyPrefixs.objects.create(Party=PartyID, **PartyPrefix) 
-        
-        
-        query=M_PartyType.objects.filter(id=PartyType.id).values('IsVendor')
+            MC_PartyPrefixs.objects.create(Party=PartyID, **PartyPrefix)
+
+        query=M_PartyType.objects.filter(id=PartyType.id).values('IsVendor', 'IsRetailer')
 
         if query[0]['IsVendor'] == True:
             for PartySubParty in PartySubPartys:
                 subparty = PartySubParty.pop('Party')
                 PartySubParty=MC_PartySubParty.objects.create(Party=PartyID,SubParty=subparty, **PartySubParty)
+
         else:
             
             for PartySubParty in PartySubPartys:
-                PartySubParty=MC_PartySubParty.objects.create(SubParty=PartyID, **PartySubParty)         
-    
+                PartySubParty=MC_PartySubParty.objects.create(SubParty=PartyID, **PartySubParty)
+
+        if not query[0]['IsRetailer']:
+                if Cluster_id is not None and Sub_Cluster_id is not None:
+                    try:
+                        cluster_instance = M_Cluster.objects.get(id=Cluster_id)
+                        sub_cluster_instance = M_SubCluster.objects.get(id=Sub_Cluster_id)
+                        M_PartyDetails.objects.create(Party=PartyID, Cluster=cluster_instance, SubCluster=sub_cluster_instance)
+                    except M_Cluster.DoesNotExist:
+                        pass
+                    except M_SubCluster.DoesNotExist:
+                        pass
+
         return PartyID
-    
             
+
 class M_PartiesSerializer1(serializers.Serializer):
 
     id = serializers.IntegerField()
@@ -157,7 +191,7 @@ class M_PartiesSerializer1(serializers.Serializer):
 class PartyAddressSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model = MC_PartyAddress
-        fields = ['id','Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault','fssaidocument'] 
+        fields = ['id','Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'fssaidocument'] 
         
 class CitiesSerializerSecond(serializers.ModelSerializer):
     class Meta:
@@ -201,6 +235,22 @@ class PartySubPartySerializer3(serializers.ModelSerializer):
         model = MC_PartySubParty
         fields = ['Party','SubParty','Creditlimit','Route','Distance']
 
+class ClusterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_Cluster
+        fields = ['id','Name']
+
+class SubClusterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_SubCluster
+        fields = ['id','Name']
+
+class ClusterSubClusterSerializer(serializers.ModelSerializer):
+    Cluster = ClusterSerializer(read_only=True)
+    SubCluster = SubClusterSerializer(read_only=True)
+    class Meta:
+        model = M_PartyDetails
+        fields = ['Cluster','SubCluster']
 
 class M_PartiesSerializerSecond(serializers.ModelSerializer):
     PartyAddress = PartyAddressSerializerSecond(many=True)
@@ -208,24 +258,48 @@ class M_PartiesSerializerSecond(serializers.ModelSerializer):
     District= DistrictSerializerSecond()
     State= StateSerializerSecond()
     Company = CompanySerializerSecond()
+    Cluster= ClusterSubClusterSerializer(read_only=True)
+    SubCluster= ClusterSubClusterSerializer(read_only=True)
     PartyType = PartyTypeSerializerSecond()
-    PriceList=PriceListSerializerSecond()
+    PriceList= PriceListSerializerSecond()
+    Country = CountrySerializer(read_only=True)
     PartyPrefix = PartyPrefixsSerializer(many=True)
     MCSubParty = PartySubPartySerializer3(many=True)
-
+    
+    
     class Meta:
         model =  M_Parties
         fields = '__all__'
-        
+    
     def to_representation(self, instance):
         # get representation from ModelSerializer
         ret = super(M_PartiesSerializerSecond, self).to_representation(instance)
         # if parent is None, overwrite
+
+        
         if not ret.get("Latitude", None):
             ret["Latitude"] = None  
         if not ret.get("Longitude", None):
             ret["Longitude"] = None    
+
+        Party_Details = M_PartyDetails.objects.filter(Party=instance.id)
+        
+        for aa in Party_Details:
+            cluster = aa.Cluster
+            subcluster = aa.SubCluster
+            
+            if cluster:
+                ret['Cluster'] = ClusterSerializer(cluster).data
+            else:
+                ret['Cluster'] = None
+            
+            if subcluster:
+                ret['SubCluster'] = SubClusterSerializer(subcluster).data
+            else:
+                ret['SubCluster'] = None
+        
         return ret    
+
 
 class M_PartiesSerializerThird(serializers.Serializer):
     
@@ -241,6 +315,8 @@ class M_PartiesSerializerFourth(serializers.Serializer):
     StateName = serializers.CharField(max_length=500)
     DistrictName = serializers.CharField(max_length=500)
     PartyID = serializers.IntegerField()
+    ClusterName = serializers.CharField(max_length=500)
+    SubClusterName = serializers.CharField(max_length=500)
     
     
     # City=CitiesSerializerSecond()
@@ -258,7 +334,7 @@ class M_PartiesSerializerFourth(serializers.Serializer):
 class UpdatePartyPrefixsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MC_PartyPrefixs
-        fields = ['Orderprefix', 'Invoiceprefix', 'Grnprefix', 'Receiptprefix','Challanprefix','WorkOrderprefix','MaterialIssueprefix','Demandprefix','IBChallanprefix','IBInwardprefix','Creditprefix','Debitprefix']
+        fields = ['Orderprefix', 'Invoiceprefix', 'Grnprefix', 'Receiptprefix','Challanprefix','WorkOrderprefix','MaterialIssueprefix','Demandprefix','IBChallanprefix','IBInwardprefix','Creditprefix','Debitprefix','PurchaseReturnprefix']
         
 class UpdatePartyAddressSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
@@ -278,6 +354,10 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
     PartyAddress = UpdatePartyAddressSerializer(many=True)
     PartyPrefix = UpdatePartyPrefixsSerializer(many=True)
     PartySubParty = UpdateMC_PartySubPartySerializer(many=True)
+    # Cluster = serializers.IntegerField(write_only=True)
+    # SubCluster = serializers.IntegerField(write_only=True)
+    # Country = CountrySerializer(many=True)
+
     class Meta:
         model =  M_Parties
         fields = '__all__'
@@ -302,7 +382,6 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
             'State', instance.State)
         instance.District = validated_data.get(
             'District', instance.District)
-        
         instance.City = validated_data.get(
             'City', instance.City)
         instance.SAPPartyCode = validated_data.get(
@@ -324,9 +403,16 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
         instance.Longitude = validated_data.get(
             'Longitude', instance.Longitude)
         instance.IsApprovedParty = validated_data.get(
-            'IsApprovedParty', instance.IsApprovedParty)    
-            
+            'IsApprovedParty', instance.IsApprovedParty) 
+        instance.Country = validated_data.get(
+            'Country', instance.Country)
+        
         instance.save()   
+
+        Cluster = validated_data.get('Cluster')
+        SubCluster = validated_data.get('SubCluster')
+           
+        
         
         for a in instance.PartyPrefix.all():
             a.delete() 
@@ -343,20 +429,36 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
                 Party = MC_PartyAddress.objects.create(Party=instance, **PartyAddress_updatedata)   
                
             
-        query=M_PartyType.objects.filter(id=instance.PartyType.id).values('IsVendor')
-       
-        if query[0]['IsVendor'] == True:
-            for PartySubParty in validated_data['PartySubParty']:
-                query =MC_PartySubParty.objects.filter(Party=instance,SubParty=PartySubParty['Party']).delete()
-                PartySubParty=MC_PartySubParty.objects.create(Party=instance,SubParty=PartySubParty['Party'], **PartySubParty)  
-        else: 
-          
-            for PartySubParty in validated_data['PartySubParty']:
-                query =MC_PartySubParty.objects.filter(Party=PartySubParty['Party'],SubParty=instance).delete()
-     
-                if PartySubParty['Delete']== 0 :
-                    del PartySubParty['Delete']
-                    PartySubParty=MC_PartySubParty.objects.create(SubParty=instance, **PartySubParty) 
-
-        return instance        
+        query=M_PartyType.objects.filter(id=instance.PartyType.id).values('IsVendor','IsRetailer')
         
+        if not query[0]['IsRetailer'] == True:
+            if Cluster is not None and SubCluster is not None:
+                M_PartyDetails.objects.filter(Party=instance, Group_id__isnull=True).update_or_create(
+                Party=instance,
+                defaults={'Cluster_id': Cluster, 'SubCluster_id': SubCluster},)
+        
+        
+        if query[0]['IsVendor'] == True:
+            
+            for PartySubParty_data in validated_data['PartySubParty']:
+                Sub_Party = PartySubParty_data.pop('Party', None)
+                DeleteData = PartySubParty_data.pop('Delete', None)
+                
+                query = MC_PartySubParty.objects.filter(Party=instance, SubParty=Sub_Party).delete()
+                if DeleteData == 0:
+                    PartySubParty=MC_PartySubParty.objects.create(Party=instance, SubParty=Sub_Party, **PartySubParty_data)  
+        else: 
+           
+            for PartySubParty_data in validated_data['PartySubParty']:
+                Main_Party = PartySubParty_data.pop('Party', None)
+                DeleteFlag = PartySubParty_data.pop('Delete', None)
+                
+                query = MC_PartySubParty.objects.filter(Party=Main_Party, SubParty=instance).delete()
+                if DeleteFlag == 0:
+                   PartySubParty = MC_PartySubParty.objects.create(SubParty=instance, Party=Main_Party, **PartySubParty_data)
+        
+        
+
+        
+        return instance
+    

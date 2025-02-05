@@ -35,16 +35,23 @@ class ChallanItemsSerializer(serializers.ModelSerializer):
         model = TC_ChallanItems
         fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate']  
 
+class ChallanReferenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = TC_ChallanReferences
+        fields = ['Demands']
+
 class ChallanSerializer(serializers.ModelSerializer):
     ChallanItems = ChallanItemsSerializer(many=True)
-    BatchWiseLiveStockGRNID=O_BatchWiseLiveStockSerializerForChallan(many=True)
+    ChallansReferences = ChallanReferenceSerializer(many=True) 
+    BatchWiseLiveStockGRNID=O_BatchWiseLiveStockSerializerForChallan(many=True)   
     class Meta:
         model = T_Challan
-        fields = ['ChallanDate', 'ChallanNumber', 'FullChallanNumber', 'GrandTotal', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'ChallanItems', 'GRN','BatchWiseLiveStockGRNID']    
+        fields = ['ChallanDate', 'ChallanNumber', 'FullChallanNumber', 'GrandTotal', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party', 'ChallanItems', 'GRN','BatchWiseLiveStockGRNID','ChallansReferences']    
     
     def create(self, validated_data):
         ChallanItems_data = validated_data.pop('ChallanItems')
         O_BatchWiseLiveStockItems_data = validated_data.pop('BatchWiseLiveStockGRNID')
+        ChallansReferences_data = validated_data.pop('ChallansReferences')
         ChallanID = T_Challan.objects.create(**validated_data)
         
         for ChallanItem_data in ChallanItems_data:
@@ -59,7 +66,10 @@ class ChallanSerializer(serializers.ModelSerializer):
                 UpdateChildetable=TC_ChallanItems.objects.filter(Challan=ChallanID,Item=O_BatchWiseLiveStockItem_data['Item']).update(LiveBatch=O_BatchWiseLiveStockItem_data['LiveBatche'])
             else:
                 raise serializers.ValidationError("Not In Stock ")
-                    
+            
+        for ChallansReference_data in ChallansReferences_data:
+            ChallansReferences = TC_ChallanReferences.objects.create(Challan=ChallanID, **ChallansReference_data)
+                      
         return ChallanID   
 
 class ChallanSerializerList(serializers.ModelSerializer):
@@ -110,13 +120,33 @@ class ChallanItemsSerializerSecond(serializers.ModelSerializer):
             ret["GST"] = {"id": None, "GSTPercentage ": None}        
              
         return ret
-
-
+class StateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_States
+        fields = '__all__'
+class MC_PartyAdressSerializer(serializers.ModelSerializer):
+    Address = serializers.CharField() 
+    class Meta:
+        model = MC_PartyAddress
+        fields = '__all__'
+class PartiesSerializerSecond(serializers.ModelSerializer):
+    PartyAddress=MC_PartyAdressSerializer(many=True)
+    State = StateSerializer(read_only=True)
+    # MCSubParty=MCPartySubPartySerializer(many=True) # code by ankita 
+    class Meta:
+        model = M_Parties
+        fields = ['id','Name','GSTIN','PAN','Email','PartyAddress','State','MobileNo','PartyType_id'] 
+        
 class ChallanSerializerSecond(serializers.ModelSerializer):
     Customer = PartiesSerializerSecond(read_only=True)
     Party = PartiesSerializerSecond(read_only=True)
     ChallanItems = ChallanItemsSerializerSecond(many=True)
- 
+    ChallanReferences=ChallanReferenceSerializer(read_only=True,many=True)
     class Meta:
         model = T_Challan
-        fields = '__all__'                 
+        fields = '__all__'
+        
+        
+
+        
+                  
