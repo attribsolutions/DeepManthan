@@ -122,11 +122,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'FoodERP',       
-        'USER': 'pk',
-        'PASSWORD': 'P@ssw0rd',  
-
-        'HOST': '10.4.5.68',   
-
+        'USER': 'admin',
+        'PASSWORD': 'prabhakarck318',          
+        'HOST': 'database-1.cjicgyekif0m.us-east-1.rds.amazonaws.com',   
         'PORT': '3306' , 
         'OPTIONS': { 
             'sql_mode': 'STRICT_TRANS_TABLES',   
@@ -136,9 +134,9 @@ DATABASES = {
     'transactionlog_db': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'TransactionLog',       
-        'USER': 'pk',
-        'PASSWORD': 'P@ssw0rd',    
-        'HOST': '10.4.5.68',    
+        'USER': 'admin',
+        'PASSWORD': 'prabhakarck318',  
+        'HOST': 'database-1.cjicgyekif0m.us-east-1.rds.amazonaws.com', 
         'PORT': '3306' , 
         'OPTIONS': { 
             'sql_mode': 'STRICT_TRANS_TABLES', 
@@ -147,10 +145,12 @@ DATABASES = {
     'sweetpos_db': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'SweetPOS',         
-        'USER': 'pk',
-        'PASSWORD': 'P@ssw0rd',  
-
-        'HOST': '10.4.5.68',    
+        # 'USER': 'pk',
+        # 'PASSWORD': 'P@ssw0rd',
+        # 'HOST': '10.4.5.68',
+        'USER': 'admin',
+        'PASSWORD': 'prabhakarck318',
+        'HOST':'database-1.cjicgyekif0m.us-east-1.rds.amazonaws.com',   
 
         'PORT': '3306' , 
         'OPTIONS': { 
