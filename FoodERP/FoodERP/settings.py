@@ -93,31 +93,7 @@ DATABASE_ROUTERS = [
     'SweetPOS.routers.SweetPOSRouter',
 ]
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'FoodERP',     
-#         'USER': 'pk',
-#         'PASSWORD': 'P@ssw0rd',  
-#         'HOST': '10.4.5.64',
-#         'PORT': '3306' , 
-#         'OPTIONS': { 
-#             'sql_mode': 'STRICT_TRANS_TABLES', 
-#         },
-#     },
-#     'transactionlog_db': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'TransactionLog',     
-#         'USER': 'pk',
-#         'PASSWORD': 'P@ssw0rd',  
-#         'HOST': '10.4.5.64',
-#         'PORT': '3306' , 
-#         'OPTIONS': { 
-#             'sql_mode': 'STRICT_TRANS_TABLES', 
-#         },
 
-#     },
-# }
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
