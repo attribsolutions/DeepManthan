@@ -30,30 +30,48 @@ class InvoiceSendToFTPForSAP(APIView):
                     user_name = settings_map.get(50)  # Username
                     password = settings_map.get(51)  # Password
                     FTPFilePath = settings_map.get(52)  # FTPFilePath           
-                    ItemSAPCode=f'''SELECT M_Items.Name 
-                        FROM T_Invoices 
-                        JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_ID = T_Invoices.ID 
-                        JOIN M_Items ON M_Items.ID = TC_InvoiceItems.Item_ID
-                        WHERE T_Invoices.ID = {InvoiceID} AND IFNULL(SapItemCode, '') = '' 
-                        LIMIT 1'''
-                    # if not ItemSAPCode: 
-                        # Raw SQL Query
-                    upload_invoices_query = f'''Select  1 id, ChallanDate ,Quantity,Rate from T_Challan 
-                    Join TC_ChallanItems ON TC_ChallanItems.Challan_id=T_Challan.id Where Challan_id=%s'''
-                    # Execute query           
-                    raw_queryset = T_Invoices.objects.raw(upload_invoices_query, [InvoiceID])            
-                    # Generate file name
+                    ItemSAPCode=f'''SELECT 1 id ,  
+                    'IN60' AS Vendor,
+                    M_Items.SAPItemCode AS Plant,
+                    T_Invoices.InvoiceDate AS DocumentDate,
+                    0 AS DeliveryNote,
+                    '' AS BillofLading,
+                    '' AS HeaderText,
+                    T_Invoices.FullInvoiceNumber AS VenderInvoiceNumber,
+                    T_Invoices.GrandTotal AS InvoiceheaderAmountwithGST,
+                    M_Parties.SAPPartyCode AS Material,
+                    O_BatchWiseLiveStock.OriginalBaseUnitQuantity Quantity,
+                    O_LiveBatches.BatchCode,O_LiveBatches.BatchDate ProdnDate,TC_InvoiceItems.BatchDate sled  FROM 
+                    T_Invoices JOIN 
+                    TC_InvoiceItems ON TC_InvoiceItems.Invoice_ID = T_Invoices.ID 
+                JOIN 
+                    M_Items ON M_Items.ID = TC_InvoiceItems.Item_ID
+                JOIN 
+                    M_Parties ON M_Parties.ID = T_Invoices.Party_id
+                JOIN  
+                    O_LiveBatches ON O_LiveBatches.id = TC_InvoiceItems.LiveBatch_id
+                JOIN  
+                    O_BatchWiseLiveStock ON O_BatchWiseLiveStock.LiveBatche_id = O_LiveBatches.id
+                WHERE 
+                    T_Invoices.ID = %s '''                   
+                       
+                    raw_queryset = T_Invoices.objects.raw(ItemSAPCode, [InvoiceID])   
+                    print(raw_queryset.query)         
+                    
                     file_name = f"{datetime.now().strftime('%Y%m%d')}_InvoiceFile1.csv"
-                    # print(file_name)
+                    print(file_name)
                     ftp_file_path = f"{FTPFilePath}/inbound/GRN_MIR7/source/{file_name}"
-                    # print(ftp_file_path)
-                    # Prepare CSV content
+                    print(ftp_file_path)
                     headers = [
-                        "ChallanDate", "Quantity", "Rate"
+                        "Vendor", "Plant", "DocumentDate","DeliveryNote","BillofLading",
+                        "HeaderText","VenderInvoiceNumber","InvoiceheaderAmountwithGST","Material","Quantity",
+                        "BatchCode","ProdnDate","sled"
                     ]
                     rows = [
                         [
-                            item.ChallanDate, item.Quantity, item.Rate
+                            item.Vendor, item.Plant, item.DocumentDate,item.DeliveryNote,item.BillofLading,item.HeaderText,
+                            item.VenderInvoiceNumber,item.InvoiceheaderAmountwithGST,item.Material,item.Quantity,
+                            item.BatchCode,item.ProdnDate,item.sled                            
                             
                         ]
                         for item in raw_queryset
@@ -63,7 +81,8 @@ class InvoiceSendToFTPForSAP(APIView):
                     
 
                     # Upload to FTP
-                    self.upload_to_ftp(ftp_file_path, user_name, password, csv_content)            
+                    self.upload_to_ftp(ftp_file_path, user_name, password, csv_content) 
+                    print("HHHHHH")           
                     pass
                     # Return success response
                     # return JsonResponse({'message': 'File uploaded successfully', 'file_name': file_name})
@@ -84,7 +103,7 @@ class InvoiceSendToFTPForSAP(APIView):
             # Connect to the FTP server
             ftp = FTP(ftp_base_url)  # Create an FTP object and connect
             ftp.login(username, password)  # Login with credentials
-
+            print(ftp.login(username, password))
             # Navigate to the directory or create it
             try:
                 ftp.cwd(directories)  # Try changing to the directory
