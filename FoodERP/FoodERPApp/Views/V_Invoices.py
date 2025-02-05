@@ -462,7 +462,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                             elif not EWayBill.get("EWayBillCreated", False) and EWayBill.get("EWayBillNotCreated", False):
                                 q = q.filter(EWayBillCreatedOn__isnull=True)   
                             Invoice_serializer.extend(SPOSInvoiceSerializer(q, many=True).data)
-                            InvoiceListData.append(a)
+                            
 
                         if (Invoicedata['DashBoardMode'] == 1):
                             InvoiceListData.append({
