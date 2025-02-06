@@ -273,13 +273,11 @@ class InvoiceListFilterViewSecond(CreateAPIView):
             with transaction.atomic():
                 FromDate = Invoicedata['FromDate']
                 ToDate = Invoicedata['ToDate']
-                Customer = Invoicedata['Customer']
+                Customer = Invoicedata['Customer']  
                 Party = Invoicedata['Party']                                
                 PaymentMode=Invoicedata['paymentMode'] 
                 InvoiceAmount=Invoicedata['invoiceAmount'] 
-                InvoiceNumber=Invoicedata['InvoiceNumber']
-                Cashier=Invoicedata['cashier']
-                Item=Invoicedata['Item']
+                InvoiceNumber=Invoicedata['InvoiceNumber']   
                 EInvoice = Invoicedata["EInvoice"]
                 EWayBill = Invoicedata["EWayBill"]
                 filter_args = {
@@ -310,15 +308,21 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         'IsDeleted': 0
                         
                     }
-                 
-                if Customer:
-                    if isinstance(Customer, str):  
-                        Customer = [int(c) for c in Customer.split(",") if c.isdigit()]                      
-                    if isinstance(Customer, list):
-                        SPOS_filter_args['Customer__in'] = Customer
+                POSCustomer = Invoicedata.get("POSCustomer", {}).get("SelectedPosCustomer", "")
+                print("POSCustomer:", POSCustomer)
+                if POSCustomer:
+                    print(POSCustomer)
+                    if isinstance(POSCustomer, str):
+                        POSCustomer = [int(c) for c in POSCustomer.split(",") if c.isdigit()]
+                        print("1:",POSCustomer)
+                    if isinstance(POSCustomer, list): 
+                        SPOS_filter_args['Customer__in'] = POSCustomer
+                     
+                        print("2:",SPOS_filter_args  )
                     else:
-                        SPOS_filter_args['Customer'] = Customer 
-
+                        SPOS_filter_args['Customer'] = POSCustomer  
+                        print("3:",SPOS_filter_args  )
+                        
                 # **Cashier (CreatedBy) Filter**
                 CreatedBy = Invoicedata.get("cashier", {}).get("SelectedCashier", "")
                 if CreatedBy:
@@ -369,21 +373,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     spos_invoice_ids = TC_SPOSInvoiceItems.objects.filter(Item__in=Item).values_list('Invoice', flat=True)  
 
                     if spos_invoice_ids:  
-                        SPOS_filter_args['id__in'] = list(spos_invoice_ids)
-
-                # **E-Invoice & E-Way Bill Dynamic Filters**
-                # EInvoice = Invoicedata.get("EInvoice", {})
-                # EWayBill = Invoicedata.get("EWayBill", {})
-
-                # if EInvoice.get("EInvoiceCreated"):
-                #     SPOS_filter_args["EInvoiceStatus"] = "Created"
-                # elif EInvoice.get("EInvoiceNotCreated"):
-                #     SPOS_filter_args["EInvoiceStatus"] = "Not Created"
-
-                # if EWayBill.get("EWayBillCreated"):
-                #     SPOS_filter_args["EWayBillStatus"] = "Created"
-                # elif EWayBill.get("EWayBillNotCreated"):
-                #     SPOS_filter_args["EWayBillStatus"] = "Not Created"
+                        SPOS_filter_args['id__in'] = list(spos_invoice_ids)                
 
                 # **Final Query Execution**
                 SposInvoices_query = (
@@ -401,8 +391,9 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         'Vehicle_id', 'TCSAmount', 'Hide', 'MobileNo', 'CreatedBy'
                     )
                 )
-
-                print(SposInvoices_query.query)
+                
+                print(SposInvoices_query)
+                
                 Spos_Invoices = []
                 for b in SposInvoices_query:
                     # print("SHRUTI")
@@ -429,7 +420,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     b['Identify_id'] = 2
                     b['VehicleNo'] = vehicle[0]['VehicleNumber'] if vehicle else ''
                     Spos_Invoices.append(b) 
-                    print(Spos_Invoices)
+                    
                 combined_invoices = []
                 
                 for aa in Invoices_query:
