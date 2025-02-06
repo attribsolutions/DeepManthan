@@ -308,6 +308,8 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         'IsDeleted': 0
                         
                     }
+                if Customer:
+                    SPOS_filter_args['Customer'] = Customer
                 # **POSCustomer (Customers) Filter**
                 POSCustomer = Invoicedata.get("Customers", {}).get("SelectedCustomer", "")
                 
