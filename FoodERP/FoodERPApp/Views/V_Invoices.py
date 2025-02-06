@@ -278,7 +278,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                 PaymentMode = Invoicedata.get('paymentMode', {})  
                 InvoiceAmount = Invoicedata.get('invoiceAmount', {})  
                 InvoiceNumber = Invoicedata.get('InvoiceNumber', {})  
-                EInvoice = Invoicedata.get('EInvoice', {})  #
+                EInvoice = Invoicedata.get('EInvoice', {})  
                 EWayBill = Invoicedata.get('EWayBill', {})  
                 filter_args = {
                         'InvoiceDate__range': (FromDate, ToDate),
