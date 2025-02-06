@@ -336,6 +336,9 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                 OrderData = list()
                 OrderItemDetails = list()
                 
+                # Check if GRN exists for any of the given OrderIDs
+                grn_exists = TC_GRNReferences.objects.filter(Order_id__in=Order_list).exists()
+                IsSave = 2 if grn_exists else 1
                
                 if Mode == 1:
                     OrderQuery=T_Orders.objects.raw('''SELECT T_Orders.Supplier_id id,M_Parties.Name SupplierName,sum(T_Orders.OrderAmount) OrderAmount ,T_Orders.Customer_id CustomerID,P.PriceList_id PriceListId
@@ -352,9 +355,9 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                         OrderItemQuery=TC_OrderItems.objects.filter(Order__in=Order_list,IsDeleted=0).order_by('Item')
                         OrderItemSerializedata=TC_OrderItemSerializer(OrderItemQuery,many=True).data                       
                         Ordersquery = T_Orders.objects.filter(Customer_id=OrderSerializedata[0]['CustomerID']).values('id')
-                        # Convert QuerySet to a list to make it JSON serializable
-                        # query_list = list(query)
-                        # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': query_list})
+                            # Convert QuerySet to a list to make it JSON serializable
+                            # query_list = list(query)
+                            # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': query_list})
                         for b in OrderItemSerializedata:
                                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': b})
                                 Item= b['Item']['id']
@@ -423,10 +426,11 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             "Customer": OrderSerializedata[0]['CustomerID'],
                             "PriceListId":OrderSerializedata[0]['PriceListId'],
                             "InvoiceNumber":"",
+                            "IsSave": IsSave,
                             "OrderItem": OrderItemDetails                            
-                        })
-                        log_entry = create_transaction_logNew(request, OrderItemSerializedata, OrderSerializedata[0]['CustomerID'],'OrderItemDetails',73,0,0,0,OrderSerializedata[0]['id'])
-                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData[0]})
+                    })
+                    log_entry = create_transaction_logNew(request, OrderItemSerializedata, OrderSerializedata[0]['CustomerID'],'OrderItemDetails',73,0,0,0,OrderSerializedata[0]['id'])
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData[0]})
                     
                 elif Mode == 2: #Make GRN from VDCChallan
                     # CustomPrint("Shrutiiiiii")
@@ -539,7 +543,8 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             "SupplierName": x['Customer']['Name'],
                             "OrderAmount": x['GrandTotal'],
                             "Customer": x['Customer']['id'],
-                            "InvoiceNumber":" ",                            
+                            "InvoiceNumber":" ",
+                            "IsSave": 0,                            
                             "FullDemandNumber":FullDemandNumber,
                             "DemandDate":DemandDate,
                             "OrderItem": ChallanItemDetails,
@@ -676,7 +681,8 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                 "SupplierName": a['Party']['Name'],
                                 "OrderAmount": a['GrandTotal'],
                                 "Customer": a['Customer']['id'],
-                                "InvoiceNumber":a['FullInvoiceNumber'], 
+                                "InvoiceNumber":a['FullInvoiceNumber'],
+                                "IsSave": 0,  
                                 "FullOrderNumber":FullOrderNumber,
                                 "OrderItem": InvoiceItemDetails,
                                 
@@ -776,7 +782,8 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             "SupplierName": x['Customer']['Name'],
                             "OrderAmount": x['GrandTotal'],
                             "Customer": x['Customer']['id'],
-                            "InvoiceNumber":" ",                            
+                            "InvoiceNumber":" ", 
+                            "IsSave": 0,                            
                             "FullDemandNumber":FullDemandNumber,
                             "DemandDate":DemandDate,
                             "OrderItem": ChallanItemDetails,
