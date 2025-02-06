@@ -18,7 +18,7 @@ from django.http import Http404
 from SweetPOS.models import *
 from django.db.models import F, Value, IntegerField
 from SweetPOS.models import *
-
+from django.db.models import OuterRef, Exists
 
 class OrderDetailsForInvoice(CreateAPIView):
     
@@ -308,21 +308,16 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         'IsDeleted': 0
                         
                     }
+                # **POSCustomer (Customers) Filter**
                 POSCustomer = Invoicedata.get("Customers", {}).get("SelectedCustomer", "")
-                # print("POSCustomer:", POSCustomer)
-                if POSCustomer:
-                    # print(POSCustomer)
+                
+                if POSCustomer:                    
                     if isinstance(POSCustomer, str):
-                        POSCustomer = [int(c) for c in POSCustomer.split(",") if c.isdigit()]
-                        # print("1:",POSCustomer)
+                        POSCustomer = [int(c) for c in POSCustomer.split(",") if c.isdigit()]                        
                     if isinstance(POSCustomer, list): 
-                        SPOS_filter_args['Customer__in'] = POSCustomer
-                     
-                        # print("2:",SPOS_filter_args  )
+                        SPOS_filter_args['Customer__in'] = POSCustomer     
                     else:
-                        SPOS_filter_args['Customer'] = POSCustomer  
-                        # print("3:",SPOS_filter_args  )
-                        
+                        SPOS_filter_args['Customer'] = POSCustomer 
                 # **Cashier (CreatedBy) Filter**
                 CreatedBy = Invoicedata.get("cashier", {}).get("SelectedCashier", "")
                 if CreatedBy:
@@ -373,8 +368,35 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     spos_invoice_ids = TC_SPOSInvoiceItems.objects.filter(Item__in=Item).values_list('Invoice', flat=True)  
 
                     if spos_invoice_ids:  
-                        SPOS_filter_args['id__in'] = list(spos_invoice_ids)                
+                        SPOS_filter_args['id__in'] = list(spos_invoice_ids)  
+               
+               # If EInvoiceCreated is True, filter by the date range for invoices
+                if EInvoice.get("EInvoiceCreated", True):                
+                    
+                    invoice_ids_in_range = T_SPOSInvoices.objects.filter(
+                        InvoiceDate__range=[FromDate, ToDate],
+                        Party=Party
+                    ).values_list('id', flat=True)
+                    tc_spos_invoice_uploads_in = TC_SPOSInvoiceUploads.objects.filter(
+                    Invoice_id__in=invoice_ids_in_range).values('Invoice_id')
+                    print(tc_spos_invoice_uploads_in.query)
+                    
+                    SPOS_filter_args['id__in'] = list(tc_spos_invoice_uploads_in.values_list('Invoice_id', flat=True))
 
+                elif EInvoice.get("EInvoiceNotCreated") is True:                    
+                    invoices_in_range = T_SPOSInvoices.objects.filter(
+                        InvoiceDate__range=[FromDate, ToDate],
+                        Party=Party
+                    )                   
+                    tc_spos_invoice_uploads_not_in = TC_SPOSInvoiceUploads.objects.filter(
+                        Invoice_id=OuterRef('id')
+                    )
+
+                    SPOS_filter_args['id__in'] = invoices_in_range.filter(
+                        ~Exists(tc_spos_invoice_uploads_not_in)
+                    ).values_list('id', flat=True)
+
+            
                 # **Final Query Execution**
                 SposInvoices_query = (
                     T_SPOSInvoices.objects.using('sweetpos_db')
@@ -392,7 +414,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     )
                 )
                 
-                print(SposInvoices_query.query)
+                # print(SposInvoices_query.query)
                 
                 Spos_Invoices = []
                 for b in SposInvoices_query:
@@ -437,23 +459,9 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                             q = TC_InvoiceUploads.objects.filter(Invoice=a["id"])
                             Invoice_serializer = InvoiceUploadsSerializer(q, many=True).data
                         if a['Identify_id'] == 2:
+                            
                             q=TC_SPOSInvoiceUploads.objects.filter(Invoice=a["id"])
-                            Invoice_serializer.extend(SPOSInvoiceSerializer(q, many=True).data)
-                            
-                            if EInvoice.get("EInvoiceCreated", False) and not EInvoice.get("EInvoiceNotCreated", False):
-                                q = q.filter(EInvoiceCreatedOn__isnull=False)  
-
-                            elif not EInvoice.get("EInvoiceCreated", False) and EInvoice.get("EInvoiceNotCreated", False):
-                                q = q.filter(EInvoiceCreatedOn__isnull=True)   
-
-                            # Apply E-Way Bill filters
-                            if EWayBill.get("EWayBillCreated", False) and not EWayBill.get("EWayBillNotCreated", False):
-                                q = q.filter(EWayBillCreatedOn__isnull=False)  
-
-                            elif not EWayBill.get("EWayBillCreated", False) and EWayBill.get("EWayBillNotCreated", False):
-                                q = q.filter(EWayBillCreatedOn__isnull=True)   
-                            Invoice_serializer.extend(SPOSInvoiceSerializer(q, many=True).data)
-                            
+                            Invoice_serializer.extend(SPOSInvoiceSerializer(q, many=True).data)   
 
                         if (Invoicedata['DashBoardMode'] == 1):
                             InvoiceListData.append({
