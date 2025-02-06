@@ -308,20 +308,20 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         'IsDeleted': 0
                         
                     }
-                POSCustomer = Invoicedata.get("POSCustomer", {}).get("SelectedPosCustomer", "")
-                print("POSCustomer:", POSCustomer)
+                POSCustomer = Invoicedata.get("Customers", {}).get("SelectedCustomer", "")
+                # print("POSCustomer:", POSCustomer)
                 if POSCustomer:
-                    print(POSCustomer)
+                    # print(POSCustomer)
                     if isinstance(POSCustomer, str):
                         POSCustomer = [int(c) for c in POSCustomer.split(",") if c.isdigit()]
-                        print("1:",POSCustomer)
+                        # print("1:",POSCustomer)
                     if isinstance(POSCustomer, list): 
                         SPOS_filter_args['Customer__in'] = POSCustomer
                      
-                        print("2:",SPOS_filter_args  )
+                        # print("2:",SPOS_filter_args  )
                     else:
                         SPOS_filter_args['Customer'] = POSCustomer  
-                        print("3:",SPOS_filter_args  )
+                        # print("3:",SPOS_filter_args  )
                         
                 # **Cashier (CreatedBy) Filter**
                 CreatedBy = Invoicedata.get("cashier", {}).get("SelectedCashier", "")
@@ -392,7 +392,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     )
                 )
                 
-                print(SposInvoices_query)
+                print(SposInvoices_query.query)
                 
                 Spos_Invoices = []
                 for b in SposInvoices_query:
