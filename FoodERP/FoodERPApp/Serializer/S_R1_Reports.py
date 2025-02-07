@@ -265,7 +265,7 @@ class EXEMP2Serializer2(serializers.Serializer):
     
 class HSNSerializer1(serializers.Serializer):    
     HSN=serializers.IntegerField()
-    Description=serializers.CharField(max_length=100)
+    # Description=serializers.CharField(max_length=100)
     UQC=serializers.CharField(max_length=100)
     TotalQuantity=FloatDecimalField()
     Rate=FloatDecimalField()
@@ -279,7 +279,7 @@ class HSNSerializer1(serializers.Serializer):
     def to_representation(self, obj):
         representation = super().to_representation(obj)
         representation ['HSN'] = representation.pop('HSN')
-        representation ['Description'] = representation.pop('Description')
+        # representation ['Description'] = representation.pop('Description')
         representation ['UQC'] = representation.pop('UQC')
         representation ['Total Quantity'] = representation.pop('TotalQuantity')
         representation ['Rate'] = representation.pop('Rate')
@@ -289,6 +289,13 @@ class HSNSerializer1(serializers.Serializer):
         representation ['Central Tax Amount'] = representation.pop('CentralTaxAmount')
         representation ['State UT Tax Amount'] = representation.pop('StateUTTaxAmount')
         # representation ['Cess Amount'] = representation.pop('CessAmount')
+        return representation
+    
+class HSNSerializerWithDescription(HSNSerializer1):
+    Description = serializers.CharField(max_length=100) 
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)  
+        representation['Description'] = getattr(obj, 'Description', '')  
         return representation
     
     
