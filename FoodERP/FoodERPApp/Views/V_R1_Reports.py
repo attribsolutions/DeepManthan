@@ -517,7 +517,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
 
                 HSNquery = T_Invoices.objects.raw('''SELECT 1 as id, M_GSTHSNCode.HSNCode AS HSN, M_Units.EwayBillUnit AS UQC,
 
-                       sum(UnitwiseQuantityConversion(M_Items.id,TC_InvoiceItems.QtyInNo,0,1,0,M_Units.id ,0)) TotalQuantity,sum(TC_InvoiceItems.Amount)TotalValue,
+                       sum(UnitwiseQuantityConversion(TC_InvoiceItems.item_id,TC_InvoiceItems.QtyInNo,0,1,0,M_Units.id ,0)) TotalQuantity,sum(TC_InvoiceItems.Amount)TotalValue,
                         sum(TC_InvoiceItems.BasicAmount) TaxableValue, sum(TC_InvoiceItems.IGST)IntegratedTaxAmount,
                         sum(TC_InvoiceItems.CGST)CentralTaxAmount,
                         sum(TC_InvoiceItems.SGST)StateUTTaxAmount, '' CessAmount,TC_InvoiceItems.GSTPercentage Rate
@@ -533,7 +533,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
 
                         SELECT 1 as id, Y.HSNCode AS HSN, M_Units.EwayBillUnit AS UQC,
 
-                        sum(UnitwiseQuantityConversion(M_Items.id,Y.QtyInNo,0,1,0,M_Units.id,0)) TotalQuantity,sum(Y.Amount)TotalValue,sum(Y.BasicAmount) TaxableValue, 
+                        sum(UnitwiseQuantityConversion(Y.Item,Y.QtyInNo,0,1,0,M_Units.id,0)) TotalQuantity,sum(Y.Amount)TotalValue,sum(Y.BasicAmount) TaxableValue, 
                         sum(Y.IGST)IntegratedTaxAmount,sum(Y.CGST)CentralTaxAmount,sum(Y.SGST)StateUTTaxAmount, 
                         '' CessAmount,Y.GSTPercentage Rate
                         FROM SweetPOS.T_SPOSInvoices X 
@@ -703,7 +703,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         WHERE X.Party= %s  and X.InvoiceDate BETWEEN %s AND %s AND X.IsDeleted=0  AND b.GSTIN!=''
                         Group by id, Y.HSNCode''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
                 
-                HSN3 = HSNSerializer1(HSNquery3, many=True).data
+                HSN3 = HSNSerializerWithDescription(HSNquery3, many=True).data
                 
                 HSNquery4= T_Invoices.objects.raw('''SELECT 1 as id, M_GSTHSNCode.HSNCode AS HSN,M_Items.Name Description,M_Units.EwayBillUnit AS UQC,
 
@@ -739,7 +739,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         WHERE X.Party= %s  and X.InvoiceDate BETWEEN %s AND %s AND X.IsDeleted=0  AND b.GSTIN=''
                         Group by id, Y.HSNCode''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
                                     
-                HSN4 = HSNSerializer1(HSNquery4, many=True).data  
+                HSN4 = HSNSerializerWithDescription(HSNquery4, many=True).data  
                 
                 if not HSN3:
                     HSN3 = [{
