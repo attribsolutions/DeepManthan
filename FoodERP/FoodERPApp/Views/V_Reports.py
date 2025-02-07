@@ -2002,3 +2002,51 @@ class PendingGRNInvoicesAPIView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'PendingGRNsReport:' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400,'Status': False,'Message': str(e),  'Data': [] })
+
+
+
+class GRNDiscrepancyReportAPIView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic
+    def post(self, request):
+        Data = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                FromDate = Data['FromDate']
+                ToDate = Data['ToDate']
+                GRNDiscrepancyData = []  
+                
+                GRNDiscrepancyQuery = TC_GRNItems.objects.raw(f'''SELECT TC_GRNItems.id, T_GRNs.GRNDate,T_GRNs.Party_id, T_GRNs.Customer_id, T_GRNs.FullGRNNumber,M_Items.Name AS ItemName,
+                                        party.Name AS PartyName, customer.Name AS CustomerName, T_GRNs.Comment,TC_GRNItems.DiscrepancyComment
+                                        FROM TC_GRNItems
+                                        JOIN T_GRNs ON TC_GRNItems.GRN_id = T_GRNs.id
+                                        JOIN M_Items ON TC_GRNItems.Item_id = M_Items.id
+                                        JOIN M_Parties party ON T_GRNs.Party_id = party.id
+                                        JOIN M_Parties customer ON T_GRNs.Customer_id = customer.id
+                                        WHERE GRNDate BETWEEN '{FromDate}' AND '{ToDate}' AND TC_GRNItems.DiscrepancyComment IS NOT NULL''')
+                
+                if GRNDiscrepancyQuery:  
+                        
+                    for row in GRNDiscrepancyQuery:                       
+                        GRNDiscrepancyData.append({
+                            "id" : row.id,
+                            "GRNDate": row.GRNDate,
+                            "PartyID": row.Party_id,
+                            "PartyName": row.PartyName,
+                            "CustomerID": row.Customer_id,
+                            "CustomerName" : row.CustomerName,
+                            "FullGRNNumber": row.FullGRNNumber,
+                            "ItemName": row.ItemName,
+                            "Comment": row.Comment,
+                            "DiscrepancyComment": row.DiscrepancyComment,                            
+                        }) 
+
+                log_entry = create_transaction_logNew(request, Data, 0, "", 442, 0, FromDate, ToDate, 0)
+                return JsonResponse({"StatusCode": 200, "Status": True,"Message": "GRN Discrepancy Report retrieved successfully.","Data": GRNDiscrepancyData,})
+            log_entry = create_transaction_logNew(request, Data, 0, "No discrepancies found", 442, 0, FromDate, ToDate, 0)
+            return JsonResponse({"StatusCode": 204,"Status": True,"Message": "No GRN discrepancies found.", "Data": [],})
+
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, Data, 0, "GRNDiscrepancyReport: " + str(e), 33, 0)
+            return JsonResponse({"StatusCode": 400,"Status": False,"Message": str(e),"Data": [],})
