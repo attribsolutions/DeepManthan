@@ -515,7 +515,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 # Example data for the seven sheet HSN 
 
 
-                HSNquery = T_Invoices.objects.raw('''SELECT 1 as id, M_GSTHSNCode.HSNCode AS HSN,M_Items.Name Description, M_Units.EwayBillUnit AS UQC,
+                HSNquery = T_Invoices.objects.raw('''SELECT 1 as id, M_GSTHSNCode.HSNCode AS HSN, M_Units.EwayBillUnit AS UQC,
 
                        sum(UnitwiseQuantityConversion(M_Items.id,TC_InvoiceItems.QtyInNo,0,1,0,M_Units.id ,0)) TotalQuantity,sum(TC_InvoiceItems.Amount)TotalValue,
                         sum(TC_InvoiceItems.BasicAmount) TaxableValue, sum(TC_InvoiceItems.IGST)IntegratedTaxAmount,
@@ -524,30 +524,25 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         FROM T_Invoices 
                         JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
                         JOIN M_GSTHSNCode ON M_GSTHSNCode.id=TC_InvoiceItems.GST_id
-                        JOIN M_Items ON M_Items.id=TC_InvoiceItems.Item_id
-
                         JOIN MC_ItemUnits ON MC_ItemUnits.id=TC_InvoiceItems.Unit_id
                         JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id
-
                         WHERE Party_id= %s  and T_Invoices.InvoiceDate BETWEEN %s AND %s  
-                        Group by id, M_GSTHSNCode.HSNCode,M_Items.Name,TC_InvoiceItems.GSTPercentage,M_Units.EwayBillUnit
+                        Group by id, M_GSTHSNCode.HSNCode,TC_InvoiceItems.GSTPercentage
                         UNION
 
 
-                        SELECT 1 as id, Y.HSNCode AS HSN,M_Items.Name Description, M_Units.EwayBillUnit AS UQC,
+                        SELECT 1 as id, Y.HSNCode AS HSN, M_Units.EwayBillUnit AS UQC,
 
                         sum(UnitwiseQuantityConversion(M_Items.id,Y.QtyInNo,0,1,0,M_Units.id,0)) TotalQuantity,sum(Y.Amount)TotalValue,sum(Y.BasicAmount) TaxableValue, 
                         sum(Y.IGST)IntegratedTaxAmount,sum(Y.CGST)CentralTaxAmount,sum(Y.SGST)StateUTTaxAmount, 
                         '' CessAmount,Y.GSTPercentage Rate
                         FROM SweetPOS.T_SPOSInvoices X 
-                        JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id=X.id                        
-
-                        JOIN M_Items ON M_Items.id=Y.Item  
+                        JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id=X.id                          
                         JOIN MC_ItemUnits ON MC_ItemUnits.id=Y.Unit
                         JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id                      
 
                         WHERE X.Party= %s  and X.InvoiceDate BETWEEN %s AND %s AND X.IsDeleted=0 
-                        Group by id, Y.HSNCode,Y.GSTPercentage,M_Items.Name,M_Units.EwayBillUnit''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
+                        Group by id, Y.HSNCode,Y.GSTPercentage''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
                 
                 HSN2 = HSNSerializer1(HSNquery, many=True).data
                 
