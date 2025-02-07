@@ -417,7 +417,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     )
                 )
                 
-                print(SposInvoices_query.query)
+                # print(SposInvoices_query.query)
                 
                 Spos_Invoices = []
                 for b in SposInvoices_query:
@@ -511,7 +511,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                                 "MobileNo":a['MobileNo']
                                 
                             }) 
-                print(InvoiceListData)
+                # print(InvoiceListData)
                 if InvoiceListData:
                     log_entry = create_transaction_logNew(request, Invoicedata, Party, 'From:'+FromDate+','+'To:'+ToDate, 35, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
