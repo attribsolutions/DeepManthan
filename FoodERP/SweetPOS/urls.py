@@ -46,6 +46,7 @@ urlpatterns = [
     url(r'SPOSUsersOfDivision/(?P<Division_id>\d+)$',SweetPOSUsersSecondView.as_view()),    
     url(r'sposroleslist$', SweetPOSRolesView.as_view()),
     url(r'StockProcesSPOS$',SPOSStockProcessingView.as_view()),
+    url(r'CronjobStockProcesSPOS$',SPOSStockProcessingthoughtcronjobView.as_view()),
     url(r'Invoice/(?P<id>\d+)(?:/(?P<characters>[A-Z]+))?$',SPOSInvoiceViewSecond.as_view()),
     url(r'CashierSummary$',SPOSCashierSummaryList.as_view()),
     url(r'UpdateCustomerVehiclePOSinvoice$',UpdateCustomerVehiclePOSInvoiceView.as_view()),
