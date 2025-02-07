@@ -286,6 +286,94 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     }
                 if Customer:
                     filter_args['Customer'] = Customer
+                POSCustomer = Invoicedata.get("Customers", {}).get("SelectedCustomer", "")
+                
+                if POSCustomer:                    
+                    if isinstance(POSCustomer, str):
+                        POSCustomer = [int(c) for c in POSCustomer.split(",") if c.isdigit()]                        
+                    if isinstance(POSCustomer, list): 
+                        filter_args['Customer__in'] = POSCustomer     
+                    else:
+                        filter_args['Customer'] = POSCustomer 
+                # **Cashier (CreatedBy) Filter**
+                CreatedBy = Invoicedata.get("cashier", {}).get("SelectedCashier", "")
+                if CreatedBy:
+                    if isinstance(CreatedBy, str):
+                        CreatedBy = [int(c) for c in CreatedBy.split(",") if c.isdigit()]
+                    if isinstance(CreatedBy, list):  
+                        filter_args['CreatedBy__in'] = CreatedBy  
+                    else:
+                        filter_args['CreatedBy'] = CreatedBy 
+
+                # **Payment Mode Filter (Dynamic)**
+                PaymentMode = Invoicedata.get("paymentMode", {})
+                payment_filters = [key for key, value in PaymentMode.items() if value]  # Get all true values
+
+                if payment_filters:
+                    filter_args["PaymentType__in"] = payment_filters
+
+                # **Invoice Amount Filters**
+                InvoiceAmount = Invoicedata.get("invoiceAmount", {})
+
+                if InvoiceAmount.get("Less_Than") and InvoiceAmount.get("Invoice_Amount"):
+                    filter_args["GrandTotal__lt"] = InvoiceAmount["Invoice_Amount"]
+
+                if InvoiceAmount.get("Greater_Than") and InvoiceAmount.get("Invoice_Amount"):
+                    filter_args["GrandTotal__gt"] = InvoiceAmount["Invoice_Amount"]
+
+                if InvoiceAmount.get("Between_InvoiceAmount") and InvoiceAmount.get("Between_InvoiceAmount_1") and InvoiceAmount.get("Between_InvoiceAmount_2"):
+                    filter_args["GrandTotal__range"] = (InvoiceAmount["Between_InvoiceAmount_1"], InvoiceAmount["Between_InvoiceAmount_2"])
+
+                # **Invoice Number Filters**
+                InvoiceNumber = Invoicedata.get("InvoiceNumber", {})
+
+                if InvoiceNumber.get("Less_Than") and InvoiceNumber.get("Invoice_Number"):
+                    filter_args["InvoiceNumber__lt"] = InvoiceNumber["Invoice_Number"]
+
+                if InvoiceNumber.get("Greater_Than") and InvoiceNumber.get("Invoice_Number"):
+                    filter_args["InvoiceNumber__gt"] = InvoiceNumber["Invoice_Number"]
+
+                if InvoiceNumber.get("Between_InvoiceNumber") and InvoiceNumber.get("Between_InvoiceNumber_1") and InvoiceNumber.get("Between_InvoiceNumber_2"):
+                    filter_args["InvoiceNumber__range"] = (InvoiceNumber["Between_InvoiceNumber_1"], InvoiceNumber["Between_InvoiceNumber_2"])
+
+                # **Item Filter**
+                Item = Invoicedata.get("Item", {}).get("SelectedItem", "")
+                if Item:
+                    if isinstance(Item, str):  
+                        Item = [int(i) for i in Item.split(",") if i.isdigit()]
+                    
+                    spos_invoice_ids = TC_SPOSInvoiceItems.objects.filter(Item__in=Item).values_list('Invoice', flat=True)  
+
+                    if spos_invoice_ids:  
+                        filter_args['id__in'] = list(spos_invoice_ids)  
+               
+               # If EInvoiceCreated is True, filter by the date range for invoices
+                if EInvoice.get("EInvoiceCreated", False):                
+                    
+                    invoice_ids_in_range = T_SPOSInvoices.objects.filter(
+                        InvoiceDate__range=[FromDate, ToDate],
+                        Party=Party
+                    ).values_list('id', flat=True)
+                    tc_spos_invoice_uploads_in = TC_SPOSInvoiceUploads.objects.filter(
+                    Invoice_id__in=invoice_ids_in_range).values('Invoice_id')
+                    # print(tc_spos_invoice_uploads_in.query)
+                    
+                    filter_args['id__in'] = list(tc_spos_invoice_uploads_in.values_list('Invoice_id', flat=True))
+
+                if EInvoice.get("EInvoiceNotCreated",False):
+                                        
+                    invoices_in_range = T_SPOSInvoices.objects.filter(
+                        InvoiceDate__range=[FromDate, ToDate],
+                        Party=Party
+                    )                   
+                    tc_spos_invoice_uploads_not_in = TC_SPOSInvoiceUploads.objects.filter(
+                        Invoice_id=OuterRef('id')
+                    )
+
+                    filter_args['id__in'] = invoices_in_range.filter(
+                        ~Exists(tc_spos_invoice_uploads_not_in)
+                    ).values_list('id', flat=True)                         
+                    
                 Invoices_query = T_Invoices.objects.filter(**filter_args).select_related('Party', 'Customer', 'Driver','Vehicle').annotate(
                     CustomerGSTIN=F('Customer__GSTIN'),
                     CustomerPAN=F('Customer__PAN'),
