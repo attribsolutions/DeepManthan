@@ -342,7 +342,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     if isinstance(Item, str):  
                         Item = [int(i) for i in Item.split(",") if i.isdigit()]
                     
-                    spos_invoice_ids = TC_SPOSInvoiceItems.objects.filter(Item__in=Item).values_list('Invoice', flat=True)  
+                    spos_invoice_ids = TC_InvoiceItems.objects.filter(Item__in=Item).values_list('Invoice', flat=True)  
 
                     if spos_invoice_ids:  
                         filter_args['id__in'] = list(spos_invoice_ids)  
@@ -350,11 +350,11 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                # If EInvoiceCreated is True, filter by the date range for invoices
                 if EInvoice.get("EInvoiceCreated", False):                
                     
-                    invoice_ids_in_range = T_SPOSInvoices.objects.filter(
+                    invoice_ids_in_range = T_Invoices.objects.filter(
                         InvoiceDate__range=[FromDate, ToDate],
                         Party=Party
                     ).values_list('id', flat=True)
-                    tc_spos_invoice_uploads_in = TC_SPOSInvoiceUploads.objects.filter(
+                    tc_spos_invoice_uploads_in = TC_InvoiceUploads.objects.filter(
                     Invoice_id__in=invoice_ids_in_range).values('Invoice_id')
                     # print(tc_spos_invoice_uploads_in.query)
                     
@@ -362,11 +362,11 @@ class InvoiceListFilterViewSecond(CreateAPIView):
 
                 if EInvoice.get("EInvoiceNotCreated",False):
                                         
-                    invoices_in_range = T_SPOSInvoices.objects.filter(
+                    invoices_in_range = T_Invoices.objects.filter(
                         InvoiceDate__range=[FromDate, ToDate],
                         Party=Party
                     )                   
-                    tc_spos_invoice_uploads_not_in = TC_SPOSInvoiceUploads.objects.filter(
+                    tc_spos_invoice_uploads_not_in = TC_InvoiceUploads.objects.filter(
                         Invoice_id=OuterRef('id')
                     )
 
