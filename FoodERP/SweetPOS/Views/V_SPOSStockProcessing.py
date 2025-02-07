@@ -147,7 +147,7 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
                     
                     start_date_str = yesterday
                     end_date_str = today
-                    Partys = M_Parties.objects.filter(PartyType = 19).values('id')[:2]
+                    Partys = M_Parties.objects.filter(PartyType = 19).values('id')
                     print(Partys)
                     
                     
