@@ -18,7 +18,7 @@ from django.http import Http404
 from SweetPOS.models import *
 from django.db.models import F, Value, IntegerField
 from SweetPOS.models import *
-
+from django.db.models import OuterRef, Exists
 
 class OrderDetailsForInvoice(CreateAPIView):
     
@@ -273,9 +273,13 @@ class InvoiceListFilterViewSecond(CreateAPIView):
             with transaction.atomic():
                 FromDate = Invoicedata['FromDate']
                 ToDate = Invoicedata['ToDate']
-                Customer = Invoicedata['Customer']
-                Party = Invoicedata['Party']
-               
+                Customer = Invoicedata['Customer']  
+                Party = Invoicedata['Party']                                
+                PaymentMode = Invoicedata.get('paymentMode', {})  
+                InvoiceAmount = Invoicedata.get('invoiceAmount', {})  
+                InvoiceNumber = Invoicedata.get('InvoiceNumber', {})  
+                EInvoice = Invoicedata.get('EInvoice', {})  
+                EWayBill = Invoicedata.get('EWayBill', {})  
                 filter_args = {
                         'InvoiceDate__range': (FromDate, ToDate),
                         'Party': Party
@@ -300,21 +304,123 @@ class InvoiceListFilterViewSecond(CreateAPIView):
 
                 SPOS_filter_args = {
                         'InvoiceDate__range': (FromDate, ToDate),
-                        'Party': Party
+                        'Party': Party,
+                        'IsDeleted': 0
+                        
                     }
                 if Customer:
                     SPOS_filter_args['Customer'] = Customer
-                SposInvoices_query = T_SPOSInvoices.objects.using('sweetpos_db').filter(IsDeleted = 0).filter(**SPOS_filter_args).order_by('-InvoiceDate').annotate(
+                # **POSCustomer (Customers) Filter**
+                POSCustomer = Invoicedata.get("Customers", {}).get("SelectedCustomer", "")
+                
+                if POSCustomer:                    
+                    if isinstance(POSCustomer, str):
+                        POSCustomer = [int(c) for c in POSCustomer.split(",") if c.isdigit()]                        
+                    if isinstance(POSCustomer, list): 
+                        SPOS_filter_args['Customer__in'] = POSCustomer     
+                    else:
+                        SPOS_filter_args['Customer'] = POSCustomer 
+                # **Cashier (CreatedBy) Filter**
+                CreatedBy = Invoicedata.get("cashier", {}).get("SelectedCashier", "")
+                if CreatedBy:
+                    if isinstance(CreatedBy, str):
+                        CreatedBy = [int(c) for c in CreatedBy.split(",") if c.isdigit()]
+                    if isinstance(CreatedBy, list):  
+                        SPOS_filter_args['CreatedBy__in'] = CreatedBy  
+                    else:
+                        SPOS_filter_args['CreatedBy'] = CreatedBy 
+
+                # **Payment Mode Filter (Dynamic)**
+                PaymentMode = Invoicedata.get("paymentMode", {})
+                payment_filters = [key for key, value in PaymentMode.items() if value]  # Get all true values
+
+                if payment_filters:
+                    SPOS_filter_args["PaymentType__in"] = payment_filters
+
+                # **Invoice Amount Filters**
+                InvoiceAmount = Invoicedata.get("invoiceAmount", {})
+
+                if InvoiceAmount.get("Less_Than") and InvoiceAmount.get("Invoice_Amount"):
+                    SPOS_filter_args["GrandTotal__lt"] = InvoiceAmount["Invoice_Amount"]
+
+                if InvoiceAmount.get("Greater_Than") and InvoiceAmount.get("Invoice_Amount"):
+                    SPOS_filter_args["GrandTotal__gt"] = InvoiceAmount["Invoice_Amount"]
+
+                if InvoiceAmount.get("Between_InvoiceAmount") and InvoiceAmount.get("Between_InvoiceAmount_1") and InvoiceAmount.get("Between_InvoiceAmount_2"):
+                    SPOS_filter_args["GrandTotal__range"] = (InvoiceAmount["Between_InvoiceAmount_1"], InvoiceAmount["Between_InvoiceAmount_2"])
+
+                # **Invoice Number Filters**
+                InvoiceNumber = Invoicedata.get("InvoiceNumber", {})
+
+                if InvoiceNumber.get("Less_Than") and InvoiceNumber.get("Invoice_Number"):
+                    SPOS_filter_args["InvoiceNumber__lt"] = InvoiceNumber["Invoice_Number"]
+
+                if InvoiceNumber.get("Greater_Than") and InvoiceNumber.get("Invoice_Number"):
+                    SPOS_filter_args["InvoiceNumber__gt"] = InvoiceNumber["Invoice_Number"]
+
+                if InvoiceNumber.get("Between_InvoiceNumber") and InvoiceNumber.get("Between_InvoiceNumber_1") and InvoiceNumber.get("Between_InvoiceNumber_2"):
+                    SPOS_filter_args["InvoiceNumber__range"] = (InvoiceNumber["Between_InvoiceNumber_1"], InvoiceNumber["Between_InvoiceNumber_2"])
+
+                # **Item Filter**
+                Item = Invoicedata.get("Item", {}).get("SelectedItem", "")
+                if Item:
+                    if isinstance(Item, str):  
+                        Item = [int(i) for i in Item.split(",") if i.isdigit()]
+                    
+                    spos_invoice_ids = TC_SPOSInvoiceItems.objects.filter(Item__in=Item).values_list('Invoice', flat=True)  
+
+                    if spos_invoice_ids:  
+                        SPOS_filter_args['id__in'] = list(spos_invoice_ids)  
+               
+               # If EInvoiceCreated is True, filter by the date range for invoices
+                if EInvoice.get("EInvoiceCreated", True):                
+                    
+                    invoice_ids_in_range = T_SPOSInvoices.objects.filter(
+                        InvoiceDate__range=[FromDate, ToDate],
+                        Party=Party
+                    ).values_list('id', flat=True)
+                    tc_spos_invoice_uploads_in = TC_SPOSInvoiceUploads.objects.filter(
+                    Invoice_id__in=invoice_ids_in_range).values('Invoice_id')
+                    # print(tc_spos_invoice_uploads_in.query)
+                    
+                    SPOS_filter_args['id__in'] = list(tc_spos_invoice_uploads_in.values_list('Invoice_id', flat=True))
+
+                elif EInvoice.get("EInvoiceNotCreated") is True:                    
+                    invoices_in_range = T_SPOSInvoices.objects.filter(
+                        InvoiceDate__range=[FromDate, ToDate],
+                        Party=Party
+                    )                   
+                    tc_spos_invoice_uploads_not_in = TC_SPOSInvoiceUploads.objects.filter(
+                        Invoice_id=OuterRef('id')
+                    )
+
+                    SPOS_filter_args['id__in'] = invoices_in_range.filter(
+                        ~Exists(tc_spos_invoice_uploads_not_in)
+                    ).values_list('id', flat=True)
+
+            
+                # **Final Query Execution**
+                SposInvoices_query = (
+                    T_SPOSInvoices.objects.using('sweetpos_db')
+                    .filter(**SPOS_filter_args)
+                    .order_by('-InvoiceDate')
+                    .annotate(
                         Party_id=F('Party'),
                         Customer_id=F('Customer'),
-                        Vehicle_id=F('Vehicle')).values(
-                    'id', 'InvoiceDate','PaymentType', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal',
-                    'RoundOffAmount', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id', 'Party_id',
-                    'Vehicle_id', 'TCSAmount', 'Hide','MobileNo','CreatedBy'
+                        Vehicle_id=F('Vehicle')
+                    )
+                    .values(
+                        'id', 'InvoiceDate', 'PaymentType', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal',
+                        'RoundOffAmount', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id', 'Party_id',
+                        'Vehicle_id', 'TCSAmount', 'Hide', 'MobileNo', 'CreatedBy'
+                    )
                 )
-    
+                
+                # print(SposInvoices_query.query)
+                
                 Spos_Invoices = []
                 for b in SposInvoices_query:
+                    # print("SHRUTI")
                     parties = M_Parties.objects.filter(id=Party).values('id', 'Name')
                     customers = M_Parties.objects.filter(id=b['Customer_id']).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
                     vehicle = M_Vehicles.objects.filter(id=b['Vehicle_id']).values('VehicleNumber')
@@ -338,6 +444,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     b['Identify_id'] = 2
                     b['VehicleNo'] = vehicle[0]['VehicleNumber'] if vehicle else ''
                     Spos_Invoices.append(b) 
+                    
                 combined_invoices = []
                 
                 for aa in Invoices_query:
@@ -354,8 +461,9 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                             q = TC_InvoiceUploads.objects.filter(Invoice=a["id"])
                             Invoice_serializer = InvoiceUploadsSerializer(q, many=True).data
                         if a['Identify_id'] == 2:
+                            
                             q=TC_SPOSInvoiceUploads.objects.filter(Invoice=a["id"])
-                            Invoice_serializer.extend(SPOSInvoiceSerializer(q, many=True).data)
+                            Invoice_serializer.extend(SPOSInvoiceSerializer(q, many=True).data)   
 
                         if (Invoicedata['DashBoardMode'] == 1):
                             InvoiceListData.append({
@@ -402,6 +510,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                                 "MobileNo":a['MobileNo']
                                 
                             }) 
+                # print(InvoiceListData)
                 if InvoiceListData:
                     log_entry = create_transaction_logNew(request, Invoicedata, Party, 'From:'+FromDate+','+'To:'+ToDate, 35, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
@@ -1099,6 +1208,41 @@ class InvoiceBulkDeleteView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, invoice_data,0,'InvoiceIDsNotDeleted:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+        
+class FranchisesCashierList(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    
+    def post(self, request):
+        POSCashierdata = JSONParser().parse(request)
+        print(POSCashierdata)
+        try:
+            with transaction.atomic():
+                
+                Party = POSCashierdata['Party']
+                print(Party)               
+                FranchisesCashierQuery=M_Users.objects.raw(f''' Select M_Users.id ,M_Users.LoginName  
+                from MC_EmployeeParties 
+                JOIN M_Users ON M_Users.Employee_id=MC_EmployeeParties.Employee_id
+                where Party_id  in(Select id from M_Parties where PartyType_id=19) and party_id={Party}''') 
+                print(FranchisesCashierQuery.query)               
+                if FranchisesCashierQuery:
+                    print("Shruti")
+                    CashierDetails=list()
+                    for row in FranchisesCashierQuery:
+                        print(row)
+                        CashierDetails.append({                            
+                            "value":row.id,
+                            "label":row.LoginName 
+                        })
+                    print(CashierDetails)
+                    log_entry = create_transaction_logNew( request, POSCashierdata, Party, '', 441, 0,0,0,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': CashierDetails})
+                log_entry = create_transaction_logNew( request, POSCashierdata, Party, 'Data Not Found', 441, 0,0,0,0)           
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+
+        except Exception as e:
+            log_entry = create_transaction_logNew( request, POSCashierdata, 0, 'Cashier:'+str(e), 33,0,0,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 
