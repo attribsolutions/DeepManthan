@@ -381,7 +381,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     ).values_list('id', flat=True)
                     tc_spos_invoice_uploads_in = TC_SPOSInvoiceUploads.objects.filter(
                     Invoice_id__in=invoice_ids_in_range).values('Invoice_id')
-                    print(tc_spos_invoice_uploads_in.query)
+                    # print(tc_spos_invoice_uploads_in.query)
                     
                     SPOS_filter_args['id__in'] = list(tc_spos_invoice_uploads_in.values_list('Invoice_id', flat=True))
 

@@ -56,12 +56,12 @@ class InvoiceSendToFTPForSAP(APIView):
                     T_Invoices.ID = %s '''                   
                        
                     raw_queryset = T_Invoices.objects.raw(ItemSAPCode, [InvoiceID])   
-                    print(raw_queryset.query)         
+                    # print(raw_queryset.query)         
                     
                     file_name = f"{datetime.now().strftime('%Y%m%d')}_InvoiceFile1.csv"
-                    print(file_name)
+                    # print(file_name)
                     ftp_file_path = f"{FTPFilePath}/inbound/GRN_MIR7/source/{file_name}"
-                    print(ftp_file_path)
+                    # print(ftp_file_path)
                     headers = [
                         "Vendor", "Plant", "DocumentDate","DeliveryNote","BillofLading",
                         "HeaderText","VenderInvoiceNumber","InvoiceheaderAmountwithGST","Material","Quantity",
@@ -82,7 +82,7 @@ class InvoiceSendToFTPForSAP(APIView):
 
                     # Upload to FTP
                     self.upload_to_ftp(ftp_file_path, user_name, password, csv_content) 
-                    print("HHHHHH")           
+                    # print("HHHHHH")           
                     pass
                     # Return success response
                     # return JsonResponse({'message': 'File uploaded successfully', 'file_name': file_name})
@@ -103,7 +103,7 @@ class InvoiceSendToFTPForSAP(APIView):
             # Connect to the FTP server
             ftp = FTP(ftp_base_url)  # Create an FTP object and connect
             ftp.login(username, password)  # Login with credentials
-            print(ftp.login(username, password))
+            # print(ftp.login(username, password))
             # Navigate to the directory or create it
             try:
                 ftp.cwd(directories)  # Try changing to the directory
