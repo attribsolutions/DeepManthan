@@ -278,7 +278,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                 PaymentMode = Invoicedata.get('paymentMode', {})  
                 InvoiceAmount = Invoicedata.get('invoiceAmount', {})  
                 InvoiceNumber = Invoicedata.get('InvoiceNumber', {})  
-                EInvoice = Invoicedata.get('EInvoice', {})  
+                EInvoice = Invoicedata.get('EInvoice', {})                 
                 EWayBill = Invoicedata.get('EWayBill', {})  
                 filter_args = {
                         'InvoiceDate__range': (FromDate, ToDate),
@@ -373,7 +373,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         SPOS_filter_args['id__in'] = list(spos_invoice_ids)  
                
                # If EInvoiceCreated is True, filter by the date range for invoices
-                if EInvoice.get("EInvoiceCreated", True):                
+                if EInvoice.get("EInvoiceCreated", False):                
                     
                     invoice_ids_in_range = T_SPOSInvoices.objects.filter(
                         InvoiceDate__range=[FromDate, ToDate],
@@ -385,7 +385,8 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     
                     SPOS_filter_args['id__in'] = list(tc_spos_invoice_uploads_in.values_list('Invoice_id', flat=True))
 
-                elif EInvoice.get("EInvoiceNotCreated") is True:                    
+                if EInvoice.get("EInvoiceNotCreated",False):
+                                        
                     invoices_in_range = T_SPOSInvoices.objects.filter(
                         InvoiceDate__range=[FromDate, ToDate],
                         Party=Party
@@ -416,7 +417,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     )
                 )
                 
-                # print(SposInvoices_query.query)
+                print(SposInvoices_query.query)
                 
                 Spos_Invoices = []
                 for b in SposInvoices_query:
@@ -510,7 +511,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                                 "MobileNo":a['MobileNo']
                                 
                             }) 
-                # print(InvoiceListData)
+                print(InvoiceListData)
                 if InvoiceListData:
                     log_entry = create_transaction_logNew(request, Invoicedata, Party, 'From:'+FromDate+','+'To:'+ToDate, 35, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceListData})
