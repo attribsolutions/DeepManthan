@@ -527,7 +527,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         JOIN MC_ItemUnits ON MC_ItemUnits.id=TC_InvoiceItems.Unit_id
                         JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id
                         WHERE Party_id= %s  and T_Invoices.InvoiceDate BETWEEN %s AND %s  
-                        Group by id, M_GSTHSNCode.HSNCode,TC_InvoiceItems.GSTPercentage
+                        Group by id, M_GSTHSNCode.HSNCode,TC_InvoiceItems.GSTPercentage,M_Units.EwayBillUnit
                         UNION
 
 
@@ -542,7 +542,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id                      
 
                         WHERE X.Party= %s  and X.InvoiceDate BETWEEN %s AND %s AND X.IsDeleted=0 
-                        Group by id, Y.HSNCode,Y.GSTPercentage''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
+                        Group by id, Y.HSNCode,Y.GSTPercentage,M_Units.EwayBillUnit''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
                 
                 HSN2 = HSNSerializer1(HSNquery, many=True).data
                 
@@ -738,7 +738,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
 
                         WHERE X.Party= %s  and X.InvoiceDate BETWEEN %s AND %s AND X.IsDeleted=0  AND b.GSTIN=''
                         Group by id, Y.HSNCode''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
-                                    
+                                  
                 HSN4 = HSNSerializerWithDescription(HSNquery4, many=True).data  
                 
                 if not HSN3:
