@@ -193,11 +193,11 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                         p1 += (SubCluster,)
             
                     if Group:
-                        where_clause += " AND M_Group.id = %s"
+                        where_clause += " AND Groupss.id = %s"
                         p1 += (Group,)
                         
                     if SubGroup:
-                        where_clause += " AND MC_SubGroup.id = %s "
+                        where_clause += " AND subgroup.id = %s "
                         p1 += (SubGroup,)
                         
                     
@@ -219,6 +219,7 @@ LEFT JOIN M_PartyDetails on  A.id=M_PartyDetails.Party_id AND M_PartyDetails.Gro
 LEFT JOIN M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id 
 LEFT JOIN M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id
 WHERE O_BatchWiseLiveStock.BaseUnitQuantity >0 {where_clause}
+group by A.id, GroupType.id, Groupss.id,subgroup.id, M_Items.id , GSTPercentage,MRPValue,M_Cluster.id,M_SubCluster.id
 {ItemsGroupJoinsandOrderby[2]}''')
                     
                     Itemquery = MC_PartyItems.objects.raw(Stockquery, p1)
@@ -250,11 +251,11 @@ WHERE O_BatchWiseLiveStock.BaseUnitQuantity >0 {where_clause}
                         p2 += (SubCluster,)
                     
                     if Group:
-                        where_clause += " AND M_Group.id = %s"
+                        where_clause += " AND Groupss.id = %s"
                         p2 += (Group,)
                     
                     if SubGroup:
-                        where_clause += " AND MC_SubGroup.id = %s "
+                        where_clause += " AND subgroup.id = %s "
                         p2 += (SubGroup,)
                     
                     Stockquery=(f'''SELECT A.id DistributorID,A.name DistributorName,
@@ -276,9 +277,9 @@ WHERE O_BatchWiseLiveStock.BaseUnitQuantity >0 {where_clause}
     LEFT JOIN M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id
     WHERE O_BatchWiseLiveStock.BaseUnitQuantity >0 {where_clause}
     {ItemsGroupJoinsandOrderby[2]}''')
-                       
-                    Itemquery = MC_PartyItems.objects.raw(Stockquery, p2)
                     
+                    Itemquery = MC_PartyItems.objects.raw(Stockquery, p2)
+                      
                 if not Itemquery:
                     log_entry = create_transaction_logNew(request, StockReportdata, Party, "BatchWiseLiveStock Not available",88,0) 
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
@@ -399,7 +400,7 @@ class StockEntryItemsView(CreateAPIView):
                                                             GetTodaysDateRate(M_Items.id, CURDATE(),  %s, 0, 1) AS Rate,
                                                             FORMAT(IFNULL(O.ClosingBalance, 0), 15) AS CurrentStock
                                                             FROM M_Items 
-                                                            JOIN MC_PartyItems ON MC_PartyItems.Item_id = M_Items.id and IsCBMItem=1
+                                                            JOIN MC_PartyItems ON MC_PartyItems.Item_id = M_Items.id 
                                                             LEFT JOIN SweetPOS.O_SPOSDateWiseLiveStock O ON O.Item = M_Items.id AND O.StockDate = CURRENT_DATE and Party= {PartyID}
                                                             {ItemsGroupJoinsandOrderby[1]}
                                                             WHERE MC_PartyItems.Party_id = %s 
