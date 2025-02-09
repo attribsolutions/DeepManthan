@@ -234,7 +234,7 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
         left join (SELECT Item,sum(BaseUnitQuantity)ActualStock FROM SweetPOS.T_SPOSStock where  IsStockAdjustment=0 and StockDate = %s and Party= %s group by Item)ActualStock
         on I.Item_id=ActualStock.Item
 
-        )R limit 10
+        )R 
         ''',([Party], [Date],[Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party]))
         # where
         # OpeningBalance!=0 OR GRN!=0 OR Sale!=0 OR PurchaseReturn != 0 OR SalesReturn !=0 OR StockAdjustment!=0
