@@ -207,7 +207,7 @@ class T_SPOSStockOut(models.Model):
     StockDate=models.DateField()
     Item= models.IntegerField()#ForeignKey(M_Items,related_name='stockItem', on_delete=models.PROTECT)
     # BaseUnitQuantity=models.DecimalField(max_digits=20,decimal_places=10)
-    # Quantity=models.DecimalField(max_digits=20,decimal_places=10)
+    Quantity=models.DecimalField(max_digits=20,decimal_places=10)
     # Unit = models.IntegerField()#ForeignKey(MC_ItemUnits, related_name='StockUnit', on_delete=models.PROTECT)
     # MRP = models.IntegerField()#ForeignKey(M_MRPMaster, related_name='StockItemMRP', on_delete=models.PROTECT)
     # MRPValue =  models.DecimalField(max_digits=20, decimal_places=2)
