@@ -147,8 +147,10 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
                     
                     start_date_str = yesterday
                     end_date_str = today
-                    Partys = M_Parties.objects.filter(PartyType = 19).values('id')
-                    print(Partys)
+                    excluded_ids = [56605, 71368, 53532, 60722, 65261, 35115]
+                    Partys = M_Parties.objects.filter(PartyType=19).exclude(id__in=excluded_ids).values('id')
+                    # Partys = M_Parties.objects.filter(PartyType = 19).values('id')
+                    print(Partys)      
                     
                     
                     for Party in Partys:
@@ -190,7 +192,7 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
 
         from
 
-        (Select Item_id,M_Items.BaseUnitID_id UnitID  from FoodERP.MC_PartyItems join FoodERP.M_Items on M_Items.id=MC_PartyItems.Item_id where Party_id=%s)I
+        (Select Item_id,M_Items.BaseUnitID_id UnitID from FoodERP.MC_PartyItems join FoodERP.M_Items on M_Items.id=MC_PartyItems.Item_id and M_Items.IsCBMItem=1 where Party_id=%s)I
 
         left join (SELECT IFNULL(Item,0) ItemID, sum(ClosingBalance)ClosingBalance FROM SweetPOS.O_SPOSDateWiseLiveStock WHERE StockDate = DATE_SUB(  %s, 
         INTERVAL 1
@@ -248,7 +250,7 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
                                     # print('kkkkkkkkkkkkkkkkkkkkkkkkkk')
                                     stock = O_SPOSDateWiseLiveStock(StockDate=Date, OpeningBalance=a.OpeningBalance, GRN=a.GRN, Sale=a.Sale, PurchaseReturn=a.PurchaseReturn, SalesReturn=a.SalesReturn, ClosingBalance=a.ClosingBalance, ActualStock=a.ActualStock, StockAdjustment=a.StockAdjustment, Item=a.ItemID, Unit=a.UnitID, Party=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
                                     stock.save()
-                                if(a.ClosingBalance == 0) :
+                                if(a.ClosingBalance <= 0) :
                                     stockout = T_SPOSStockOut(StockDate=Date, Item=a.ItemID, Party=Party, CreatedBy=0)
                                     stockout.save()    
                             current_date += timedelta(days=1)
