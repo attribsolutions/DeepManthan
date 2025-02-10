@@ -150,8 +150,9 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
                     excluded_ids = [56605, 71368, 53532, 60722, 65261, 35115]
                     Partys = M_Parties.objects.filter(PartyType=19).exclude(id__in=excluded_ids).values('id')
                     # Partys = M_Parties.objects.filter(PartyType = 19).values('id')
-                    print(Partys)      
-                    
+
+                    print(Partys)                    
+
                     
                     for Party in Partys:
                         print(Party['id'])
@@ -192,7 +193,9 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
 
         from
 
-        (Select Item_id,M_Items.BaseUnitID_id UnitID from FoodERP.MC_PartyItems join FoodERP.M_Items on M_Items.id=MC_PartyItems.Item_id and M_Items.IsCBMItem=1 where Party_id=%s)I
+
+        (Select Item_id,M_Items.BaseUnitID_id UnitID  from FoodERP.MC_PartyItems join FoodERP.M_Items on M_Items.id=MC_PartyItems.Item_id and M_Items.IsCBMItem=1 where Party_id=%s)I
+
 
         left join (SELECT IFNULL(Item,0) ItemID, sum(ClosingBalance)ClosingBalance FROM SweetPOS.O_SPOSDateWiseLiveStock WHERE StockDate = DATE_SUB(  %s, 
         INTERVAL 1
