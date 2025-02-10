@@ -118,9 +118,10 @@ on I.Item_id=ActualStock.Item
                             # print('kkkkkkkkkkkkkkkkkkkkkkkkkk')
                             stock = O_SPOSDateWiseLiveStock(StockDate=Date, OpeningBalance=a.OpeningBalance, GRN=a.GRN, Sale=a.Sale, PurchaseReturn=a.PurchaseReturn, SalesReturn=a.SalesReturn, ClosingBalance=a.ClosingBalance, ActualStock=a.ActualStock, StockAdjustment=a.StockAdjustment, Item=a.ItemID, Unit=a.UnitID, Party=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
                             stock.save()
-                        if(a.ClosingBalance == 0) :
-                            stockout = T_SPOSStockOut(StockDate=Date, Item=a.ItemID, Party=Party, CreatedBy=0)
-                            stockout.save()    
+                       
+                        # if(a.ClosingBalance == 0) :
+                        #     stockout = T_SPOSStockOut(StockDate=Date, Item=a.ItemID, Party=Party, CreatedBy=0)
+                        #     stockout.save()    
                     
                     current_date += timedelta(days=1)
                 log_entry = create_transaction_logNew(request, Orderdata, Party, 'Stock Process Successfully', 209, 0, start_date_str, end_date_str, 0)
@@ -253,7 +254,7 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
                                     # print('kkkkkkkkkkkkkkkkkkkkkkkkkk')
                                     stock = O_SPOSDateWiseLiveStock(StockDate=Date, OpeningBalance=a.OpeningBalance, GRN=a.GRN, Sale=a.Sale, PurchaseReturn=a.PurchaseReturn, SalesReturn=a.SalesReturn, ClosingBalance=a.ClosingBalance, ActualStock=a.ActualStock, StockAdjustment=a.StockAdjustment, Item=a.ItemID, Unit=a.UnitID, Party=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
                                     stock.save()
-                                if(a.ClosingBalance <= 0) :
+                                if(a.ClosingBalance <= 0 and date.today() == Date) :
                                     stockout = T_SPOSStockOut(StockDate=Date, Item=a.ItemID, Party=Party, CreatedBy=0)
                                     stockout.save()    
                             current_date += timedelta(days=1)
