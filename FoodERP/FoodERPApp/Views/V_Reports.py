@@ -2042,10 +2042,10 @@ class GRNDiscrepancyReportAPIView(CreateAPIView):
                             "DiscrepancyComment": row.DiscrepancyComment,                            
                         }) 
 
-                    log_entry = create_transaction_logNew(request, Data, 0, "", 442, 0, FromDate, ToDate, 0)
-                    return JsonResponse({"StatusCode": 200, "Status": True,"Message": "GRN Discrepancy Report retrieved successfully.","Data": GRNDiscrepancyData,})
-                log_entry = create_transaction_logNew(request, Data, 0, "No discrepancies found", 442, 0, FromDate, ToDate, 0)
-                return JsonResponse({"StatusCode": 204,"Status": True,"Message": "No GRN discrepancies found.", "Data": [],})
+                log_entry = create_transaction_logNew(request, Data, 0, "", 442, 0, FromDate, ToDate, 0)
+                return JsonResponse({"StatusCode": 200, "Status": True,"Message": "GRN Discrepancy Report retrieved successfully.","Data": GRNDiscrepancyData,})
+            log_entry = create_transaction_logNew(request, Data, 0, "No discrepancies found", 442, 0, FromDate, ToDate, 0)
+            return JsonResponse({"StatusCode": 204,"Status": True,"Message": "No GRN discrepancies found.", "Data": [],})
 
         except Exception as e:
             log_entry = create_transaction_logNew(request, Data, 0, "GRNDiscrepancyReport: " + str(e), 33, 0)
