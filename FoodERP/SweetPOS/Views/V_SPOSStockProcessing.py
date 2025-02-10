@@ -144,7 +144,16 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
                 user = BasicAuthenticationfunction(request)
                 if user is not None:
                     today = date.today()
-                    yesterday = today - timedelta(days = 1)
+                    
+                    query0=O_SPOSDateWiseLiveStock.objects.filter(StockDate = today).count()
+                    print( 'count',query0)
+                    if query0 > 0:
+                        # today = date.today()
+                        print('aaaaaaaaaaa')
+                        yesterday = today - timedelta(days = 1)
+                    else:
+                        print('bbbbbbbbbbbbbbbbbb')
+                        yesterday = today.replace(day=1)    
                     
                     start_date_str = yesterday
                     end_date_str = today
@@ -255,12 +264,12 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
                                     stock = O_SPOSDateWiseLiveStock(StockDate=Date, OpeningBalance=a.OpeningBalance, GRN=a.GRN, Sale=a.Sale, PurchaseReturn=a.PurchaseReturn, SalesReturn=a.SalesReturn, ClosingBalance=a.ClosingBalance, ActualStock=a.ActualStock, StockAdjustment=a.StockAdjustment, Item=a.ItemID, Unit=a.UnitID, Party=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
                                     stock.save()
                                 
-                                processingdate =datetime.strptime(Date, '%Y-%m-%d').date()
-                                
-                                if a.ClosingBalance <= 0 and date.today() == processingdate:
-                                    
-                                    stockout = T_SPOSStockOut(StockDate=Date, Item=a.ItemID, Party=Party, CreatedBy=0,Quantity=a.ClosingBalance)
-                                    stockout.save()    
+                                if query0 > 0 :
+                                    processingdate =datetime.strptime(Date, '%Y-%m-%d').date()
+                                    if a.ClosingBalance <= 0 and date.today() == processingdate:
+                                        stockout = T_SPOSStockOut(StockDate=Date, Item=a.ItemID, Party=Party, CreatedBy=0,Quantity=a.ClosingBalance)
+                                        stockout.save()    
+                            
                             current_date += timedelta(days=1)
                         log_entry = create_transaction_logNew(request, Orderdata, Party, 'Stock Process Successfully', 209, 0, start_date_str, end_date_str, 0)
                             
