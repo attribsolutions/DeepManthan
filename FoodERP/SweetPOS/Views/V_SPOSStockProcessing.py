@@ -254,7 +254,11 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
                                     # print('kkkkkkkkkkkkkkkkkkkkkkkkkk')
                                     stock = O_SPOSDateWiseLiveStock(StockDate=Date, OpeningBalance=a.OpeningBalance, GRN=a.GRN, Sale=a.Sale, PurchaseReturn=a.PurchaseReturn, SalesReturn=a.SalesReturn, ClosingBalance=a.ClosingBalance, ActualStock=a.ActualStock, StockAdjustment=a.StockAdjustment, Item=a.ItemID, Unit=a.UnitID, Party=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
                                     stock.save()
-                                if(a.ClosingBalance <= 0 and date.today() == Date) :
+                                
+                                processingdate =datetime.strptime(Date, '%Y-%m-%d').date()
+                                
+                                if a.ClosingBalance <= 0 and date.today() == processingdate:
+                                    
                                     stockout = T_SPOSStockOut(StockDate=Date, Item=a.ItemID, Party=Party, CreatedBy=0)
                                     stockout.save()    
                             current_date += timedelta(days=1)
@@ -266,4 +270,4 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
 
         except Exception as e:
             log_entry = create_transaction_logNew(request, Orderdata, 0, 'StockProcessing:'+str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
