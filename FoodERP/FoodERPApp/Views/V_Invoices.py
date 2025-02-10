@@ -306,11 +306,11 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         filter_args['CreatedBy'] = CreatedBy 
 
                 # **Payment Mode Filter (Dynamic)**
-                PaymentMode = Invoicedata.get("paymentMode", {})
-                payment_filters = [key for key, value in PaymentMode.items() if value]  # Get all true values
+                # PaymentMode = Invoicedata.get("paymentMode", {})
+                # payment_filters = [key for key, value in PaymentMode.items() if value] 
 
-                if payment_filters:
-                    filter_args["PaymentType__in"] = payment_filters
+                # if payment_filters:
+                #     filter_args["PaymentType__in"] = payment_filters
 
                 # **Invoice Amount Filters**
                 InvoiceAmount = Invoicedata.get("invoiceAmount", {})
