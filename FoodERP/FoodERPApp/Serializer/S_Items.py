@@ -198,8 +198,10 @@ class ItemSerializer(serializers.ModelSerializer):
            
             for c in instance.ItemUnitDetails.all():
                 if c.IsBase == 1:
+                    print('aaaaaaaaaaaa',c.id)
                     SetFlag=MC_ItemUnits.objects.filter(id=c.id ).update(PODefaultUnit=c.PODefaultUnit,SODefaultUnit=c.SODefaultUnit)
                 else:
+                    print('bbbbbbbbbbbbbbb',c.id)
                     SetFlag=MC_ItemUnits.objects.filter(id=c.id,IsBase=0 ).update(IsDeleted=1)
 
             for ItemUnit_data in validated_data['ItemUnitDetails']:
