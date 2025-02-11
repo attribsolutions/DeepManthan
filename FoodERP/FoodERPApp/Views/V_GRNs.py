@@ -263,6 +263,7 @@ class T_GRNViewSecond(CreateAPIView):
                         "BatchCode": a['BatchCode'],
                         "SystemBatchDate": a['SystemBatchDate'],
                         "SystemBatchCode": a['SystemBatchCode'],
+                        "DiscrepancyComment" : a['DiscrepancyComment'],
                         "UnitDetails":[]
                     })
 
@@ -288,6 +289,7 @@ class T_GRNViewSecond(CreateAPIView):
                     "PartyName": a['Party']['Name'],
                     "CreatedBy": a['CreatedBy'],
                     "UpdatedBy": a['UpdatedBy'],
+                    "Comment" : a['Comment'],
                     "GRNReferences": GRNReferencesData,
                     "GRNItems": GRNItemListData
                 })
