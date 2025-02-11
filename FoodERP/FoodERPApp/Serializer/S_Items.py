@@ -197,11 +197,14 @@ class ItemSerializer(serializers.ModelSerializer):
         else:
            
             for c in instance.ItemUnitDetails.all():
-                # CustomPrint(c.id)
-                SetFlag=MC_ItemUnits.objects.filter(id=c.id,IsBase=0 ).update(IsDeleted=1)
+                if c.IsBase == 1:
+                    SetFlag=MC_ItemUnits.objects.filter(id=c.id ).update(PODefaultUnit=c.PODefaultUnit,SODefaultUnit=c.SODefaultUnit)
+                else:
+                    SetFlag=MC_ItemUnits.objects.filter(id=c.id,IsBase=0 ).update(IsDeleted=1)
 
             for ItemUnit_data in validated_data['ItemUnitDetails']:
-                ItemUnits = MC_ItemUnits.objects.create(Item=instance, **ItemUnit_data)    
+                if c.IsBase == 0:
+                    ItemUnits = MC_ItemUnits.objects.create(Item=instance, **ItemUnit_data)    
         
         
         
