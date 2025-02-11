@@ -203,7 +203,8 @@ class ItemSerializer(serializers.ModelSerializer):
                     SetFlag=MC_ItemUnits.objects.filter(id=c.id,IsBase=0 ).update(IsDeleted=1)
 
             for ItemUnit_data in validated_data['ItemUnitDetails']:
-                if ItemUnit_data.IsBase == 0:
+                print(ItemUnit_data['IsBase'])
+                if ItemUnit_data['IsBase'] == 0:
                     ItemUnits = MC_ItemUnits.objects.create(Item=instance, **ItemUnit_data)    
         
         
