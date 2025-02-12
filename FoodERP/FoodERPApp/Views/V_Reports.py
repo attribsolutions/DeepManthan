@@ -1981,7 +1981,7 @@ ON A.PartyName = B.PartyName
 WHERE A.QtyInKg != COALESCE(B.QtyInKg, 0)  
 ORDER BY A.PartyName, A.OrderDate''')
 
-                print(DemandVsReportquery.query)  
+                # print(DemandVsReportquery.query)  
                 if DemandVsReportquery:  
                     # print("SHRUR")              
                     for row in DemandVsReportquery:                       
