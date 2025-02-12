@@ -390,7 +390,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                 UserRole=str(RoleID[0]['DefaultValue'])
                 Role_list = [int(x) for x in UserRole.split(",")]               
                 # print(Role_list)
-                if any(role in Role_list for role in user_role_ids):                   
+                if set(user_role_ids) & set(Role_list):                   
                     SposInvoices_query = []
                 else :
                     SPOS_filter_args = {
