@@ -313,7 +313,8 @@ class StockOutReportView(CreateAPIView):
                         "Party": a.Party,
                         "PartyName": a.PartyName,
                         "CreatedBy": a.CreatedBy,
-                        "StockoutTime": a.StockoutTime
+                        "StockoutTime": a.StockoutTime,
+                        "Quantity" :a.Quantity
 
                     })
                 log_entry = create_transaction_logNew(request, StockData, 0, f'StockoutReportfor :{Party} for time {datetime_obj.hour},', 419, 0)
