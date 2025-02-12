@@ -2077,7 +2077,7 @@ class GRNDiscrepancyReportAPIView(CreateAPIView):
                                         LEFT JOIN MC_ItemUnits ON TC_GRNItems.Item_id = MC_ItemUnits.Item_id AND MC_ItemUnits.IsBase = TRUE and IsDeleted=0
                                         WHERE GRNDate BETWEEN '{FromDate}' AND '{ToDate}' AND TC_GRNItems.DiscrepancyComment IS NOT NULL
                                         {GetParties} ''')
-                print(GRNDiscrepancyQuery)
+                
                 if GRNDiscrepancyQuery:  
                         
                     for row in GRNDiscrepancyQuery:                       
