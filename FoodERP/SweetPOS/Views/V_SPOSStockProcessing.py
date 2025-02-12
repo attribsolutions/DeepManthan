@@ -118,9 +118,10 @@ on I.Item_id=ActualStock.Item
                             # print('kkkkkkkkkkkkkkkkkkkkkkkkkk')
                             stock = O_SPOSDateWiseLiveStock(StockDate=Date, OpeningBalance=a.OpeningBalance, GRN=a.GRN, Sale=a.Sale, PurchaseReturn=a.PurchaseReturn, SalesReturn=a.SalesReturn, ClosingBalance=a.ClosingBalance, ActualStock=a.ActualStock, StockAdjustment=a.StockAdjustment, Item=a.ItemID, Unit=a.UnitID, Party=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
                             stock.save()
-                        if(a.ClosingBalance == 0) :
-                            stockout = T_SPOSStockOut(StockDate=Date, Item=a.ItemID, Party=Party, CreatedBy=0)
-                            stockout.save()    
+                       
+                        # if(a.ClosingBalance == 0) :
+                        #     stockout = T_SPOSStockOut(StockDate=Date, Item=a.ItemID, Party=Party, CreatedBy=0)
+                        #     stockout.save()    
                     
                     current_date += timedelta(days=1)
                 log_entry = create_transaction_logNew(request, Orderdata, Party, 'Stock Process Successfully', 209, 0, start_date_str, end_date_str, 0)
@@ -143,13 +144,25 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
                 user = BasicAuthenticationfunction(request)
                 if user is not None:
                     today = date.today()
-                    yesterday = today - timedelta(days = 1)
+                    
+                    query0=O_SPOSDateWiseLiveStock.objects.filter(StockDate = today).count()
+                    print( 'count',query0)
+                    if query0 > 0:
+                        # today = date.today()
+                        print('aaaaaaaaaaa')
+                        yesterday = today - timedelta(days = 1)
+                    else:
+                        print('bbbbbbbbbbbbbbbbbb')
+                        yesterday = today.replace(day=1)    
                     
                     start_date_str = yesterday
                     end_date_str = today
-                    Partys = M_Parties.objects.filter(PartyType = 19).values('id')
-                    print(Partys)
-                    
+                    excluded_ids = [56605, 71368, 53532, 60722, 65261, 35115]
+                    Partys = M_Parties.objects.filter(PartyType=19).exclude(id__in=excluded_ids).values('id')
+                    # Partys = M_Parties.objects.filter(PartyType = 19).values('id')
+
+                    print(Partys)                    
+
                     
                     for Party in Partys:
                         print(Party['id'])
@@ -190,7 +203,9 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
 
         from
 
-        (Select Item_id,M_Items.BaseUnitID_id UnitID  from FoodERP.MC_PartyItems join FoodERP.M_Items on M_Items.id=MC_PartyItems.Item_id where Party_id=%s)I
+
+        (Select Item_id,M_Items.BaseUnitID_id UnitID  from FoodERP.MC_PartyItems join FoodERP.M_Items on M_Items.id=MC_PartyItems.Item_id and M_Items.IsCBMItem=1 where Party_id=%s)I
+
 
         left join (SELECT IFNULL(Item,0) ItemID, sum(ClosingBalance)ClosingBalance FROM SweetPOS.O_SPOSDateWiseLiveStock WHERE StockDate = DATE_SUB(  %s, 
         INTERVAL 1
@@ -234,7 +249,7 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
         left join (SELECT Item,sum(BaseUnitQuantity)ActualStock FROM SweetPOS.T_SPOSStock where  IsStockAdjustment=0 and StockDate = %s and Party= %s group by Item)ActualStock
         on I.Item_id=ActualStock.Item
 
-        )R limit 10
+        )R 
         ''',([Party], [Date],[Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party]))
         # where
         # OpeningBalance!=0 OR GRN!=0 OR Sale!=0 OR PurchaseReturn != 0 OR SalesReturn !=0 OR StockAdjustment!=0
@@ -248,9 +263,13 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
                                     # print('kkkkkkkkkkkkkkkkkkkkkkkkkk')
                                     stock = O_SPOSDateWiseLiveStock(StockDate=Date, OpeningBalance=a.OpeningBalance, GRN=a.GRN, Sale=a.Sale, PurchaseReturn=a.PurchaseReturn, SalesReturn=a.SalesReturn, ClosingBalance=a.ClosingBalance, ActualStock=a.ActualStock, StockAdjustment=a.StockAdjustment, Item=a.ItemID, Unit=a.UnitID, Party=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
                                     stock.save()
-                                if(a.ClosingBalance == 0) :
-                                    stockout = T_SPOSStockOut(StockDate=Date, Item=a.ItemID, Party=Party, CreatedBy=0)
-                                    stockout.save()    
+                                
+                                if query0 > 0 :
+                                    processingdate =datetime.strptime(Date, '%Y-%m-%d').date()
+                                    if a.ClosingBalance <= 0 and date.today() == processingdate:
+                                        stockout = T_SPOSStockOut(StockDate=Date, Item=a.ItemID, Party=Party, CreatedBy=0,Quantity=a.ClosingBalance)
+                                        stockout.save()    
+                            
                             current_date += timedelta(days=1)
                         log_entry = create_transaction_logNew(request, Orderdata, Party, 'Stock Process Successfully', 209, 0, start_date_str, end_date_str, 0)
                             
@@ -260,4 +279,4 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
 
         except Exception as e:
             log_entry = create_transaction_logNew(request, Orderdata, 0, 'StockProcessing:'+str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})

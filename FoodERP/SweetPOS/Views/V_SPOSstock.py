@@ -273,20 +273,34 @@ class StockOutReportView(CreateAPIView):
         StockData = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                FromDate = StockData['FromDate']
-                ToDate = StockData['ToDate']
-                Party = StockData['Party']
+                date_string = StockData['Date']
+                StokoutDateTime = StockData['Time']
+                PartyIDs = StockData['Party']
+
+                Party=PartyIDs.split(',')
                 
-                ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Party,0).split('!')
-               
-                StockOutReportQuery = T_SPOSStockOut.objects.raw(f'''SELECT A.id, A.StockDate , A.Item ItemID, M_Items.Name, Groupss.Name "Group", subgroup.Name SubGroup, A.Party, M_Parties.Name PartyName, A.CreatedBy, A.CreatedOn StockoutTime
+                if PartyIDs == '0' :
+                    
+                    a = 18837
+                    b= ''
+                else:   
+                    a=Party[0]
+                    c = ','.join(Party)
+                    b=f'AND A.Party in ({c})'
+                
+                ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(a,0).split('!')
+                date_string = date_string.strip()
+                # Convert the string to a datetime object using strptime with the correct format
+                datetime_obj = datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
+                
+                StockOutReportQuery = T_SPOSStockOut.objects.raw(f'''SELECT A.id,A.Quantity , A.StockDate , A.Item ItemID, M_Items.Name, Groupss.Name "Group", subgroup.Name SubGroup, A.Party, M_Parties.Name PartyName, A.CreatedBy, A.CreatedOn StockoutTime
                             FROM SweetPOS.T_SPOSStockOut A 
                             JOIN FoodERP.M_Items  ON M_Items.id = A.Item
                             JOIN FoodERP.M_Parties ON M_Parties.id = A.Party
                             {ItemsGroupJoinsandOrderby[1]}
-                            WHERE A.StockDate BETWEEN %s AND %s AND A.Party=%s
-                            {ItemsGroupJoinsandOrderby[2]}''',[FromDate,ToDate,Party])
-             
+                            WHERE HOUR(A.CreatedOn) = %s {b}
+                            {ItemsGroupJoinsandOrderby[2]}''',[datetime_obj.hour])
+                # print(StockOutReportQuery)
                 StockOutDataList = list()
 
                 for a in StockOutReportQuery:
@@ -294,17 +308,17 @@ class StockOutReportView(CreateAPIView):
                         "id": a.id,
                         "ItemID": a.ItemID,
                         "ItemName": a.Name,
-                        "Group": a.Group,
-                        "SubGroup": a.SubGroup,
+                        "GroupName": a.Group,
+                        "SubGroupName": a.SubGroup,
                         "Party": a.Party,
                         "PartyName": a.PartyName,
                         "CreatedBy": a.CreatedBy,
                         "StockoutTime": a.StockoutTime
 
                     })
-                log_entry = create_transaction_logNew(request, StockData, Party, '', 419, 0)
+                log_entry = create_transaction_logNew(request, StockData, 0, f'StockoutReportfor :{Party} for time {datetime_obj.hour},', 419, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': StockOutDataList})
-        except str as e:
+        except Exception as e:
             log_entry = create_transaction_logNew(request, StockData, 0, 'SPOS StockOut Report:'+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
                
