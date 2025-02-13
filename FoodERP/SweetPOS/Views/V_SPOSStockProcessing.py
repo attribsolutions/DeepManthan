@@ -146,13 +146,13 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
                     today = date.today()
                     
                     query0=O_SPOSDateWiseLiveStock.objects.filter(StockDate = today).count()
-                    print( 'count',query0)
+                    # print( 'count',query0)
                     if query0 > 0:
                         # today = date.today()
-                        print('aaaaaaaaaaa')
+                        # print('aaaaaaaaaaa')
                         yesterday = today - timedelta(days = 1)
                     else:
-                        print('bbbbbbbbbbbbbbbbbb')
+                        # print('bbbbbbbbbbbbbbbbbb')
                         yesterday = today.replace(day=1)    
                     
                     start_date_str = yesterday
@@ -161,11 +161,11 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
                     Partys = M_Parties.objects.filter(PartyType=19).exclude(id__in=excluded_ids).values('id')
                     # Partys = M_Parties.objects.filter(PartyType = 19).values('id')
 
-                    print(Partys)                    
+                    # print(Partys)                    
 
                     
                     for Party in Partys:
-                        print(Party['id'])
+                        # print(Party['id'])
                         # start_date = start_date_str.strptime( "%Y-%m-%d")
                         # end_date = end_date_str.strptime( "%Y-%m-%d")
                         Party=Party['id']
@@ -175,7 +175,7 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
                         current_date = start_date
                         while current_date <= end_date:
                             Date = current_date.strftime("%Y-%m-%d")
-                            print(Date)
+                            # print(Date)
                             
                             StockDeleteQuery = O_SPOSDateWiseLiveStock.objects.filter(
                                 Party=Party, StockDate=Date)
@@ -271,7 +271,7 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
                                         stockout.save()    
                             
                             current_date += timedelta(days=1)
-                        log_entry = create_transaction_logNew(request, Orderdata, Party, 'Stock Process Successfully', 209, 0, start_date_str, end_date_str, 0)
+                        # log_entry = create_transaction_logNew(request, Orderdata, Party, 'Stock Process Successfully', 209, 0, start_date_str, end_date_str, 0)
                             
                         
                     log_entry = create_transaction_logNew(request, Orderdata, Party, 'Stock Process Successfully', 209, 0, start_date_str, end_date_str, 0)
