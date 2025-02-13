@@ -382,13 +382,28 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     'RoundOffAmount', 'CreatedBy','CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id',
                     'Party_id', 'Vehicle_id', 'TCSAmount', 'Hide', 'ImportFromExcel', 'PartyName', 'CustomerName','VehicleNo',
                     'DeletedFromSAP', 'DataRecovery', 'CustomerGSTIN', 'CustomerPAN', 'CustomerPartyType', 'DriverName','MobileNo').order_by('-InvoiceDate')
-                    
-                SPOS_filter_args = {
-                        'InvoiceDate__range': (FromDate, ToDate),
-                        'Party': Party,
-                        'IsDeleted': 0
-                        
-                    }
+                
+                user_role_ids = list(MC_UserRoles.objects.filter(User_id=request.user.id).values_list('Role_id', flat=True))                
+                RoleID=M_Settings.objects.filter(id=55).values("DefaultValue")
+                UserRole=str(RoleID[0]['DefaultValue'])
+                Role_list = [int(x) for x in UserRole.split(",")]
+                user_role_ids = [int(role) for role in user_role_ids]
+                Role_list = [int(role) for role in Role_list]                
+                
+                if any(role in Role_list for role in user_role_ids):    
+                    SPOS_filter_args = {
+                            'InvoiceDate__range': (FromDate, ToDate),
+                            'Party': Party,
+                            'IsDeleted': 0,
+                            'ClientID':0
+                        }
+                else:
+                    SPOS_filter_args = {
+                            'InvoiceDate__range': (FromDate, ToDate),
+                            'Party': Party,
+                            'IsDeleted': 0
+                            
+                        }
                 if Customer:
                     SPOS_filter_args['Customer'] = Customer
                 # **POSCustomer (Customers) Filter**
@@ -480,49 +495,25 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         ~Exists(tc_spos_invoice_uploads_not_in)
                     ).values_list('id', flat=True)
 
-                user_role_ids = list(MC_UserRoles.objects.filter(User_id=request.user.id).values_list('Role_id', flat=True))
-                print(user_role_ids)
-                RoleID=M_Settings.objects.filter(id=55).values("DefaultValue")
-                UserRole=str(RoleID[0]['DefaultValue'])
-                Role_list = [int(x) for x in UserRole.split(",")]
-                user_role_ids = [int(role) for role in user_role_ids]
-                Role_list = [int(role) for role in Role_list]
-                
-                # **Final Query Execution**
-                if any(role in Role_list for role in user_role_ids):                    
-                    SposInvoices_query = (
-                        T_SPOSInvoices.objects.using('sweetpos_db')
-                        .filter(**SPOS_filter_args,ClientID=0)
-                        .order_by('-InvoiceDate')
-                        .annotate(
-                            Party_id=F('Party'),
-                            Customer_id=F('Customer'),
-                            Vehicle_id=F('Vehicle')
-                        )
-                        .values(
-                            'id', 'InvoiceDate', 'PaymentType', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal',
-                            'RoundOffAmount', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id', 'Party_id',
-                            'Vehicle_id', 'TCSAmount', 'Hide', 'MobileNo', 'CreatedBy'
-                        )
+              
+                # **Final Query Execution**                  
+                SposInvoices_query = (
+                    T_SPOSInvoices.objects.using('sweetpos_db')
+                    .filter(**SPOS_filter_args)
+                    .order_by('-InvoiceDate')
+                    .annotate(
+                        Party_id=F('Party'),
+                        Customer_id=F('Customer'),
+                        Vehicle_id=F('Vehicle')
                     )
-                else:
-                     SposInvoices_query = (
-                        T_SPOSInvoices.objects.using('sweetpos_db')
-                        .filter(**SPOS_filter_args)
-                        .order_by('-InvoiceDate')
-                        .annotate(
-                            Party_id=F('Party'),
-                            Customer_id=F('Customer'),
-                            Vehicle_id=F('Vehicle')
-                        )
-                        .values(
-                            'id', 'InvoiceDate', 'PaymentType', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal',
-                            'RoundOffAmount', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id', 'Party_id',
-                            'Vehicle_id', 'TCSAmount', 'Hide', 'MobileNo', 'CreatedBy'
-                        )
+                    .values(
+                        'id', 'InvoiceDate', 'PaymentType', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal',
+                        'RoundOffAmount', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id', 'Party_id',
+                        'Vehicle_id', 'TCSAmount', 'Hide', 'MobileNo', 'CreatedBy'
                     )
+                )
                
-                
+                print(SposInvoices_query.query)
                 
                 Spos_Invoices = []
                 for b in SposInvoices_query:
@@ -550,6 +541,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     b['Identify_id'] = 2
                     b['VehicleNo'] = vehicle[0]['VehicleNumber'] if vehicle else ''
                     Spos_Invoices.append(b) 
+                    
                     
                 combined_invoices = []              
                 
