@@ -512,12 +512,9 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         'Vehicle_id', 'TCSAmount', 'Hide', 'MobileNo', 'CreatedBy'
                     )
                 )
-               
-                print(SposInvoices_query.query)
                 
                 Spos_Invoices = []
                 for b in SposInvoices_query:
-                    # print("SHRUTI")
                     parties = M_Parties.objects.filter(id=Party).values('id', 'Name')
                     customers = M_Parties.objects.filter(id=b['Customer_id']).values('id', 'Name', 'GSTIN', 'PAN', 'PartyType')
                     vehicle = M_Vehicles.objects.filter(id=b['Vehicle_id']).values('VehicleNumber')
@@ -1312,27 +1309,21 @@ class FranchisesCashierList(CreateAPIView):
     
     def post(self, request):
         POSCashierdata = JSONParser().parse(request)
-        print(POSCashierdata)
         try:
             with transaction.atomic():
                 
-                Party = POSCashierdata['Party']
-                print(Party)               
+                Party = POSCashierdata['Party']              
                 FranchisesCashierQuery=M_Users.objects.raw(f''' Select M_Users.id ,M_Users.LoginName  
                 from MC_EmployeeParties 
                 JOIN M_Users ON M_Users.Employee_id=MC_EmployeeParties.Employee_id
-                where Party_id  in(Select id from M_Parties where PartyType_id=19) and party_id={Party}''') 
-                print(FranchisesCashierQuery.query)               
+                where Party_id  in(Select id from M_Parties where PartyType_id=19) and party_id={Party}''')              
                 if FranchisesCashierQuery:
-                    print("Shruti")
                     CashierDetails=list()
                     for row in FranchisesCashierQuery:
-                        print(row)
                         CashierDetails.append({                            
                             "value":row.id,
                             "label":row.LoginName 
                         })
-                    print(CashierDetails)
                     log_entry = create_transaction_logNew( request, POSCashierdata, Party, '', 441, 0,0,0,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': CashierDetails})
                 log_entry = create_transaction_logNew( request, POSCashierdata, Party, 'Data Not Found', 441, 0,0,0,0)           
