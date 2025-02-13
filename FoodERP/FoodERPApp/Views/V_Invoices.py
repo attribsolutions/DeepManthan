@@ -303,14 +303,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     if isinstance(CreatedBy, list):  
                         filter_args['CreatedBy__in'] = CreatedBy  
                     else:
-                        filter_args['CreatedBy'] = CreatedBy 
-
-                # **Payment Mode Filter (Dynamic)**
-                # PaymentMode = Invoicedata.get("paymentMode", {})
-                # payment_filters = [key for key, value in PaymentMode.items() if value] 
-
-                # if payment_filters:
-                #     filter_args["PaymentType__in"] = payment_filters
+                        filter_args['CreatedBy'] = CreatedBy                
 
                 # **Invoice Amount Filters**
                 InvoiceAmount = Invoicedata.get("invoiceAmount", {})
@@ -389,13 +382,28 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     'RoundOffAmount', 'CreatedBy','CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id',
                     'Party_id', 'Vehicle_id', 'TCSAmount', 'Hide', 'ImportFromExcel', 'PartyName', 'CustomerName','VehicleNo',
                     'DeletedFromSAP', 'DataRecovery', 'CustomerGSTIN', 'CustomerPAN', 'CustomerPartyType', 'DriverName','MobileNo').order_by('-InvoiceDate')
-
-                SPOS_filter_args = {
-                        'InvoiceDate__range': (FromDate, ToDate),
-                        'Party': Party,
-                        'IsDeleted': 0
-                        
-                    }
+                
+                user_role_ids = list(MC_UserRoles.objects.filter(User_id=request.user.id).values_list('Role_id', flat=True))                
+                RoleID=M_Settings.objects.filter(id=55).values("DefaultValue")
+                UserRole=str(RoleID[0]['DefaultValue'])
+                Role_list = [int(x) for x in UserRole.split(",")]
+                user_role_ids = [int(role) for role in user_role_ids]
+                Role_list = [int(role) for role in Role_list]                
+                
+                if any(role in Role_list for role in user_role_ids):    
+                    SPOS_filter_args = {
+                            'InvoiceDate__range': (FromDate, ToDate),
+                            'Party': Party,
+                            'IsDeleted': 0,
+                            'ClientID':0
+                        }
+                else:
+                    SPOS_filter_args = {
+                            'InvoiceDate__range': (FromDate, ToDate),
+                            'Party': Party,
+                            'IsDeleted': 0
+                            
+                        }
                 if Customer:
                     SPOS_filter_args['Customer'] = Customer
                 # **POSCustomer (Customers) Filter**
@@ -487,8 +495,8 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         ~Exists(tc_spos_invoice_uploads_not_in)
                     ).values_list('id', flat=True)
 
-            
-                # **Final Query Execution**
+              
+                # **Final Query Execution**                  
                 SposInvoices_query = (
                     T_SPOSInvoices.objects.using('sweetpos_db')
                     .filter(**SPOS_filter_args)
@@ -504,8 +512,8 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         'Vehicle_id', 'TCSAmount', 'Hide', 'MobileNo', 'CreatedBy'
                     )
                 )
-                
-                # print(SposInvoices_query.query)
+               
+                print(SposInvoices_query.query)
                 
                 Spos_Invoices = []
                 for b in SposInvoices_query:
@@ -534,7 +542,8 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     b['VehicleNo'] = vehicle[0]['VehicleNumber'] if vehicle else ''
                     Spos_Invoices.append(b) 
                     
-                combined_invoices = []
+                    
+                combined_invoices = []              
                 
                 for aa in Invoices_query:
                         aa['CreatedBy'] = 0
