@@ -1978,7 +1978,9 @@ LEFT JOIN (
 ON A.PartyName = B.PartyName 
    AND A.OrderDate = B.InvoiceDate 
    AND A.ItemName = B.ItemName
-WHERE A.QtyInKg != COALESCE(B.QtyInKg, 0)  
+WHERE A.QtyInKg != COALESCE(B.QtyInKg, 0) and (
+        ROUND(COALESCE(A.QtyInKg, 5), 5) <> ROUND(COALESCE(B.QtyInKg, 5), 5)
+       OR ROUND(COALESCE(A.QtyInNo, 5), 5) <> ROUND(COALESCE(B.QtyInNo, 5), 5))  
 ORDER BY A.PartyName, A.OrderDate''')
 
                 # print(DemandVsReportquery.query)  
