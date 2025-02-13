@@ -76,10 +76,10 @@ class StockView(CreateAPIView):
                     "BatchCode" : a['BatchCode'],
                     "BatchCodeID" : a['BatchCodeID'],
                     "IsSaleable" : 1,
-                    "Difference" : round(BaseUnitQuantity,3)-totalstock,
+                    "Difference" : round(round(BaseUnitQuantity,3)-totalstock,3),
                     "IsStockAdjustment" : IsStockAdjustment
                     })
-                    
+                # print(T_SPOS_StockEntryList,round(BaseUnitQuantity,3),totalstock)    
                 StockEntrySerializer = SPOSstockSerializer(data=T_SPOS_StockEntryList, many=True)
                
                        
@@ -313,7 +313,8 @@ class StockOutReportView(CreateAPIView):
                         "Party": a.Party,
                         "PartyName": a.PartyName,
                         "CreatedBy": a.CreatedBy,
-                        "StockoutTime": a.StockoutTime
+                        "StockoutTime": a.StockoutTime,
+                        "Quantity" :a.Quantity
 
                     })
                 log_entry = create_transaction_logNew(request, StockData, 0, f'StockoutReportfor :{Party} for time {datetime_obj.hour},', 419, 0)
