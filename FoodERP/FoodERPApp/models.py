@@ -2503,7 +2503,7 @@ class M_SAPPOSUploadLog(models.Model):
     UploadDate = models.DateTimeField(auto_now=True)
     UploadBy = models.IntegerField()
     Party = models.IntegerField()
-    FileID = models.IntegerField()
+    File = models.CharField(max_length=500)
     SaleDate = models.DateField()
     UploadStatus = models.CharField(max_length=500)
     Message = models.CharField(max_length=500)
