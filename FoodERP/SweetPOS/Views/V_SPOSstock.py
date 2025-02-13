@@ -76,10 +76,10 @@ class StockView(CreateAPIView):
                     "BatchCode" : a['BatchCode'],
                     "BatchCodeID" : a['BatchCodeID'],
                     "IsSaleable" : 1,
-                    "Difference" : round(BaseUnitQuantity,3)-totalstock,
+                    "Difference" : round(round(BaseUnitQuantity,3)-totalstock,3),
                     "IsStockAdjustment" : IsStockAdjustment
                     })
-                    
+                # print(T_SPOS_StockEntryList,round(BaseUnitQuantity,3),totalstock)    
                 StockEntrySerializer = SPOSstockSerializer(data=T_SPOS_StockEntryList, many=True)
                
                        
