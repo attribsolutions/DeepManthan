@@ -28,89 +28,105 @@ class GRNListFilterView(CreateAPIView):
         try:
             with transaction.atomic():
                 
-                # FromDate = GRNdata['FromDate']
-                # ToDate = GRNdata['ToDate']
-                # Customer = GRNdata['Party']
-                # Supplier = GRNdata['Supplier']
-                
-                # if(Supplier == ''):
-                #     # print("shruti")
-                #     query = T_GRNs.objects.filter(
-                #         GRNDate__range=[FromDate, ToDate], Customer_id=Customer)
-                #     # print(query.query)
-                # else:
-                #     query = T_GRNs.objects.filter(
-                #         GRNDate__range=[FromDate, ToDate], Customer_id=Customer, Party_id=Supplier)
+                FromDate = GRNdata['FromDate']
+                ToDate = GRNdata['ToDate']
+                Customer = GRNdata['Party']
+                Supplier = GRNdata['Supplier']
+                # print('aaaaaaaaaaaaaaaaaaaaa')
+                if(Supplier == ''):
+                    # print("shruti")
+                    # query = T_GRNs.objects.filter(
+                    #     GRNDate__range=[FromDate, ToDate], Customer_id=Customer)
+                    # print(query.query)
+                    condition=""
                     
-                # # return JsonResponse({'Data':str(query.query)})
-                # if not query:
-                #     log_entry = create_transaction_logNew(request, GRNdata, Customer,'List Not available',68,0)
-                #     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
-                # else:
-                #     GRN_serializer = T_GRNSerializerForGET(query, many=True).data
-                #     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRN_serializer})
-                #     GRNListData = list()
-                #     # print(GRN_serializer)
-                #     for a in GRN_serializer:
-                        
-                #         # print("RRRRRRRRRRRRRRRRRRRRRR",a)
-                #         if (GRNdata['DashBoardMode'] == 1):
-                #             GRNListData.append({
-                #                 "GRNDate": a['GRNDate']                
-                #             })
-                #         else:
-                #             # print("Shrutirriri")
-                #             x = a.get('GRNReferences')
-                #             # print(a.get('GRNReferences'))                         
-                #             # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': a})
-                #             challan = None 
-                            
-                #             if x:
-                #                 # print("hhhhhhhhh")
-                #                 challan = x[0]['Challan']
-                #                 # print(challan)
-                #                 POType= ""
-                #                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': x})
-                #             else:
-                #                 POType= ""
-                        
-                #             # challan = a['GRNReferences'][0]['Challan']
-                #             # if challan != None: 
-                #             #     POType= ""
-                #             # else:
-                #             #     POType= ""
-                #             #     # POType= a['GRNReferences'][0]['Order']['POType']['id']
-                #             GRNListData.append({
-                #                 "id": a['id'],
-                #                 "GRNDate": a['GRNDate'],
-                #                 "Customer": a['Customer']['id'],
-                #                 "CustomerName": a['Customer']['Name'],
-                #                 "GRNNumber": a['GRNNumber'],
-                #                 "FullGRNNumber": a['FullGRNNumber'],
-                #                 "InvoiceNumber": a['InvoiceNumber'],
-                #                 "FullInvoiceNumber":a['GRNReferences'][0]['Invoice']['FullInvoiceNumber'] if a['GRNReferences'][0]['Invoice'] else a['InvoiceNumber'],
-                #                 "InvoiceDate": a['GRNReferences'][0]['Invoice']['InvoiceDate'] if a['GRNReferences'][0]['Invoice'] else "",
-                #                 "GrandTotal": a['GrandTotal'],
-                #                 "Party": a['Party']['id'],
-                #                 "PartyName": a['Party']['Name'],
-                #                 "CreatedOn" : a['CreatedOn'],
-                #                 "POType":POType
+                else:
+                    condition=f'''and G.Party_id = {Supplier}'''
+                    # query = T_GRNs.objects.filter(
+                    #     GRNDate__range=[FromDate, ToDate], Customer_id=Customer, Party_id=Supplier)
+                # print('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')    
+                query =T_GRNs.objects.raw(f''' select G.id, G.GRNDate, G.Customer_id, G.GRNNumber, G.FullGRNNumber,G.InvoiceNumber,G.GrandTotal, G.Party_id, G.CreatedBy, G.UpdatedBy,G.CreatedOn, G.Comment
+                                            ,party.Name PartyName,cust.Name customerName,cust.id customerid,T_Invoices.InvoiceNumber,
+                                          T_Invoices.InvoiceDate,party.id PartyID,T_Invoices.id InvoiceID,T_Invoices.FullInvoiceNumber
+                                          from T_GRNs G
 
-                #             })
-                #     # print(GRNListData)
-                #     #for log.
-                #     if Supplier == '':
-                #         y = 0
-                #     else:
-                #         y= Supplier
-                #     # print("ssssssssssssssssssss")
-                #     # print(GRNListData)
-                #     log_entry = create_transaction_logNew(request, GRNdata,Customer,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(y),68,0,FromDate,ToDate,0)
-                #     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': []})
+join M_Parties party on party.id=G.Party_id
+join M_Parties cust on cust.id=G.Customer_id
+join TC_GRNReferences on TC_GRNReferences.GRN_id=G.id
+left join T_Invoices on T_Invoices.id=TC_GRNReferences.Invoice_id
+where GRNDate between %s and %s and G.Customer_id= %s {condition}  ''',[FromDate,ToDate,Customer])
+                
+                # print(query)
+                if not query:
+                    log_entry = create_transaction_logNew(request, GRNdata, Customer,'List Not available',68,0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
+                else:
+                    # GRN_serializer = T_GRNSerializerForGET(query, many=True).data
+                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRN_serializer})
+                    GRNListData = list()
+                    # print(GRN_serializer)
+                    for a in query:
+                        
+                        # print("RRRRRRRRRRRRRRRRRRRRRR",a)
+                        if (GRNdata['DashBoardMode'] == 1):
+                            GRNListData.append({
+                                "GRNDate": a.GRNDate                
+                            })
+                        else:
+                            pass
+                            # print("Shrutirriri")
+                            # x = a.get('GRNReferences')
+                            # # print(a.get('GRNReferences'))                         
+                            # # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': a})
+                            # challan = None 
+                            
+                            # if x:
+                            #     # print("hhhhhhhhh")
+                            #     challan = x[0]['Challan']
+                            #     # print(challan)
+                            #     POType= ""
+                            #     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': x})
+                            # else:
+                            POType= ""
+                        
+                            # challan = a['GRNReferences'][0]['Challan']
+                            # if challan != None: 
+                            #     POType= ""
+                            # else:
+                            #     POType= ""
+                            #     # POType= a['GRNReferences'][0]['Order']['POType']['id']
+                            GRNListData.append({
+                                "id": a.id,
+                                "GRNDate": a.GRNDate,
+                                "Customer": a.customerid,
+                                "CustomerName": a.customerName,
+                                "GRNNumber": a.GRNNumber,
+                                "FullGRNNumber": a.FullGRNNumber,
+                                "InvoiceNumber": a.InvoiceNumber,
+                                "FullInvoiceNumber":a.FullInvoiceNumber if a.FullInvoiceNumber else a.InvoiceNumber,
+                                "InvoiceDate": a.InvoiceDate if a.InvoiceNumber else "",
+                                "InvoiceID" : a.InvoiceID,
+                                "GrandTotal": a.GrandTotal,
+                                "Party": a.PartyID,
+                                "PartyName": a.PartyName,
+                                "CreatedOn" : a.CreatedOn,
+                                "POType":POType
+
+                            })
+                    # print(GRNListData)
+                    #for log.
+                    if Supplier == '':
+                        y = 0
+                    else:
+                        y= Supplier
+                    # print("ssssssssssssssssssss")
+                    # print(GRNListData)
+                    log_entry = create_transaction_logNew(request, GRNdata,Customer,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(y),68,0,FromDate,ToDate,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData})
+                
         except Exception as e:
             log_entry = create_transaction_logNew(request, GRNdata, 0,'GRNList:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 # GRN Save  API
 
