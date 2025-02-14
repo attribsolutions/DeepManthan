@@ -1004,6 +1004,19 @@ class T_Invoices(models.Model):
     HideComment = models.CharField(max_length=500 ,null=True,blank=True)
     class Meta:
         db_table = "T_Invoices"
+        indexes = [
+            
+            
+            models.Index(fields=['InvoiceDate']),  # Index on InvoiceDate
+            models.Index(fields=['InvoiceNumber']),  # Index on InvoiceNumber
+            models.Index(fields=['CreatedBy']),  # Index on CreatedBy
+            models.Index(fields=['Customer']),  # Index on Customer
+            models.Index(fields=['Party']),  # Index on Party
+            # Composite index for frequently used fielters like Party and InvoiceDate
+            models.Index(fields=['Party', 'InvoiceDate']),
+            models.Index(fields=['Customer', 'InvoiceDate']),
+            
+        ] 
 
 
 class TC_InvoiceItems(models.Model):
