@@ -32,7 +32,7 @@ class GRNListFilterView(CreateAPIView):
                 ToDate = GRNdata['ToDate']
                 Customer = GRNdata['Party']
                 Supplier = GRNdata['Supplier']
-                print('aaaaaaaaaaaaaaaaaaaaa')
+                # print('aaaaaaaaaaaaaaaaaaaaa')
                 if(Supplier == ''):
                     # print("shruti")
                     # query = T_GRNs.objects.filter(
@@ -44,7 +44,7 @@ class GRNListFilterView(CreateAPIView):
                     condition=f'''and G.Party_id = {Supplier}'''
                     # query = T_GRNs.objects.filter(
                     #     GRNDate__range=[FromDate, ToDate], Customer_id=Customer, Party_id=Supplier)
-                print('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')    
+                # print('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')    
                 query =T_GRNs.objects.raw(f''' select G.id, G.GRNDate, G.Customer_id, G.GRNNumber, G.FullGRNNumber,G.InvoiceNumber,G.GrandTotal, G.Party_id, G.CreatedBy, G.UpdatedBy,G.CreatedOn, G.Comment
                                             ,party.Name PartyName,cust.Name customerName,cust.id customerid,T_Invoices.InvoiceNumber,
                                           T_Invoices.InvoiceDate,party.id PartyID,T_Invoices.id InvoiceID,T_Invoices.FullInvoiceNumber
@@ -56,7 +56,7 @@ join TC_GRNReferences on TC_GRNReferences.GRN_id=G.id
 left join T_Invoices on T_Invoices.id=TC_GRNReferences.Invoice_id
 where GRNDate between %s and %s and G.Customer_id= %s {condition}  ''',[FromDate,ToDate,Customer])
                 
-                print(query)
+                # print(query)
                 if not query:
                     log_entry = create_transaction_logNew(request, GRNdata, Customer,'List Not available',68,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
