@@ -723,6 +723,7 @@ class M_Items(models.Model):
     SAPUnitID = models.IntegerField(default=False,null=True,blank=True)
     IsCBMItem  = models.BooleanField(default=False)
     IsMixItem = models.BooleanField(default=False)
+    IsStockProcessItem = models.BooleanField(default=False)
     class Meta:
         constraints = [
             UniqueConstraint(fields=['Company', 'SAPItemCode'], name='unique_company_sapitemcode')
