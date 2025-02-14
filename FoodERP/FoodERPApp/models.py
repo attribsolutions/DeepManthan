@@ -1000,6 +1000,7 @@ class T_Invoices(models.Model):
     DeletedFromSAP = models.BooleanField(default=False)
     DataRecovery = models.BooleanField(default=False)
     # IsDataRecovery = models.BooleanField(default=False)
+    HideComment = models.CharField(max_length=500 ,null=True,blank=True)
     class Meta:
         db_table = "T_Invoices"
 
@@ -2498,5 +2499,15 @@ class MC_SchemeParties(models.Model):
     class Meta:
         db_table = "MC_SchemeParties"
     
+class M_SAPPOSUploadLog(models.Model):
+    UploadDate = models.DateTimeField(auto_now=True)
+    UploadBy = models.IntegerField()
+    Party = models.IntegerField()
+    File = models.CharField(max_length=500)
+    SaleDate = models.DateField()
+    UploadStatus = models.CharField(max_length=500)
+    Message = models.CharField(max_length=500)
 
+    class Meta:
+        db_table = "M_SAPPOSUploadLog"
     
