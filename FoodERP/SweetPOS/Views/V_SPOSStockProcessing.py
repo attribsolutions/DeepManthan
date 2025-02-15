@@ -277,7 +277,7 @@ WHERE InvoiceDate >= DATE_SUB(CURDATE(), INTERVAL 100 DAY) AND Party_id NOT IN (
                                             stockout.save()    
                             
                             current_date += timedelta(days=1)
-                        # log_entry = create_transaction_logNew(request, Orderdata, Party, 'Stock Process Successfully', 209, 0, start_date_str, end_date_str, 0)
+                        log_entry = create_transaction_logNew(request, Orderdata, Party, 'Stock Process Successfully', 209, 0, start_date_str, end_date_str, 0)
                             
                         
                     log_entry = create_transaction_logNew(request, Orderdata, Party, 'Stock Process Successfully', 209, 0, start_date_str, end_date_str, 0)
