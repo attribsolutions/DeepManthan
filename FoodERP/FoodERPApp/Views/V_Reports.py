@@ -2059,54 +2059,87 @@ class GRNDiscrepancyReportAPIView(CreateAPIView):
                 FromDate = Data['FromDate']
                 ToDate = Data['ToDate']
                 Party = Data.get('Party', 0)
-                GRNDiscrepancyData = []  
-                
-                GetParties = ""
-                if Party != 0:
-                    GetParties = f"AND T_GRNs.Customer_id = {Party}"
-                
-                GRNDiscrepancyQuery = TC_GRNItems.objects.raw(f''' SELECT TC_GRNItems.id, T_GRNs.GRNDate,T_GRNs.Party_id, T_GRNs.Customer_id, T_GRNs.FullGRNNumber, T_GRNs.InvoiceNumber, 
-                                        T_GRNs.InvoiceDate, M_Items.Name AS ItemName,  IFNULL(T_Invoices.Hide, 0) AS GRNSaveStatus,
-                                        party.Name AS PartyName, customer.Name AS CustomerName, T_GRNs.Comment,TC_GRNItems.DiscrepancyComment,
-                                        TC_GRNItems.Amount, TC_GRNItems.Quantity,MC_ItemUnits.BaseUnitConversion,  M_GeneralMaster.Name AS DiscrepancyReason
-                                        FROM TC_GRNItems
-                                        JOIN T_GRNs ON TC_GRNItems.GRN_id = T_GRNs.id
-                                        JOIN M_Items ON TC_GRNItems.Item_id = M_Items.id
-                                        JOIN M_Parties party ON T_GRNs.Party_id = party.id
-                                        JOIN M_Parties customer ON T_GRNs.Customer_id = customer.id
-                                        LEFT JOIN T_Invoices ON T_GRNs.InvoiceNumber = T_Invoices.InvoiceNumber
-                                        LEFT JOIN M_GeneralMaster ON T_GRNs.Reason_id = M_GeneralMaster.id 
-                                        LEFT JOIN MC_ItemUnits ON TC_GRNItems.Item_id = MC_ItemUnits.Item_id AND MC_ItemUnits.IsBase = TRUE and IsDeleted=0
-                                        WHERE GRNDate BETWEEN '{FromDate}' AND '{ToDate}' AND TC_GRNItems.DiscrepancyComment IS NOT NULL
-                                        {GetParties} ''')
-                
-                if GRNDiscrepancyQuery:  
-                        
-                    for row in GRNDiscrepancyQuery:                       
-                        GRNDiscrepancyData.append({
-                            "id" : row.id,
-                            "PartyID": row.Party_id,
-                            "Warehouse": row.PartyName,
-                            "SAPInvoiceNumber" : row.InvoiceNumber,
-                            "InvoiceDate" : row.InvoiceDate,
-                            "GRNID": row.FullGRNNumber,
-                            "GRNSaveStatus" : row.GRNSaveStatus,
-                            "GRNSaveDate": row.GRNDate,
-                            "CustomerID": row.Customer_id,
-                            "PartyName" : row.CustomerName,
-                            "SKUName": row.ItemName,
-                            "QtyBilled": row.Quantity,
-                            "QtyUOM" : row.BaseUnitConversion,
-                            "LineAmountwithGST" : row.Amount,
-                            "Comment": row.Comment,
-                            "DiscrepancyReason" : row.DiscrepancyReason,
-                            "DiscrepancyComment": row.DiscrepancyComment,                            
-                        })
+                GRNDiscrepancyData = []
+
+                GetParties = f"AND T_GRNs.Customer_id = {Party}" if Party != 0 else ""
+
+                GRNDiscrepancyQuery = TC_GRNItems.objects.raw(f'''SELECT TC_GRNItems.id, T_GRNs.GRNDate, T_GRNs.Party_id, T_GRNs.Customer_id, 
+                                                                  T_GRNs.FullGRNNumber, T_GRNs.InvoiceNumber, T_GRNs.InvoiceDate, M_Items.Name AS ItemName,  
+                                                                  IFNULL(T_Invoices.Hide, 0) AS GRNSaveStatus,'' AS HideComment,party.Name AS PartyName, 
+                                                                  customer.Name AS CustomerName, T_GRNs.Comment, TC_GRNItems.DiscrepancyComment, 
+                                                                  TC_GRNItems.Amount, TC_GRNItems.Quantity, MC_ItemUnits.BaseUnitConversion,   M_GeneralMaster.Name AS DiscrepancyReason
+                                                                  FROM TC_GRNItems
+                                                                  JOIN T_GRNs ON TC_GRNItems.GRN_id = T_GRNs.id
+                                                                  JOIN M_Items ON TC_GRNItems.Item_id = M_Items.id
+                                                                  JOIN M_Parties party ON T_GRNs.Party_id = party.id
+                                                                  JOIN M_Parties customer ON T_GRNs.Customer_id = customer.id
+                                                                  LEFT JOIN T_Invoices ON T_GRNs.InvoiceNumber = T_Invoices.InvoiceNumber
+                                                                  LEFT JOIN M_GeneralMaster ON T_GRNs.Reason_id = M_GeneralMaster.id 
+                                                                  LEFT JOIN MC_ItemUnits ON TC_GRNItems.Item_id = MC_ItemUnits.Item_id 
+                                                                  AND MC_ItemUnits.IsBase = TRUE 
+                                                                  AND MC_ItemUnits.IsDeleted = 0
+                                                                  WHERE T_GRNs.GRNDate BETWEEN '{FromDate}' AND '{ToDate}'
+                                                                  AND TC_GRNItems.DiscrepancyComment IS NOT NULL
+                                                                  {GetParties}''')
+
+                HiddenInvoicesQuery = T_Invoices.objects.raw(f'''SELECT T_Invoices.id, Hide, HideComment, InvoiceNumber, InvoiceDate, Party_id,
+                                                                Customer_id , party.Name AS PartyName, customer.Name AS CustomerName
+                                                                FROM T_Invoices
+                                                                JOIN M_Parties party ON T_Invoices.Party_id = party.id
+                                                                JOIN M_Parties customer ON T_Invoices.Customer_id = customer.id
+                                                                WHERE Hide = 1 AND HideComment IS NOT NULL''')
+                print(HiddenInvoicesQuery)
+
+                for row in GRNDiscrepancyQuery:
+                    GRNDiscrepancyData.append({
+                        "id": row.id,
+                        "PartyID": row.Party_id,
+                        "Warehouse": row.PartyName,
+                        "SAPInvoiceNumber": row.InvoiceNumber,
+                        "InvoiceDate": row.InvoiceDate,
+                        "GRNID": row.FullGRNNumber,
+                        "GRNSaveStatus": row.GRNSaveStatus,
+                        "GRNSaveDate": row.GRNDate,
+                        "CustomerID": row.Customer_id,
+                        "PartyName": row.CustomerName,
+                        "SKUName": row.ItemName,
+                        "QtyBilled": row.Quantity,
+                        "QtyUOM": row.BaseUnitConversion,
+                        "LineAmountwithGST": row.Amount,
+                        "DiscrepancyComment": row.Comment,
+                        "HideComment": row.HideComment, 
+                        "DiscrepancyReason": row.DiscrepancyReason,
+                        "DiscrepancyItemComment": row.DiscrepancyComment,
+                    })
+
+                for invoice in HiddenInvoicesQuery:
+                    GRNDiscrepancyData.append({
+                        "id": invoice.id,
+                        "PartyID": invoice.Party_id,
+                        "Warehouse": invoice.PartyName,
+                        "SAPInvoiceNumber": invoice.InvoiceNumber,
+                        "InvoiceDate":invoice.id,
+                        "GRNID": None,
+                        "GRNSaveStatus": invoice.Hide,
+                        "GRNSaveDate": None,
+                        "CustomerID": invoice.Customer_id,
+                        "PartyName": invoice.CustomerName,
+                        "SKUName": None,
+                        "QtyBilled": None,
+                        "QtyUOM": None,
+                        "LineAmountwithGST": None,
+                        "DiscrepancyComment": None,
+                        "HideComment": invoice.HideComment,
+                        "DiscrepancyReason": None,
+                        "DiscrepancyItemComment": None,
+                    })
+                if GRNDiscrepancyData:
                     log_entry = create_transaction_logNew(request, Data, 0, "", 442, 0, FromDate, ToDate, 0)
-                    return JsonResponse({"StatusCode": 200, "Status": True,"Message": "GRN Discrepancy Report retrieved successfully.","Data": GRNDiscrepancyData,})
+                    return JsonResponse({"StatusCode": 200, "Status": True, "Message": "GRN Discrepancy Report retrieved successfully.","Data": GRNDiscrepancyData,})
+
                 log_entry = create_transaction_logNew(request, Data, 0, "No discrepancies found", 442, 0, FromDate, ToDate, 0)
-                return JsonResponse({"StatusCode": 204,"Status": True,"Message": "No GRN discrepancies found.", "Data": [],})
+                return JsonResponse({"StatusCode": 204, "Status": True,"Message": "No GRN discrepancies found.","Data": [], })
 
         except Exception as e:
             log_entry = create_transaction_logNew(request, Data, 0, "GRNDiscrepancyReport: " + str(e), 33, 0)
-            return JsonResponse({"StatusCode": 400,"Status": False,"Message": str(e),"Data": [],})
+            return JsonResponse({"StatusCode": 400,"Status": False,"Message": str(e), "Data": [],})
