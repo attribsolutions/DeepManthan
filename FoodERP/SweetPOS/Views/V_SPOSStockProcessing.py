@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from rest_framework.parsers import JSONParser
 from FoodERPApp.Views.V_CommFunction import create_transaction_logNew
-from FoodERPApp.models import CustomPrint, M_Parties
+from FoodERPApp.models import CustomPrint, M_Items, M_Parties
 from SweetPOS.Views.SweetPOSCommonFunction import BasicAuthenticationfunction
 from ..models import *
 from rest_framework.authentication import BasicAuthentication
@@ -145,14 +145,19 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
                 if user is not None:
                     today = date.today()
                     
-                    query0=O_SPOSDateWiseLiveStock.objects.filter(StockDate = today).count()
-                    # print( 'count',query0)
+                    # Querying the database to count the number of records for today's date in O_SPOSDateWiseLiveStock
+                    query0 = O_SPOSDateWiseLiveStock.objects.filter(StockDate=today).count()
+
+                    # If there are records found for today's date (i.e., query0 > 0), then...
                     if query0 > 0:
-                        # today = date.today()
-                        # print('aaaaaaaaaaa')
-                        yesterday = today - timedelta(days = 1)
+                        # Calculate yesterday's date by subtracting 1 day from today's date
+                        yesterday = today - timedelta(days=1)
                     else:
-                        # print('bbbbbbbbbbbbbbbbbb')
+                        # If no records were found for today, set yesterday to be the first day of the current month
+                        updateIsStockProcessItem= M_Items.objects.raw(''' update M_Items set IsStockProcessItem =1 where id in(  
+
+SELECT DISTINCT Item_id FROM T_Invoices JOIN TC_InvoiceItems ON Invoice_id = T_Invoices.id 
+WHERE InvoiceDate >= DATE_SUB(CURDATE(), INTERVAL 100 DAY) AND Party_id NOT IN (SELECT DefaultValue FROM M_Settings WHERE id=55))''')
                         yesterday = today.replace(day=1)    
                     
                     start_date_str = yesterday
@@ -204,7 +209,7 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
         from
 
 
-        (Select Item_id,M_Items.BaseUnitID_id UnitID  from FoodERP.MC_PartyItems join FoodERP.M_Items on M_Items.id=MC_PartyItems.Item_id and M_Items.IsCBMItem=1 where Party_id=%s)I
+        (Select Item_id,M_Items.BaseUnitID_id UnitID  from FoodERP.MC_PartyItems join FoodERP.M_Items on M_Items.id=MC_PartyItems.Item_id and M_Items.IsStockProcessItem=1 and  where Party_id=%s)I
 
 
         left join (SELECT IFNULL(Item,0) ItemID, sum(ClosingBalance)ClosingBalance FROM SweetPOS.O_SPOSDateWiseLiveStock WHERE StockDate = DATE_SUB(  %s, 
@@ -267,8 +272,9 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
                                 if query0 > 0 :
                                     processingdate =datetime.strptime(Date, '%Y-%m-%d').date()
                                     if a.ClosingBalance <= 0 and date.today() == processingdate:
-                                        stockout = T_SPOSStockOut(StockDate=Date, Item=a.ItemID, Party=Party, CreatedBy=0,Quantity=a.ClosingBalance)
-                                        stockout.save()    
+                                        if ((datetime.now()).hour ) > 8 and ((datetime.now()).hour ) < 22 :
+                                            stockout = T_SPOSStockOut(StockDate=Date, Item=a.ItemID, Party=Party, CreatedBy=0,Quantity=a.ClosingBalance)
+                                            stockout.save()    
                             
                             current_date += timedelta(days=1)
                         # log_entry = create_transaction_logNew(request, Orderdata, Party, 'Stock Process Successfully', 209, 0, start_date_str, end_date_str, 0)
