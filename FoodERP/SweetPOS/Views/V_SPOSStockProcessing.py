@@ -168,7 +168,7 @@ WHERE InvoiceDate >= DATE_SUB(CURDATE(), INTERVAL 100 DAY) AND Party_id NOT IN (
 
                     # print(Partys)                    
 
-                    
+                    log_entry = create_transaction_logNew(request, Orderdata, 0, 'Stock Process start', 209, 0, start_date_str, end_date_str, 0)
                     for Party in Partys:
                         # print(Party['id'])
                         # start_date = start_date_str.strptime( "%Y-%m-%d")
