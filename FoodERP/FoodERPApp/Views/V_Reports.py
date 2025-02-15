@@ -2088,8 +2088,6 @@ class GRNDiscrepancyReportAPIView(CreateAPIView):
                                                                 JOIN M_Parties party ON T_Invoices.Party_id = party.id
                                                                 JOIN M_Parties customer ON T_Invoices.Customer_id = customer.id
                                                                 WHERE Hide = 1 AND HideComment IS NOT NULL''')
-                print(HiddenInvoicesQuery)
-
                 for row in GRNDiscrepancyQuery:
                     GRNDiscrepancyData.append({
                         "id": row.id,
