@@ -374,6 +374,7 @@ order by StockDate,Party_id,Item_id ''')
 
 
    
+   
 class StockEntryItemsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     

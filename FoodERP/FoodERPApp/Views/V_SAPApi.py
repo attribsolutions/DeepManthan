@@ -239,7 +239,9 @@ class SAPOrderView(CreateAPIView):
                 OrderID = data["Order"]
                 payload = list()
                 Items =list()
-                ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(0,1).split('!')              
+                queryforcustomerID=T_Orders.objects.filter(id=OrderID).values('Customer')
+                
+                ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(queryforcustomerID[0]['Customer'],0).split('!')              
                 
                 query=T_Orders.objects.raw(f'''select (5000000+T_Orders.id)id ,C.SAPPartyCode CustomerID,T_Orders.OrderDate DocDate,
                                            M_PartyType.SAPIndicator Indicator,

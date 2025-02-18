@@ -796,9 +796,12 @@ urlpatterns = [
 #SAPExport:
               url(r'SAPExportDetails$',SAPExportViewDetails.as_view()), 
               url(r'InvoiceSAPExportDetails$',InvoiceSendToFTPForSAP.as_view()), 
+              url(r'UploadFileListDetails$',UploadFileList.as_view()),
+              
               
 #Cashier Details:
               url(r'FranchisesCashierDetails$',FranchisesCashierList.as_view()), 
+              
 
 
               
