@@ -1884,7 +1884,7 @@ class BillBookingReportView(CreateAPIView):
                 ,M_Parties.Name ,Sum(TC_GRNItems.Amount)Amount FROM T_GRNs
                 JOIN TC_GRNItems ON  TC_GRNItems.Grn_id =T_GRNs.id  
                 JOIN M_Parties ON M_Parties.id= T_GRNs.Party_id
-                WHERE  GrnDate Between '{FromDate}' and '{ToDate}' and T_GRNs.Customer_id={Party} group by TC_GRNItems.GRN_id ,M_Parties.Name ''')
+                WHERE IsSave=2 AND GrnDate Between '{FromDate}' and '{ToDate}' and T_GRNs.Customer_id={Party} group by TC_GRNItems.GRN_id ,M_Parties.Name ''')
                 if BillBookingquery:                     
                     for row in BillBookingquery:                       
                         GRNData.append({
