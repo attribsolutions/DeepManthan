@@ -374,6 +374,7 @@ order by StockDate,Party_id,Item_id ''')
 
 
    
+   
 class StockEntryItemsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     
@@ -406,18 +407,30 @@ class StockEntryItemsView(CreateAPIView):
                                                             WHERE MC_PartyItems.Party_id = %s 
                                                             {ItemsGroupJoinsandOrderby[2]}''', ([PartyID],[PartyID],[PartyID]))
                 if not Itemquery:
-                    log_entry = create_transaction_logNew(request, Logindata, 0, 'Franchise Items Not available', 102, 0)
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available', 'Data': []})
+                    log_entry = create_transaction_logNew(request, Logindata, 0, 'StockEntry Items Not available', 102, 0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'StockEntry Items Not available', 'Data': []})
+     
+                GetPartyID = M_Parties.objects.filter(id=PartyID).select_related('PartyType').first()
 
-                LastStockEntryQuery = '''SELECT O.id, MAX(O.StockDate) AS LastStockEntryDate
-                    FROM SweetPOS.T_SPOSStock O
-                    WHERE O.Party = %s'''
-                LastStockEntry = T_SPOSStock.objects.raw(LastStockEntryQuery, [PartyID])
+                PartyTypeID = GetPartyID.PartyType.id 
+
                 LastStockEntryDate = None
+
+                if PartyTypeID == 19:
+                    LastStockEntryQuery = '''SELECT T_SPOSStock.id, MAX(T_SPOSStock.StockDate) AS LastStockEntryDate
+                                            FROM SweetPOS.T_SPOSStock 
+                                            WHERE T_SPOSStock.Party = %s'''
+                    LastStockEntry = T_SPOSStock.objects.raw(LastStockEntryQuery, [PartyID])
+                else:
+                    LastStockEntryQuery = '''SELECT T_Stock.id, MAX(T_Stock.StockDate) AS LastStockEntryDate
+                                            FROM T_Stock 
+                                            WHERE T_Stock.Party_id = %s'''
+                    LastStockEntry = T_Stock.objects.raw(LastStockEntryQuery, [PartyID])
+                    
                 for date in LastStockEntry:
                     LastStockEntryDate = date.LastStockEntryDate
                     
-                FranchiseItemsList = [{
+                StockEntryItemsList = [{
                     "Item": item.id,
                     "ItemName": item.ItemName,
                     'GroupName': item.GroupName,
@@ -443,10 +456,10 @@ class StockEntryItemsView(CreateAPIView):
                     }]
                 } for item in Itemquery]
                 
-                log_entry = create_transaction_logNew(request, Logindata, PartyID, 'Franchise Items List', 102, 0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '',  'LastStockEntryDate': LastStockEntryDate, 'Data': FranchiseItemsList})
+                log_entry = create_transaction_logNew(request, Logindata, PartyID, 'StockEntryItems List', 102, 0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '',  'LastStockEntryDate': LastStockEntryDate, 'Data': StockEntryItemsList})
 
-        except Exception as e:
+        except Exception as e:   
             log_entry = create_transaction_logNew(request, Logindata, 0, 'FetchStock_Items:' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
         
