@@ -11,6 +11,10 @@ import io
 from rest_framework.permissions import IsAuthenticated
 from urllib.parse import urlparse
 from rest_framework.parsers import JSONParser
+from django.utils import timezone
+from ..Serializer.S_Invoices import *
+
+
 
 
 class SAPExportViewDetails(APIView):
@@ -71,10 +75,15 @@ class SAPExportViewDetails(APIView):
                 M_Items.SAPItemCode '''
 
             # Execute query           
-            raw_queryset = T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate,Party,InvoiceDate,Party])   
+            # raw_queryset = T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate,Party,InvoiceDate,Party])   
             # print(raw_queryset.query)         
             # Generate file name
+            # file_name = f"{datetime.now().strftime('%Y%m%d')}_{raw_queryset[0].Name.strip()}_File1.csv"
+            raw_queryset = list(T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate, Party, InvoiceDate, Party]))  
+            if not raw_queryset:  
+                raise Exception(f"No records found for Party {Party} on {InvoiceDate}")
             file_name = f"{datetime.now().strftime('%Y%m%d')}_{raw_queryset[0].Name.strip()}_File1.csv"
+            
             ftp_file_path = f"{FTPFilePath}/inbound/POS/POS_day_sales/source/{file_name}"
             
             # Prepare CSV content
@@ -95,14 +104,14 @@ class SAPExportViewDetails(APIView):
             
 
             # Upload to FTP
-            self.upload_to_ftp(ftp_file_path, user_name, password, csv_content)            
+            self.upload_to_ftp(ftp_file_path, user_name, password, csv_content,Party,InvoiceDate)            
             pass
             # Return success response
             # return JsonResponse({'message': 'File uploaded successfully', 'file_name': file_name})
             
         except Exception as exc:
             # Log and return the error
-            self.insert_pos_log(1, "Failed", str(exc))
+            self.insert_pos_log(1, "Failed", str(exc),Party,InvoiceDate)
             return JsonResponse({'error': str(exc)}, status=500)
             raise
             
@@ -124,10 +133,15 @@ class SAPExportViewDetails(APIView):
                 WHERE InvoiceDate = %s AND A.Party =%s'''
 
             # Execute query with parameters        
-            raw_queryset = T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate,Party])
+            # raw_queryset = T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate,Party])
             
             # Generate file name
+            # file_name = f"{datetime.now().strftime('%Y%m%d')}_{raw_queryset[0].Name.strip()}_File3.csv"
+            raw_queryset = list(T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate, Party]))  
+            if not raw_queryset:  
+                raise Exception(f"No records found for Party {Party} on {InvoiceDate}")
             file_name = f"{datetime.now().strftime('%Y%m%d')}_{raw_queryset[0].Name.strip()}_File3.csv"
+            
             ftp_file_path = f"{FTPFilePath}/inbound/POS/POS_day_sales/source/{file_name}"            
             # Prepare CSV content
             headers = [
@@ -143,11 +157,11 @@ class SAPExportViewDetails(APIView):
             csv_content = self.generate_csv(headers, rows)
 
             # Upload to FTP
-            self.upload_to_ftp(ftp_file_path, user_name, password, csv_content)           
+            self.upload_to_ftp(ftp_file_path, user_name, password, csv_content,Party,InvoiceDate)           
             pass
         except Exception as exc:
             # Log and raise error
-            self.insert_pos_log(3, "Failed", str(exc))
+            self.insert_pos_log(3, "Failed", str(exc),Party,InvoiceDate)
             raise
         
     def File2(self, Party,InvoiceDate):
@@ -176,9 +190,15 @@ class SAPExportViewDetails(APIView):
             SapItemCode,M_Units.Name,M_Parties.SapPartyCode,InvoiceDate,M_Parties.Name,M_Items.SAPItemCode,M_Units.id'''
 
             # Execute query with parameters            
-            raw_queryset = T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate,Party,DoNOtUseItemID])
+            # raw_queryset = T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate,Party,DoNOtUseItemID])
             
             # Generate file name
+            # file_name = f"{datetime.now().strftime('%Y%m%d')}_{raw_queryset[0].Name.strip()}_File2.csv"
+            
+            
+            raw_queryset = list(T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate, Party, DoNOtUseItemID]))  
+            if not raw_queryset:  
+                raise Exception(f"No records found for Party {Party} on {InvoiceDate}")
             file_name = f"{datetime.now().strftime('%Y%m%d')}_{raw_queryset[0].Name.strip()}_File2.csv"
             ftp_file_path = f"{FTPFilePath}/inbound/POS/POS_day_sales/source/{file_name}"            
             # Prepare CSV content
@@ -196,11 +216,11 @@ class SAPExportViewDetails(APIView):
             csv_content = self.generate_csv(headers, rows)
 
             # Upload to FTP
-            self.upload_to_ftp(ftp_file_path, user_name, password, csv_content)    
+            self.upload_to_ftp(ftp_file_path, user_name, password, csv_content,Party,InvoiceDate)    
             pass
         except Exception as exc:
             # Log and raise error
-            self.insert_pos_log(2, "Failed", str(exc))
+            self.insert_pos_log(2, "Failed", str(exc),Party,InvoiceDate)
             raise
         
     def generate_csv(self, headers, rows):
@@ -211,7 +231,7 @@ class SAPExportViewDetails(APIView):
             output.write(",".join(map(str, row)) + "\n")
         return output.getvalue().encode("utf-8")
    
-    def upload_to_ftp(self, ftp_url, username, password, file_content):
+    def upload_to_ftp(self, ftp_url, username, password, file_content,Party,InvoiceDate):
         """Upload file content to an FTP server."""        
         try:
             parsed_url = urlparse(ftp_url)
@@ -237,7 +257,7 @@ class SAPExportViewDetails(APIView):
             # Upload the file
             with io.BytesIO(file_content) as file_stream:                        
                 ftp.storbinary(f"STOR {file_name}", file_stream)  # Upload the file
-
+            self.insert_pos_log(ftp_url, "Success", "File uploaded successfully", Party, InvoiceDate)
             # Verify the upload
             uploaded_files = []
             ftp.retrlines('NLST', uploaded_files.append)
@@ -250,11 +270,59 @@ class SAPExportViewDetails(APIView):
             print(f"FTP upload failed: {e}")
             raise
 
-    def insert_pos_log(self, file_type, status, message):
-        """Log operation details."""
-        print(f"Log - FileType: {file_type}, Status: {status}, Message: {message}")  
+    # def insert_pos_log(self, file_type, status, message):
+    #     """Log operation details."""
+    #     print(f"Log - FileType: {file_type}, Status: {status}, Message: {message}")  
         
     def get_ftp_settings(self):
         """Fetches FTP credentials."""
         Q11 = M_Settings.objects.filter(id__in=[50, 51, 52,53]).values("id", "DefaultValue")
         return {item['id']: item['DefaultValue'] for item in Q11}
+    
+    def insert_pos_log(self, file_type, status, message, party, sale_date):
+        """Log operation details into m_sapposuploadlog."""
+        try:
+            print(f"Logging: file_type={file_type}, status={status}, message={message}, party={party}, sale_date={sale_date}")
+            M_SAPPOSUploadLog.objects.create(
+                UploadDate=datetime.now(),
+                UploadBy=party,  
+                Party=party,
+                SaleDate=sale_date,
+                UploadStatus=status,
+                Message=message,
+                File=file_type
+            )
+        except Exception as e:
+            print(f"Failed to insert log: {e}")
+    
+    
+class UploadFileList(APIView):
+    permission_classes = (IsAuthenticated,)    
+    def get(self, request):
+        # SAPPOSUploaddata = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                               
+                # Party = SAPPOSUploaddata['Party'] 
+                # InvoiceDate=SAPPOSUploaddata['InvoiceDate']             
+                SAPPOSQuery=M_Users.objects.raw(f'''SELECT FoodERP.M_SAPPOSUploadLog.id, UploadDate,SaleDate,FoodERP.M_Parties.Name, UploadStatus,Message,File  FROM FoodERP.M_SAPPOSUploadLog
+                JOIN FoodERP.M_Parties  ON M_Parties.id=Party''')              
+                if SAPPOSQuery:
+                    POSSAPDetails=list()
+                    for row in SAPPOSQuery:
+                        POSSAPDetails.append({                            
+                            "UploadDate":row.UploadDate,
+                            "SaleDate":row.SaleDate,
+                            "Name":row.Name,
+                            "Message":row.Message,
+                            "File":row.File,
+                            "UploadStatus":row.UploadStatus,
+                        })
+                    log_entry = create_transaction_logNew( request, 0, 0, '', 441, 0,0,0,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': POSSAPDetails})
+                log_entry = create_transaction_logNew( request, POSSAPDetails, 0, 'Data Not Found', 441, 0,0,0,0)           
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+
+        except Exception as e:
+            log_entry = create_transaction_logNew( request, 0, 0, 'Cashier:'+str(e), 33,0,0,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
