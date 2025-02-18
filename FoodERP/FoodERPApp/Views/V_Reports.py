@@ -2141,3 +2141,53 @@ class GRNDiscrepancyReportAPIView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, Data, 0, "GRNDiscrepancyReport: " + str(e), 33, 0)
             return JsonResponse({"StatusCode": 400,"Status": False,"Message": str(e), "Data": [],})
+
+
+class CouponCodeRedemptionReportView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic
+    def post(self, request):
+        CouponCodeData = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                FromDate = CouponCodeData['FromDate']
+                ToDate = CouponCodeData['ToDate']
+                Party = CouponCodeData.get('Party', 0)
+                CouponCodeRedemptionData = []
+
+                GetParties = f"AND M_GiftVoucherCode.Party = {Party}" if Party != 0 else ""
+                
+                
+                CouponCodeRedemptionQuery = TC_GRNItems.objects.raw(f'''SELECT M_GiftVoucherCode.id, VoucherType_id, VoucherCode, M_GiftVoucherCode.UpdatedOn, InvoiceDate, 
+                                                                        InvoiceNumber, InvoiceAmount, Party, client, M_GiftVoucherCode.IsActive, M_Parties.Name as PartyName
+                                                                        FROM M_GiftVoucherCode
+                                                                        JOIN M_Parties  ON M_GiftVoucherCode.Party = M_Parties.id
+                                                                        WHERE M_GiftVoucherCode.IsActive = 0
+                                                                        AND InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}'
+                                                                        {GetParties}''')
+                for CouponCode in CouponCodeRedemptionQuery:
+                    CouponCodeRedemptionData.append({
+                        "id": CouponCode.id,
+                        "VoucherTypeID": CouponCode.VoucherType_id,
+                        "VoucherCode": CouponCode.VoucherCode,
+                        "UpdatedOn": CouponCode.UpdatedOn,
+                        "InvoiceDate":CouponCode.InvoiceDate,
+                        "InvoiceNumber": CouponCode.InvoiceNumber,
+                        "InvoiceAmount": CouponCode.InvoiceAmount,
+                        "PartyID": CouponCode.Party,
+                        "PartyName": CouponCode.PartyName,
+                        "client": CouponCode.client,
+                    })
+                if CouponCodeRedemptionData:
+                    log_entry = create_transaction_logNew(request, CouponCodeData, 0, "", 443, 0, FromDate, ToDate, 0)
+                    return JsonResponse({"StatusCode": 200, "Status": True, "Message": "CouponCodeRedemptionReport","Data": CouponCodeRedemptionData,})
+
+                log_entry = create_transaction_logNew(request, CouponCodeData, 0, "No CouponCodeRedemptionReport found", 443, 0, FromDate, ToDate, 0)
+                return JsonResponse({"StatusCode": 204, "Status": True,"Message": "No CouponCodeRedemptionReport found.","Data": [], })
+
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, CouponCodeData, 0, "CouponCodeRedemptionReport: " + str(e), 33, 0)
+            return JsonResponse({"StatusCode": 400,"Status": False,"Message": str(e), "Data": [],})
+
+

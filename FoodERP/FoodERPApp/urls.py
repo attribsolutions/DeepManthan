@@ -687,7 +687,9 @@ urlpatterns = [
             url(r'CxDDDiffReport$',CxDDDiffReportView.as_view()), 
             url(r'FranchiseSaleReport$',FranchiseSecondarySaleReportView.as_view()), 
             url(r'PendingGRNInvoices$',PendingGRNInvoicesAPIView.as_view()),
-            url(r'GRNDiscrepancyReport$',GRNDiscrepancyReportAPIView.as_view()),  
+            url(r'GRNDiscrepancyReport$',GRNDiscrepancyReportAPIView.as_view()),
+            url(r'CouponCodeRedemptionReport$',CouponCodeRedemptionReportView.as_view()),
+              
             
             
             
