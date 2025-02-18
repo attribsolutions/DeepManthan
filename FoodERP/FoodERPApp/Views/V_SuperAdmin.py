@@ -249,6 +249,8 @@ class SuperAdminView(CreateAPIView):
                     "isSendOTP": "0",
                     "isLoginUsingMobile": "0",
                     "isLoginUsingEmail": "0",
+                    "POSRateType" : 0,
+                    
                     "CreatedBy": 1,
                     "UpdatedBy": 1,
                     "UserRole": [

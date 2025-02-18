@@ -335,7 +335,7 @@ urlpatterns = [
             url(r'Cancel_EInvoicea/([0-9]+)/([0-9]+)/([0-9]+)$', Cancel_EInvoice.as_view()),
             url(r'Cancel_EwayBill/([0-9]+)/([0-9]+)/([0-9]+)$', Cancel_EwayBill.as_view()),
             url(r'UpdateVehicleInvoice/([0-9]+)/([0-9]+)$',UpdateVehicleInvoiceView.as_view()),
-            url(r'InvoiceHide/([0-9]+)/([0-9]+)$',InvoiceHideView.as_view()),
+            url(r'InvoiceHide$', InvoiceHideView.as_view()),
             url(r'InvoiceBulkDelete$', InvoiceBulkDeleteView.as_view()),
             
                 
@@ -687,7 +687,9 @@ urlpatterns = [
             url(r'CxDDDiffReport$',CxDDDiffReportView.as_view()), 
             url(r'FranchiseSaleReport$',FranchiseSecondarySaleReportView.as_view()), 
             url(r'PendingGRNInvoices$',PendingGRNInvoicesAPIView.as_view()),
-            url(r'GRNDiscrepancyReport$',GRNDiscrepancyReportAPIView.as_view()),  
+            url(r'GRNDiscrepancyReport$',GRNDiscrepancyReportAPIView.as_view()),
+            url(r'CouponCodeRedemptionReport$',CouponCodeRedemptionReportView.as_view()),
+              
             
             
             
