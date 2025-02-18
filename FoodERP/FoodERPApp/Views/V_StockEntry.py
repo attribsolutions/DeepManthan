@@ -458,7 +458,7 @@ class StockEntryItemsView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Logindata, PartyID, 'StockEntryItems List', 102, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '',  'LastStockEntryDate': LastStockEntryDate, 'Data': StockEntryItemsList})
 
-        except Exception as e:
+        except Exception as e:   
             log_entry = create_transaction_logNew(request, Logindata, 0, 'FetchStock_Items:' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
         
