@@ -239,8 +239,23 @@ class GenericSaleView(CreateAPIView):
                 ToDate = Genericdata['ToDate']
                 Party = Genericdata['Party']
                 Party_list = Party.split(",")
-
-                Genericdataquery = T_Invoices.objects.raw('''SELECT TC_InvoiceItems.id, A.SAPPartyCode SAPPartyID, T_Invoices.Party_id AS PartyID,A.Name PartyName, X.Name PartyType, T_Invoices.ImportFromExcel,  T_Invoices.FullInvoiceNumber,
+                
+                party_types = M_Parties.objects.filter(id__in=Party_list).values('id', 'PartyType_id')
+                # print(party_types)
+                franchise_type_ids = [19]  
+                # other_type_ids = [9,10] 
+                
+                # franchise_parties = [p['id'] for p in party_types if p['PartyType_id'] in franchise_type_ids]
+                # other_parties = [p['id'] for p in party_types if p['PartyType_id'] in other_type_ids]
+                Franchises_Data = []
+                Other_Data = []
+                # print(franchise_parties)
+                # print(other_parties)
+                for p in party_types:
+                    ids = tuple(p['id']) if isinstance(p['id'], list) else (p['id'],)
+                    if p['PartyType_id'] not in franchise_type_ids:
+                    # print("sh")
+                        Other_Data = T_Invoices.objects.raw('''SELECT TC_InvoiceItems.id, A.SAPPartyCode SAPPartyID, T_Invoices.Party_id AS PartyID,A.Name PartyName, X.Name PartyType, T_Invoices.ImportFromExcel,  T_Invoices.FullInvoiceNumber,
 T_Invoices.InvoiceDate,T_Invoices.Customer_id AS CustomerID,B.Name CustomerName, Y.Name CustomeType, M_Drivers.Name DriverName,
 M_Vehicles.VehicleNumber VehicleNo,TC_InvoiceItems.Item_id AS ItemID,M_Items.Name ItemName,C_Companies.Name CompanyName,
 M_GSTHSNCode.HSNCode,TC_InvoiceItems.MRPValue AS MRP,ROUND(TC_InvoiceItems.QtyInNo, 2) AS QtyInNo,ROUND(TC_InvoiceItems.QtyInKg, 2) AS QtyInKg,ROUND(TC_InvoiceItems.QtyInBox, 2) AS QtyInBox,
@@ -265,7 +280,6 @@ left JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id
  left JOIN M_GSTHSNCode ON M_GSTHSNCode.id = TC_InvoiceItems.GST_id 
  JOIN MC_ItemUnits ON MC_ItemUnits.id = TC_InvoiceItems.Unit_id 
  JOIN M_Units ON M_Units.id = MC_ItemUnits.UnitID_id 
-
  LEFT JOIN M_Drivers ON M_Drivers.id = T_Invoices.Driver_id 
  LEFT JOIN M_Vehicles ON M_Vehicles.id = T_Invoices.Vehicle_id 
  left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id  and MC_ItemGroupDetails.GroupType_id=1
@@ -274,7 +288,48 @@ left JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id
  LEFT JOIN M_PartyDetails on  A.id=M_PartyDetails.Party_id AND M_PartyDetails.Group_id is null
  LEFT JOIN M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id 
  LEFT JOIN M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id 
- WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id IN %s''',([FromDate,ToDate,Party_list]))
+ WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id IN %s''',([FromDate,ToDate,ids]))
+                        # print(Other_Data)   
+                    else:
+                        # print("Ru")
+                        Franchises_Data = T_SPOSInvoices.objects.raw('''SELECT SweetPOS.TC_SPOSInvoiceItems.ClientID,SweetPOS.TC_SPOSInvoiceItems.id, A.SAPPartyCode SAPPartyID, SweetPOS.T_SPOSInvoices.Party AS PartyID,A.Name PartyName, X.Name PartyType, '' ImportFromExcel,  SweetPOS.T_SPOSInvoices.FullInvoiceNumber,
+SweetPOS.T_SPOSInvoices.InvoiceDate,SweetPOS.T_SPOSInvoices.Customer AS CustomerID,B.Name CustomerName, Y.Name CustomeType, M_Drivers.Name DriverName,
+M_Vehicles.VehicleNumber VehicleNo,SweetPOS.TC_SPOSInvoiceItems.Item AS ItemID,M_Items.Name ItemName,C_Companies.Name CompanyName,
+SweetPOS.TC_SPOSInvoiceItems.HSNCode,SweetPOS.TC_SPOSInvoiceItems.MRPValue AS MRP,ROUND(SweetPOS.TC_SPOSInvoiceItems.QtyInNo, 2) AS QtyInNo,ROUND(SweetPOS.TC_SPOSInvoiceItems.QtyInKg, 2) AS QtyInKg,
+ROUND(SweetPOS.TC_SPOSInvoiceItems.QtyInBox, 2) AS QtyInBox,
+SweetPOS.TC_SPOSInvoiceItems.Rate AS BasicRate,(SweetPOS.TC_SPOSInvoiceItems.Rate + ((SweetPOS.TC_SPOSInvoiceItems.Rate * SweetPOS.TC_SPOSInvoiceItems.GSTPercentage) / 100)) WithGSTRate,
+M_Units.Name AS UnitName,SweetPOS.TC_SPOSInvoiceItems.DiscountType,SweetPOS.TC_SPOSInvoiceItems.Discount,SweetPOS.TC_SPOSInvoiceItems.DiscountAmount,
+SweetPOS.TC_SPOSInvoiceItems.BasicAmount AS TaxableValue,SweetPOS.TC_SPOSInvoiceItems.CGST,SweetPOS.TC_SPOSInvoiceItems.CGSTPercentage,SweetPOS.TC_SPOSInvoiceItems.SGST,
+SweetPOS.TC_SPOSInvoiceItems.SGSTPercentage,SweetPOS.TC_SPOSInvoiceItems.IGST,SweetPOS.TC_SPOSInvoiceItems.IGSTPercentage,SweetPOS.TC_SPOSInvoiceItems.GSTPercentage,
+SweetPOS.TC_SPOSInvoiceItems.GSTAmount,SweetPOS.TC_SPOSInvoiceItems.Amount AS TotalValue,T_Orders.FullOrderNumber,T_Orders.OrderDate,SweetPOS.T_SPOSInvoices.TCSAmount,
+SweetPOS.T_SPOSInvoices.RoundOffAmount,SweetPOS.T_SPOSInvoices.GrandTotal,M_Group.Name AS `Group`, MC_SubGroup.Name AS SubGroup,
+M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster, SweetPOS.TC_SPOSInvoiceItems.BatchCode AS BatchNo , SweetPOS.TC_SPOSInvoiceItems.BatchDate, M_Items.SAPItemCode SAPItemID
+FROM SweetPOS.TC_SPOSInvoiceItems
+JOIN SweetPOS.T_SPOSInvoices ON SweetPOS.T_SPOSInvoices.id = SweetPOS.TC_SPOSInvoiceItems.Invoice_id
+
+left JOIN SweetPOS.TC_SPOSInvoicesReferences ON SweetPOS.TC_SPOSInvoicesReferences.Invoice_id = SweetPOS.T_SPOSInvoices.id
+left JOIN FoodERP.T_Orders ON FoodERP.T_Orders.id = SweetPOS.TC_SPOSInvoicesReferences.Order
+ JOIN FoodERP.M_Parties A ON A.id = SweetPOS.T_SPOSInvoices.Party
+ JOIN FoodERP.M_Parties B ON B.id = SweetPOS.T_SPOSInvoices.Customer
+ JOIN FoodERP.M_PartyType X on A.PartyType_id = X.id
+ JOIN FoodERP.M_PartyType Y on B.PartyType_id = Y.id
+ JOIN FoodERP.M_Items ON FoodERP.M_Items.id = SweetPOS.TC_SPOSInvoiceItems.Item
+ JOIN FoodERP.C_Companies ON FoodERP.C_Companies.id = M_Items.Company_id
+ JOIN FoodERP.MC_PartySubParty ON FoodERP.MC_PartySubParty.SubParty_id = SweetPOS.T_SPOSInvoices.Customer and MC_PartySubParty.Party_id=SweetPOS.T_SPOSInvoices.Party
+ JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.id = SweetPOS.TC_SPOSInvoiceItems.Unit
+ JOIN FoodERP.M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
+ LEFT JOIN FoodERP.M_Drivers ON M_Drivers.id = SweetPOS.T_SPOSInvoices.Driver
+ LEFT JOIN FoodERP.M_Vehicles ON M_Vehicles.id = SweetPOS.T_SPOSInvoices.Vehicle
+ left JOIN FoodERP.MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id  and MC_ItemGroupDetails.GroupType_id=1
+ LEFT JOIN FoodERP.M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
+ LEFT JOIN FoodERP.MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
+ LEFT JOIN FoodERP.M_PartyDetails on  A.id=M_PartyDetails.Party_id AND M_PartyDetails.Group_id is null
+ LEFT JOIN FoodERP.M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id
+ LEFT JOIN FoodERP.M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id
+ WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party IN %s''',([FromDate,ToDate,ids]))   
+                # print(Franchises_Data)
+                Genericdataquery = list(Franchises_Data) + list(Other_Data)    
+                # print(Genericdataquery)         
                 if Genericdataquery:
                     GenericSaleData = list()
                     GenericSaleSerializer = GenericSaleReportSerializer(
