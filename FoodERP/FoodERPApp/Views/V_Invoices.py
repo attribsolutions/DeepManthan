@@ -1098,25 +1098,56 @@ class BulkInvoiceView(CreateAPIView):
         
 
 
+# class InvoiceHideView(CreateAPIView):
+#     permission_classes = (IsAuthenticated,)
+#     # authentication_class = JSONWebTokenAuthentication
+    
+#     @transaction.atomic()
+#     def delete(self, request, id=0,Mode=0):
+#         try:
+#             with transaction.atomic():
+#                 if Mode == '0':
+#                     InvoiceUpdate = T_Invoices.objects.filter(id=id).update(Hide=0) 
+#                     log_entry = create_transaction_logNew(request, {'InvoiceID':id}, 0,'',65,0)
+#                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Un-Hide Successfully ', 'Data':[]})
+#                 else:
+#                     InvoiceUpdate = T_Invoices.objects.filter(id=id).update(Hide=1)
+#                     log_entry = create_transaction_logNew(request, {'InvoiceID':id}, 0,'',66,0)
+#                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Hide Successfully ', 'Data':[]})
+#         except Exception as e:
+#             log_entry = create_transaction_logNew(request, 0, 0,'InvoiceHide:'+(e),33,0)
+#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]}) 
+
+
+
 class InvoiceHideView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    # authentication_class = JSONWebTokenAuthentication
-    
-    @transaction.atomic()
-    def delete(self, request, id=0,Mode=0):
+
+    @transaction.atomic
+    def post(self, request):
+        Invoice_Data = JSONParser().parse(request)
+        print(Invoice_Data)
         try:
             with transaction.atomic():
+                
+                InvoiceID = Invoice_Data.get('InvoiceID') 
+                Mode = Invoice_Data.get('Mode') 
+                Comment = Invoice_Data.get('Comment', '') 
+                
                 if Mode == '0':
-                    InvoiceUpdate = T_Invoices.objects.filter(id=id).update(Hide=0) 
-                    log_entry = create_transaction_logNew(request, {'InvoiceID':id}, 0,'',65,0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Un-Hide Successfully ', 'Data':[]})
+                    T_Invoices.objects.filter(id=InvoiceID).update(Hide=0, HideComment=Comment)
+                    log_entry = create_transaction_logNew(request, {'InvoiceID': id}, 0, '', 65, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Invoice Un-Hide Successfully', 'Data': []})
                 else:
-                    InvoiceUpdate = T_Invoices.objects.filter(id=id).update(Hide=1)
-                    log_entry = create_transaction_logNew(request, {'InvoiceID':id}, 0,'',66,0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Hide Successfully ', 'Data':[]})
+                    T_Invoices.objects.filter(id=InvoiceID).update(Hide=1, HideComment=Comment)
+                    
+                    log_entry = create_transaction_logNew(request, {'InvoiceID': id}, 0, '', 66, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Invoice Hide Successfully', 'Data': []})
+
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'InvoiceHide:'+(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]}) 
+            log_entry = create_transaction_logNew(request, 0, 0, 'InvoiceHide: ' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+
         
         
 class UpdateVehicleInvoiceView(CreateAPIView):
