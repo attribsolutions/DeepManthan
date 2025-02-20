@@ -2136,13 +2136,16 @@ class GRNDiscrepancyReportAPIView(CreateAPIView):
                                                                   WHERE T_GRNs.GRNDate BETWEEN '{FromDate}' AND '{ToDate}'
                                                                   AND TC_GRNItems.DiscrepancyComment IS NOT NULL
                                                                   {GetParties}''')
+                
+                PartyID = f"AND T_Invoices.Customer_id = {Party}" if Party != 0 else ""
 
                 HiddenInvoicesQuery = T_Invoices.objects.raw(f'''SELECT T_Invoices.id, Hide, HideComment, InvoiceNumber, InvoiceDate, Party_id,
                                                                 Customer_id , party.Name AS PartyName, customer.Name AS CustomerName
                                                                 FROM T_Invoices
                                                                 JOIN M_Parties party ON T_Invoices.Party_id = party.id
                                                                 JOIN M_Parties customer ON T_Invoices.Customer_id = customer.id
-                                                                WHERE Hide = 1 AND HideComment IS NOT NULL''')
+                                                                WHERE Hide = 1 AND HideComment IS NOT NULL
+                                                                 {PartyID}''')
                 for row in GRNDiscrepancyQuery:
                     GRNDiscrepancyData.append({
                         "id": row.id,
