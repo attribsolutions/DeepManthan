@@ -239,8 +239,27 @@ class GenericSaleView(CreateAPIView):
                 ToDate = Genericdata['ToDate']
                 Party = Genericdata['Party']
                 Party_list = Party.split(",")
-
-                Genericdataquery = T_Invoices.objects.raw('''SELECT TC_InvoiceItems.id, A.SAPPartyCode SAPPartyID, T_Invoices.Party_id AS PartyID,A.Name PartyName, X.Name PartyType, T_Invoices.ImportFromExcel,  T_Invoices.FullInvoiceNumber,
+                
+                party_types = M_Parties.objects.filter(id__in=Party_list).values('id', 'PartyType_id')
+                # print(party_types)
+                franchise_type_ids = [19]  
+                # other_type_ids = [9,10] 
+                
+                # franchise_parties = [p['id'] for p in party_types if p['PartyType_id'] in franchise_type_ids]
+                # other_parties = [p['id'] for p in party_types if p['PartyType_id'] in other_type_ids]
+                # Franchises_Data = []
+                # Other_Data = []
+                Final_Data = []
+                
+                # print(franchise_parties)
+                # print(other_parties)
+                for p in party_types:
+                    # ids = tuple(p['id']) if isinstance(p['id'], list) else (p['id'],)
+                    # ids = ",".join(map(str, ['id']))
+                    party_id = p['id'] 
+                    if p['PartyType_id'] not in franchise_type_ids:
+                    # print("sh")
+                        query ='''SELECT TC_InvoiceItems.id, A.SAPPartyCode SAPPartyID, T_Invoices.Party_id AS PartyID,A.Name PartyName, X.Name PartyType, T_Invoices.ImportFromExcel,  T_Invoices.FullInvoiceNumber,
 T_Invoices.InvoiceDate,T_Invoices.Customer_id AS CustomerID,B.Name CustomerName, Y.Name CustomeType, M_Drivers.Name DriverName,
 M_Vehicles.VehicleNumber VehicleNo,TC_InvoiceItems.Item_id AS ItemID,M_Items.Name ItemName,C_Companies.Name CompanyName,
 M_GSTHSNCode.HSNCode,TC_InvoiceItems.MRPValue AS MRP,ROUND(TC_InvoiceItems.QtyInNo, 2) AS QtyInNo,ROUND(TC_InvoiceItems.QtyInKg, 2) AS QtyInKg,ROUND(TC_InvoiceItems.QtyInBox, 2) AS QtyInBox,
@@ -251,36 +270,79 @@ TC_InvoiceItems.SGSTPercentage,TC_InvoiceItems.IGST,TC_InvoiceItems.IGSTPercenta
 TC_InvoiceItems.GSTAmount,TC_InvoiceItems.Amount AS TotalValue,T_Orders.FullOrderNumber,T_Orders.OrderDate,T_Invoices.TCSAmount,
 T_Invoices.RoundOffAmount,T_Invoices.GrandTotal,M_Group.Name AS `Group`, MC_SubGroup.Name AS SubGroup, 
 M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster, TC_InvoiceItems.BatchCode AS BatchNo , TC_InvoiceItems.BatchDate, M_Items.SAPItemCode SAPItemID 
-FROM TC_InvoiceItems 
-JOIN T_Invoices ON T_Invoices.id = TC_InvoiceItems.Invoice_id 
-JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id = T_Invoices.Customer_id and MC_PartySubParty.Party_id=T_Invoices.Party_id
-left JOIN TC_InvoicesReferences ON TC_InvoicesReferences.Invoice_id = T_Invoices.id 
-left JOIN T_Orders ON T_Orders.id = TC_InvoicesReferences.Order_id
- JOIN M_Parties A ON A.id = T_Invoices.Party_id 
- JOIN M_Parties B ON B.id = T_Invoices.Customer_id 
- JOIN M_PartyType X on A.PartyType_id = X.id 
- JOIN M_PartyType Y on B.PartyType_id = Y.id 
- JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id 
- JOIN C_Companies ON C_Companies.id = M_Items.Company_id 
- left JOIN M_GSTHSNCode ON M_GSTHSNCode.id = TC_InvoiceItems.GST_id 
- JOIN MC_ItemUnits ON MC_ItemUnits.id = TC_InvoiceItems.Unit_id 
- JOIN M_Units ON M_Units.id = MC_ItemUnits.UnitID_id 
+FROM FoodERP.TC_InvoiceItems 
+JOIN FoodERP.T_Invoices ON FoodERP.T_Invoices.id = FoodERP.TC_InvoiceItems.Invoice_id 
+JOIN FoodERP.MC_PartySubParty ON FoodERP.MC_PartySubParty.SubParty_id = FoodERP.T_Invoices.Customer_id and MC_PartySubParty.Party_id=T_Invoices.Party_id
+left JOIN FoodERP.TC_InvoicesReferences ON FoodERP.TC_InvoicesReferences.Invoice_id = FoodERP.T_Invoices.id 
+left JOIN FoodERP.T_Orders ON FoodERP.T_Orders.id = FoodERP.TC_InvoicesReferences.Order_id
+ JOIN FoodERP.M_Parties A ON A.id = FoodERP.T_Invoices.Party_id 
+ JOIN FoodERP.M_Parties B ON B.id = FoodERP.T_Invoices.Customer_id 
+ JOIN FoodERP.M_PartyType X on A.PartyType_id = X.id 
+ JOIN FoodERP.M_PartyType Y on B.PartyType_id = Y.id 
+ JOIN FoodERP.M_Items ON M_Items.id = FoodERP.TC_InvoiceItems.Item_id 
+ JOIN FoodERP.C_Companies ON FoodERP.C_Companies.id = FoodERP.M_Items.Company_id 
+ left JOIN FoodERP.M_GSTHSNCode ON FoodERP.M_GSTHSNCode.id = FoodERP.TC_InvoiceItems.GST_id 
+ JOIN FoodERP.MC_ItemUnits ON FoodERP.MC_ItemUnits.id = FoodERP.TC_InvoiceItems.Unit_id 
+ JOIN FoodERP.M_Units ON FoodERP.M_Units.id = FoodERP.MC_ItemUnits.UnitID_id 
+ LEFT JOIN FoodERP.M_Drivers ON FoodERP.M_Drivers.id = T_Invoices.Driver_id 
+ LEFT JOIN FoodERP.M_Vehicles ON FoodERP.M_Vehicles.id = T_Invoices.Vehicle_id 
+ left JOIN FoodERP.MC_ItemGroupDetails ON FoodERP.MC_ItemGroupDetails.Item_id = FoodERP.M_Items.id  and FoodERP.MC_ItemGroupDetails.GroupType_id=1
+ LEFT JOIN FoodERP.M_Group ON M_Group.id  = FoodERP.MC_ItemGroupDetails.Group_id 
+ LEFT JOIN FoodERP.MC_SubGroup ON FoodERP.MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
+ LEFT JOIN FoodERP.M_PartyDetails on  A.id=FoodERP.M_PartyDetails.Party_id AND FoodERP.M_PartyDetails.Group_id is null
+ LEFT JOIN FoodERP.M_Cluster On FoodERP.M_PartyDetails.Cluster_id=FoodERP.M_Cluster.id 
+ LEFT JOIN FoodERP.M_SubCluster on FoodERP.M_PartyDetails.SubCluster_id=FoodERP.M_SubCluster.Id 
+ WHERE FoodERP.T_Invoices.InvoiceDate BETWEEN %s AND %s AND FoodERP.T_Invoices.Party_id = %s'''
+                        Other_Data = list(T_Invoices.objects.raw(query, [FromDate, ToDate, party_id]))  
+                        Final_Data.extend(Other_Data)
+                        # print(Final_Data)   
+                    else:
+                        # print("Ru")
+                        query = '''SELECT SweetPOS.TC_SPOSInvoiceItems.ClientID,SweetPOS.TC_SPOSInvoiceItems.id, A.SAPPartyCode SAPPartyID, SweetPOS.T_SPOSInvoices.Party AS PartyID,A.Name PartyName, X.Name PartyType, '' ImportFromExcel,  SweetPOS.T_SPOSInvoices.FullInvoiceNumber,
+SweetPOS.T_SPOSInvoices.InvoiceDate,SweetPOS.T_SPOSInvoices.Customer AS CustomerID,B.Name CustomerName, Y.Name CustomeType, M_Drivers.Name DriverName,
+M_Vehicles.VehicleNumber VehicleNo,SweetPOS.TC_SPOSInvoiceItems.Item AS ItemID,M_Items.Name ItemName,C_Companies.Name CompanyName,
+SweetPOS.TC_SPOSInvoiceItems.HSNCode,SweetPOS.TC_SPOSInvoiceItems.MRPValue AS MRP,ROUND(SweetPOS.TC_SPOSInvoiceItems.QtyInNo, 2) AS QtyInNo,ROUND(SweetPOS.TC_SPOSInvoiceItems.QtyInKg, 2) AS QtyInKg,
+ROUND(SweetPOS.TC_SPOSInvoiceItems.QtyInBox, 2) AS QtyInBox,
+SweetPOS.TC_SPOSInvoiceItems.Rate AS BasicRate,(SweetPOS.TC_SPOSInvoiceItems.Rate + ((SweetPOS.TC_SPOSInvoiceItems.Rate * SweetPOS.TC_SPOSInvoiceItems.GSTPercentage) / 100)) WithGSTRate,
+M_Units.Name AS UnitName,SweetPOS.TC_SPOSInvoiceItems.DiscountType,SweetPOS.TC_SPOSInvoiceItems.Discount,SweetPOS.TC_SPOSInvoiceItems.DiscountAmount,
+SweetPOS.TC_SPOSInvoiceItems.BasicAmount AS TaxableValue,SweetPOS.TC_SPOSInvoiceItems.CGST,SweetPOS.TC_SPOSInvoiceItems.CGSTPercentage,SweetPOS.TC_SPOSInvoiceItems.SGST,
+SweetPOS.TC_SPOSInvoiceItems.SGSTPercentage,SweetPOS.TC_SPOSInvoiceItems.IGST,SweetPOS.TC_SPOSInvoiceItems.IGSTPercentage,SweetPOS.TC_SPOSInvoiceItems.GSTPercentage,
+SweetPOS.TC_SPOSInvoiceItems.GSTAmount,SweetPOS.TC_SPOSInvoiceItems.Amount AS TotalValue,T_Orders.FullOrderNumber,T_Orders.OrderDate,SweetPOS.T_SPOSInvoices.TCSAmount,
+SweetPOS.T_SPOSInvoices.RoundOffAmount,SweetPOS.T_SPOSInvoices.GrandTotal,M_Group.Name AS `Group`, MC_SubGroup.Name AS SubGroup,
+M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster, SweetPOS.TC_SPOSInvoiceItems.BatchCode AS BatchNo , SweetPOS.TC_SPOSInvoiceItems.BatchDate, M_Items.SAPItemCode SAPItemID
+FROM SweetPOS.TC_SPOSInvoiceItems
+JOIN SweetPOS.T_SPOSInvoices ON SweetPOS.T_SPOSInvoices.id = SweetPOS.TC_SPOSInvoiceItems.Invoice_id
 
- LEFT JOIN M_Drivers ON M_Drivers.id = T_Invoices.Driver_id 
- LEFT JOIN M_Vehicles ON M_Vehicles.id = T_Invoices.Vehicle_id 
- left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id  and MC_ItemGroupDetails.GroupType_id=1
- LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
- LEFT JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
- LEFT JOIN M_PartyDetails on  A.id=M_PartyDetails.Party_id AND M_PartyDetails.Group_id is null
- LEFT JOIN M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id 
- LEFT JOIN M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id 
- WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s AND T_Invoices.Party_id IN %s''',([FromDate,ToDate,Party_list]))
-                if Genericdataquery:
+left JOIN SweetPOS.TC_SPOSInvoicesReferences ON SweetPOS.TC_SPOSInvoicesReferences.Invoice_id = SweetPOS.T_SPOSInvoices.id
+left JOIN FoodERP.T_Orders ON FoodERP.T_Orders.id = SweetPOS.TC_SPOSInvoicesReferences.Order
+ JOIN FoodERP.M_Parties A ON A.id = SweetPOS.T_SPOSInvoices.Party
+ JOIN FoodERP.M_Parties B ON B.id = SweetPOS.T_SPOSInvoices.Customer
+ JOIN FoodERP.M_PartyType X on A.PartyType_id = X.id
+ JOIN FoodERP.M_PartyType Y on B.PartyType_id = Y.id
+ JOIN FoodERP.M_Items ON FoodERP.M_Items.id = SweetPOS.TC_SPOSInvoiceItems.Item
+ JOIN FoodERP.C_Companies ON FoodERP.C_Companies.id = M_Items.Company_id
+ JOIN FoodERP.MC_PartySubParty ON FoodERP.MC_PartySubParty.SubParty_id = SweetPOS.T_SPOSInvoices.Customer and MC_PartySubParty.Party_id=SweetPOS.T_SPOSInvoices.Party
+ JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.id = SweetPOS.TC_SPOSInvoiceItems.Unit
+ JOIN FoodERP.M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
+ LEFT JOIN FoodERP.M_Drivers ON M_Drivers.id = SweetPOS.T_SPOSInvoices.Driver
+ LEFT JOIN FoodERP.M_Vehicles ON M_Vehicles.id = SweetPOS.T_SPOSInvoices.Vehicle
+ left JOIN FoodERP.MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id  and MC_ItemGroupDetails.GroupType_id=1
+ LEFT JOIN FoodERP.M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
+ LEFT JOIN FoodERP.MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
+ LEFT JOIN FoodERP.M_PartyDetails on  A.id=M_PartyDetails.Party_id AND M_PartyDetails.Group_id is null
+ LEFT JOIN FoodERP.M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id
+ LEFT JOIN FoodERP.M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id
+ WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s'''
+                Franchises_Data = list(T_SPOSInvoices.objects.raw(query, [FromDate, ToDate, party_id]))  
+                Final_Data.extend(Franchises_Data)   
+                # print(Final_Data)
+                # Genericdataquery = Final_Data    
+                # print(Genericdataquery)         
+                if Final_Data:
                     GenericSaleData = list()
-                    GenericSaleSerializer = GenericSaleReportSerializer(
-                        Genericdataquery, many=True).data
+                    GenericSaleSerializer = GenericSaleReportSerializer(Final_Data, many=True).data
 
-                    # GenericSaleData.append({"GenericSaleDetails" : GenericSaleSerializer})
+                    GenericSaleData.append({"GenericSaleDetails" : GenericSaleSerializer})
                     log_entry = create_transaction_logNew(request, Genericdata, 0, 'From:'+str(FromDate)+','+'To:'+str(ToDate), 207, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': GenericSaleSerializer})
                 else:
@@ -1981,7 +2043,7 @@ ON A.PartyName = B.PartyName
 WHERE A.QtyInKg != COALESCE(B.QtyInKg, 0) and (
         ROUND(COALESCE(A.QtyInKg, 5), 5) <> ROUND(COALESCE(B.QtyInKg, 5), 5)
        OR ROUND(COALESCE(A.QtyInNo, 5), 5) <> ROUND(COALESCE(B.QtyInNo, 5), 5))  
-ORDER BY A.PartyName, A.OrderDate''')
+ORDER BY (CASE WHEN COALESCE(B.QtyInKg, 0) = 0 AND COALESCE(B.QtyInNo, 0) = 0 THEN 0 ELSE 1 END), A.PartyName, A.OrderDate''')
 
                 # print(DemandVsReportquery.query)  
                 if DemandVsReportquery:  
@@ -2059,54 +2121,138 @@ class GRNDiscrepancyReportAPIView(CreateAPIView):
                 FromDate = Data['FromDate']
                 ToDate = Data['ToDate']
                 Party = Data.get('Party', 0)
-                GRNDiscrepancyData = []  
+                GRNDiscrepancyData = []
+
+                GetParties = f"AND T_GRNs.Customer_id = {Party}" if Party != 0 else ""
+
+                GRNDiscrepancyQuery = TC_GRNItems.objects.raw(f'''SELECT TC_GRNItems.id, T_GRNs.GRNDate, T_GRNs.Party_id, T_GRNs.Customer_id, 
+                                                                  T_GRNs.FullGRNNumber, T_GRNs.InvoiceNumber, T_GRNs.InvoiceDate, M_Items.Name AS ItemName,  
+                                                                  IFNULL(T_Invoices.Hide, 0) AS GRNSaveStatus,'' AS HideComment,party.Name AS PartyName, 
+                                                                  customer.Name AS CustomerName, T_GRNs.Comment, TC_GRNItems.DiscrepancyComment, 
+                                                                  TC_GRNItems.Amount, TC_GRNItems.Quantity, MC_ItemUnits.BaseUnitConversion,   M_GeneralMaster.Name AS DiscrepancyReason
+                                                                  FROM TC_GRNItems
+                                                                  JOIN T_GRNs ON TC_GRNItems.GRN_id = T_GRNs.id
+                                                                  JOIN M_Items ON TC_GRNItems.Item_id = M_Items.id
+                                                                  JOIN M_Parties party ON T_GRNs.Party_id = party.id
+                                                                  JOIN M_Parties customer ON T_GRNs.Customer_id = customer.id
+                                                                  LEFT JOIN T_Invoices ON T_GRNs.InvoiceNumber = T_Invoices.InvoiceNumber
+                                                                  LEFT JOIN M_GeneralMaster ON T_GRNs.Reason_id = M_GeneralMaster.id 
+                                                                  LEFT JOIN MC_ItemUnits ON TC_GRNItems.Item_id = MC_ItemUnits.Item_id 
+                                                                  AND MC_ItemUnits.IsBase = TRUE 
+                                                                  AND MC_ItemUnits.IsDeleted = 0
+                                                                  WHERE T_GRNs.GRNDate BETWEEN '{FromDate}' AND '{ToDate}'
+                                                                  AND TC_GRNItems.DiscrepancyComment IS NOT NULL
+                                                                  {GetParties}''')
                 
-                GetParties = ""
-                if Party != 0:
-                    GetParties = f"AND T_GRNs.Customer_id = {Party}"
-                
-                GRNDiscrepancyQuery = TC_GRNItems.objects.raw(f''' SELECT TC_GRNItems.id, T_GRNs.GRNDate,T_GRNs.Party_id, T_GRNs.Customer_id, T_GRNs.FullGRNNumber, T_GRNs.InvoiceNumber, 
-                                        T_GRNs.InvoiceDate, M_Items.Name AS ItemName,  IFNULL(T_Invoices.Hide, 0) AS GRNSaveStatus,
-                                        party.Name AS PartyName, customer.Name AS CustomerName, T_GRNs.Comment,TC_GRNItems.DiscrepancyComment,
-                                        TC_GRNItems.Amount, TC_GRNItems.Quantity,MC_ItemUnits.BaseUnitConversion,  M_GeneralMaster.Name AS DiscrepancyReason
-                                        FROM TC_GRNItems
-                                        JOIN T_GRNs ON TC_GRNItems.GRN_id = T_GRNs.id
-                                        JOIN M_Items ON TC_GRNItems.Item_id = M_Items.id
-                                        JOIN M_Parties party ON T_GRNs.Party_id = party.id
-                                        JOIN M_Parties customer ON T_GRNs.Customer_id = customer.id
-                                        LEFT JOIN T_Invoices ON T_GRNs.InvoiceNumber = T_Invoices.InvoiceNumber
-                                        LEFT JOIN M_GeneralMaster ON T_GRNs.Reason_id = M_GeneralMaster.id 
-                                        LEFT JOIN MC_ItemUnits ON TC_GRNItems.Item_id = MC_ItemUnits.Item_id AND MC_ItemUnits.IsBase = TRUE and IsDeleted=0
-                                        WHERE GRNDate BETWEEN '{FromDate}' AND '{ToDate}' AND TC_GRNItems.DiscrepancyComment IS NOT NULL
-                                        {GetParties} ''')
-                
-                if GRNDiscrepancyQuery:  
-                        
-                    for row in GRNDiscrepancyQuery:                       
-                        GRNDiscrepancyData.append({
-                            "id" : row.id,
-                            "PartyID": row.Party_id,
-                            "Warehouse": row.PartyName,
-                            "SAPInvoiceNumber" : row.InvoiceNumber,
-                            "InvoiceDate" : row.InvoiceDate,
-                            "GRNID": row.FullGRNNumber,
-                            "GRNSaveStatus" : row.GRNSaveStatus,
-                            "GRNSaveDate": row.GRNDate,
-                            "CustomerID": row.Customer_id,
-                            "PartyName" : row.CustomerName,
-                            "SKUName": row.ItemName,
-                            "QtyBilled": row.Quantity,
-                            "QtyUOM" : row.BaseUnitConversion,
-                            "LineAmountwithGST" : row.Amount,
-                            "Comment": row.Comment,
-                            "DiscrepancyReason" : row.DiscrepancyReason,
-                            "DiscrepancyComment": row.DiscrepancyComment,                            
-                        })
+                PartyID = f"AND T_Invoices.Customer_id = {Party}" if Party != 0 else ""
+
+                HiddenInvoicesQuery = T_Invoices.objects.raw(f'''SELECT T_Invoices.id, Hide, HideComment, InvoiceNumber, InvoiceDate, Party_id,
+                                                                Customer_id , party.Name AS PartyName, customer.Name AS CustomerName
+                                                                FROM T_Invoices
+                                                                JOIN M_Parties party ON T_Invoices.Party_id = party.id
+                                                                JOIN M_Parties customer ON T_Invoices.Customer_id = customer.id
+                                                                WHERE Hide = 1 AND HideComment IS NOT NULL
+                                                                 {PartyID}''')
+                for row in GRNDiscrepancyQuery:
+                    GRNDiscrepancyData.append({
+                        "id": row.id,
+                        "PartyID": row.Party_id,
+                        "Warehouse": row.PartyName,
+                        "SAPInvoiceNumber": row.InvoiceNumber,
+                        "InvoiceDate": row.InvoiceDate,
+                        "GRNID": row.FullGRNNumber,
+                        "GRNSaveStatus": row.GRNSaveStatus,
+                        "GRNSaveDate": row.GRNDate,
+                        "CustomerID": row.Customer_id,
+                        "PartyName": row.CustomerName,
+                        "SKUName": row.ItemName,
+                        "QtyBilled": row.Quantity,
+                        "QtyUOM": row.BaseUnitConversion,
+                        "LineAmountwithGST": row.Amount,
+                        "DiscrepancyComment": row.Comment,
+                        "HideComment": row.HideComment, 
+                        "DiscrepancyReason": row.DiscrepancyReason,
+                        "DiscrepancyItemComment": row.DiscrepancyComment,
+                    })
+
+                for invoice in HiddenInvoicesQuery:
+                    GRNDiscrepancyData.append({
+                        "id": invoice.id,
+                        "PartyID": invoice.Party_id,
+                        "Warehouse": invoice.PartyName,
+                        "SAPInvoiceNumber": invoice.InvoiceNumber,
+                        "InvoiceDate":invoice.id,
+                        "GRNID": None,
+                        "GRNSaveStatus": invoice.Hide,
+                        "GRNSaveDate": None,
+                        "CustomerID": invoice.Customer_id,
+                        "PartyName": invoice.CustomerName,
+                        "SKUName": None,
+                        "QtyBilled": None,
+                        "QtyUOM": None,
+                        "LineAmountwithGST": None,
+                        "DiscrepancyComment": None,
+                        "HideComment": invoice.HideComment,
+                        "DiscrepancyReason": None,
+                        "DiscrepancyItemComment": None,
+                    })
+                if GRNDiscrepancyData:
                     log_entry = create_transaction_logNew(request, Data, 0, "", 442, 0, FromDate, ToDate, 0)
-                    return JsonResponse({"StatusCode": 200, "Status": True,"Message": "GRN Discrepancy Report retrieved successfully.","Data": GRNDiscrepancyData,})
+                    return JsonResponse({"StatusCode": 200, "Status": True, "Message": "GRN Discrepancy Report retrieved successfully.","Data": GRNDiscrepancyData,})
+
                 log_entry = create_transaction_logNew(request, Data, 0, "No discrepancies found", 442, 0, FromDate, ToDate, 0)
-                return JsonResponse({"StatusCode": 204,"Status": True,"Message": "No GRN discrepancies found.", "Data": [],})
+                return JsonResponse({"StatusCode": 204, "Status": True,"Message": "No GRN discrepancies found.","Data": [], })
 
         except Exception as e:
             log_entry = create_transaction_logNew(request, Data, 0, "GRNDiscrepancyReport: " + str(e), 33, 0)
-            return JsonResponse({"StatusCode": 400,"Status": False,"Message": str(e),"Data": [],})
+            return JsonResponse({"StatusCode": 400,"Status": False,"Message": str(e), "Data": [],})
+
+
+class CouponCodeRedemptionReportView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic
+    def post(self, request):
+        CouponCodeData = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                FromDate = CouponCodeData['FromDate']
+                ToDate = CouponCodeData['ToDate']
+                Party = CouponCodeData.get('Party', 0)
+                CouponCodeRedemptionData = []
+
+                GetParties = f"AND M_GiftVoucherCode.Party = {Party}" if Party != 0 else ""
+                
+                
+                CouponCodeRedemptionQuery = TC_GRNItems.objects.raw(f'''SELECT M_GiftVoucherCode.id, VoucherType_id, VoucherCode, M_GiftVoucherCode.UpdatedOn, InvoiceDate, 
+                                                                        InvoiceNumber, InvoiceAmount, Party, client, M_GiftVoucherCode.IsActive, M_Parties.Name as PartyName
+                                                                        FROM M_GiftVoucherCode
+                                                                        JOIN M_Parties  ON M_GiftVoucherCode.Party = M_Parties.id
+                                                                        WHERE M_GiftVoucherCode.IsActive = 0
+                                                                        AND InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}'
+                                                                        {GetParties}''')
+                for CouponCode in CouponCodeRedemptionQuery:
+                    CouponCodeRedemptionData.append({
+                        "id": CouponCode.id,
+                        "VoucherTypeID": CouponCode.VoucherType_id,
+                        "VoucherCode": CouponCode.VoucherCode,
+                        "UpdatedOn": CouponCode.UpdatedOn,
+                        "InvoiceDate":CouponCode.InvoiceDate,
+                        "InvoiceNumber": CouponCode.InvoiceNumber,
+                        "InvoiceAmount": CouponCode.InvoiceAmount,
+                        "PartyID": CouponCode.Party,
+                        "PartyName": CouponCode.PartyName,
+                        "client": CouponCode.client,
+                    })
+                if CouponCodeRedemptionData:
+                    log_entry = create_transaction_logNew(request, CouponCodeData, 0, "", 443, 0, FromDate, ToDate, 0)
+                    return JsonResponse({"StatusCode": 200, "Status": True, "Message": "CouponCodeRedemptionReport","Data": CouponCodeRedemptionData,})
+
+                log_entry = create_transaction_logNew(request, CouponCodeData, 0, "No CouponCodeRedemptionReport found", 443, 0, FromDate, ToDate, 0)
+                return JsonResponse({"StatusCode": 204, "Status": True,"Message": "No CouponCodeRedemptionReport found.","Data": [], })
+
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, CouponCodeData, 0, "CouponCodeRedemptionReport: " + str(e), 33, 0)
+            return JsonResponse({"StatusCode": 400,"Status": False,"Message": str(e), "Data": [],})
+
+
