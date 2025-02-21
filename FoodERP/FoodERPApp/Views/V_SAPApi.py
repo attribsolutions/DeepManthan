@@ -195,7 +195,7 @@ class SAPInvoiceView(CreateAPIView):
                                     "Party": PartyMapping[0]["id"],
                                     "CreatedBy": 30,
                                     "UpdatedBy": 30,
-                                    "TCSAmount" : 0, 
+                                    "TCSAmount" : aa['TCSAmount'], 
                                     "InvoiceDate": InvoiceDate,
                                     "InvoiceItems": InvoiceItems
 
