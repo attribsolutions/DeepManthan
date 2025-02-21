@@ -320,8 +320,7 @@ left JOIN FoodERP.T_Orders ON FoodERP.T_Orders.id = SweetPOS.TC_SPOSInvoicesRefe
  JOIN FoodERP.M_PartyType X on A.PartyType_id = X.id
  JOIN FoodERP.M_PartyType Y on B.PartyType_id = Y.id
  JOIN FoodERP.M_Items ON FoodERP.M_Items.id = SweetPOS.TC_SPOSInvoiceItems.Item
- JOIN FoodERP.C_Companies ON FoodERP.C_Companies.id = M_Items.Company_id
- JOIN FoodERP.MC_PartySubParty ON FoodERP.MC_PartySubParty.SubParty_id = SweetPOS.T_SPOSInvoices.Customer and MC_PartySubParty.Party_id=SweetPOS.T_SPOSInvoices.Party
+ JOIN FoodERP.C_Companies ON FoodERP.C_Companies.id = M_Items.Company_id 
  JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.id = SweetPOS.TC_SPOSInvoiceItems.Unit
  JOIN FoodERP.M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
  LEFT JOIN FoodERP.M_Drivers ON M_Drivers.id = SweetPOS.T_SPOSInvoices.Driver
@@ -335,7 +334,7 @@ left JOIN FoodERP.T_Orders ON FoodERP.T_Orders.id = SweetPOS.TC_SPOSInvoicesRefe
  WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s'''
                 Franchises_Data = list(T_SPOSInvoices.objects.raw(query, [FromDate, ToDate, party_id]))  
                 Final_Data.extend(Franchises_Data)   
-                # print(Final_Data)
+                # print(query)
                 # Genericdataquery = Final_Data    
                 # print(Genericdataquery)         
                 if Final_Data:
