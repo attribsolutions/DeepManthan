@@ -298,6 +298,8 @@ left JOIN FoodERP.T_Orders ON FoodERP.T_Orders.id = FoodERP.TC_InvoicesReference
                         # print(Final_Data)   
                     else:
                         # print("Ru")
+                        # MC_PartySubParty join use madhe nahi so remove kela aahe. 
+                        # JOIN FoodERP.MC_PartySubParty ON FoodERP.MC_PartySubParty.SubParty_id = SweetPOS.T_SPOSInvoices.Customer and FoodERP.MC_PartySubParty.Party_id=SweetPOS.T_SPOSInvoices.Party
                         query = '''SELECT SweetPOS.TC_SPOSInvoiceItems.ClientID,SweetPOS.TC_SPOSInvoiceItems.id, A.SAPPartyCode SAPPartyID, SweetPOS.T_SPOSInvoices.Party AS PartyID,A.Name PartyName, X.Name PartyType, '' ImportFromExcel,  SweetPOS.T_SPOSInvoices.FullInvoiceNumber,
 SweetPOS.T_SPOSInvoices.InvoiceDate,SweetPOS.T_SPOSInvoices.Customer AS CustomerID,B.Name CustomerName, Y.Name CustomeType, M_Drivers.Name DriverName,
 M_Vehicles.VehicleNumber VehicleNo,SweetPOS.TC_SPOSInvoiceItems.Item AS ItemID,M_Items.Name ItemName,C_Companies.Name CompanyName,
@@ -312,7 +314,6 @@ SweetPOS.T_SPOSInvoices.RoundOffAmount,SweetPOS.T_SPOSInvoices.GrandTotal,M_Grou
 M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster, SweetPOS.TC_SPOSInvoiceItems.BatchCode AS BatchNo , SweetPOS.TC_SPOSInvoiceItems.BatchDate, M_Items.SAPItemCode SAPItemID
 FROM SweetPOS.TC_SPOSInvoiceItems
 JOIN SweetPOS.T_SPOSInvoices ON SweetPOS.T_SPOSInvoices.id = SweetPOS.TC_SPOSInvoiceItems.Invoice_id
-
 left JOIN SweetPOS.TC_SPOSInvoicesReferences ON SweetPOS.TC_SPOSInvoicesReferences.Invoice_id = SweetPOS.T_SPOSInvoices.id
 left JOIN FoodERP.T_Orders ON FoodERP.T_Orders.id = SweetPOS.TC_SPOSInvoicesReferences.Order
  JOIN FoodERP.M_Parties A ON A.id = SweetPOS.T_SPOSInvoices.Party
@@ -320,13 +321,12 @@ left JOIN FoodERP.T_Orders ON FoodERP.T_Orders.id = SweetPOS.TC_SPOSInvoicesRefe
  JOIN FoodERP.M_PartyType X on A.PartyType_id = X.id
  JOIN FoodERP.M_PartyType Y on B.PartyType_id = Y.id
  JOIN FoodERP.M_Items ON FoodERP.M_Items.id = SweetPOS.TC_SPOSInvoiceItems.Item
- JOIN FoodERP.C_Companies ON FoodERP.C_Companies.id = M_Items.Company_id
- JOIN FoodERP.MC_PartySubParty ON FoodERP.MC_PartySubParty.SubParty_id = SweetPOS.T_SPOSInvoices.Customer and MC_PartySubParty.Party_id=SweetPOS.T_SPOSInvoices.Party
+ JOIN FoodERP.C_Companies ON FoodERP.C_Companies.id = M_Items.Company_id 
  JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.id = SweetPOS.TC_SPOSInvoiceItems.Unit
  JOIN FoodERP.M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
  LEFT JOIN FoodERP.M_Drivers ON M_Drivers.id = SweetPOS.T_SPOSInvoices.Driver
  LEFT JOIN FoodERP.M_Vehicles ON M_Vehicles.id = SweetPOS.T_SPOSInvoices.Vehicle
- left JOIN FoodERP.MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id  and MC_ItemGroupDetails.GroupType_id=1
+ left JOIN FoodERP.MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id  and MC_ItemGroupDetails.GroupType_id=5
  LEFT JOIN FoodERP.M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
  LEFT JOIN FoodERP.MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
  LEFT JOIN FoodERP.M_PartyDetails on  A.id=M_PartyDetails.Party_id AND M_PartyDetails.Group_id is null
@@ -335,7 +335,7 @@ left JOIN FoodERP.T_Orders ON FoodERP.T_Orders.id = SweetPOS.TC_SPOSInvoicesRefe
  WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s'''
                 Franchises_Data = list(T_SPOSInvoices.objects.raw(query, [FromDate, ToDate, party_id]))  
                 Final_Data.extend(Franchises_Data)   
-                # print(Final_Data)
+                # print(Franchises_Data)
                 # Genericdataquery = Final_Data    
                 # print(Genericdataquery)         
                 if Final_Data:
