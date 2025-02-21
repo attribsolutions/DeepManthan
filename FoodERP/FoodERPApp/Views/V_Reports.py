@@ -762,7 +762,7 @@ class InvoiceDateExportReportView(CreateAPIView):
     JOIN C_Companies ON C_Companies.id = M_Items.Company_id
     JOIN MC_ItemUnits ON MC_ItemUnits.id=TC_InvoiceItems.Unit_id
     JOIN M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
-    JOIN M_GSTHSNCode ON M_GSTHSNCode.Item_id=TC_InvoiceItems.Item_id and M_GSTHSNCode.IsDeleted=0
+    JOIN M_GSTHSNCode ON M_GSTHSNCode.Item_id=TC_InvoiceItems.Item_id and M_GSTHSNCode.IsDeleted=0 and M_GSTHSNCode.PartyType_id is null
     LEFT JOIN TC_InvoiceUploads on TC_InvoiceUploads.Invoice_id = T_Invoices.id
     left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id and MC_ItemGroupDetails.GroupType_id=1
     LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
