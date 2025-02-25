@@ -245,21 +245,27 @@ class GenericSaleView(CreateAPIView):
                 franchise_type_ids = [19]  
                 # other_type_ids = [9,10] 
                 
-                # franchise_parties = [p['id'] for p in party_types if p['PartyType_id'] in franchise_type_ids]
+                # franchise_parties = [p['id'] for p in party_types if p['PartyType_id'] in franchise_type_ids ]
                 # other_parties = [p['id'] for p in party_types if p['PartyType_id'] in other_type_ids]
-                # Franchises_Data = []
-                # Other_Data = []
+                franchise_parties = []
+                other_parties = []
+                for party in party_types:
+                    (franchise_parties if party['PartyType_id'] == 19 else other_parties).append(party['id'])
+                # print(franchise_parties)
+                # print(other_parties)
                 Final_Data = []
                 
                 # print(franchise_parties)
                 # print(other_parties)
-                for p in party_types:
-                    # ids = tuple(p['id']) if isinstance(p['id'], list) else (p['id'],)
-                    # ids = ",".join(map(str, ['id']))
-                    party_id = p['id'] 
-                    if p['PartyType_id'] not in franchise_type_ids:
+                # for p in 2:
+                # ids = tuple(p['id']) if isinstance(p['id'], list) else (p['id'],)
+                # ids = ",".join(map(str, ['id']))
+                # print(p['PartyType_id'])
+                # party_id = p['id'] 
+                if other_parties:
                     # print("sh")
-                        query ='''SELECT TC_InvoiceItems.id, A.SAPPartyCode SAPPartyID, T_Invoices.Party_id AS PartyID,A.Name PartyName, X.Name PartyType, T_Invoices.ImportFromExcel,  T_Invoices.FullInvoiceNumber,
+
+                    query ='''SELECT TC_InvoiceItems.id, A.SAPPartyCode SAPPartyID, T_Invoices.Party_id AS PartyID,A.Name PartyName, X.Name PartyType, T_Invoices.ImportFromExcel,  T_Invoices.FullInvoiceNumber,
 T_Invoices.InvoiceDate,T_Invoices.Customer_id AS CustomerID,B.Name CustomerName, Y.Name CustomeType, M_Drivers.Name DriverName,
 M_Vehicles.VehicleNumber VehicleNo,TC_InvoiceItems.Item_id AS ItemID,M_Items.Name ItemName,C_Companies.Name CompanyName,
 M_GSTHSNCode.HSNCode,TC_InvoiceItems.MRPValue AS MRP,ROUND(TC_InvoiceItems.QtyInNo, 2) AS QtyInNo,ROUND(TC_InvoiceItems.QtyInKg, 2) AS QtyInKg,ROUND(TC_InvoiceItems.QtyInBox, 2) AS QtyInBox,
@@ -275,32 +281,32 @@ JOIN FoodERP.T_Invoices ON FoodERP.T_Invoices.id = FoodERP.TC_InvoiceItems.Invoi
 JOIN FoodERP.MC_PartySubParty ON FoodERP.MC_PartySubParty.SubParty_id = FoodERP.T_Invoices.Customer_id and MC_PartySubParty.Party_id=T_Invoices.Party_id
 left JOIN FoodERP.TC_InvoicesReferences ON FoodERP.TC_InvoicesReferences.Invoice_id = FoodERP.T_Invoices.id 
 left JOIN FoodERP.T_Orders ON FoodERP.T_Orders.id = FoodERP.TC_InvoicesReferences.Order_id
- JOIN FoodERP.M_Parties A ON A.id = FoodERP.T_Invoices.Party_id 
- JOIN FoodERP.M_Parties B ON B.id = FoodERP.T_Invoices.Customer_id 
- JOIN FoodERP.M_PartyType X on A.PartyType_id = X.id 
- JOIN FoodERP.M_PartyType Y on B.PartyType_id = Y.id 
- JOIN FoodERP.M_Items ON M_Items.id = FoodERP.TC_InvoiceItems.Item_id 
- JOIN FoodERP.C_Companies ON FoodERP.C_Companies.id = FoodERP.M_Items.Company_id 
- left JOIN FoodERP.M_GSTHSNCode ON FoodERP.M_GSTHSNCode.id = FoodERP.TC_InvoiceItems.GST_id 
- JOIN FoodERP.MC_ItemUnits ON FoodERP.MC_ItemUnits.id = FoodERP.TC_InvoiceItems.Unit_id 
- JOIN FoodERP.M_Units ON FoodERP.M_Units.id = FoodERP.MC_ItemUnits.UnitID_id 
- LEFT JOIN FoodERP.M_Drivers ON FoodERP.M_Drivers.id = T_Invoices.Driver_id 
- LEFT JOIN FoodERP.M_Vehicles ON FoodERP.M_Vehicles.id = T_Invoices.Vehicle_id 
- left JOIN FoodERP.MC_ItemGroupDetails ON FoodERP.MC_ItemGroupDetails.Item_id = FoodERP.M_Items.id  and FoodERP.MC_ItemGroupDetails.GroupType_id=1
- LEFT JOIN FoodERP.M_Group ON M_Group.id  = FoodERP.MC_ItemGroupDetails.Group_id 
- LEFT JOIN FoodERP.MC_SubGroup ON FoodERP.MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
- LEFT JOIN FoodERP.M_PartyDetails on  A.id=FoodERP.M_PartyDetails.Party_id AND FoodERP.M_PartyDetails.Group_id is null
- LEFT JOIN FoodERP.M_Cluster On FoodERP.M_PartyDetails.Cluster_id=FoodERP.M_Cluster.id 
- LEFT JOIN FoodERP.M_SubCluster on FoodERP.M_PartyDetails.SubCluster_id=FoodERP.M_SubCluster.Id 
- WHERE FoodERP.T_Invoices.InvoiceDate BETWEEN %s AND %s AND FoodERP.T_Invoices.Party_id = %s'''
-                        Other_Data = list(T_Invoices.objects.raw(query, [FromDate, ToDate, party_id]))  
-                        Final_Data.extend(Other_Data)
-                        # print(Final_Data)   
-                    else:
-                        # print("Ru")
-                        # MC_PartySubParty join use madhe nahi so remove kela aahe. 
-                        # JOIN FoodERP.MC_PartySubParty ON FoodERP.MC_PartySubParty.SubParty_id = SweetPOS.T_SPOSInvoices.Customer and FoodERP.MC_PartySubParty.Party_id=SweetPOS.T_SPOSInvoices.Party
-                        query = '''SELECT SweetPOS.TC_SPOSInvoiceItems.ClientID,SweetPOS.TC_SPOSInvoiceItems.id, A.SAPPartyCode SAPPartyID, SweetPOS.T_SPOSInvoices.Party AS PartyID,A.Name PartyName, X.Name PartyType, '' ImportFromExcel,  SweetPOS.T_SPOSInvoices.FullInvoiceNumber,
+JOIN FoodERP.M_Parties A ON A.id = FoodERP.T_Invoices.Party_id 
+JOIN FoodERP.M_Parties B ON B.id = FoodERP.T_Invoices.Customer_id 
+JOIN FoodERP.M_PartyType X on A.PartyType_id = X.id 
+JOIN FoodERP.M_PartyType Y on B.PartyType_id = Y.id 
+JOIN FoodERP.M_Items ON M_Items.id = FoodERP.TC_InvoiceItems.Item_id 
+JOIN FoodERP.C_Companies ON FoodERP.C_Companies.id = FoodERP.M_Items.Company_id 
+left JOIN FoodERP.M_GSTHSNCode ON FoodERP.M_GSTHSNCode.id = FoodERP.TC_InvoiceItems.GST_id 
+JOIN FoodERP.MC_ItemUnits ON FoodERP.MC_ItemUnits.id = FoodERP.TC_InvoiceItems.Unit_id 
+JOIN FoodERP.M_Units ON FoodERP.M_Units.id = FoodERP.MC_ItemUnits.UnitID_id 
+LEFT JOIN FoodERP.M_Drivers ON FoodERP.M_Drivers.id = T_Invoices.Driver_id 
+LEFT JOIN FoodERP.M_Vehicles ON FoodERP.M_Vehicles.id = T_Invoices.Vehicle_id 
+left JOIN FoodERP.MC_ItemGroupDetails ON FoodERP.MC_ItemGroupDetails.Item_id = FoodERP.M_Items.id  and FoodERP.MC_ItemGroupDetails.GroupType_id=1
+LEFT JOIN FoodERP.M_Group ON M_Group.id  = FoodERP.MC_ItemGroupDetails.Group_id 
+LEFT JOIN FoodERP.MC_SubGroup ON FoodERP.MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
+LEFT JOIN FoodERP.M_PartyDetails on  A.id=FoodERP.M_PartyDetails.Party_id AND FoodERP.M_PartyDetails.Group_id is null
+LEFT JOIN FoodERP.M_Cluster On FoodERP.M_PartyDetails.Cluster_id=FoodERP.M_Cluster.id 
+LEFT JOIN FoodERP.M_SubCluster on FoodERP.M_PartyDetails.SubCluster_id=FoodERP.M_SubCluster.Id 
+WHERE FoodERP.T_Invoices.InvoiceDate BETWEEN %s AND %s AND FoodERP.T_Invoices.Party_id in %s'''
+                    Other_Data = list(T_Invoices.objects.raw(query, [FromDate, ToDate, other_parties]))  
+                    Final_Data.extend(Other_Data)
+                    # print(Final_Data)   
+                if franchise_parties:
+                    # print("fran")
+                    # MC_PartySubParty join use madhe nahi so remove kela aahe. 
+                    # JOIN FoodERP.MC_PartySubParty ON FoodERP.MC_PartySubParty.SubParty_id = SweetPOS.T_SPOSInvoices.Customer and FoodERP.MC_PartySubParty.Party_id=SweetPOS.T_SPOSInvoices.Party
+                    query = '''SELECT SweetPOS.TC_SPOSInvoiceItems.ClientID,SweetPOS.TC_SPOSInvoiceItems.id, A.SAPPartyCode SAPPartyID, SweetPOS.T_SPOSInvoices.Party AS PartyID,A.Name PartyName, X.Name PartyType, '' ImportFromExcel,  SweetPOS.T_SPOSInvoices.FullInvoiceNumber,
 SweetPOS.T_SPOSInvoices.InvoiceDate,SweetPOS.T_SPOSInvoices.Customer AS CustomerID,B.Name CustomerName, Y.Name CustomeType, M_Drivers.Name DriverName,
 M_Vehicles.VehicleNumber VehicleNo,SweetPOS.TC_SPOSInvoiceItems.Item AS ItemID,M_Items.Name ItemName,C_Companies.Name CompanyName,
 SweetPOS.TC_SPOSInvoiceItems.HSNCode,SweetPOS.TC_SPOSInvoiceItems.MRPValue AS MRP,ROUND(SweetPOS.TC_SPOSInvoiceItems.QtyInNo, 2) AS QtyInNo,ROUND(SweetPOS.TC_SPOSInvoiceItems.QtyInKg, 2) AS QtyInKg,
@@ -316,24 +322,24 @@ FROM SweetPOS.TC_SPOSInvoiceItems
 JOIN SweetPOS.T_SPOSInvoices ON SweetPOS.T_SPOSInvoices.id = SweetPOS.TC_SPOSInvoiceItems.Invoice_id
 left JOIN SweetPOS.TC_SPOSInvoicesReferences ON SweetPOS.TC_SPOSInvoicesReferences.Invoice_id = SweetPOS.T_SPOSInvoices.id
 left JOIN FoodERP.T_Orders ON FoodERP.T_Orders.id = SweetPOS.TC_SPOSInvoicesReferences.Order
- JOIN FoodERP.M_Parties A ON A.id = SweetPOS.T_SPOSInvoices.Party
- JOIN FoodERP.M_Parties B ON B.id = SweetPOS.T_SPOSInvoices.Customer
- JOIN FoodERP.M_PartyType X on A.PartyType_id = X.id
- JOIN FoodERP.M_PartyType Y on B.PartyType_id = Y.id
- JOIN FoodERP.M_Items ON FoodERP.M_Items.id = SweetPOS.TC_SPOSInvoiceItems.Item
- JOIN FoodERP.C_Companies ON FoodERP.C_Companies.id = M_Items.Company_id 
- JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.id = SweetPOS.TC_SPOSInvoiceItems.Unit
- JOIN FoodERP.M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
- LEFT JOIN FoodERP.M_Drivers ON M_Drivers.id = SweetPOS.T_SPOSInvoices.Driver
- LEFT JOIN FoodERP.M_Vehicles ON M_Vehicles.id = SweetPOS.T_SPOSInvoices.Vehicle
- left JOIN FoodERP.MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id  and MC_ItemGroupDetails.GroupType_id=5
- LEFT JOIN FoodERP.M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
- LEFT JOIN FoodERP.MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
- LEFT JOIN FoodERP.M_PartyDetails on  A.id=M_PartyDetails.Party_id AND M_PartyDetails.Group_id is null
- LEFT JOIN FoodERP.M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id
- LEFT JOIN FoodERP.M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id
- WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party = %s'''
-                Franchises_Data = list(T_SPOSInvoices.objects.raw(query, [FromDate, ToDate, party_id]))  
+JOIN FoodERP.M_Parties A ON A.id = SweetPOS.T_SPOSInvoices.Party
+JOIN FoodERP.M_Parties B ON B.id = SweetPOS.T_SPOSInvoices.Customer
+JOIN FoodERP.M_PartyType X on A.PartyType_id = X.id
+JOIN FoodERP.M_PartyType Y on B.PartyType_id = Y.id
+JOIN FoodERP.M_Items ON FoodERP.M_Items.id = SweetPOS.TC_SPOSInvoiceItems.Item
+JOIN FoodERP.C_Companies ON FoodERP.C_Companies.id = M_Items.Company_id 
+JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.id = SweetPOS.TC_SPOSInvoiceItems.Unit
+JOIN FoodERP.M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
+LEFT JOIN FoodERP.M_Drivers ON M_Drivers.id = SweetPOS.T_SPOSInvoices.Driver
+LEFT JOIN FoodERP.M_Vehicles ON M_Vehicles.id = SweetPOS.T_SPOSInvoices.Vehicle
+left JOIN FoodERP.MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id  and MC_ItemGroupDetails.GroupType_id=5
+LEFT JOIN FoodERP.M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id
+LEFT JOIN FoodERP.MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
+LEFT JOIN FoodERP.M_PartyDetails on  A.id=M_PartyDetails.Party_id AND M_PartyDetails.Group_id is null
+LEFT JOIN FoodERP.M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id
+LEFT JOIN FoodERP.M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id
+WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party in %s'''
+                Franchises_Data = list(T_SPOSInvoices.objects.raw(query, [FromDate, ToDate, franchise_parties]))  
                 Final_Data.extend(Franchises_Data)   
                 # print(Franchises_Data)
                 # Genericdataquery = Final_Data    
