@@ -2132,16 +2132,18 @@ class GRNDiscrepancyReportAPIView(CreateAPIView):
                 GetParties = f"AND T_GRNs.Customer_id = {Party}" if Party != 0 else ""
 
                 GRNDiscrepancyQuery = TC_GRNItems.objects.raw(f'''SELECT TC_GRNItems.id, T_GRNs.GRNDate, T_GRNs.Party_id, T_GRNs.Customer_id, 
-                                                                  T_GRNs.FullGRNNumber, T_GRNs.InvoiceNumber, T_GRNs.InvoiceDate, M_Items.Name AS ItemName,  
-                                                                  IFNULL(T_Invoices.Hide, 0) AS GRNSaveStatus,'' AS HideComment,party.Name AS PartyName, 
+                                                                  T_GRNs.FullGRNNumber, T_Invoices.InvoiceNumber, T_Invoices.InvoiceDate, M_Items.Name AS ItemName,  
+                                                                  CASE WHEN T_Invoices.Hide = 0 THEN 'Save' ELSE 'Hide' END AS GRNSaveStatus,
+                                                                  '' AS HideComment,party.Name AS PartyName, 
                                                                   customer.Name AS CustomerName, T_GRNs.Comment, TC_GRNItems.DiscrepancyComment, 
-                                                                  TC_GRNItems.Amount, TC_GRNItems.Quantity, MC_ItemUnits.BaseUnitConversion,   M_GeneralMaster.Name AS DiscrepancyReason
+                                                                  TC_GRNItems.Amount, TC_GRNItems.Quantity, MC_ItemUnits.BaseUnitConversion,M_GeneralMaster.Name AS DiscrepancyReason
                                                                   FROM TC_GRNItems
                                                                   JOIN T_GRNs ON TC_GRNItems.GRN_id = T_GRNs.id
                                                                   JOIN M_Items ON TC_GRNItems.Item_id = M_Items.id
                                                                   JOIN M_Parties party ON T_GRNs.Party_id = party.id
                                                                   JOIN M_Parties customer ON T_GRNs.Customer_id = customer.id
-                                                                  LEFT JOIN T_Invoices ON T_GRNs.InvoiceNumber = T_Invoices.InvoiceNumber
+                                                                  LEFT JOIN TC_GRNReferences ON TC_GRNReferences.GRN_id = T_GRNs.id  
+                                                                  LEFT JOIN T_Invoices ON T_Invoices.id = TC_GRNReferences.Invoice_id  
                                                                   LEFT JOIN M_GeneralMaster ON T_GRNs.Reason_id = M_GeneralMaster.id 
                                                                   LEFT JOIN MC_ItemUnits ON TC_GRNItems.Item_id = MC_ItemUnits.Item_id 
                                                                   AND MC_ItemUnits.IsBase = TRUE 
@@ -2152,8 +2154,9 @@ class GRNDiscrepancyReportAPIView(CreateAPIView):
                 
                 PartyID = f"AND T_Invoices.Customer_id = {Party}" if Party != 0 else ""
 
-                HiddenInvoicesQuery = T_Invoices.objects.raw(f'''SELECT T_Invoices.id, Hide, HideComment, InvoiceNumber, InvoiceDate, Party_id,
-                                                                Customer_id , party.Name AS PartyName, customer.Name AS CustomerName
+                HiddenInvoicesQuery = T_Invoices.objects.raw(f'''SELECT T_Invoices.id, HideComment, InvoiceNumber, InvoiceDate, Party_id,
+                                                                Customer_id , party.Name AS PartyName, customer.Name AS CustomerName,
+                                                                CASE WHEN T_Invoices.Hide = 0 THEN 'Save' ELSE 'Hide' END AS GRNSaveStatus
                                                                 FROM T_Invoices
                                                                 JOIN M_Parties party ON T_Invoices.Party_id = party.id
                                                                 JOIN M_Parties customer ON T_Invoices.Customer_id = customer.id
@@ -2167,7 +2170,7 @@ class GRNDiscrepancyReportAPIView(CreateAPIView):
                         "SAPInvoiceNumber": row.InvoiceNumber,
                         "InvoiceDate": row.InvoiceDate,
                         "GRNID": row.FullGRNNumber,
-                        "GRNSaveStatus": row.GRNSaveStatus,
+                        "GRNSaveStatus": "Save" if row.GRNSaveStatus == "Save" else "Hide", 
                         "GRNSaveDate": row.GRNDate,
                         "CustomerID": row.Customer_id,
                         "PartyName": row.CustomerName,
@@ -2187,9 +2190,9 @@ class GRNDiscrepancyReportAPIView(CreateAPIView):
                         "PartyID": invoice.Party_id,
                         "Warehouse": invoice.PartyName,
                         "SAPInvoiceNumber": invoice.InvoiceNumber,
-                        "InvoiceDate":invoice.id,
+                        "InvoiceDate":invoice.InvoiceDate,
                         "GRNID": None,
-                        "GRNSaveStatus": invoice.Hide,
+                        "GRNSaveStatus": "Save" if invoice.GRNSaveStatus == "Save" else "Hide", 
                         "GRNSaveDate": None,
                         "CustomerID": invoice.Customer_id,
                         "PartyName": invoice.CustomerName,
