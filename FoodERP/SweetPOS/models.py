@@ -86,6 +86,20 @@ class T_SPOSInvoices(models.Model):
     VoucherCode = models.CharField(max_length=50 ,blank=True, null=True)
     class Meta:
         db_table = "T_SPOSInvoices"
+        indexes = [
+            models.Index(fields=['SaleID']),
+            models.Index(fields=['ClientID']),
+            models.Index(fields=['InvoiceNumber']),
+            models.Index(fields=['InvoiceDate']),
+            models.Index(fields=['Customer']),
+            models.Index(fields=['Party']),
+            models.Index(fields=['NetAmount']),
+            models.Index(fields=['CreatedBy']),
+            # If you need to speed up queries on multiple fields, consider composite indexes
+            models.Index(fields=['Party', 'InvoiceDate','IsDeleted']),
+            models.Index(fields=['Customer', 'InvoiceDate']),
+            models.Index(fields=['ClientID', 'Party']),
+        ]
 
 
 class TC_SPOSInvoiceItems(models.Model):

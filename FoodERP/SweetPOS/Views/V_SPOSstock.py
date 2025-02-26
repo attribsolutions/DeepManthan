@@ -298,8 +298,8 @@ class StockOutReportView(CreateAPIView):
                             JOIN FoodERP.M_Items  ON M_Items.id = A.Item
                             JOIN FoodERP.M_Parties ON M_Parties.id = A.Party
                             {ItemsGroupJoinsandOrderby[1]}
-                            WHERE HOUR(A.CreatedOn) = %s {b}
-                            {ItemsGroupJoinsandOrderby[2]}''',[datetime_obj.hour])
+                            WHERE A.StockDate= %s and   HOUR(A.CreatedOn) = %s {b}
+                            {ItemsGroupJoinsandOrderby[2]}''',[datetime_obj.date(),datetime_obj.hour])
                 # print(StockOutReportQuery)
                 StockOutDataList = list()
 
