@@ -207,6 +207,8 @@ class GenericSaleReportSerializer(serializers.Serializer):
     BatchNo = serializers.CharField(max_length=500)
     BatchDate = serializers.DateField()
     SAPItemID = serializers.CharField(max_length=500)
+    VoucherCode = serializers.CharField(max_length=500)
+    CashierName = serializers.CharField(max_length=500)
      
     def to_representation(self, instance):
         # Ensure proper rounding for specific fields
