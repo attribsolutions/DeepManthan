@@ -1149,6 +1149,8 @@ class TC_GRNItems(models.Model):
     QtyInBox = models.DecimalField(max_digits=30, decimal_places=20)
     ActualQuantity=models.DecimalField(max_digits=20, decimal_places=3,null=True,blank=True)
     DiscrepancyComment = models.CharField(max_length=500 ,null=True,blank=True)
+    DiscrepancyReason = models.CharField(max_length=500, null=True, blank=True)
+    
     class Meta:
         db_table = "TC_GRNItems"
              
