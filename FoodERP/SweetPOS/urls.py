@@ -56,7 +56,10 @@ urlpatterns = [
     url(r'FranchiseSaleWithBillCount$', FranchiseSaleWithBillCountView.as_view()),
     url(r'FranchiseInvoiceDelete/([0-9]+)$', FranchiseInvoiceDeleteView.as_view()),
     url(r'FranchiseInvoiceEdit/([0-9]+)$', FranchiseInvoiceEditView.as_view()),
+    url(r'LVersionList$', LVersionsView.as_view()),
     #Service Settings Import
     url(r'SweetPosServiceSettingsImport/([0-9]+)$', SweetPosServiceSettingsImportView.as_view()),
+    
+    
  
     ]

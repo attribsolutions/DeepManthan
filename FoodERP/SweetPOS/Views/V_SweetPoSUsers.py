@@ -179,4 +179,38 @@ FROM SweetPOS.M_SweetPOSRoles S''')
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Role Not available', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'GETAllRoles:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})  
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]}) 
+        
+        
+        
+        
+
+        
+        
+class LVersionsView(CreateAPIView):
+    permission_classes = ()
+
+    @transaction.atomic()
+    def post(self, request):
+        UserData = JSONParser().parse(request)      
+        try:
+            with transaction.atomic():
+                Party = UserData['Party']                           
+                               
+                query = M_SweetPOSUser.objects.raw(f'''
+                    SELECT 1 id,  MAX(ExeVersion) AS ExeVersion, M_SweetPOSLogin.MacID,M_SweetPOSMachine.MachineName FROM SweetPOS.M_SweetPOSLogin
+                    LEFT JOIN SweetPOS.M_SweetPOSMachine ON SweetPOS.M_SweetPOSMachine.MacID=SweetPOS.M_SweetPOSLogin.MacID
+                    WHERE DivisionID = {Party}
+                    GROUP BY  MacID ,M_SweetPOSMachine.MachineName''')            
+                user_list = []
+                for row in query:
+                    user_list.append({
+                            "id": row.id,
+                            "MacID": row.MacID,
+                            "ExeVersion": row.ExeVersion,
+                            "MachineName":row.MachineName
+                        })                
+                return JsonResponse({'StatusCode': 200,'Status': True,'Message': 'Success','Data': user_list})
+
+        except Exception as e:
+            return JsonResponse({'StatusCode': 500,'Status': False,'Message': str(e),'Data': []})
