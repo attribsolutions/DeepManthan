@@ -179,7 +179,7 @@ FROM SweetPOS.M_SweetPOSRoles S''')
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Role Not available', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'GETAllRoles:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]}) 
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
         
         
         
@@ -209,8 +209,11 @@ class LVersionsView(CreateAPIView):
                             "MacID": row.MacID,
                             "ExeVersion": row.ExeVersion,
                             "MachineName":row.MachineName
-                        })                
-                return JsonResponse({'StatusCode': 200,'Status': True,'Message': 'Success','Data': user_list})
+                        })  
+                              
+                log_entry = create_transaction_logNew( request, user_list, Party, '', 444, 0,0,0,0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': user_list})        
 
         except Exception as e:
-            return JsonResponse({'StatusCode': 500,'Status': False,'Message': str(e),'Data': []})
+            log_entry = create_transaction_logNew( request, user_list, 0, str(e), 33,0,0,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
