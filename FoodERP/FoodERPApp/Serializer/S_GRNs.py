@@ -52,7 +52,6 @@ class T_GRNSerializer(serializers.ModelSerializer):
        
         GRNItems_data = validated_data.pop('GRNItems')
         O_LiveBatchesLists_data=validated_data.pop('O_LiveBatchesList')
-        
         GRNReferences_data = validated_data.pop('GRNReferences')
         
         
