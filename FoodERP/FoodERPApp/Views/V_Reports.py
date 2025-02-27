@@ -2126,7 +2126,7 @@ class GRNDiscrepancyReportAPIView(CreateAPIView):
                 GetParties = f"AND T_GRNs.Customer_id = {Party}" if Party != 0 else ""
 
                 GRNDiscrepancyQuery = TC_GRNItems.objects.raw(f'''SELECT TC_GRNItems.id, T_GRNs.GRNDate, T_GRNs.Party_id, T_GRNs.Customer_id, 
-                                                                  T_GRNs.FullGRNNumber, T_Invoices.InvoiceNumber, T_Invoices.InvoiceDate, M_Items.Name AS ItemName,  
+                                                                  T_GRNs.FullGRNNumber, T_Invoices.FullInvoiceNumber, T_Invoices.InvoiceDate, M_Items.Name AS ItemName,  
                                                                   CASE WHEN T_Invoices.Hide = 0 THEN 'Save' ELSE 'Hide' END AS GRNSaveStatus,
                                                                   '' AS HideComment,party.Name AS PartyName, 
                                                                   customer.Name AS CustomerName, T_GRNs.Comment, TC_GRNItems.DiscrepancyComment, 
@@ -2148,20 +2148,27 @@ class GRNDiscrepancyReportAPIView(CreateAPIView):
                 
                 PartyID = f"AND T_Invoices.Customer_id = {Party}" if Party != 0 else ""
 
-                HiddenInvoicesQuery = T_Invoices.objects.raw(f'''SELECT T_Invoices.id, HideComment, InvoiceNumber, InvoiceDate, Party_id,
+                HiddenInvoicesQuery = T_Invoices.objects.raw(f'''SELECT T_Invoices.id, HideComment, FullInvoiceNumber, InvoiceDate, Party_id,
                                                                 Customer_id , party.Name AS PartyName, customer.Name AS CustomerName,
+                                                                M_Items.Name AS ItemName, TC_InvoiceItems.Quantity,MC_ItemUnits.BaseUnitConversion,
+                                                                TC_InvoiceItems.Amount,
                                                                 CASE WHEN T_Invoices.Hide = 0 THEN 'Save' ELSE 'Hide' END AS GRNSaveStatus
                                                                 FROM T_Invoices
                                                                 JOIN M_Parties party ON T_Invoices.Party_id = party.id
                                                                 JOIN M_Parties customer ON T_Invoices.Customer_id = customer.id
-                                                                WHERE Hide = 1 AND HideComment IS NOT NULL
+                                                                JOIN TC_InvoiceItems ON T_Invoices.id = TC_InvoiceItems.Invoice_id
+                                                                JOIN M_Items ON TC_InvoiceItems.Item_id = M_Items.id
+                                                                JOIN MC_ItemUnits ON M_Items.id = MC_ItemUnits.Item_id
+                                                                WHERE T_Invoices.Hide = 1 AND HideComment IS NOT NULL
+                                                                AND T_Invoices.InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}'
                                                                  {PartyID}''')
+                
                 for row in GRNDiscrepancyQuery:
                     GRNDiscrepancyData.append({
                         "id": row.id,
                         "PartyID": row.Party_id,
                         "Warehouse": row.PartyName,
-                        "SAPInvoiceNumber": row.InvoiceNumber,
+                        "SAPInvoiceNumber": row.FullInvoiceNumber,
                         "InvoiceDate": row.InvoiceDate,
                         "GRNID": row.FullGRNNumber,
                         "GRNSaveStatus": "Save" if row.GRNSaveStatus == "Save" else "Hide", 
@@ -2183,17 +2190,17 @@ class GRNDiscrepancyReportAPIView(CreateAPIView):
                         "id": invoice.id,
                         "PartyID": invoice.Party_id,
                         "Warehouse": invoice.PartyName,
-                        "SAPInvoiceNumber": invoice.InvoiceNumber,
+                        "SAPInvoiceNumber": invoice.FullInvoiceNumber,
                         "InvoiceDate":invoice.InvoiceDate,
                         "GRNID": None,
                         "GRNSaveStatus": "Save" if invoice.GRNSaveStatus == "Save" else "Hide", 
                         "GRNSaveDate": None,
                         "CustomerID": invoice.Customer_id,
                         "PartyName": invoice.CustomerName,
-                        "SKUName": None,
-                        "QtyBilled": None,
-                        "QtyUOM": None,
-                        "LineAmountwithGST": None,
+                        "SKUName": invoice.ItemName,
+                        "QtyBilled": invoice.Quantity,
+                        "QtyUOM": invoice.BaseUnitConversion,
+                        "LineAmountwithGST": invoice.Amount,
                         "DiscrepancyComment": None,
                         "HideComment": invoice.HideComment,
                         "DiscrepancyReason": None,
