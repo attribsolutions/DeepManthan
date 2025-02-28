@@ -2182,7 +2182,7 @@ class GRNDiscrepancyReportAPIView(CreateAPIView):
                         "QtyUOM": row.BaseUnitConversion,
                         "LineAmountwithGST": row.Amount,
                         "DiscrepancyComment": row.Comment,
-                        "HideComment": row.Comment, 
+                        "HideComment": None, 
                         "DiscrepancyReason": row.DiscrepancyReason,
                         "DiscrepancyItemComment": row.DiscrepancyComment,
                     })
