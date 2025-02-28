@@ -2045,7 +2045,7 @@ WHERE A.QtyInKg != COALESCE(B.QtyInKg, 0) and (
        OR ROUND(COALESCE(A.QtyInNo, 5), 5) <> ROUND(COALESCE(B.QtyInNo, 5), 5))  
 ORDER BY (CASE WHEN COALESCE(B.QtyInKg, 0) = 0 AND COALESCE(B.QtyInNo, 0) = 0 THEN 0 ELSE 1 END), A.PartyName, A.OrderDate''')
 
-                print(DemandVsReportquery.query)  
+                # print(DemandVsReportquery.query)  
                 if DemandVsReportquery:  
                     # print("SHRUR")              
                     for row in DemandVsReportquery:                       
