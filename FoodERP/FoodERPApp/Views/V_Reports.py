@@ -2129,7 +2129,7 @@ class GRNDiscrepancyReportAPIView(CreateAPIView):
                                                                   T_GRNs.FullGRNNumber, T_Invoices.FullInvoiceNumber, T_Invoices.InvoiceDate, M_Items.Name AS ItemName,  
                                                                   CASE WHEN T_Invoices.Hide = 0 THEN 'Save' ELSE 'Hide' END AS GRNSaveStatus,
                                                                   '' AS HideComment,party.Name AS PartyName, 
-                                                                  customer.Name AS CustomerName, T_GRNs.Comment, TC_GRNItems.DiscrepancyComment, TC_GRNItems.DiscrepancyReason,
+                                                                  customer.Name AS CustomerName, T_GRNs.Comment, TC_GRNItems.DiscrepancyComment, M_GeneralMaster.Name as DiscrepancyReason,
                                                                   TC_GRNItems.Amount, TC_GRNItems.Quantity, MC_ItemUnits.BaseUnitConversion
                                                                   FROM TC_GRNItems
                                                                   JOIN T_GRNs ON TC_GRNItems.GRN_id = T_GRNs.id
@@ -2138,7 +2138,7 @@ class GRNDiscrepancyReportAPIView(CreateAPIView):
                                                                   JOIN M_Parties customer ON T_GRNs.Customer_id = customer.id
                                                                   LEFT JOIN TC_GRNReferences ON TC_GRNReferences.GRN_id = T_GRNs.id  
                                                                   LEFT JOIN T_Invoices ON T_Invoices.id = TC_GRNReferences.Invoice_id  
-                                                                  LEFT JOIN M_GeneralMaster ON T_GRNs.Reason_id = M_GeneralMaster.id 
+                                                                  LEFT JOIN M_GeneralMaster ON TC_GRNItems.DiscrepancyReason = M_GeneralMaster.id 
                                                                   LEFT JOIN MC_ItemUnits ON TC_GRNItems.Item_id = MC_ItemUnits.Item_id 
                                                                   AND MC_ItemUnits.IsBase = TRUE 
                                                                   AND MC_ItemUnits.IsDeleted = 0
