@@ -95,26 +95,26 @@ class PartyDetailsView(CreateAPIView):
   
 
 
-    @transaction.atomic()
-    def put(self, request, id=0):
-        PartyDetails_data = JSONParser().parse(request)
-        try:
-            with transaction.atomic():
+    # @transaction.atomic()
+    # def put(self, request, id=0):
+    #     PartyDetails_data = JSONParser().parse(request)
+    #     try:
+    #         with transaction.atomic():
                 
-                PartyDetails_datadataByID = M_PartyDetails.objects.get(id=id)
-                PartyDetails_serializer = PartyDetailsSerializer(
-                    PartyDetails_datadataByID, data=PartyDetails_data)
-                if PartyDetails_serializer.is_valid():
-                    PartyDetails_serializer.save()
-                    log_entry = create_transaction_logNew(request, PartyDetails_data,0,'PartyDetailsID:'+str(id),447,0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyDetails Data Updated Successfully','Data' :[]})
-                else:
-                    log_entry = create_transaction_logNew(request, PartyDetails_data,0,'PartyDetailsEdit:'+str(PartyDetails_serializer.errors),34,0)
-                    transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PartyDetailsSerializer.errors, 'Data' :[]})
-        except Exception as e:
-            log_entry = create_transaction_logNew(request, PartyDetails_data, 0,'PartyDetailsEdit:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
+    #             PartyDetails_datadataByID = M_PartyDetails.objects.get(id=id)
+    #             PartyDetails_serializer = PartyDetailsSerializer(
+    #                 PartyDetails_datadataByID, data=PartyDetails_data)
+    #             if PartyDetails_serializer.is_valid():
+    #                 PartyDetails_serializer.save()
+    #                 log_entry = create_transaction_logNew(request, PartyDetails_data,0,'PartyDetailsID:'+str(id),447,0)
+    #                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyDetails Data Updated Successfully','Data' :[]})
+    #             else:
+    #                 log_entry = create_transaction_logNew(request, PartyDetails_data,0,'PartyDetailsEdit:'+str(PartyDetails_serializer.errors),34,0)
+    #                 transaction.set_rollback(True)
+    #                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PartyDetailsSerializer.errors, 'Data' :[]})
+    #     except Exception as e:
+    #         log_entry = create_transaction_logNew(request, PartyDetails_data, 0,'PartyDetailsEdit:'+str(e),33,0)
+    #         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
         
 def SalesTeamData(ID):
     if ID:
