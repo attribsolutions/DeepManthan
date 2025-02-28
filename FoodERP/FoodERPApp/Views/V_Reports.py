@@ -2129,8 +2129,8 @@ class GRNDiscrepancyReportAPIView(CreateAPIView):
                                                                   T_GRNs.FullGRNNumber, T_Invoices.FullInvoiceNumber, T_Invoices.InvoiceDate, M_Items.Name AS ItemName,  
                                                                   CASE WHEN T_Invoices.Hide = 0 THEN 'Save' ELSE 'Hide' END AS GRNSaveStatus,
                                                                   '' AS HideComment,party.Name AS PartyName, 
-                                                                  customer.Name AS CustomerName, T_GRNs.Comment, TC_GRNItems.DiscrepancyComment, 
-                                                                  TC_GRNItems.Amount, TC_GRNItems.Quantity, MC_ItemUnits.BaseUnitConversion,M_GeneralMaster.Name AS DiscrepancyReason
+                                                                  customer.Name AS CustomerName, T_GRNs.Comment, TC_GRNItems.DiscrepancyComment, TC_GRNItems.DiscrepancyReason,
+                                                                  TC_GRNItems.Amount, TC_GRNItems.Quantity, MC_ItemUnits.BaseUnitConversion
                                                                   FROM TC_GRNItems
                                                                   JOIN T_GRNs ON TC_GRNItems.GRN_id = T_GRNs.id
                                                                   JOIN M_Items ON TC_GRNItems.Item_id = M_Items.id

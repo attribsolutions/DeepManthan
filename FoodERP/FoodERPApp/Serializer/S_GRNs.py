@@ -35,7 +35,7 @@ class TC_GRNItemsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TC_GRNItems
         fields = ['Item', 'Quantity', 'Unit', 'BaseUnitQuantity', 'MRP', 'ReferenceRate', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount',
-                  'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'BatchDate', 'BatchCode','SystemBatchCode','SystemBatchDate','GSTPercentage','MRPValue','QtyInBox','QtyInKg','QtyInNo','ActualQuantity','DiscrepancyComment']
+                  'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'BatchDate', 'BatchCode','SystemBatchCode','SystemBatchDate','GSTPercentage','MRPValue','QtyInBox','QtyInKg','QtyInNo','ActualQuantity','DiscrepancyComment','DiscrepancyReason']
 
 class T_GRNSerializer(serializers.ModelSerializer):
 
