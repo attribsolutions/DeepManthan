@@ -2158,7 +2158,9 @@ class GRNDiscrepancyReportAPIView(CreateAPIView):
                                                                 JOIN M_Parties customer ON T_Invoices.Customer_id = customer.id
                                                                 JOIN TC_InvoiceItems ON T_Invoices.id = TC_InvoiceItems.Invoice_id
                                                                 JOIN M_Items ON TC_InvoiceItems.Item_id = M_Items.id
-                                                                JOIN MC_ItemUnits ON M_Items.id = MC_ItemUnits.Item_id
+                                                                LEFT JOIN MC_ItemUnits ON M_Items.id = MC_ItemUnits.Item_id
+                                                                AND MC_ItemUnits.IsBase = TRUE 
+                                                                AND MC_ItemUnits.IsDeleted = 0
                                                                 WHERE T_Invoices.Hide = 1 AND HideComment IS NOT NULL
                                                                 AND T_Invoices.InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}'
                                                                  {PartyID}''')
