@@ -22,7 +22,7 @@ SECRET_KEY = 'django-insecure-t#s!16-8)sy91!+@q2hmdt_yclkuldlx=*g5aw_cb&^+rzr@ty
 DEBUG = True
 
 # ALLOWED_HOSTS = ['localhost','192.168.1.114','www.cbmfooderp.com','cbmfooderp.com','10.4.5.64','10.4.5.68',] 
-ALLOWED_HOSTS = ['localhost','127.0.0.1','www.cbmfooderp.com','cbmfooderp.com','10.4.5.64','10.4.5.68','192.168.1.114','65.254.81.162','43.225.53.91','10.1.201.68'] 
+ALLOWED_HOSTS = ['localhost','127.0.0.1','www.cbmfooderp.com','cbmfooderp.com','10.4.5.64','10.4.5.68','192.168.1.114','65.254.81.162','43.225.53.91','10.1.201.68','s2.cbmfooderp.com'] 
 
 # Application definition
 CORS_ORIGIN_ALLOW_ALL = True #we allow the all domain to access through API
@@ -100,7 +100,7 @@ DATABASES = {
         'NAME': 'FoodERP',       
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',  
-        'HOST': '10.4.5.68',   #css :10.1.201.68 , erp.in :43.225.53.91 ,erp.com : 10.4.5.68
+        'HOST': '10.1.201.68',   #css :10.1.201.68 , erp.in :43.225.53.91 ,erp.com : 10.4.5.68
         
         'PORT': '3306' , 
         'OPTIONS': { 
@@ -113,7 +113,7 @@ DATABASES = {
         'NAME': 'TransactionLog',       
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',    
-        'HOST': '10.4.5.68',    
+        'HOST': '10.1.201.68',    
         'PORT': '3306' , 
         'OPTIONS': { 
             'sql_mode': 'STRICT_TRANS_TABLES', 
@@ -125,7 +125,7 @@ DATABASES = {
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',  
 
-        'HOST': '10.4.5.68',    
+        'HOST': '10.1.201.68',    
 
         'PORT': '3306' , 
         'OPTIONS': { 
