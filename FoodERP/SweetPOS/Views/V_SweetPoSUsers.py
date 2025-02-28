@@ -11,7 +11,9 @@ from django.db import IntegrityError, transaction
 from FoodERPApp.models import *
 from ..Serializer.S_SweetPoSUsers import *
 from FoodERPApp.Views.V_CommFunction import create_transaction_logNew
-
+from ftplib import FTP
+import configparser
+import os
 
 
 class SweetPOSUsersView(CreateAPIView):
@@ -195,25 +197,53 @@ class LVersionsView(CreateAPIView):
         UserData = JSONParser().parse(request)      
         try:
             with transaction.atomic():
-                Party = UserData['Party']                           
-                               
-                query = M_SweetPOSUser.objects.raw(f'''
-                    SELECT 1 id,  MAX(ExeVersion) AS ExeVersion, M_SweetPOSLogin.MacID,M_SweetPOSMachine.MachineName FROM SweetPOS.M_SweetPOSLogin
-                    LEFT JOIN SweetPOS.M_SweetPOSMachine ON SweetPOS.M_SweetPOSMachine.MacID=SweetPOS.M_SweetPOSLogin.MacID
-                    WHERE DivisionID = {Party}
-                    GROUP BY  MacID ,M_SweetPOSMachine.MachineName''')            
+                Party = UserData['Party']   
+                ftp_host = "web.chitalebandhu.in"  
+                ftp_user = "attribftp"  
+                ftp_pass = "Attrib@318" 
+                              
+                ftp = FTP(ftp_host)
+                ftp.login(ftp_user, ftp_pass)
+                ftp.cwd("SweetPOSPython")
+                
+                local_path = os.path.join(os.path.expanduser("~"), "version.ini")
+                filename = "version.ini"
+                with open(local_path, "wb") as file:
+                    ftp.retrbinary(f"RETR {filename}", file.write)
+
+                ftp.quit()
+                print(f"{filename}: {local_path}")
+                
+                
+                config = configparser.ConfigParser()
+                config.read(local_path)
+                exe_version = config.get("current_version", "ExeVersion", fallback=None)    
+                if not exe_version:
+                    return JsonResponse({"StatusCode": 404, "Status": False, "Message": "'ExeVersion' Not Found", "Data": []})
+                # else:
+                #     return Response({"message": "'ExeVersion' Not Found", "status": "error"}, status=404)                 
+                query = M_SweetPOSUser.objects.raw("""SELECT 1 AS id,l.MacID, 
+                    MAX(CASE WHEN l.ExeVersion LIKE 'WS%%' THEN l.ExeVersion END) AS WinService,
+                    MAX(CASE WHEN l.ExeVersion NOT LIKE 'WS%%' THEN l.ExeVersion END) AS ExeVersion,
+                    m.MachineName 
+                    FROM SweetPOS.M_SweetPOSLogin l
+                    LEFT JOIN SweetPOS.M_SweetPOSMachine m ON m.MacID = l.MacID
+                    WHERE l.DivisionID =%s GROUP BY l.MacID, m.MachineName""", [Party])            
                 user_list = []
                 for row in query:
                     user_list.append({
                             "id": row.id,
-                            "MacID": row.MacID,
-                            "ExeVersion": row.ExeVersion,
-                            "MachineName":row.MachineName
+                            "MacID": row.MacID,                            
+                            "Version":{
+                                "ExeVersion": row.ExeVersion,
+                                "WinServise":row.WinService
+                            },
+                            "MachineName":row.MachineName                           
                         })  
                               
                 log_entry = create_transaction_logNew( request, user_list, Party, '', 444, 0,0,0,0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': user_list})        
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Latestversion': exe_version,'Data': user_list})        
 
         except Exception as e:
-            log_entry = create_transaction_logNew( request, user_list, 0, str(e), 33,0,0,0)
+            log_entry = create_transaction_logNew( request, 0, 0, str(e), 33,0,0,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
