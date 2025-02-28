@@ -31,7 +31,7 @@ class RateListView(CreateAPIView):
                                                     join FoodERP.M_Items  on A.Item_id = M_Items.id
                                                     {ItemsGroupJoinsandOrderby[1]}
                                                     left join SweetPOS.M_SPOSRateMaster C on C.ItemID = M_Items.id and C.IsDeleted=0 and C.EffectiveFrom <= %s and C.POSRateType = %s 
-                                                    where A.PartyType_id=19 
+                                                    where A.PartyType_id in (select id from M_PartyType where IsFranchises=1)
                                                     {ItemsGroupJoinsandOrderby[2]}
                                                     ''', [today, EffectiveFrom, POSRateType])
                
