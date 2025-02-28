@@ -2148,8 +2148,8 @@ class GRNDiscrepancyReportAPIView(CreateAPIView):
                 
                 PartyID = f"AND T_Invoices.Customer_id = {Party}" if Party != 0 else ""
 
-                HiddenInvoicesQuery = T_Invoices.objects.raw(f'''SELECT T_Invoices.id, HideComment, FullInvoiceNumber, InvoiceDate, Party_id,
-                                                                Customer_id , party.Name AS PartyName, customer.Name AS CustomerName,
+                HiddenInvoicesQuery = T_Invoices.objects.raw(f'''SELECT T_Invoices.id, T_Invoices.HideComment as Comment, FullInvoiceNumber, InvoiceDate, Party_id,
+                                                                Customer_id, party.Name AS PartyName, customer.Name AS CustomerName,
                                                                 M_Items.Name AS ItemName, TC_InvoiceItems.Quantity,MC_ItemUnits.BaseUnitConversion,
                                                                 TC_InvoiceItems.Amount,
                                                                 CASE WHEN T_Invoices.Hide = 0 THEN 'Save' ELSE 'Hide' END AS GRNSaveStatus
@@ -2182,7 +2182,7 @@ class GRNDiscrepancyReportAPIView(CreateAPIView):
                         "QtyUOM": row.BaseUnitConversion,
                         "LineAmountwithGST": row.Amount,
                         "DiscrepancyComment": row.Comment,
-                        "HideComment": row.HideComment, 
+                        "HideComment": row.Comment, 
                         "DiscrepancyReason": row.DiscrepancyReason,
                         "DiscrepancyItemComment": row.DiscrepancyComment,
                     })
@@ -2204,7 +2204,7 @@ class GRNDiscrepancyReportAPIView(CreateAPIView):
                         "QtyUOM": invoice.BaseUnitConversion,
                         "LineAmountwithGST": invoice.Amount,
                         "DiscrepancyComment": None,
-                        "HideComment": invoice.HideComment,
+                        "HideComment": invoice.Comment,
                         "DiscrepancyReason": None,
                         "DiscrepancyItemComment": None,
                     })
