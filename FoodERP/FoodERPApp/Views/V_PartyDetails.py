@@ -83,7 +83,7 @@ class PartyDetailsView(CreateAPIView):
                     PartyDetailsdata = M_PartyDetails.objects.filter(Group=PartyDetails_data[0]['Group'])
                     PartyDetailsdata.delete()   
                     PartyDetails_serializer.save() 
-                    log_entry = create_transaction_logNew(request, PartyDetails_data,0,'',446,0)
+                    log_entry = create_transaction_logNew(request, PartyDetails_data,0,'GroupID:'+str(PartyDetails_data[0]['Group']),446,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyDetails Data Updated Successfully', 'Data': []})
                 else:
                     log_entry = create_transaction_logNew(request, PartyDetails_data,0,'PartyDetails_Save:'+str(PartyDetails_serializer.errors),34,0)
@@ -217,7 +217,7 @@ class GetPartydetailsView(CreateAPIView):
 
                         })
                     
-                    log_entry = create_transaction_logNew(request, PartyDetailData,0,'',445,0)
+                    log_entry = create_transaction_logNew(request, PartyDetailData,0,'GroupID:'+str(Group),445,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartyDetailData})
                 else:  
                     log_entry = create_transaction_logNew(request,0,0,'PartyDetailData Does Not Exist',445,0)
