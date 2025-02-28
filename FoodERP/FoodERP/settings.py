@@ -93,40 +93,15 @@ DATABASE_ROUTERS = [
     'SweetPOS.routers.SweetPOSRouter',
 ]
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'FoodERP',     
-#         'USER': 'pk',
-#         'PASSWORD': 'P@ssw0rd',  
-#         'HOST': '10.4.5.64',
-#         'PORT': '3306' , 
-#         'OPTIONS': { 
-#             'sql_mode': 'STRICT_TRANS_TABLES', 
-#         },
-#     },
-#     'transactionlog_db': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'TransactionLog',     
-#         'USER': 'pk',
-#         'PASSWORD': 'P@ssw0rd',  
-#         'HOST': '10.4.5.64',
-#         'PORT': '3306' , 
-#         'OPTIONS': { 
-#             'sql_mode': 'STRICT_TRANS_TABLES', 
-#         },
 
-#     },
-# }
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'FoodERP',       
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',  
-
-        'HOST': '10.4.5.68',   
-
+        'HOST': '43.225.53.91',   #css :10.1.201.68 , erp.in :43.225.53.91 ,erp.com : 10.4.5.68
+        
         'PORT': '3306' , 
         'OPTIONS': { 
             'sql_mode': 'STRICT_TRANS_TABLES',   
@@ -138,7 +113,7 @@ DATABASES = {
         'NAME': 'TransactionLog',       
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',    
-        'HOST': '10.4.5.68',    
+        'HOST': '43.225.53.91',    
         'PORT': '3306' , 
         'OPTIONS': { 
             'sql_mode': 'STRICT_TRANS_TABLES', 
@@ -150,7 +125,7 @@ DATABASES = {
         'USER': 'pk',
         'PASSWORD': 'P@ssw0rd',  
 
-        'HOST': '10.4.5.68',    
+        'HOST': '43.225.53.91',    
 
         'PORT': '3306' , 
         'OPTIONS': { 
