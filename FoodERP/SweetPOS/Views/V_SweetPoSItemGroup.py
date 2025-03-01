@@ -98,7 +98,7 @@ class ItemListView(CreateAPIView):
                 left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=i.id and GroupType_id=5
                 LEFT JOIN M_ChannelWiseItems ON i.id = M_ChannelWiseItems.Item_id
                 join MC_PartyItems on MC_PartyItems.Item_id=i.id and MC_PartyItems.party_id={DivisionID}
-                WHERE M_ChannelWiseItems.PartyType_id = 19  """)                  
+                WHERE M_ChannelWiseItems.PartyType_id in (select id from M_PartyType where IsFranchises=1)""")                  
                 # return Response({"status": True, "status_code": 200, "count": "", "data": "" }, status=200)
                 # print(query)
                 count=0
