@@ -245,6 +245,9 @@ class MC_PartyAddress(models.Model):
 
     class Meta:
         db_table = 'MC_PartyAddress'
+        indexes = [
+            models.Index(fields=['Party', 'IsDefault']),
+        ]  
      
      
 
@@ -2354,7 +2357,10 @@ class M_PartyDetails(models.Model):
     MT = models.CharField(max_length=500,null=True)
     
     class Meta:
-        db_table = "M_PartyDetails" 
+        db_table = "M_PartyDetails"
+        indexes = [
+            models.Index(fields=['Party', 'Group']),
+        ]  
 
 
 class T_TargetUploads(models.Model):
