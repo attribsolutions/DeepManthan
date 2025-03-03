@@ -34,9 +34,9 @@ class SweetPosServiceSettingsImportView(CreateAPIView):
                 
                 log_entry = create_transaction_logNew(request, ServicesSettings_serializer,id,'',429,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': ServicesSettings_serializer})
-        except  M_SweetPOSRoleAccess.DoesNotExist:
-            log_entry = create_transaction_logNew(request, 0,id,'GETSweetPOSServiceSettingDetails'+'Service Settings Not available',429,0)
-            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Service Settings Not available', 'Data': []})
+        # except  M_SweetPOSRoleAccess.DoesNotExist:
+        #     log_entry = create_transaction_logNew(request, 0,id,'GETSweetPOSServiceSettingDetails'+'Service Settings Not available',429,0)
+        #     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Service Settings Not available', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0,0,'GETSweetPOSServiceSettingDetails:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
