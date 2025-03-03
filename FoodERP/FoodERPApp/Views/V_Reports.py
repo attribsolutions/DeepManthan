@@ -2054,10 +2054,10 @@ ORDER BY (CASE WHEN COALESCE(B.QtyInKg, 0) = 0 AND COALESCE(B.QtyInNo, 0) = 0 TH
                             "PartyName":row.PartyName,
                             "OrderDate":row.OrderDate,
                             "ItemName":row.ItemName,
-                            "QtyInKg":round(row.QtyInKg,2),
-                            "QtyInNo":round(row.QtyInNo,2),
-                            "SupplyInKg":round(row.SupplyInKg,2),
-                            "SupplyInNo":round(row.SupplyInNo,2)                            
+                            "QtyInKg":round(float(row.QtyInKg),2),
+                            "QtyInNo":round(float(row.QtyInNo),2),
+                            "SupplyInKg":round(float(row.SupplyInKg),2),
+                            "SupplyInNo":round(float(row.SupplyInNo),2)                           
                         })                          
                       
                 log_entry = create_transaction_logNew(request, Data, Party, '', 432, 0, FromDate, ToDate, 0)
