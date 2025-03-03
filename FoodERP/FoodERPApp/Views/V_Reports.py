@@ -1377,7 +1377,7 @@ class ManPowerReportView(CreateAPIView):
 M_PartyType.Name AS PartyType, A.Email, A.PAN, MC_PartySubParty.Party_id AS SS_id, B.NAME AS SSName, M_Users.LoginName AS LoginID, "India" AS country,
  C.Address, M_States.Name AS State, M_Districts.Name AS District,
 M_Cities.Name AS City, C.PIN AS PIN, A.MobileNo AS Mobile, M_Employees.Name AS OwnerName,
-A.Latitude, A.Longitude, C.FSSAINo AS FSSAINo,
+A.Latitude, A.Longitude, C.FSSAINo AS FSSAINo, C.fssaidocument ,
 C.FSSAIExipry AS FSSAIExpiry, A.GSTIN AS GSTIN, M_Employees_GM.Name AS GM, M_Employees_NH.Name AS NSM,
  M_Employees_RH.Name AS RSM, M_Employees_ASM.Name AS ASM,M_Employees_SE.Name AS SE,M_Employees_SO.Name AS SO, M_Employees_SR.Name AS SR, M_Employees_MT.Name AS MT,  M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
 FROM MC_PartySubParty 
@@ -1447,7 +1447,8 @@ WHERE M_PartyType.id IN(9,10,15,17,19) AND C.IsDefault = 1 ''')
                             "SE": a['SE'],
                             "SO": a['SO'],
                             "SR": a['SR'],
-                            "MT": a['MT']
+                            "MT": a['MT'],
+                            "fssaidocument" :a['fssaidocument']
                             
                             })
                     log_entry = create_transaction_logNew(request, ManPower_Serializer, 0, '', 219, 0)
