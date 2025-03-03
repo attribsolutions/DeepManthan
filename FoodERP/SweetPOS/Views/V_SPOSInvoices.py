@@ -200,18 +200,18 @@ class SPOSMaxsaleIDView(CreateAPIView):
                     
                 if user is not None: 
                     
-                    QueryfordivisionID = M_SweetPOSRoleAccess.objects.filter(Party=DivisionID).values('Party')
+                    # QueryfordivisionID = M_SweetPOSRoleAccess.objects.filter(Party=DivisionID).values('Party')
                     QueryforSaleRecordCount = M_SweetPOSMachine.objects.filter(Party=DivisionID ,id=ClientID).values('UploadSaleRecordCount')
-                    if not QueryfordivisionID:
+                    if not QueryforSaleRecordCount:
                             
-                            return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'DivisionId is not mapped. Please map it from the SPOSRoleAccess page.', 'Data':[]})
+                            return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'SweetPOSMachine is not mapped', 'Data':[]})
                     else:
                         
                         QueryForMaxSalesID=T_SPOSInvoices.objects.raw('''SELECT 1 id,ifnull(max(ClientSaleID),0) MaxSaleID FROM SweetPOS.T_SPOSInvoices where Party=%s and clientID=%s''', [QueryfordivisionID[0]['Party'] ,ClientID])
                         for row in QueryForMaxSalesID:
                             maxSaleID=row.MaxSaleID
 
-                        log_entry = create_transaction_logNew(request, 0, QueryfordivisionID[0]['Party'],'',384,0,0,0,ClientID)
+                        log_entry = create_transaction_logNew(request, 0, DivisionID,'',384,0,0,0,ClientID)
                         return JsonResponse({"Success":True,"status_code":200,"SaleID":maxSaleID,"Toprows":QueryforSaleRecordCount[0]['UploadSaleRecordCount']})    
         except Exception as e:
             
