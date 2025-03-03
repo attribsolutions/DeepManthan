@@ -207,7 +207,7 @@ class SPOSMaxsaleIDView(CreateAPIView):
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'SweetPOSMachine is not mapped', 'Data':[]})
                     else:
                         
-                        QueryForMaxSalesID=T_SPOSInvoices.objects.raw('''SELECT 1 id,ifnull(max(ClientSaleID),0) MaxSaleID FROM SweetPOS.T_SPOSInvoices where Party=%s and clientID=%s''', DivisionID ,ClientID])
+                        QueryForMaxSalesID=T_SPOSInvoices.objects.raw('''SELECT 1 id,ifnull(max(ClientSaleID),0) MaxSaleID FROM SweetPOS.T_SPOSInvoices where Party=%s and clientID=%s''', [DivisionID ,ClientID])
                         for row in QueryForMaxSalesID:
                             maxSaleID=row.MaxSaleID
 
