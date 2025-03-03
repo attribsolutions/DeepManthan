@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "test_backend"
+        IMAGE_NAME = "adarshmali/fooderpbackend"
         IMAGE_TAG = "latest"
         DOCKER_USERNAME = 'adarshmali'
         DOCKER_PASSWORD = 'Adm@514040'
