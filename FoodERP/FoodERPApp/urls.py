@@ -682,7 +682,7 @@ urlpatterns = [
             url(r'CreditDebitDataExport$', CreditDebitExportReportView.as_view()),
             url(r'ReceiptDataExport$', ReceiptDataExportReportView.as_view()),
             url(r'OutStandingBalance$', OutStandingBalanceView.as_view()),
-            url(r'ManPowerReport$', ManPowerReportView.as_view()),
+            url(r'ManPowerReport/([0-9]+)$', ManPowerReportView.as_view()),
             url(r'TCSAmountReport$', TCSAmountReportView.as_view()),
             url(r'CxDDDiffReport$',CxDDDiffReportView.as_view()), 
             url(r'FranchiseSaleReport$',FranchiseSecondarySaleReportView.as_view()), 

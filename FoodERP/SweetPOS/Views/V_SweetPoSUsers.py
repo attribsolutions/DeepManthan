@@ -190,7 +190,7 @@ FROM SweetPOS.M_SweetPOSRoles S''')
         
         
 class LVersionsView(CreateAPIView):
-    permission_classes = ()
+    permission_classes = (IsAuthenticated,)
 
     @transaction.atomic()
     def post(self, request):
@@ -217,7 +217,8 @@ class LVersionsView(CreateAPIView):
                 
                 config = configparser.ConfigParser()
                 config.read(local_path)
-                exe_version = config.get("current_version", "ExeVersion", fallback=None)    
+                exe_version = config.get("current_version", "ExeVersion", fallback=None)
+                Service_Version = config.get("current_version", "ServiceVersion", fallback=None)    
                 if not exe_version:
                     return JsonResponse({"StatusCode": 404, "Status": False, "Message": "'ExeVersion' Not Found", "Data": []})
                 # else:
@@ -241,8 +242,8 @@ class LVersionsView(CreateAPIView):
                             "MachineName":row.MachineName                           
                         })  
                               
-                log_entry = create_transaction_logNew( request, user_list, Party, '', 444, 0,0,0,0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Latestversion': exe_version,'Data': user_list})        
+                # log_entry = create_transaction_logNew( request, user_list, Party, '', 444, 0,0,0,0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Latest_EXE_version': exe_version,'Latest_Service_Version':Service_Version,'Data': user_list})        
 
         except Exception as e:
             log_entry = create_transaction_logNew( request, 0, 0, str(e), 33,0,0,0)
