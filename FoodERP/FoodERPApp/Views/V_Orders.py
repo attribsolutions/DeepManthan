@@ -743,11 +743,11 @@ class EditOrderView(CreateAPIView):
 
                 if (q1[0]['PartyType__IsRetailer'] == 0 ):
                     PartyItem = Customer
-                    ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Customer,0).split('!') 
+                    ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Stockparty,0).split('!') 
                     
                     if q1[0]['PartyType__IsFranchises'] == 1:
                         StockQuantity = (f''' IFNULL(s.ClosingBalance, 0) AS StockQuantity''')
-                        JoinForO_SPOSDateWiseLiveStock = (f'''LEFT JOIN SweetPOS.O_SPOSDateWiseLiveStock s ON s.Item = a.Item_id AND s.Party = {Customer} AND s.StockDate = CURDATE()''')
+                        JoinForO_SPOSDateWiseLiveStock = (f'''LEFT JOIN SweetPOS.O_SPOSDateWiseLiveStock s ON s.Item = a.Item_id AND s.Party = {Stockparty} AND s.StockDate = CURDATE()''')
                     else:
                         StockQuantity = (f''' (SELECT IFNULL(SUM(BaseUnitQuantity), 0) FROM O_BatchWiseLiveStock 
                                                     WHERE IsDamagePieces = 0 AND Item_id = a.Item_id AND Party_id = {Stockparty} GROUP BY Item_id) AS StockQuantity''')
@@ -801,7 +801,7 @@ left join M_GSTHSNCode on M_GSTHSNCode.id=a.GST_id
                
                 else:
                     PartyItem = Party
-                    ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Party,0).split('!') 
+                    ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Stockparty,0).split('!') 
                     
                     Itemquery = TC_OrderItems.objects.raw(f'''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,
                     convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,1,{RateParty},0) else a.GST_id end),SIGNED)GST_id,
