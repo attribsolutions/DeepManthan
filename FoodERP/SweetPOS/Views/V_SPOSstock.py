@@ -112,9 +112,10 @@ class SPOSStockReportView(CreateAPIView):
                 FromDate = Orderdata['FromDate']
                 ToDate = Orderdata['ToDate']
                 Unit = Orderdata['Unit']
-                PartyID = Orderdata['Party']   
+                PartyID = Orderdata['Party'] 
+                PartyIds=PartyID.split(',')
                              
-                PartyIds = [int(p) for p in Orderdata['Party'].split(',')] 
+                # PartyIds = [int(p) for p in Orderdata['Party'].split(',')] 
                 # print(PartyIds)
                 # PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
                 StockData = []
