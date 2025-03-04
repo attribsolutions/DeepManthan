@@ -112,7 +112,7 @@ class SPOSStockReportView(CreateAPIView):
                 FromDate = Orderdata['FromDate']
                 ToDate = Orderdata['ToDate']
                 Unit = Orderdata['Unit']
-                # Party = Orderdata['Party']   
+                PartyID = Orderdata['Party']   
                              
                 PartyIds = [int(p) for p in Orderdata['Party'].split(',')] 
                 # print(PartyIds)
@@ -121,6 +121,7 @@ class SPOSStockReportView(CreateAPIView):
             
                 for Party in PartyIds:
                     # print(Party)
+                    Party = int(Party)
                     PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
                     if not PartyNameQ.exists():
                         continue 
@@ -179,24 +180,19 @@ class SPOSStockReportView(CreateAPIView):
                     
                     serializer = SPOSStockReportSerializer(StockreportQuery, many=True).data                
                     # StockData = list()
-                    StockData.append({
-                        "FromDate": FromDate,
-                        "ToDate": ToDate,
-                        "PartyName": PartyNameQ[0]["Name"],
-                        "StockDetails": serializer})
+                    if serializer:
+                        StockData.append({
+                            "FromDate": FromDate,
+                            "ToDate": ToDate,
+                            "PartyName": PartyNameQ[0]["Name"],
+                            "StockDetails": serializer})
                     # print(StockreportQuery)
-                # if StockData:
-                #     log_entry = create_transaction_logNew(request, Orderdata, 0, 'From:'+str(FromDate)+','+'To:'+str(ToDate), 210, 0, FromDate, ToDate, 0)
-                #     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': StockData})
-                # else:
-                #     log_entry = create_transaction_logNew(request, Orderdata, 0, 'Recort Not Found', 210, 0)
-                #     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
-                
                 if StockData:
+                    log_entry = create_transaction_logNew(request, Orderdata, 0, 'From:'+str(FromDate)+','+'To:'+str(ToDate), 210, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': StockData})
                 else:
+                    log_entry = create_transaction_logNew(request, Orderdata, 0, 'Recort Not Found', 210, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
-    
         except Exception as e:
             log_entry = create_transaction_logNew(request,Orderdata, 0, 'StockReport:'+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})        
