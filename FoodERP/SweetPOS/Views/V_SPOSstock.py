@@ -119,7 +119,7 @@ class SPOSStockReportView(CreateAPIView):
                 StockData = []
             
                 for Party in PartyIds:
-                    PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
+                    PartyNameQ = M_Parties.objects.filter(id__in=PartyIds).values("Name")
                     if not PartyNameQ.exists():
                         continue 
                 
