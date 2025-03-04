@@ -609,14 +609,15 @@ class StockReportView(CreateAPIView):
                         StockreportQuery, many=True).data
 
                     # StockData = list()
-                    StockData.append({
+                    if serializer:
+                        StockData.append({
 
-                        "FromDate": FromDate,
-                        "ToDate": ToDate,
-                        "PartyName": PartyNameQ[0]["Name"],
-                        "StockDetails": serializer
+                            "FromDate": FromDate,
+                            "ToDate": ToDate,
+                            "PartyName": PartyNameQ[0]["Name"],
+                            "StockDetails": serializer
 
-                    })
+                        })
 
                 if StockData:
                     log_entry = create_transaction_logNew(request, Orderdata, Party, 'From:'+str(FromDate)+','+'To:'+str(ToDate), 210, 0, FromDate, ToDate, 0)
