@@ -189,7 +189,7 @@ class SPOSStockReportView(CreateAPIView):
                     log_entry = create_transaction_logNew(request, Orderdata, 0, 'From:'+str(FromDate)+','+'To:'+str(ToDate), 210, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': StockData})
                 else:
-                    log_entry = create_transaction_logNew(request, Orderdata, Party, 'Recort Not Found', 210, 0)
+                    log_entry = create_transaction_logNew(request, Orderdata, 0, 'Recort Not Found', 210, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request,Orderdata, 0, 'StockReport:'+str(e), 33, 0)
