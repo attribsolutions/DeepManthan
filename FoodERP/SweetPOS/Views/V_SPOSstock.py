@@ -114,18 +114,19 @@ class SPOSStockReportView(CreateAPIView):
                 Unit = Orderdata['Unit']
                 # Party = Orderdata['Party']                
                 PartyIds = [int(p) for p in Orderdata['Party'].split(',')] 
-                
+                # print(PartyIds)
                 # PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
                 StockData = []
             
                 for Party in PartyIds:
-                    PartyNameQ = M_Parties.objects.filter(id__in=PartyIds).values("Name")
+                    # print(Party)
+                    PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
                     if not PartyNameQ.exists():
                         continue 
                 
                     ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Party,5).split('!')
 
-                    CustomPrint(PartyNameQ)
+                    # print(PartyNameQ)
                     if(Unit!=0):
                         UnitName = M_Units.objects.filter(id=Unit).values("Name")
                         unitname = UnitName[0]['Name']                    
