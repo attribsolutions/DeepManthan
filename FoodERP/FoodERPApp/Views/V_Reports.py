@@ -541,77 +541,84 @@ class StockReportView(CreateAPIView):
                 FromDate = Orderdata['FromDate']
                 ToDate = Orderdata['ToDate']
                 Unit = Orderdata['Unit']
-                Party = Orderdata['Party']
-                PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
+                # Party = Orderdata['Party']
+                # PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
+                PartyIDs = [int(p) for p in Orderdata['Party'].split(',')]
                 
-                ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Party,0).split('!')
-                
-                # UnitName = M_Units.objects.filter(id=Unit).values("Name")
-                # unitname = UnitName[0]['Name']
-                if(Unit!=0):
-                    UnitName = M_Units.objects.filter(id=Unit).values("Name")
-                    unitname = UnitName[0]['Name']                    
-                else:
-                    unitname =''
+                StockData = []
+
+                for Party in PartyIDs:
+                    PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
+                    if not PartyNameQ.exists():
+                        continue            
+                    ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Party,0).split('!')
                     
-                # print('aaaaa')
-                if(Unit==0):
-                    unitcondi='A.Unit_id'
-                else:
-                    unitcondi=Unit  
-                StockreportQuery = O_DateWiseLiveStock.objects.raw(f'''SELECT  1 as id,A.Item_id,A.Unit_id,
-                UnitwiseQuantityConversion(A.Item_id,ifnull(OpeningBalance,0),0,A.Unit_id,0,{unitcondi},0)OpeningBalance, 
-                UnitwiseQuantityConversion(A.Item_id,GRNInward,0,A.Unit_id,0,{unitcondi},0)GRNInward, 
-                UnitwiseQuantityConversion(A.Item_id,Sale,0,A.Unit_id,0,{unitcondi},0)Sale, 
-                UnitwiseQuantityConversion(A.Item_id,ClosingBalance,0,A.Unit_id,0,{unitcondi},0)ClosingBalance, 
-                UnitwiseQuantityConversion(A.Item_id,ActualStock,0,A.Unit_id,0,{unitcondi},0)ActualStock,
-                A.ItemName,
-                D.QuantityInBaseUnit,
-                UnitwiseQuantityConversion(A.Item_id,PurchaseReturn,0,A.Unit_id,0,{unitcondi},0)PurchaseReturn,
-                UnitwiseQuantityConversion(A.Item_id,SalesReturn,0,A.Unit_id,0,{unitcondi},0)SalesReturn,
-                UnitwiseQuantityConversion(A.Item_id,StockAdjustment,0,A.Unit_id,0,{unitcondi},0)StockAdjustment
-                ,GroupTypeName,GroupName,SubGroupName,CASE WHEN {Unit} = 0 THEN UnitName else '{unitname}' END UnitName
-                FROM 
-	
-	( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit_id,M_Units.Name UnitName ,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
-    {ItemsGroupJoinsandOrderby[0]}
-	 FROM O_DateWiseLiveStock
-	
-	    JOIN M_Items ON M_Items.id=O_DateWiseLiveStock.Item_id 
-        join M_Units on M_Units.id=O_DateWiseLiveStock.Unit_id
-        {ItemsGroupJoinsandOrderby[1]} 
-		 
-		 WHERE StockDate BETWEEN %s AND %s AND Party_id=%s GROUP BY Item_id,Unit_id,GroupType.id,Groupss.id,subgroup.id
-        {ItemsGroupJoinsandOrderby[2]}) A 
-		
-		left JOIN (SELECT O_DateWiseLiveStock.Item_id, OpeningBalance FROM O_DateWiseLiveStock WHERE O_DateWiseLiveStock.StockDate = %s AND O_DateWiseLiveStock.Party_id=%s) B
-		
-		 ON A.Item_id = B.Item_id 
-		
-		 left JOIN (SELECT Item_id, ClosingBalance, ActualStock FROM O_DateWiseLiveStock WHERE StockDate = %s AND Party_id=%s) C
-		 
-		  ON A.Item_id = C.Item_id  
-		
-		LEFT JOIN (SELECT Item_id, SUM(BaseunitQuantity) QuantityInBaseUnit 
-		FROM T_Stock 
-		WHERE Party_id =%s AND StockDate BETWEEN %s AND %s 
-		GROUP BY Item_id) D 		
-		ON A.Item_id = D.Item_id ''', ([FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate]))
-                CustomPrint(StockreportQuery)
-                serializer = StockReportSerializer(
-                    StockreportQuery, many=True).data
+                    # UnitName = M_Units.objects.filter(id=Unit).values("Name")
+                    # unitname = UnitName[0]['Name']
+                    if(Unit!=0):
+                        UnitName = M_Units.objects.filter(id=Unit).values("Name")
+                        unitname = UnitName[0]['Name']                    
+                    else:
+                        unitname =''
+                        
+                    # print('aaaaa')
+                    if(Unit==0):
+                        unitcondi='A.Unit_id'
+                    else:
+                        unitcondi=Unit  
+                    StockreportQuery = O_DateWiseLiveStock.objects.raw(f'''SELECT  1 as id,A.Item_id,A.Unit_id,
+                    UnitwiseQuantityConversion(A.Item_id,ifnull(OpeningBalance,0),0,A.Unit_id,0,{unitcondi},0)OpeningBalance, 
+                    UnitwiseQuantityConversion(A.Item_id,GRNInward,0,A.Unit_id,0,{unitcondi},0)GRNInward, 
+                    UnitwiseQuantityConversion(A.Item_id,Sale,0,A.Unit_id,0,{unitcondi},0)Sale, 
+                    UnitwiseQuantityConversion(A.Item_id,ClosingBalance,0,A.Unit_id,0,{unitcondi},0)ClosingBalance, 
+                    UnitwiseQuantityConversion(A.Item_id,ActualStock,0,A.Unit_id,0,{unitcondi},0)ActualStock,
+                    A.ItemName,
+                    D.QuantityInBaseUnit,
+                    UnitwiseQuantityConversion(A.Item_id,PurchaseReturn,0,A.Unit_id,0,{unitcondi},0)PurchaseReturn,
+                    UnitwiseQuantityConversion(A.Item_id,SalesReturn,0,A.Unit_id,0,{unitcondi},0)SalesReturn,
+                    UnitwiseQuantityConversion(A.Item_id,StockAdjustment,0,A.Unit_id,0,{unitcondi},0)StockAdjustment
+                    ,GroupTypeName,GroupName,SubGroupName,CASE WHEN {Unit} = 0 THEN UnitName else '{unitname}' END UnitName
+                    FROM 
+        
+        ( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit_id,M_Units.Name UnitName ,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
+        {ItemsGroupJoinsandOrderby[0]}
+        FROM O_DateWiseLiveStock
+        
+            JOIN M_Items ON M_Items.id=O_DateWiseLiveStock.Item_id 
+            join M_Units on M_Units.id=O_DateWiseLiveStock.Unit_id
+            {ItemsGroupJoinsandOrderby[1]} 
+            
+            WHERE StockDate BETWEEN %s AND %s AND Party_id=%s GROUP BY Item_id,Unit_id,GroupType.id,Groupss.id,subgroup.id
+            {ItemsGroupJoinsandOrderby[2]}) A 
+            
+            left JOIN (SELECT O_DateWiseLiveStock.Item_id, OpeningBalance FROM O_DateWiseLiveStock WHERE O_DateWiseLiveStock.StockDate = %s AND O_DateWiseLiveStock.Party_id=%s) B
+            
+            ON A.Item_id = B.Item_id 
+            
+            left JOIN (SELECT Item_id, ClosingBalance, ActualStock FROM O_DateWiseLiveStock WHERE StockDate = %s AND Party_id=%s) C
+            
+            ON A.Item_id = C.Item_id  
+            
+            LEFT JOIN (SELECT Item_id, SUM(BaseunitQuantity) QuantityInBaseUnit 
+            FROM T_Stock 
+            WHERE Party_id =%s AND StockDate BETWEEN %s AND %s 
+            GROUP BY Item_id) D 		
+            ON A.Item_id = D.Item_id ''', ([FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate]))
+                    CustomPrint(StockreportQuery)
+                    serializer = StockReportSerializer(
+                        StockreportQuery, many=True).data
 
-                StockData = list()
-                StockData.append({
+                    # StockData = list()
+                    StockData.append({
 
-                    "FromDate": FromDate,
-                    "ToDate": ToDate,
-                    "PartyName": PartyNameQ[0]["Name"],
-                    "StockDetails": serializer
+                        "FromDate": FromDate,
+                        "ToDate": ToDate,
+                        "PartyName": PartyNameQ[0]["Name"],
+                        "StockDetails": serializer
 
-                })
+                    })
 
-                if StockreportQuery:
+                if StockData:
                     log_entry = create_transaction_logNew(request, Orderdata, Party, 'From:'+str(FromDate)+','+'To:'+str(ToDate), 210, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': StockData})
                 else:
