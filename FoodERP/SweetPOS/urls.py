@@ -29,7 +29,7 @@ urlpatterns = [
     url(r'GETMaxSweetPOSSaleIDByClientID/([0-9]+)/([0-9]+)$', SPOSMaxsaleIDView.as_view()),
     url(r'StockEntry$', StockView.as_view()),  # ForStockEntryandAdjustment
     url(r'SPOSStockAdjustment/([0-9]+)/([0-9]+)$',SPOSStockAdjustmentView.as_view()),  #ItemID/PartyID
-    url(r'SPOSStockReport$', SPOSStockReportView.as_view()), 
+    url(r'SPOSStockReportTT$', SPOSStockReportView.as_view()), 
     url(r'SPOSRateList$', RateListView.as_view()),
     url(r'SPOSRateSave$', RateSaveView.as_view()),
     url(r'SPOSMobileLinkToBill$', MobileNumberSaveView.as_view()),

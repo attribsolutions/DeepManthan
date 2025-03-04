@@ -740,18 +740,17 @@ class EditOrderView(CreateAPIView):
                 else:
                         Stockparty=Party
                 # Is Not Retailer but is SSDD Order
+                
+                if q1[0]['PartyType__IsFranchises'] == 1:
+                        StockQuantity = (f''' IFNULL(s.ClosingBalance, 0) AS StockQuantity''')
+                        JoinForO_SPOSDateWiseLiveStock = (f'''LEFT JOIN SweetPOS.O_SPOSDateWiseLiveStock s ON s.Item = a.Item_id AND s.Party = {Stockparty} AND s.StockDate = CURDATE()''')
+                else:
+                        StockQuantity = (f''' (SELECT IFNULL(SUM(BaseUnitQuantity), 0) FROM O_BatchWiseLiveStock 
+                                                    WHERE IsDamagePieces = 0 AND Item_id = a.Item_id AND Party_id = {Stockparty} GROUP BY Item_id) AS StockQuantity''')
 
                 if (q1[0]['PartyType__IsRetailer'] == 0 ):
                     PartyItem = Customer
                     ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Stockparty,0).split('!') 
-                    
-                    if q1[0]['PartyType__IsFranchises'] == 1:
-                        StockQuantity = (f''' IFNULL(s.ClosingBalance, 0) AS StockQuantity''')
-                        JoinForO_SPOSDateWiseLiveStock = (f'''LEFT JOIN SweetPOS.O_SPOSDateWiseLiveStock s ON s.Item = a.Item_id AND s.Party = {Stockparty} AND s.StockDate = CURDATE()''')
-                    else:
-                        StockQuantity = (f''' (SELECT IFNULL(SUM(BaseUnitQuantity), 0) FROM O_BatchWiseLiveStock 
-                                                    WHERE IsDamagePieces = 0 AND Item_id = a.Item_id AND Party_id = {Stockparty} GROUP BY Item_id) AS StockQuantity''')
-                       
                     
                     Itemquery = TC_OrderItems.objects.raw(f'''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,
                     convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,1,{RateParty},0) else a.GST_id end),SIGNED)GST_id,
@@ -814,10 +813,9 @@ left join M_GSTHSNCode on M_GSTHSNCode.id=a.GST_id
 
 a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,
 {ItemsGroupJoinsandOrderby[0]},
-ifnull(a.DiscountAmount,0)DiscountAmount
-,(select ifnull(sum(BaseUnitQuantity),0) from O_BatchWiseLiveStock where IsDamagePieces=0 and Item_id=a.Item_id 
-and Party_id=%s 
-group by Item_id)StockQuantity ,Round(GetTodaysDateRate(a.Item_id, '{EffectiveDate}','{Party}',0,2),2) AS VRate,(select BaseUnitQuantity from MC_ItemUnits where IsDeleted=0  and UnitID_id=2 and Item_id=a.Item_id)Weightage            
+ifnull(a.DiscountAmount,0)DiscountAmount,
+{StockQuantity},
+Round(GetTodaysDateRate(a.Item_id, '{EffectiveDate}','{Party}',0,2),2) AS VRate,(select BaseUnitQuantity from MC_ItemUnits where IsDeleted=0  and UnitID_id=2 and Item_id=a.Item_id)Weightage            
                 from
 (select * from 
         (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = %s)b 
@@ -839,7 +837,9 @@ left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
 left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
 left join M_GSTHSNCode on M_GSTHSNCode.id=a.GST_id
 {ItemsGroupJoinsandOrderby[1]}
-{ItemsGroupJoinsandOrderby[2]}''', ([EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[Customer],[Party],[EffectiveDate],[Customer],[Party],[Stockparty],[PartyItem], [OrderID]))
+{JoinForO_SPOSDateWiseLiveStock} 
+{ItemsGroupJoinsandOrderby[2]}''', ([EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[Customer],
+                                    [Party],[EffectiveDate],[Customer],[Party],[PartyItem], [OrderID]))
                 
                 OrderItemSerializer = OrderEditserializer(Itemquery, many=True).data
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': OrderItemSerializer})
