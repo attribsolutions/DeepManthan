@@ -163,18 +163,18 @@ class SPOSStockReportView(CreateAPIView):
                     JOIN FoodERP.M_Items ON M_Items.id=O_SPOSDateWiseLiveStock.Item
                     join FoodERP.M_Units on M_Units.id= O_SPOSDateWiseLiveStock.Unit
                     {ItemsGroupJoinsandOrderby[1]}
-                    WHERE StockDate BETWEEN %s AND %s AND Party=%s GROUP BY Item,Unit,GroupType.id,Groupss.id,subgroup.id
+                    WHERE StockDate BETWEEN %s AND %s AND Party IN %s GROUP BY Item,Unit,GroupType.id,Groupss.id,subgroup.id
                     {ItemsGroupJoinsandOrderby[2]}) A
 
-                    left JOIN (SELECT O_SPOSDateWiseLiveStock.Item, OpeningBalance FROM O_SPOSDateWiseLiveStock WHERE O_SPOSDateWiseLiveStock.StockDate = %s AND O_SPOSDateWiseLiveStock.Party=%s) B
+                    left JOIN (SELECT O_SPOSDateWiseLiveStock.Item, OpeningBalance FROM O_SPOSDateWiseLiveStock WHERE O_SPOSDateWiseLiveStock.StockDate = %s AND O_SPOSDateWiseLiveStock.Party IN %s) B
                     ON A.Item_id = B.Item
 
-                    left JOIN (SELECT Item, ClosingBalance, ActualStock FROM O_SPOSDateWiseLiveStock WHERE StockDate = %s AND Party=%s) C 
+                    left JOIN (SELECT Item, ClosingBalance, ActualStock FROM O_SPOSDateWiseLiveStock WHERE StockDate = %s AND Party IN  %s) C 
                     ON A.Item_id = C.Item
 
                     LEFT JOIN (SELECT Item, SUM(BaseunitQuantity) QuantityInBaseUnit
                     FROM T_SPOSStock
-                    WHERE Party =%s AND StockDate BETWEEN %s AND %s
+                    WHERE Party IN %s AND StockDate BETWEEN %s AND %s
                     GROUP BY Item) D
                     ON A.Item_id = D.Item ''', ( [FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate]))
                     
