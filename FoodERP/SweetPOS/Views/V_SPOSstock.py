@@ -106,30 +106,24 @@ class SPOSStockReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, id=0):
-        # Orderdata = JSONParser().parse(request)
-        Orderdata = json.loads(request.body.decode('utf-8'))
+        Orderdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
                 FromDate = Orderdata['FromDate']
                 ToDate = Orderdata['ToDate']
                 Unit = Orderdata['Unit']
-                PartyID = Orderdata['Party'] 
-                PartyIds=PartyID.split(',')
-                             
-                # PartyIds = [int(p) for p in Orderdata['Party'].split(',')] 
-                # print(PartyIds)
+                # Party = Orderdata['Party']
+                PartyIDs = [int(p) for p in Orderdata['Party'].split(',')]
                 # PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
                 StockData = []
-            
-                for Party in PartyIds:
-                    # print(Party)
+
+                for Party in PartyIDs:
                     PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
                     if not PartyNameQ.exists():
-                        continue 
-                
+                        continue                         
                     ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Party,5).split('!')
 
-                    # print(PartyNameQ)
+                    CustomPrint(PartyNameQ)
                     if(Unit!=0):
                         UnitName = M_Units.objects.filter(id=Unit).values("Name")
                         unitname = UnitName[0]['Name']                    
@@ -164,35 +158,34 @@ class SPOSStockReportView(CreateAPIView):
                     JOIN FoodERP.M_Items ON M_Items.id=O_SPOSDateWiseLiveStock.Item
                     join FoodERP.M_Units on M_Units.id= O_SPOSDateWiseLiveStock.Unit
                     {ItemsGroupJoinsandOrderby[1]}
-                    WHERE StockDate BETWEEN %s AND %s AND Party IN %s GROUP BY Item,Unit,GroupType.id,Groupss.id,subgroup.id
+                    WHERE StockDate BETWEEN %s AND %s AND Party=%s GROUP BY Item,Unit,GroupType.id,Groupss.id,subgroup.id
                     {ItemsGroupJoinsandOrderby[2]}) A
 
-                    left JOIN (SELECT O_SPOSDateWiseLiveStock.Item, OpeningBalance FROM O_SPOSDateWiseLiveStock WHERE O_SPOSDateWiseLiveStock.StockDate = %s AND O_SPOSDateWiseLiveStock.Party IN %s) B
+                    left JOIN (SELECT O_SPOSDateWiseLiveStock.Item, OpeningBalance FROM O_SPOSDateWiseLiveStock WHERE O_SPOSDateWiseLiveStock.StockDate = %s AND O_SPOSDateWiseLiveStock.Party=%s) B
                     ON A.Item_id = B.Item
 
-                    left JOIN (SELECT Item, ClosingBalance, ActualStock FROM O_SPOSDateWiseLiveStock WHERE StockDate = %s AND Party IN  %s) C 
+                    left JOIN (SELECT Item, ClosingBalance, ActualStock FROM O_SPOSDateWiseLiveStock WHERE StockDate = %s AND Party=%s) C 
                     ON A.Item_id = C.Item
 
                     LEFT JOIN (SELECT Item, SUM(BaseunitQuantity) QuantityInBaseUnit
                     FROM T_SPOSStock
-                    WHERE Party IN %s AND StockDate BETWEEN %s AND %s
+                    WHERE Party =%s AND StockDate BETWEEN %s AND %s
                     GROUP BY Item) D
                     ON A.Item_id = D.Item ''', ( [FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate]))
                     
                     serializer = SPOSStockReportSerializer(StockreportQuery, many=True).data                
                     # StockData = list()
-                    if serializer:
-                        StockData.append({
-                            "FromDate": FromDate,
-                            "ToDate": ToDate,
-                            "PartyName": PartyNameQ[0]["Name"],
-                            "StockDetails": serializer})
-                    # print(StockreportQuery)
+                    StockData.append({
+                        "FromDate": FromDate,
+                        "ToDate": ToDate,
+                        "PartyName": PartyNameQ[0]["Name"],
+                        "StockDetails": serializer})
+                # print(StockreportQuery)
                 if StockData:
-                    log_entry = create_transaction_logNew(request, Orderdata, 0, 'From:'+str(FromDate)+','+'To:'+str(ToDate), 210, 0, FromDate, ToDate, 0)
+                    log_entry = create_transaction_logNew(request, Orderdata, Party, 'From:'+str(FromDate)+','+'To:'+str(ToDate), 210, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': StockData})
                 else:
-                    log_entry = create_transaction_logNew(request, Orderdata, 0, 'Recort Not Found', 210, 0)
+                    log_entry = create_transaction_logNew(request, Orderdata, Party, 'Recort Not Found', 210, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request,Orderdata, 0, 'StockReport:'+str(e), 33, 0)
