@@ -106,7 +106,8 @@ class SPOSStockReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, id=0):
-        Orderdata = JSONParser().parse(request)
+        # Orderdata = JSONParser().parse(request)
+        Orderdata = json.loads(request.body.decode('utf-8'))
         try:
             with transaction.atomic():
                 FromDate = Orderdata['FromDate']
