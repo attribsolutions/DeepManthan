@@ -112,7 +112,8 @@ class SPOSStockReportView(CreateAPIView):
                 FromDate = Orderdata['FromDate']
                 ToDate = Orderdata['ToDate']
                 Unit = Orderdata['Unit']
-                # Party = Orderdata['Party']                
+                # Party = Orderdata['Party']   
+                             
                 PartyIds = [int(p) for p in Orderdata['Party'].split(',')] 
                 # print(PartyIds)
                 # PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
@@ -185,7 +186,7 @@ class SPOSStockReportView(CreateAPIView):
                         "StockDetails": serializer})
                     # print(StockreportQuery)
                 if StockData:
-                    log_entry = create_transaction_logNew(request, Orderdata, Party, 'From:'+str(FromDate)+','+'To:'+str(ToDate), 210, 0, FromDate, ToDate, 0)
+                    log_entry = create_transaction_logNew(request, Orderdata, 0, 'From:'+str(FromDate)+','+'To:'+str(ToDate), 210, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': StockData})
                 else:
                     log_entry = create_transaction_logNew(request, Orderdata, Party, 'Recort Not Found', 210, 0)
