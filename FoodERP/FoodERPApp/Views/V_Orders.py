@@ -747,7 +747,7 @@ class EditOrderView(CreateAPIView):
                     
                     if q1[0]['PartyType__IsFranchises'] == 1:
                         StockQuantity = (f''' IFNULL(s.ClosingBalance, 0) AS StockQuantity''')
-                        JoinForO_SPOSDateWiseLiveStock = (f'''LEFT JOIN SweetPOS.O_SPOSDateWiseLiveStock s ON s.Item = a.Item_id AND s.Party = {Customer} AND s.StockDate = {EffectiveDate}''')
+                        JoinForO_SPOSDateWiseLiveStock = (f'''LEFT JOIN SweetPOS.O_SPOSDateWiseLiveStock s ON s.Item = a.Item_id AND s.Party = {Customer} AND s.StockDate = CURDATE()''')
                     else:
                         StockQuantity = (f''' (SELECT IFNULL(SUM(BaseUnitQuantity), 0) FROM O_BatchWiseLiveStock 
                                                     WHERE IsDamagePieces = 0 AND Item_id = a.Item_id AND Party_id = {Stockparty} GROUP BY Item_id) AS StockQuantity''')
