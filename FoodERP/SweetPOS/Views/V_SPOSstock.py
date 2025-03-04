@@ -114,15 +114,13 @@ class SPOSStockReportView(CreateAPIView):
                 Unit = Orderdata['Unit']
                 PartyID = Orderdata['Party']   
                              
-                # PartyIds = [int(p) for p in Orderdata['Party'].split(',')] 
-                PartyIds = list(map(int, Orderdata['Party'].split(',')))
+                PartyIds = [int(p) for p in Orderdata['Party'].split(',')] 
                 # print(PartyIds)
                 # PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
                 StockData = []
             
                 for Party in PartyIds:
                     # print(Party)
-                    Party = int(Party)
                     PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
                     if not PartyNameQ.exists():
                         continue 
