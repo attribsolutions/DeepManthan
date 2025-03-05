@@ -527,7 +527,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         JOIN MC_ItemUnits ON MC_ItemUnits.id=TC_InvoiceItems.Unit_id
                         JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id
                         WHERE Party_id= %s  and T_Invoices.InvoiceDate BETWEEN %s AND %s  
-                        Group by id, M_GSTHSNCode.HSNCode,TC_InvoiceItems.GSTPercentage,M_Units.EwayBillUnit
+                        Group by  M_GSTHSNCode.HSNCode,TC_InvoiceItems.GSTPercentage,M_Units.id
                         UNION
 
 
@@ -542,7 +542,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id                      
 
                         WHERE X.Party= %s  and X.InvoiceDate BETWEEN %s AND %s AND X.IsDeleted=0 
-                        Group by id, Y.HSNCode,Y.GSTPercentage,M_Units.EwayBillUnit''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
+                        Group by  Y.HSNCode,Y.GSTPercentage,M_Units.id''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
                 
                 HSN2 = HSNSerializer1(HSNquery, many=True).data
                 
@@ -673,7 +673,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         sum(UnitwiseQuantityConversion(M_Items.id,TC_InvoiceItems.QtyInNo,0,1,0,M_Units.id ,0)) TotalQuantity,sum(TC_InvoiceItems.Amount)TotalValue,
                         sum(TC_InvoiceItems.BasicAmount) TaxableValue, sum(TC_InvoiceItems.IGST)IntegratedTaxAmount,
                         sum(TC_InvoiceItems.CGST)CentralTaxAmount,
-                        sum(TC_InvoiceItems.SGST)StateUTTaxAmount,TC_InvoiceItems.GSTPercentage Rate,b.GSTIN
+                        sum(TC_InvoiceItems.SGST)StateUTTaxAmount,TC_InvoiceItems.GSTPercentage Rate
                         FROM T_Invoices 
                         JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
                         JOIN M_GSTHSNCode ON M_GSTHSNCode.id=TC_InvoiceItems.GST_id
@@ -683,7 +683,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id
 
                         WHERE Party_id= %s  and T_Invoices.InvoiceDate BETWEEN %s AND %s   AND b.GSTIN!=''
-                        Group by M_Items.id, M_GSTHSNCode.HSNCode,TC_InvoiceItems.GSTPercentage,M_Units.EwayBillUnit
+                        Group by M_Items.id, M_GSTHSNCode.HSNCode,TC_InvoiceItems.GSTPercentage,M_Units.id
                         UNION
 
 
@@ -691,7 +691,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
 
                         sum(UnitwiseQuantityConversion(M_Items.id,Y.QtyInNo,0,1,0,M_Units.id,0)) TotalQuantity,sum(Y.Amount)TotalValue,sum(Y.BasicAmount) TaxableValue, 
                         sum(Y.IGST)IntegratedTaxAmount,sum(Y.CGST)CentralTaxAmount,sum(Y.SGST)StateUTTaxAmount, 
-                        Y.GSTPercentage Rate,b.GSTIN
+                        Y.GSTPercentage Rate
                         FROM SweetPOS.T_SPOSInvoices X 
                         JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id=X.id                        
 
@@ -710,7 +710,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         sum(UnitwiseQuantityConversion(M_Items.id,TC_InvoiceItems.QtyInNo,0,1,0,M_Units.id ,0)) TotalQuantity,sum(TC_InvoiceItems.Amount)TotalValue,
                         sum(TC_InvoiceItems.BasicAmount) TaxableValue, sum(TC_InvoiceItems.IGST)IntegratedTaxAmount,
                         sum(TC_InvoiceItems.CGST)CentralTaxAmount,
-                        sum(TC_InvoiceItems.SGST)StateUTTaxAmount,TC_InvoiceItems.GSTPercentage Rate,b.GSTIN
+                        sum(TC_InvoiceItems.SGST)StateUTTaxAmount,TC_InvoiceItems.GSTPercentage Rate
                         FROM T_Invoices 
                         JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
                         JOIN M_GSTHSNCode ON M_GSTHSNCode.id=TC_InvoiceItems.GST_id
@@ -720,14 +720,14 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id
 
                         WHERE Party_id= %s  and T_Invoices.InvoiceDate BETWEEN %s AND %s   AND b.GSTIN=''
-                        Group by M_Items.id, M_GSTHSNCode.HSNCode,TC_InvoiceItems.GSTPercentage,M_Units.EwayBillUnit
+                        Group by M_Items.id, M_GSTHSNCode.HSNCode,TC_InvoiceItems.GSTPercentage,M_Units.id
                         UNION
 
 
                         SELECT 1 as id, Y.HSNCode AS HSN, M_Items.Name AS Description,M_Units.EwayBillUnit AS UQC,
                         sum(UnitwiseQuantityConversion(M_Items.id,Y.QtyInNo,0,1,0,M_Units.id,0)) TotalQuantity,sum(Y.Amount)TotalValue,sum(Y.BasicAmount) TaxableValue, 
                         sum(Y.IGST)IntegratedTaxAmount,sum(Y.CGST)CentralTaxAmount,sum(Y.SGST)StateUTTaxAmount, 
-                        Y.GSTPercentage Rate,b.GSTIN
+                        Y.GSTPercentage Rate
                         FROM SweetPOS.T_SPOSInvoices X 
                         JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id=X.id                        
 
@@ -737,7 +737,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id                     
 
                         WHERE X.Party= %s  and X.InvoiceDate BETWEEN %s AND %s AND X.IsDeleted=0  AND b.GSTIN=''
-                        Group by M_Items.id, Y.HSNCode,Y.GSTPercentage,M_Units.EwayBillUnit''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
+                        Group by M_Items.id, Y.HSNCode,Y.GSTPercentage,M_Units.id''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
                                   
                 HSN4 = HSNSerializerWithDescription(HSNquery4, many=True).data  
                 
