@@ -22,7 +22,7 @@ SECRET_KEY = 'django-insecure-t#s!16-8)sy91!+@q2hmdt_yclkuldlx=*g5aw_cb&^+rzr@ty
 DEBUG = True
 
 # ALLOWED_HOSTS = ['localhost','192.168.1.114','www.cbmfooderp.com','cbmfooderp.com','10.4.5.64','10.4.5.68',] 
-ALLOWED_HOSTS = ['localhost','127.0.0.1','www.cbmfooderp.com','cbmfooderp.com','10.4.5.64','10.4.5.68','192.168.1.114','65.254.81.162','43.225.53.91','10.1.201.68','s2.cbmfooderp.com'] 
+ALLOWED_HOSTS = ['localhost','127.0.0.1','www.cbmfooderp.com','cbmfooderp.com','10.4.5.64','10.4.5.68','192.168.1.114','65.254.81.162','43.225.53.91','10.1.201.68','s2.cbmfooderp.com','192.168.1.231','44.205.161.35'] 
 
 # Application definition
 CORS_ORIGIN_ALLOW_ALL = True #we allow the all domain to access through API
@@ -92,14 +92,14 @@ DATABASE_ROUTERS = [
     'FoodERPDBLog.routers.FoodERPDBLogRouter',
     'SweetPOS.routers.SweetPOSRouter',
 ]
-host= '10.4.5.68' #css :10.1.201.68 , erp.in :43.225.53.91 ,erp.com : 10.4.5.68
+host= 'database3.cjicgyekif0m.us-east-1.rds.amazonaws.com' #css :10.1.201.68 , erp.in :43.225.53.91 ,erp.com : 10.4.5.68
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'FoodERP',       
-        'USER': 'pk',
-        'PASSWORD': 'P@ssw0rd',  
+        'USER': 'admin',
+        'PASSWORD': 'attrib318',  
         'HOST': host,   
         'PORT': '3306' , 
         'OPTIONS': { 
@@ -110,8 +110,8 @@ DATABASES = {
     'transactionlog_db': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'TransactionLog',       
-        'USER': 'pk',
-        'PASSWORD': 'P@ssw0rd',    
+        'USER': 'admin',
+        'PASSWORD': 'attrib318',    
         'HOST': host,    
         'PORT': '3306' , 
         'OPTIONS': { 
@@ -121,8 +121,8 @@ DATABASES = {
     'sweetpos_db': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'SweetPOS',         
-        'USER': 'pk',
-        'PASSWORD': 'P@ssw0rd',  
+        'USER': 'admin',
+        'PASSWORD': 'attrib318',  
         'HOST': host,    
         'PORT': '3306' , 
         'OPTIONS': { 
