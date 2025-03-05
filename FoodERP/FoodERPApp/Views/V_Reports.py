@@ -541,77 +541,85 @@ class StockReportView(CreateAPIView):
                 FromDate = Orderdata['FromDate']
                 ToDate = Orderdata['ToDate']
                 Unit = Orderdata['Unit']
-                Party = Orderdata['Party']
-                PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
+                # Party = Orderdata['Party']
+                # PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
+                PartyIDs = [int(p) for p in Orderdata['Party'].split(',')]
                 
-                ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Party,0).split('!')
-                
-                # UnitName = M_Units.objects.filter(id=Unit).values("Name")
-                # unitname = UnitName[0]['Name']
-                if(Unit!=0):
-                    UnitName = M_Units.objects.filter(id=Unit).values("Name")
-                    unitname = UnitName[0]['Name']                    
-                else:
-                    unitname =''
+                StockData = []
+
+                for Party in PartyIDs:
+                    PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
+                    if not PartyNameQ.exists():
+                        continue            
+                    ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Party,0).split('!')
                     
-                # print('aaaaa')
-                if(Unit==0):
-                    unitcondi='A.Unit_id'
-                else:
-                    unitcondi=Unit  
-                StockreportQuery = O_DateWiseLiveStock.objects.raw(f'''SELECT  1 as id,A.Item_id,A.Unit_id,
-                UnitwiseQuantityConversion(A.Item_id,ifnull(OpeningBalance,0),0,A.Unit_id,0,{unitcondi},0)OpeningBalance, 
-                UnitwiseQuantityConversion(A.Item_id,GRNInward,0,A.Unit_id,0,{unitcondi},0)GRNInward, 
-                UnitwiseQuantityConversion(A.Item_id,Sale,0,A.Unit_id,0,{unitcondi},0)Sale, 
-                UnitwiseQuantityConversion(A.Item_id,ClosingBalance,0,A.Unit_id,0,{unitcondi},0)ClosingBalance, 
-                UnitwiseQuantityConversion(A.Item_id,ActualStock,0,A.Unit_id,0,{unitcondi},0)ActualStock,
-                A.ItemName,
-                D.QuantityInBaseUnit,
-                UnitwiseQuantityConversion(A.Item_id,PurchaseReturn,0,A.Unit_id,0,{unitcondi},0)PurchaseReturn,
-                UnitwiseQuantityConversion(A.Item_id,SalesReturn,0,A.Unit_id,0,{unitcondi},0)SalesReturn,
-                UnitwiseQuantityConversion(A.Item_id,StockAdjustment,0,A.Unit_id,0,{unitcondi},0)StockAdjustment
-                ,GroupTypeName,GroupName,SubGroupName,CASE WHEN {Unit} = 0 THEN UnitName else '{unitname}' END UnitName
-                FROM 
-	
-	( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit_id,M_Units.Name UnitName ,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
-    {ItemsGroupJoinsandOrderby[0]}
-	 FROM O_DateWiseLiveStock
-	
-	    JOIN M_Items ON M_Items.id=O_DateWiseLiveStock.Item_id 
-        join M_Units on M_Units.id=O_DateWiseLiveStock.Unit_id
-        {ItemsGroupJoinsandOrderby[1]} 
-		 
-		 WHERE StockDate BETWEEN %s AND %s AND Party_id=%s GROUP BY Item_id,Unit_id,GroupType.id,Groupss.id,subgroup.id
-        {ItemsGroupJoinsandOrderby[2]}) A 
-		
-		left JOIN (SELECT O_DateWiseLiveStock.Item_id, OpeningBalance FROM O_DateWiseLiveStock WHERE O_DateWiseLiveStock.StockDate = %s AND O_DateWiseLiveStock.Party_id=%s) B
-		
-		 ON A.Item_id = B.Item_id 
-		
-		 left JOIN (SELECT Item_id, ClosingBalance, ActualStock FROM O_DateWiseLiveStock WHERE StockDate = %s AND Party_id=%s) C
-		 
-		  ON A.Item_id = C.Item_id  
-		
-		LEFT JOIN (SELECT Item_id, SUM(BaseunitQuantity) QuantityInBaseUnit 
-		FROM T_Stock 
-		WHERE Party_id =%s AND StockDate BETWEEN %s AND %s 
-		GROUP BY Item_id) D 		
-		ON A.Item_id = D.Item_id ''', ([FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate]))
-                CustomPrint(StockreportQuery)
-                serializer = StockReportSerializer(
-                    StockreportQuery, many=True).data
+                    # UnitName = M_Units.objects.filter(id=Unit).values("Name")
+                    # unitname = UnitName[0]['Name']
+                    if(Unit!=0):
+                        UnitName = M_Units.objects.filter(id=Unit).values("Name")
+                        unitname = UnitName[0]['Name']                    
+                    else:
+                        unitname =''
+                        
+                    # print('aaaaa')
+                    if(Unit==0):
+                        unitcondi='A.Unit_id'
+                    else:
+                        unitcondi=Unit  
+                    StockreportQuery = O_DateWiseLiveStock.objects.raw(f'''SELECT  1 as id,A.Item_id,A.Unit_id,
+                    UnitwiseQuantityConversion(A.Item_id,ifnull(OpeningBalance,0),0,A.Unit_id,0,{unitcondi},0)OpeningBalance, 
+                    UnitwiseQuantityConversion(A.Item_id,GRNInward,0,A.Unit_id,0,{unitcondi},0)GRNInward, 
+                    UnitwiseQuantityConversion(A.Item_id,Sale,0,A.Unit_id,0,{unitcondi},0)Sale, 
+                    UnitwiseQuantityConversion(A.Item_id,ClosingBalance,0,A.Unit_id,0,{unitcondi},0)ClosingBalance, 
+                    UnitwiseQuantityConversion(A.Item_id,ActualStock,0,A.Unit_id,0,{unitcondi},0)ActualStock,
+                    A.ItemName,
+                    D.QuantityInBaseUnit,
+                    UnitwiseQuantityConversion(A.Item_id,PurchaseReturn,0,A.Unit_id,0,{unitcondi},0)PurchaseReturn,
+                    UnitwiseQuantityConversion(A.Item_id,SalesReturn,0,A.Unit_id,0,{unitcondi},0)SalesReturn,
+                    UnitwiseQuantityConversion(A.Item_id,StockAdjustment,0,A.Unit_id,0,{unitcondi},0)StockAdjustment
+                    ,GroupTypeName,GroupName,SubGroupName,CASE WHEN {Unit} = 0 THEN UnitName else '{unitname}' END UnitName
+                    FROM 
+        
+        ( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit_id,M_Units.Name UnitName ,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
+        {ItemsGroupJoinsandOrderby[0]}
+        FROM O_DateWiseLiveStock
+        
+            JOIN M_Items ON M_Items.id=O_DateWiseLiveStock.Item_id 
+            join M_Units on M_Units.id=O_DateWiseLiveStock.Unit_id
+            {ItemsGroupJoinsandOrderby[1]} 
+            
+            WHERE StockDate BETWEEN %s AND %s AND Party_id=%s GROUP BY Item_id,Unit_id,GroupType.id,Groupss.id,subgroup.id
+            {ItemsGroupJoinsandOrderby[2]}) A 
+            
+            left JOIN (SELECT O_DateWiseLiveStock.Item_id, OpeningBalance FROM O_DateWiseLiveStock WHERE O_DateWiseLiveStock.StockDate = %s AND O_DateWiseLiveStock.Party_id=%s) B
+            
+            ON A.Item_id = B.Item_id 
+            
+            left JOIN (SELECT Item_id, ClosingBalance, ActualStock FROM O_DateWiseLiveStock WHERE StockDate = %s AND Party_id=%s) C
+            
+            ON A.Item_id = C.Item_id  
+            
+            LEFT JOIN (SELECT Item_id, SUM(BaseunitQuantity) QuantityInBaseUnit 
+            FROM T_Stock 
+            WHERE Party_id =%s AND StockDate BETWEEN %s AND %s 
+            GROUP BY Item_id) D 		
+            ON A.Item_id = D.Item_id ''', ([FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate]))
+                    CustomPrint(StockreportQuery)
+                    serializer = StockReportSerializer(
+                        StockreportQuery, many=True).data
 
-                StockData = list()
-                StockData.append({
+                    # StockData = list()
+                    if serializer:
+                        StockData.append({
 
-                    "FromDate": FromDate,
-                    "ToDate": ToDate,
-                    "PartyName": PartyNameQ[0]["Name"],
-                    "StockDetails": serializer
+                            "FromDate": FromDate,
+                            "ToDate": ToDate,
+                            "PartyName": PartyNameQ[0]["Name"],
+                            "StockDetails": serializer
 
-                })
+                        })
 
-                if StockreportQuery:
+                if StockData:
                     log_entry = create_transaction_logNew(request, Orderdata, Party, 'From:'+str(FromDate)+','+'To:'+str(ToDate), 210, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': StockData})
                 else:
@@ -1370,27 +1378,32 @@ class ManPowerReportView(CreateAPIView):
     # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self, request):
+    def get(self, request,EmployeeID=0):
         try:
             with transaction.atomic():
-                query = MC_PartySubParty.objects.raw('''SELECT  MC_PartySubParty.id,A.SAPPartyCode AS SAPCode, A.id AS FEParty_id, A.NAME AS PartyName,  A.isActive AS PartyActive, A.CreatedOn AS PartyCreation,
+                EmpPartys=MC_EmployeeParties.objects.raw('''select EmployeeParties(%s) id''',[EmployeeID])
+                for row in EmpPartys:
+                    p=row.id
+                PartyIDs = p.split(",")
+                
+                query = MC_PartySubParty.objects.raw(f'''SELECT  MC_PartySubParty.id,A.SAPPartyCode AS SAPCode, A.id AS FEParty_id, A.NAME AS PartyName,  A.isActive AS PartyActive, A.CreatedOn AS PartyCreation,
 M_PartyType.Name AS PartyType, A.Email, A.PAN, MC_PartySubParty.Party_id AS SS_id, B.NAME AS SSName, M_Users.LoginName AS LoginID, "India" AS country,
  C.Address, M_States.Name AS State, M_Districts.Name AS District,
 M_Cities.Name AS City, C.PIN AS PIN, A.MobileNo AS Mobile, M_Employees.Name AS OwnerName,
-A.Latitude, A.Longitude, C.FSSAINo AS FSSAINo,
+A.Latitude, A.Longitude, C.FSSAINo AS FSSAINo, 
 C.FSSAIExipry AS FSSAIExpiry, A.GSTIN AS GSTIN, M_Employees_GM.Name AS GM, M_Employees_NH.Name AS NSM,
  M_Employees_RH.Name AS RSM, M_Employees_ASM.Name AS ASM,M_Employees_SE.Name AS SE,M_Employees_SO.Name AS SO, M_Employees_SR.Name AS SR, M_Employees_MT.Name AS MT,  M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
 FROM MC_PartySubParty 
-LEFT JOIN M_Parties A ON A.id = MC_PartySubParty.SubParty_id
+LEFT JOIN M_Parties A ON A.id = MC_PartySubParty.SubParty_id and A.id in %s
 LEFT JOIN M_Parties B ON B.id = MC_PartySubParty.Party_id
 LEFT JOIN M_PartyType ON M_PartyType.id = A.PartyType_id
-LEFT JOIN MC_PartyAddress  C ON C.Party_id = A.id
+LEFT JOIN MC_PartyAddress  C ON C.Party_id = A.id AND C.IsDefault = 1
 LEFT JOIN M_States ON M_States.id = A.State_id
 LEFT JOIN M_Districts ON M_Districts.id = A.District_id
 LEFT JOIN M_Cities ON M_Cities.id = A.City_id
-LEFT JOIN MC_EmployeeParties ON MC_EmployeeParties.Party_id = A.id
+LEFT JOIN MC_EmployeeParties ON MC_EmployeeParties.Party_id = A.id 
 LEFT JOIN M_Employees On M_Employees.id = MC_EmployeeParties.Employee_id
-LEFT JOIN M_Users On M_Users.Employee_id = M_Employees.id
+LEFT JOIN M_Users On M_Users.Employee_id = M_Employees.id and M_Users.POSRateType=0
 LEFT JOIN M_PartyDetails X On  A.id=X.Party_id AND X.Group_id is null
 LEFT JOIN M_Cluster On X.Cluster_id=M_Cluster.id
 LEFT JOIN M_SubCluster On X.SubCluster_id=M_SubCluster.id
@@ -1403,60 +1416,63 @@ LEFT JOIN M_Employees M_Employees_SO ON M_Employees_SO.id = X.SO
 LEFT JOIN M_Employees M_Employees_SR ON M_Employees_SR.id = X.SR
 LEFT JOIN M_Employees M_Employees_MT ON M_Employees_MT.id = X.MT
                                                      
-WHERE M_PartyType.id IN(9,10,15,17,19) AND C.IsDefault = 1 ''')
+WHERE M_PartyType.id IN(9,10,15,17,19)  ''',[PartyIDs])
                
-
+                print(query)
                 if query:
-                    ManPower_Serializer = ManPowerSerializer(query, many=True).data
+                    # ManPower_Serializer = ManPowerSerializer(query, many=True).data
                     ManPowerList = list()
                     CustomPrint(query)
-                    for a in ManPower_Serializer:
-                        PartyDateTime = datetime.strptime(a['PartyCreation'], "%Y-%m-%dT%H:%M:%S.%f")
+                    for a in query:
+                        # PartyDateTime = datetime.strptime(str(a.PartyCreation), "%Y-%m-%dT %H:%M:%S.%f")
+                        # PartyCreation = PartyDateTime.strftime("%Y-%m-%d %H:%M:%S")
+                        PartyDateTime = datetime.strptime(str(a.PartyCreation), "%Y-%m-%d %H:%M:%S.%f")
                         PartyCreation = PartyDateTime.strftime("%Y-%m-%d %H:%M:%S")
                         ManPowerList.append({
-                            "SAPCode": a['SAPCode'],
-                            "FEParty_id": a['FEParty_id'],
-                            "PartyName": a['PartyName'],
-                            "PartyActive": a['PartyActive'],
+                            "SAPCode": a.SAPCode,
+                            "FEParty_id": a.FEParty_id,
+                            "PartyName": a.PartyName,
+                            "PartyActive": a.PartyActive,
                             "PartyCreation":PartyCreation,
-                            "PartyType": a['PartyType'],
-                            "Email": a['Email'],
-                            "PAN":a['PAN'],
-                            "SS_id": a['SS_id'],
-                            "SSName": a['SSName'],
-                            "LoginID": a['LoginID'],
-                            "country": a['country'],
-                            "Cluster" : a["Cluster"],
-                            "SubCluster": a["SubCluster"],
-                            "Address": a['Address'],
-                            "State": a['State'],
-                            "District": a['District'],
-                            "City": a['City'],
-                            "PIN": a['PIN'],
-                            "Mobile": a['Mobile'],
-                            "OwnerName": a['OwnerName'],
-                            "Latitude": a['Latitude'],
-                            "Longitude": a['Longitude'],
-                            "FSSAINo": a['FSSAINo'],
-                            "FSSAIExpiry": a['FSSAIExpiry'],
-                            "GSTIN": a['GSTIN'],
-                            "GM": a['GM'],
-                            "NSM": a['NSM'],
-                            "RSM": a['RSM'],
-                            "ASM": a['ASM'],
-                            "SE": a['SE'],
-                            "SO": a['SO'],
-                            "SR": a['SR'],
-                            "MT": a['MT']
+                            "PartyType": a.PartyType,
+                            "Email": a.Email,
+                            "PAN":a.PAN,
+                            "SS_id": a.SS_id,
+                            "SSName": a.SSName,
+                            "LoginID": a.LoginID,
+                            "country": a.country,
+                            "Cluster" : a.Cluster,
+                            "SubCluster": a.SubCluster,
+                            "Address": a.Address,
+                            "State": a.State,
+                            "District": a.District,
+                            "City": a.City,
+                            "PIN": a.PIN,
+                            "Mobile": a.Mobile,
+                            "OwnerName": a.OwnerName,
+                            "Latitude": a.Latitude,
+                            "Longitude": a.Longitude,
+                            "FSSAINo": a.FSSAINo,
+                            "FSSAIExpiry": a.FSSAIExpiry,
+                            "GSTIN": a.GSTIN,
+                            "GM": a.GM,
+                            "NSM": a.NSM,
+                            "RSM": a.RSM,
+                            "ASM": a.ASM,
+                            "SE": a.SE,
+                            "SO": a.SO,
+                            "SR": a.SR,
+                            "MT": a.MT,
+                            # "fssaidocument" :a.fssaidocument
                             
                             })
-                    log_entry = create_transaction_logNew(request, ManPower_Serializer, 0, '', 219, 0)
+                    log_entry = create_transaction_logNew(request, query, 0, '', 219, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ManPowerList})
-                log_entry = create_transaction_logNew(request, ManPower_Serializer, 0, 'Report Not Found', 219, 0)
+                log_entry = create_transaction_logNew(request, query, 0, 'Report Not Found', 219, 0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'ManPowerReport:'+str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
 
 
 class ProductAndMarginReportView(CreateAPIView):

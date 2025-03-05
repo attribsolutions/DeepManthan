@@ -440,6 +440,7 @@ class ManPowerSerializer(serializers.Serializer):
     SO = serializers.CharField(max_length=500)
     SR = serializers.CharField(max_length=500)
     MT =  serializers.CharField(max_length=500)
+    fssaidocument = serializers.CharField(max_length=500)
     
 
 class TCSAmountReportSerializer(serializers.Serializer):

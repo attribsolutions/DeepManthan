@@ -117,6 +117,13 @@ class M_PartyType(models.Model):
  
     class Meta:
         db_table = 'M_PartyType'
+        indexes = [
+          
+            models.Index(fields=['IsRetailer']),  # Index on InvoiceDate
+            models.Index(fields=['IsFranchises']),
+            
+            
+        ]
         
 
 class M_GeneralMaster(models.Model):
@@ -233,6 +240,11 @@ class M_Parties(models.Model):
     
     class Meta:
         db_table = 'M_Parties'
+        indexes = [
+            models.Index(fields=['PartyType', 'District','State']),
+            
+            
+        ]
         
 class MC_PartyAddress(models.Model): 
     Address = models.CharField(max_length=500)
@@ -245,6 +257,9 @@ class MC_PartyAddress(models.Model):
 
     class Meta:
         db_table = 'MC_PartyAddress'
+        indexes = [
+            models.Index(fields=['Party', 'IsDefault']),
+        ]  
      
      
 
@@ -331,7 +346,11 @@ class MC_ManagementParties(models.Model):
     Party = models.ForeignKey(M_Parties, related_name='ManagementEmpparty',  on_delete=models.PROTECT)
 
     class Meta:
-        db_table = "MC_ManagementParties"        
+        db_table = "MC_ManagementParties"  
+        indexes = [
+            models.Index(fields=['Employee', 'Party']),
+            
+        ]      
 
 class UserManager(BaseUserManager):
     '''
@@ -2354,7 +2373,10 @@ class M_PartyDetails(models.Model):
     MT = models.CharField(max_length=500,null=True)
     
     class Meta:
-        db_table = "M_PartyDetails" 
+        db_table = "M_PartyDetails"
+        indexes = [
+            models.Index(fields=['Party', 'Group']),
+        ]  
 
 
 class T_TargetUploads(models.Model):
