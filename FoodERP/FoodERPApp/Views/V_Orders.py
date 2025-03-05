@@ -796,7 +796,7 @@ left join M_GSTHSNCode on M_GSTHSNCode.id=a.GST_id
                                                            [EffectiveDate], [EffectiveDate], [Customer], [Party], [EffectiveDate], 
                                                            [Customer], [Party], [EffectiveDate], [RateParty], [PartyItem],
                                                            [Party], [PartyItem], [OrderID]))
-                    print(Itemquery)
+                    
                
                 else:
                     PartyItem = Party
