@@ -741,7 +741,7 @@ class EditOrderView(CreateAPIView):
                 # Is Not Retailer but is SSDD Order
                 
                 if q1[0]['PartyType__IsFranchises'] == 1:
-                        StockQuantity = (f'''(SELECT IFNULL(O_SPOSDateWiseLiveStock.ClosingBalance, 0)  FROM SweetPOS.O_SPOSDateWiseLiveStock
+                        StockQuantity = (f'''(SELECT COALESCE(MAX(O_SPOSDateWiseLiveStock.ClosingBalance), 0)    FROM SweetPOS.O_SPOSDateWiseLiveStock
                                            Where O_SPOSDateWiseLiveStock.Item = a.Item_id 
                                               AND O_SPOSDateWiseLiveStock.Party = {Stockparty} AND O_SPOSDateWiseLiveStock.StockDate = CURDATE() ) AS StockQuantity''')
                 else:
@@ -796,6 +796,7 @@ left join M_GSTHSNCode on M_GSTHSNCode.id=a.GST_id
                                                            [EffectiveDate], [EffectiveDate], [Customer], [Party], [EffectiveDate], 
                                                            [Customer], [Party], [EffectiveDate], [RateParty], [PartyItem],
                                                            [Party], [PartyItem], [OrderID]))
+                    print(Itemquery)
                
                 else:
                     PartyItem = Party
