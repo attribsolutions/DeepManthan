@@ -683,7 +683,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id
 
                         WHERE Party_id= %s  and T_Invoices.InvoiceDate BETWEEN %s AND %s   AND b.GSTIN!=''
-                        Group by id, M_GSTHSNCode.HSNCode,TC_InvoiceItems.GSTPercentage,M_Units.EwayBillUnit
+                        Group by M_Items.id, M_GSTHSNCode.HSNCode,TC_InvoiceItems.GSTPercentage,M_Units.EwayBillUnit
                         UNION
 
 
@@ -701,7 +701,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id                     
 
                         WHERE X.Party= %s  and X.InvoiceDate BETWEEN %s AND %s AND X.IsDeleted=0  AND b.GSTIN!=''
-                        Group by id, Y.HSNCode,Y.GSTPercentage,M_Units.EwayBillUnit''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
+                        Group by M_Items.id, Y.HSNCode,Y.GSTPercentage,M_Units.EwayBillUnit''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
                 
                 HSN3 = HSNSerializerWithDescription(HSNquery3, many=True).data
                 
@@ -720,7 +720,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id
 
                         WHERE Party_id= %s  and T_Invoices.InvoiceDate BETWEEN %s AND %s   AND b.GSTIN=''
-                        Group by id, M_GSTHSNCode.HSNCode,TC_InvoiceItems.GSTPercentage,M_Units.EwayBillUnit
+                        Group by M_Items.id, M_GSTHSNCode.HSNCode,TC_InvoiceItems.GSTPercentage,M_Units.EwayBillUnit
                         UNION
 
 
@@ -737,7 +737,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id                     
 
                         WHERE X.Party= %s  and X.InvoiceDate BETWEEN %s AND %s AND X.IsDeleted=0  AND b.GSTIN=''
-                        Group by id, Y.HSNCode,Y.GSTPercentage,M_Units.EwayBillUnit''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
+                        Group by M_Items.id, Y.HSNCode,Y.GSTPercentage,M_Units.EwayBillUnit''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
                                   
                 HSN4 = HSNSerializerWithDescription(HSNquery4, many=True).data  
                 
