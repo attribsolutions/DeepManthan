@@ -2318,10 +2318,10 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                        
                     })
                 if CodeRedemptionData:
-                    log_entry = create_transaction_logNew(request, MATAData, 0, "", 443, 0, FromDate, ToDate, 0)
+                    log_entry = create_transaction_logNew(request, MATAData, 0, "", 448, 0, FromDate, ToDate, 0)
                     return JsonResponse({"StatusCode": 200, "Status": True, "Message": "CodeRedemptionReport","Data": CodeRedemptionData,})
 
-                log_entry = create_transaction_logNew(request, MATAData, 0, "No CodeRedemptionReport found", 443, 0, FromDate, ToDate, 0)
+                log_entry = create_transaction_logNew(request, MATAData, 0, "No CodeRedemptionReport found", 448, 0, FromDate, ToDate, 0)
                 return JsonResponse({"StatusCode": 204, "Status": True,"Message": "No CodeRedemptionReport found.","Data": [], })
 
         except Exception as e:
