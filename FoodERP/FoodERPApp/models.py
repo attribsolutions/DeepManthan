@@ -788,7 +788,7 @@ class MC_ItemUnits(models.Model):
 
 class MC_ItemImages(models.Model):
     
-    Item_pic = models.FileField(upload_to=r"Images\ItemImages",default="",null=True,blank=True)
+    Item_pic = models.FileField(upload_to="Images\ItemImages",default="",null=True,blank=True)
     ImageType= models.ForeignKey(M_ImageTypes, related_name='ImageType', on_delete=models.PROTECT)
     Item = models.ForeignKey(M_Items, related_name='ItemImagesDetails', on_delete=models.CASCADE,null=True,blank=True)
     class Meta:
@@ -1585,7 +1585,7 @@ class T_PurchaseReturn(models.Model):
     ReturnReason = models.ForeignKey(M_GeneralMaster, related_name='ReturnReason', on_delete=models.PROTECT,null=True,blank=True)
     IsApproved=models.IntegerField(default=0)
     Mode = models.IntegerField() # 1- SalesReturn 2-PurchaseReturn 3- Salesconsoldatedpurchasereturn
-    ASMApprovalImgUpload = models.FileField(upload_to=r"Images\ReturnASMApprovalImgUpload",default="",null=True,blank=True)
+    ASMApprovalImgUpload = models.FileField(upload_to="Images\ReturnASMApprovalImgUpload",default="",null=True,blank=True)
     
     class Meta:
         db_table = "T_PurchaseReturn"
@@ -1650,7 +1650,7 @@ class TC_PurchaseReturnItems(models.Model):
 class TC_PurchaseReturnItemImages(models.Model):
     Item_pic = models.TextField(null=True,blank=True)
     PurchaseReturnItem = models.ForeignKey(TC_PurchaseReturnItems, related_name='ReturnItemImages', on_delete=models.CASCADE,null=True,blank=True)
-    Image = models.ImageField(upload_to=r"Images\ReturnImages",default="",null=True,blank=True)
+    Image = models.ImageField(upload_to="Images\ReturnImages",default="",null=True,blank=True)
     class Meta:
         db_table = "TC_PurchaseReturnItemImages"
         
@@ -2058,7 +2058,7 @@ class M_PartySettingsDetails(models.Model):
     Setting=models.ForeignKey(M_Settings,related_name='Settingid',on_delete=models.CASCADE)  
     Company = models.ForeignKey(C_Companies,related_name='SetCompany', on_delete=models.PROTECT)
     Party = models.ForeignKey(M_Parties,related_name='SetParty', on_delete=models.CASCADE)
-    Image = models.ImageField(upload_to=r"Images\PartyRelatedImages",default="",null=True,blank=True)
+    Image = models.ImageField(upload_to="Images\PartyRelatedImages",default="",null=True,blank=True)
     
     class Meta:
         db_table="M_PartySettingsDetails"
@@ -2312,7 +2312,7 @@ class T_ClaimTrackingEntry(models.Model):
     CreditNoteDate = models.DateField()	
     CreditNoteAmount	= models.DecimalField(max_digits=20, decimal_places=2)
     ClaimSummaryDate = models.DateField()	
-    CreditNoteUpload = models.FileField(upload_to=r"Images\ClaimTrackingFiles",default="",null=True,blank=True)
+    CreditNoteUpload = models.FileField(upload_to="Images\ClaimTrackingFiles",default="",null=True,blank=True)
     Party = models.ForeignKey(M_Parties, related_name='ClaimTrackingParty', on_delete=models.PROTECT) 
     FullClaimNo = models.CharField(max_length=500,blank=True, null=True) 
     PartyType = models.ForeignKey(M_PartyType, related_name='ClaimTrackingPartyType', on_delete=models.PROTECT,blank=True, null=True)
