@@ -2282,5 +2282,50 @@ class CouponCodeRedemptionReportView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, CouponCodeData, 0, "CouponCodeRedemptionReport: " + str(e), 33, 0)
             return JsonResponse({"StatusCode": 400,"Status": False,"Message": str(e), "Data": [],})
+        
+        
+        
+class MATAVoucherRedeemptionClaimView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic
+    def post(self, request):
+        MATAData = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                FromDate = MATAData['FromDate']
+                ToDate = MATAData['ToDate']
+                Party = MATAData['Party']
+                CodeRedemptionData = []
+                             
+                
+                MATACodeRedemptionQuery = T_SPOSInvoices.objects.raw(f'''Select SweetPOS.T_SPOSInvoices.id,FoodERP.M_Parties.Name FranchiseName,count(*) VoucherCodeCount,M_Scheme.SchemeValue ClaimPerVoucher,
+                (M_Scheme.SchemeValue*Count(*))TotalClaimAmount From  SweetPOS.T_SPOSInvoices
+                JOIN FoodERP.M_Parties ON FoodERP.M_Parties.id=Party
+                JOIN FoodERP.MC_SchemeParties ON FoodERP.MC_SchemeParties.PartyID_id=FoodERP.M_Parties.id
+                JOIN FoodERP.M_Scheme ON FoodERP.M_Scheme.id=FoodERP.MC_SchemeParties.SchemeID_id
+                where InvoiceDate between '{FromDate}' and '{ToDate}' and VoucherCode !=''
+                and SchemeID_id=1  and Party in ({Party}) group by SweetPOS.T_SPOSInvoices.Party,M_Scheme.id ''')
+                print(MATACodeRedemptionQuery)
+                for Code in MATACodeRedemptionQuery:
+                    print(Code)
+                    CodeRedemptionData.append({
+                        "id": Code.id,
+                        "FranchiseName": Code.FranchiseName,
+                        "VoucherCodeCount": Code.VoucherCodeCount,
+                        "ClaimPerVoucher": Code.ClaimPerVoucher,
+                        "TotalClaimAmount":Code.TotalClaimAmount
+                       
+                    })
+                if CodeRedemptionData:
+                    log_entry = create_transaction_logNew(request, MATAData, 0, "", 443, 0, FromDate, ToDate, 0)
+                    return JsonResponse({"StatusCode": 200, "Status": True, "Message": "CodeRedemptionReport","Data": CodeRedemptionData,})
+
+                log_entry = create_transaction_logNew(request, MATAData, 0, "No CodeRedemptionReport found", 443, 0, FromDate, ToDate, 0)
+                return JsonResponse({"StatusCode": 204, "Status": True,"Message": "No CodeRedemptionReport found.","Data": [], })
+
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, MATAData, 0, "CodeRedemptionReport: " + str(e), 33, 0)
+            return JsonResponse({"StatusCode": 400,"Status": False,"Message": str(e), "Data": [],})
 
 
