@@ -41,7 +41,7 @@ pipeline {
                     docker rm backend-container || true
                     docker pull ${REGISTRY}:${IMAGE_TAG}
                     docker rmi ${IMAGE_NAME}:${IMAGE_TAG} || true
-                    docker run -d -p 8000:8000 --name fooderpbackend ${REGISTRY}:${IMAGE_TAG}
+                    docker run -d -p 8000:8000 --name backend-container ${REGISTRY}:${IMAGE_TAG}
 
                 """
             }
