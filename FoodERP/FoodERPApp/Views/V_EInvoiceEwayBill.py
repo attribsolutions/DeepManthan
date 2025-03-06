@@ -212,7 +212,7 @@ where Invoice_id=%s group by SPOSInvoiceItems.Item,SPOSInvoiceItems.HSNCode,M_Un
                         'location': Invoice['Buyer_location'],
                         'pincode': Invoice['buyer_pincode'],
                         'place_of_supply': Invoice['Buyer_state_code'],
-                        'state_code': Invoice['seller_State']
+                        'state_code': Invoice['buyer_State']
                     }),
                     dispatch_details.append({
                         'company_name': Invoice['seller_legal_name'],
