@@ -175,11 +175,12 @@ class SPOSStockReportView(CreateAPIView):
                     
                     serializer = SPOSStockReportSerializer(StockreportQuery, many=True).data                
                     # StockData = list()
-                    StockData.append({
-                        "FromDate": FromDate,
-                        "ToDate": ToDate,
-                        "PartyName": PartyNameQ[0]["Name"],
-                        "StockDetails": serializer})
+                    if serializer:
+                        StockData.append({
+                            "FromDate": FromDate,
+                            "ToDate": ToDate,
+                            "PartyName": PartyNameQ[0]["Name"],
+                            "StockDetails": serializer})
                 # print(StockreportQuery)
                 if StockData:
                     log_entry = create_transaction_logNew(request, Orderdata, Party, 'From:'+str(FromDate)+','+'To:'+str(ToDate), 210, 0, FromDate, ToDate, 0)
@@ -189,7 +190,7 @@ class SPOSStockReportView(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request,Orderdata, 0, 'StockReport:'+str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})        
         
         
         
