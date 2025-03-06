@@ -92,7 +92,9 @@ DATABASE_ROUTERS = [
     'FoodERPDBLog.routers.FoodERPDBLogRouter',
     'SweetPOS.routers.SweetPOSRouter',
 ]
-host= 'database3.cjicgyekif0m.us-east-1.rds.amazonaws.com' #css :10.1.201.68 , erp.in :43.225.53.91 ,erp.com : 10.4.5.68
+
+host= '10.4.5.68'  #css :10.1.201.68 , erp.in :43.225.53.91 ,erp.com : 10.4.5.68
+
 
 
 DATABASES = {
