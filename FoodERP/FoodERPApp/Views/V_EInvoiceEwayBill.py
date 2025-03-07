@@ -98,7 +98,7 @@ P.Name seller_legal_name,C.Name Buyer_legal_name,SPOSInvoice.FullInvoiceNumber d
 PS.Name seller_State ,CS.Name buyer_State,PS.StateCode Seller_state_code ,CS.StateCode Buyer_state_code,
 PD.Name Seller_location ,CD.Name Buyer_location,
 P.GSTIN Seller_gstin,C.GSTIN Buyer_gstin, 
-PA.Address seller_address1,PA.PIN seller_pincode,CA.Address Buyer_address1,PA.PIN buyer_pincode 
+PA.Address seller_address1,PA.PIN seller_pincode,CA.Address Buyer_address1,CA.PIN buyer_pincode 
 FROM SweetPOS.T_SPOSInvoices SPOSInvoice
 join FoodERP.M_Parties P on P.id=SPOSInvoice.Party
 join FoodERP.M_Parties C on C.id=SPOSInvoice.Customer
@@ -212,7 +212,7 @@ where Invoice_id=%s group by SPOSInvoiceItems.Item,SPOSInvoiceItems.HSNCode,M_Un
                         'location': Invoice['Buyer_location'],
                         'pincode': Invoice['buyer_pincode'],
                         'place_of_supply': Invoice['Buyer_state_code'],
-                        'state_code': Invoice['seller_State']
+                        'state_code': Invoice['buyer_State']
                     }),
                     dispatch_details.append({
                         'company_name': Invoice['seller_legal_name'],

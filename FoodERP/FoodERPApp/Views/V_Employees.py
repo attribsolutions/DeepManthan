@@ -307,8 +307,7 @@ class ManagementEmployeeViewList(CreateAPIView):
                 Company = ManagementEmployeedata['Company']
                 query = M_EmployeeTypes.objects.filter(Company=Company, IsSalesTeamMember=1)
                 if query.exists():
-                    query2 = M_Employees.objects.filter(
-                        Company=Company, EmployeeType__in=query)
+                    query2 = M_Employees.objects.filter(Company=Company, EmployeeType__in=query)
                     Employee_Serializer = M_EmployeesSerializer(
                         query2, many=True)
                     log_entry = create_transaction_logNew(request,ManagementEmployeedata,0,'Company:'+str(Company),204,0)
@@ -345,7 +344,7 @@ class ManagementEmployeePartiesFilterView(CreateAPIView):
                 Left JOIN M_PartyDetails  ON M_Parties.id = M_PartyDetails.Party_id and M_PartyDetails.Group_id is null
 				Left JOIN M_Cluster  ON M_PartyDetails.Cluster_id = M_Cluster.id
 				Left JOIN M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id
-                Where  M_PartyType.Company_id=%s AND M_PartyType.IsRetailer=0 OR (M_PartyType.IsRetailer!=1 and M_PartyType.IsFranchises =1) )a
+                Where  M_PartyType.Company_id=%s AND (M_PartyType.IsRetailer=0 OR (M_PartyType.IsRetailer!=1 and M_PartyType.IsFranchises =1)) )a
                 left join 
                 (select Party_id PartyID from MC_ManagementParties where MC_ManagementParties.Employee_id=%s)b
                 ON  a.Party = b.PartyID''', ([CompanyID], [EmployeeID]))
