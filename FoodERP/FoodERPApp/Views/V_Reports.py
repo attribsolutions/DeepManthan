@@ -2306,9 +2306,9 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                 JOIN FoodERP.M_Scheme ON FoodERP.M_Scheme.id=FoodERP.MC_SchemeParties.SchemeID_id
                 where InvoiceDate between '{FromDate}' and '{ToDate}' and VoucherCode !=''
                 and SchemeID_id=1  and Party in ({Party}) group by SweetPOS.T_SPOSInvoices.Party,M_Scheme.id ''')
-                print(MATACodeRedemptionQuery)
+                
                 for Code in MATACodeRedemptionQuery:
-                    print(Code)
+                   
                     CodeRedemptionData.append({
                         "id": Code.id,
                         "FranchiseName": Code.FranchiseName,
