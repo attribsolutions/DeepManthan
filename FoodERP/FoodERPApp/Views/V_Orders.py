@@ -741,10 +741,12 @@ class EditOrderView(CreateAPIView):
                 # Is Not Retailer but is SSDD Order
                 
                 if q1[0]['PartyType__IsFranchises'] == 1:
+                        IsCBMItems = ''
                         StockQuantity = (f'''(SELECT COALESCE(MAX(O_SPOSDateWiseLiveStock.ClosingBalance), 0)    FROM SweetPOS.O_SPOSDateWiseLiveStock
                                            Where O_SPOSDateWiseLiveStock.Item = a.Item_id 
                                               AND O_SPOSDateWiseLiveStock.Party = {Stockparty} AND O_SPOSDateWiseLiveStock.StockDate = CURDATE() ) AS StockQuantity''')
                 else:
+                        IsCBMItems = 'AND M_Items.IsCBMItem = 1'
                         StockQuantity = (f''' (SELECT IFNULL(SUM(BaseUnitQuantity), 0) FROM O_BatchWiseLiveStock 
                                                     WHERE IsDamagePieces = 0 AND Item_id = a.Item_id AND Party_id = {Stockparty} GROUP BY Item_id) AS StockQuantity''')
 
@@ -831,7 +833,7 @@ Round(GetTodaysDateRate(a.Item_id, '{EffectiveDate}','{Party}',0,2),2) AS VRate,
 )a
 
 
-join M_Items on M_Items.id=Item_id and IsCBMItem=1
+JOIN M_Items  ON M_Items.id = a.Item_id {IsCBMItems}
 left join M_MRPMaster on M_MRPMaster.id =a.MRP_id
 left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
 left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
