@@ -1403,7 +1403,7 @@ LEFT JOIN M_Districts ON M_Districts.id = A.District_id
 LEFT JOIN M_Cities ON M_Cities.id = A.City_id
 LEFT JOIN MC_EmployeeParties ON MC_EmployeeParties.Party_id = A.id 
 LEFT JOIN M_Employees On M_Employees.id = MC_EmployeeParties.Employee_id
-LEFT JOIN M_Users On M_Users.Employee_id = M_Employees.id
+LEFT JOIN M_Users On M_Users.Employee_id = M_Employees.id and M_Users.POSRateType=0
 LEFT JOIN M_PartyDetails X On  A.id=X.Party_id AND X.Group_id is null
 LEFT JOIN M_Cluster On X.Cluster_id=M_Cluster.id
 LEFT JOIN M_SubCluster On X.SubCluster_id=M_SubCluster.id
@@ -2305,9 +2305,11 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                 JOIN FoodERP.M_Scheme ON FoodERP.M_Scheme.id=FoodERP.MC_SchemeParties.SchemeID_id
                 where InvoiceDate between '{FromDate}' and '{ToDate}' and VoucherCode !=''
                 and SchemeID_id=1  and Party in ({Party}) group by SweetPOS.T_SPOSInvoices.Party,M_Scheme.id ''')
-                # print(MATACodeRedemptionQuery)
+
+                
                 for Code in MATACodeRedemptionQuery:
-                    # print(Code)
+                   
+
                     CodeRedemptionData.append({
                         "id": Code.id,
                         "FranchiseName": Code.FranchiseName,

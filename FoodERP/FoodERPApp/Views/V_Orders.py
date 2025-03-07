@@ -732,7 +732,6 @@ class EditOrderView(CreateAPIView):
                 DemandID = request.data['Demand']
                 
                 q1 = M_Parties.objects.filter(id=Customer).select_related('PartyType').values('PartyType','PartyType__IsRetailer','PartyType__IsSCM','PartyType__IsFranchises')
-                # print(q1)
                 # q2 = M_PartyType.objects.filter(
                 #     id=q1[0]['PartyType']).values('IsRetailer', 'IsSCM')
                 if(OrderType == 1):
@@ -742,8 +741,9 @@ class EditOrderView(CreateAPIView):
                 # Is Not Retailer but is SSDD Order
                 
                 if q1[0]['PartyType__IsFranchises'] == 1:
-                        StockQuantity = (f''' IFNULL(s.ClosingBalance, 0) AS StockQuantity''')
-                        JoinForO_SPOSDateWiseLiveStock = (f'''LEFT JOIN SweetPOS.O_SPOSDateWiseLiveStock s ON s.Item = a.Item_id AND s.Party = {Stockparty} AND s.StockDate = CURDATE()''')
+                        StockQuantity = (f'''(SELECT COALESCE(MAX(O_SPOSDateWiseLiveStock.ClosingBalance), 0)    FROM SweetPOS.O_SPOSDateWiseLiveStock
+                                           Where O_SPOSDateWiseLiveStock.Item = a.Item_id 
+                                              AND O_SPOSDateWiseLiveStock.Party = {Stockparty} AND O_SPOSDateWiseLiveStock.StockDate = CURDATE() ) AS StockQuantity''')
                 else:
                         StockQuantity = (f''' (SELECT IFNULL(SUM(BaseUnitQuantity), 0) FROM O_BatchWiseLiveStock 
                                                     WHERE IsDamagePieces = 0 AND Item_id = a.Item_id AND Party_id = {Stockparty} GROUP BY Item_id) AS StockQuantity''')
@@ -791,12 +791,12 @@ left join M_MRPMaster on M_MRPMaster.id =a.MRP_id
 left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
 left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
 left join M_GSTHSNCode on M_GSTHSNCode.id=a.GST_id
-{ItemsGroupJoinsandOrderby[1]}
-{JoinForO_SPOSDateWiseLiveStock} 
+{ItemsGroupJoinsandOrderby[1]} 
 {ItemsGroupJoinsandOrderby[2]} ''', ([EffectiveDate], [EffectiveDate], [EffectiveDate], [EffectiveDate],
                                                            [EffectiveDate], [EffectiveDate], [Customer], [Party], [EffectiveDate], 
                                                            [Customer], [Party], [EffectiveDate], [RateParty], [PartyItem],
                                                            [Party], [PartyItem], [OrderID]))
+                    
                
                 else:
                     PartyItem = Party
@@ -837,7 +837,6 @@ left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
 left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
 left join M_GSTHSNCode on M_GSTHSNCode.id=a.GST_id
 {ItemsGroupJoinsandOrderby[1]}
-{JoinForO_SPOSDateWiseLiveStock} 
 {ItemsGroupJoinsandOrderby[2]}''', ([EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[Customer],
                                     [Party],[EffectiveDate],[Customer],[Party],[PartyItem], [OrderID]))
                 
