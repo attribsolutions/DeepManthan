@@ -108,11 +108,9 @@ class ItemSaleReportView(CreateAPIView):
                         SPOSInvoicequery += ' AND Sup.id = %s'
                 
                 q1 = T_Invoices.objects.raw(Invoicequery,parameters)
-                print("1111111")
-                print(q1)
+              
                 q2 = T_SPOSInvoices.objects.using('sweetpos_db').raw(SPOSInvoicequery,parameters)
-                print("222222222")
-                print(q2)
+              
                 combined_invoices = list(q1) + list(q2)   
                 if combined_invoices:
                     ItemList = list()
