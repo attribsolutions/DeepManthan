@@ -197,30 +197,35 @@ class LVersionsView(CreateAPIView):
         UserData = JSONParser().parse(request)      
         try:
             with transaction.atomic():
-                Party = UserData['Party']   
-                ftp_host = "web.chitalebandhu.in"  
-                ftp_user = "attribftp"  
-                ftp_pass = "Attrib@318" 
+                Party = UserData['Party'] 
+                Q11=M_Settings.objects.filter(id=58).values("DefaultValue")
+                PartyTypeID1=Q11[0]['DefaultValue'].split(',')
+                ExeVersion=PartyTypeID1[0].strip()
+                WinVersion=PartyTypeID1[1].strip()
+                print(ExeVersion,WinVersion)
+                # ftp_host = "web.chitalebandhu.in"  
+                # ftp_user = "attribftp"  
+                # ftp_pass = "Attrib@318" 
                               
-                ftp = FTP(ftp_host)
-                ftp.login(ftp_user, ftp_pass)
-                ftp.cwd("SweetPOSPython")
+                # ftp = FTP(ftp_host)
+                # ftp.login(ftp_user, ftp_pass)
+                # ftp.cwd("SweetPOSPython")
                 
-                local_path = os.path.join(os.path.expanduser("~"), "version.ini")
-                filename = "version.ini"
-                with open(local_path, "wb") as file:
-                    ftp.retrbinary(f"RETR {filename}", file.write)
+                # local_path = os.path.join(os.path.expanduser("~"), "version.ini")
+                # filename = "version.ini"
+                # with open(local_path, "wb") as file:
+                #     ftp.retrbinary(f"RETR {filename}", file.write)
 
-                ftp.quit()
-                print(f"{filename}: {local_path}")
+                # ftp.quit()
+                # print(f"{filename}: {local_path}")
                 
                 
-                config = configparser.ConfigParser()
-                config.read(local_path)
-                exe_version = config.get("current_version", "ExeVersion", fallback=None)
-                Service_Version = config.get("current_version", "ServiceVersion", fallback=None)    
-                if not exe_version:
-                    return JsonResponse({"StatusCode": 404, "Status": False, "Message": "'ExeVersion' Not Found", "Data": []})
+                # config = configparser.ConfigParser()
+                # config.read(local_path)
+                # exe_version = config.get("current_version", "ExeVersion", fallback=None)
+                # Service_Version = config.get("current_version", "ServiceVersion", fallback=None)    
+                # if not exe_version:
+                #     return JsonResponse({"StatusCode": 404, "Status": False, "Message": "'ExeVersion' Not Found", "Data": []})
                 # else:
                 #     return Response({"message": "'ExeVersion' Not Found", "status": "error"}, status=404)                 
                 query = M_SweetPOSUser.objects.raw("""SELECT 1 AS id,l.MacID, 
@@ -243,7 +248,7 @@ class LVersionsView(CreateAPIView):
                         })  
                               
                 # log_entry = create_transaction_logNew( request, user_list, Party, '', 444, 0,0,0,0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Latest_EXE_version': exe_version,'Latest_Service_Version':Service_Version,'Data': user_list})        
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Latest_EXE_version': ExeVersion,'Latest_Service_Version':WinVersion,'Data': user_list})        
 
         except Exception as e:
             log_entry = create_transaction_logNew( request, 0, 0, str(e), 33,0,0,0)
