@@ -2296,8 +2296,7 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                 FromDate = MATAData['FromDate']
                 ToDate = MATAData['ToDate']
                 Party = MATAData['Party']
-                CodeRedemptionData = []
-                             
+                CodeRedemptionData = []                            
                 
                 MATACodeRedemptionQuery = T_SPOSInvoices.objects.raw(f'''Select SweetPOS.T_SPOSInvoices.id,FoodERP.M_Parties.Name FranchiseName,count(*) VoucherCodeCount,M_Scheme.SchemeValue ClaimPerVoucher,
                 (M_Scheme.SchemeValue*Count(*))TotalClaimAmount From  SweetPOS.T_SPOSInvoices
@@ -2306,16 +2305,19 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                 JOIN FoodERP.M_Scheme ON FoodERP.M_Scheme.id=FoodERP.MC_SchemeParties.SchemeID_id
                 where InvoiceDate between '{FromDate}' and '{ToDate}' and VoucherCode !=''
                 and SchemeID_id=1  and Party in ({Party}) group by SweetPOS.T_SPOSInvoices.Party,M_Scheme.id ''')
-                print(MATACodeRedemptionQuery)
+
+
+                
                 for Code in MATACodeRedemptionQuery:
-                    print(Code)
+                   
+
+
                     CodeRedemptionData.append({
                         "id": Code.id,
                         "FranchiseName": Code.FranchiseName,
                         "VoucherCodeCount": Code.VoucherCodeCount,
                         "ClaimPerVoucher": Code.ClaimPerVoucher,
-                        "TotalClaimAmount":Code.TotalClaimAmount
-                       
+                        "TotalClaimAmount":Code.TotalClaimAmount                       
                     })
                 if CodeRedemptionData:
                     log_entry = create_transaction_logNew(request, MATAData, 0, "", 448, 0, FromDate, ToDate, 0)

@@ -273,7 +273,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                                 T_CreditDebitNotes.FullNoteNumber AS NoteNumber,T_CreditDebitNotes.CRDRNoteDate AS NoteDate,M_GeneralMaster.Name NoteTypeName,
                                 T_CreditDebitNotes.NoteType_id AS NoteValue,CONCAT(M_States.StateCode, '-', M_States.Name) PlaceOfSupply,
                                 'N' ReverseCharge,'Regular' NoteSupplyType,(T_CreditDebitNotes.GrandTotal) GrandTotal,TC_CreditDebitNoteItems.GSTPercentage AS  ApplicableOfTaxRate,
-                                TC_CreditDebitNoteItems.GSTPercentage Rate,SUM(TC_CreditDebitNoteItems.BasicAmount) TaxableValue,'' CessAmount,TC_CreditDebitNoteItems.IGST,
+                                TC_CreditDebitNoteItems.GSTPercentage Rate,SUM(TC_CreditDebitNoteItems.BasicAmount) TaxableValue,'0' AS CessAmount,TC_CreditDebitNoteItems.IGST,
                                 TC_CreditDebitNoteItems.CGST,TC_CreditDebitNoteItems.SGST,
                                 COALESCE(TC_CreditDebitNoteUploads.Irn, '') AS IRN, 
                                 COALESCE(TC_CreditDebitNoteUploads.EINvoiceCreatedON ,'')AS EINvoiceCreatedON  FROM T_CreditDebitNotes
@@ -284,7 +284,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                                 left JOIN TC_CreditDebitNoteUploads ON TC_CreditDebitNoteUploads.CRDRNote_id=T_CreditDebitNotes.id
                                 WHERE T_CreditDebitNotes.Party_id = %s  AND T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s AND M_Parties.GSTIN != '' 
                                 GROUP BY T_CreditDebitNotes.id, M_Parties.GSTIN , M_Parties.Name , T_CreditDebitNotes.FullNoteNumber , T_CreditDebitNotes.CRDRNoteDate,NoteTypeName, T_CreditDebitNotes.NoteType_id , M_States.id , M_States.Name , TC_CreditDebitNoteItems.GSTPercentage''',([Party],[FromDate],[ToDate]))
-                            
+                # print(CDNRquery)
                 CDNR2 = CDNRSerializer1(CDNRquery, many=True).data
                 
                 CDNRquery2= T_CreditDebitNotes.objects.raw('''SELECT 1 as id, COUNT(DISTINCT A.Customer_id)NoOfRecipients,COUNT(A.CRDRNote_id) NoOfNotes,SUM(A.GrandTotal) TotalInvoiceValue,SUM(A.TaxbleAmount) TotalTaxableValue, 0 TotalCess

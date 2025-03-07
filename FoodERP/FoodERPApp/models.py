@@ -529,6 +529,7 @@ class M_Roles(models.Model):
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
     Company = models.ForeignKey(C_Companies, related_name='RoleCompany', on_delete=models.PROTECT)
+    IdentifyKey = models.IntegerField()
 
     class Meta:
         db_table = "M_Roles"
