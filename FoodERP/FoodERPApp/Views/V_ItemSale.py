@@ -24,9 +24,49 @@ class ItemSaleReportView(CreateAPIView):
                 Party = Reportdata['Party']
                 EmployeeID = Reportdata['Employee']
                 
-                Invoicequery = '''SELECT T_Invoices.id, T_Invoices.InvoiceDate, SupPartyType.Name SaleMadeFrom, CustPartyType.Name SaleMadeTo, FullInvoiceNumber,Sup.Name SupplierName, M_Routes.Name RouteName, Cust.Name CustomerName, M_Group.Name GroupName, MC_SubGroup.Name SubGroupName, M_Items.Name ItemName, QtyInKg, QtyInNo, QtyInBox, Rate, BasicAmount, DiscountAmount, GSTPercentage, GSTAmount, Amount, T_Invoices.GrandTotal, RoundOffAmount, TCSAmount, T_GRNs.FullGRNNumber, TC_InvoiceItems.MRPValue, 0 MobileNo, "" CashierName FROM T_Invoices JOIN TC_InvoiceItems ON Invoice_id = T_Invoices.id JOIN M_Parties Cust ON Customer_id = Cust.id JOIN M_Parties Sup ON Party_id = Sup.id JOIN M_PartyType CustPartyType ON Cust.PartyType_id = CustPartyType.id JOIN M_PartyType SupPartyType ON Sup.PartyType_id = SupPartyType.id JOIN M_Items ON Item_id = M_Items.id left JOIN MC_ItemGroupDetails ON TC_InvoiceItems.Item_id = MC_ItemGroupDetails.Item_id AND GroupType_id = 1 JOIN M_Group ON MC_ItemGroupDetails.Group_id = M_Group.ID JOIN MC_SubGroup ON MC_ItemGroupDetails.SubGroup_id = MC_SubGroup.id JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id = Cust.id AND MC_PartySubParty.Party_id = Sup.id LEFT JOIN M_Routes ON MC_PartySubParty.Route_id = M_Routes.id LEFT JOIN TC_GRNReferences ON TC_GRNReferences.Invoice_id = T_Invoices.id LEFT JOIN T_GRNs ON GRN_id = T_GRNs.ID WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s'''
+                
+
+                
+                Invoicequery = '''SELECT T_Invoices.id, T_Invoices.InvoiceDate, SupPartyType.Name SaleMadeFrom, CustPartyType.Name SaleMadeTo, 
+                                FullInvoiceNumber,Sup.Name SupplierName, M_Routes.Name RouteName, Cust.Name CustomerName, M_Group.Name GroupName,
+                                MC_SubGroup.Name SubGroupName, M_Items.Name ItemName,  QtyInKg, QtyInNo, QtyInBox, Rate, BasicAmount, 
+                                DiscountAmount, GSTPercentage, GSTAmount, Amount, T_Invoices.GrandTotal, RoundOffAmount, TCSAmount, 
+                                T_GRNs.FullGRNNumber, TC_InvoiceItems.MRPValue, 0 MobileNo, "" CashierName, FoodERP.M_Units.Name AS BaseUnitName,
+                                 CASE 
+        WHEN FoodERP.M_Units.Name = 'kg' THEN QtyInKg
+        WHEN FoodERP.M_Units.Name = 'No' THEN QtyInNo
+        WHEN FoodERP.M_Units.Name = 'Box' THEN QtyInBox
+        ELSE NULL  -- Default case if no match
+    END AS BaseUnitQuantity
+                                FROM T_Invoices
+                                JOIN TC_InvoiceItems ON Invoice_id = T_Invoices.id 
+                                JOIN M_Parties Cust ON Customer_id = Cust.id 
+                                JOIN M_Parties Sup ON Party_id = Sup.id 
+                                JOIN M_PartyType CustPartyType ON Cust.PartyType_id = CustPartyType.id
+                                JOIN M_PartyType SupPartyType ON Sup.PartyType_id = SupPartyType.id 
+                                JOIN M_Items ON Item_id = M_Items.id 
+                                left JOIN MC_ItemGroupDetails ON TC_InvoiceItems.Item_id = MC_ItemGroupDetails.Item_id AND GroupType_id = 1 
+                                JOIN M_Group ON MC_ItemGroupDetails.Group_id = M_Group.ID 
+                                JOIN MC_SubGroup ON MC_ItemGroupDetails.SubGroup_id = MC_SubGroup.id 
+                                JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id = Cust.id AND MC_PartySubParty.Party_id = Sup.id 
+                                LEFT JOIN M_Routes ON MC_PartySubParty.Route_id = M_Routes.id 
+                                LEFT JOIN TC_GRNReferences ON TC_GRNReferences.Invoice_id = T_Invoices.id 
+                                LEFT JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.Item_id = M_Items.id AND MC_ItemUnits.IsBase = 1
+                                JOIN FoodERP.M_Units ON MC_ItemUnits.UnitID_id = M_Units.id
+                                LEFT JOIN T_GRNs ON GRN_id = T_GRNs.ID WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s'''
                             
-                SPOSInvoicequery='''SELECT A.id, A.InvoiceDate, SupPartyType.Name SaleMadeFrom, CustPartyType.Name SaleMadeTo, A.FullInvoiceNumber, Sup.Name SupplierName, M_Routes.Name RouteName, Cust.Name CustomerName, M_Group.Name GroupName, MC_SubGroup.Name SubGroupName, M_Items.Name ItemName, B.QtyInKg, B.QtyInNo, B.QtyInBox, B.Rate, B.BasicAmount, A.DiscountAmount, B.GSTPercentage, B.GSTAmount, B.Amount, A.GrandTotal, A.RoundOffAmount, A.TCSAmount, T_GRNs.FullGRNNumber, B.MRPValue, A.MobileNo , M.LoginName CashierName  
+                SPOSInvoicequery='''SELECT A.id, A.InvoiceDate, SupPartyType.Name SaleMadeFrom, CustPartyType.Name SaleMadeTo, 
+                                A.FullInvoiceNumber, Sup.Name SupplierName, M_Routes.Name RouteName, Cust.Name CustomerName, 
+                                M_Group.Name GroupName, MC_SubGroup.Name SubGroupName, M_Items.Name ItemName, B.QtyInKg, B.QtyInNo, B.QtyInBox,
+                                B.Rate, B.BasicAmount, A.DiscountAmount, B.GSTPercentage, B.GSTAmount, B.Amount, A.GrandTotal, A.RoundOffAmount,
+                                A.TCSAmount, T_GRNs.FullGRNNumber, B.MRPValue, A.MobileNo , M.LoginName CashierName, FoodERP.M_Units.Name AS BaseUnitName,
+                                CASE 
+        WHEN FoodERP.M_Units.Name = 'kg' THEN QtyInKg
+        WHEN FoodERP.M_Units.Name = 'No' THEN QtyInNo
+        WHEN FoodERP.M_Units.Name = 'Box' THEN QtyInBox
+        ELSE NULL  -- Default case if no match
+    END AS BaseUnitQuantity
+                                
                                 FROM SweetPOS.T_SPOSInvoices A 
                                 JOIN SweetPOS.TC_SPOSInvoiceItems B ON Invoice_id = A.id 
                                 JOIN FoodERP.M_Parties Cust ON A.Customer = Cust.id 
@@ -41,9 +81,11 @@ class ItemSaleReportView(CreateAPIView):
                                 LEFT JOIN FoodERP.M_Routes ON D.Route_id = M_Routes.id 
                                 LEFT JOIN FoodERP.TC_GRNReferences ON TC_GRNReferences.Invoice_id = A.id 
                                 LEFT JOIN FoodERP.T_GRNs ON GRN_id = T_GRNs.ID
+                                LEFT JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.Item_id = M_Items.id AND MC_ItemUnits.IsBase = 1
+                                JOIN FoodERP.M_Units ON MC_ItemUnits.UnitID_id = M_Units.id
                                 -- JOIN SweetPOS.M_SweetPOSUser M ON M.id = A.CreatedBy -- Comment For changing M_SweetPOSUser to M_Users
                                 LEFT JOIN FoodERP.M_Users M ON M.id = A.CreatedBy
-                                WHERE A.InvoiceDate BETWEEN %s AND %s and A.IsDeleted=0'''
+                                WHERE A.InvoiceDate BETWEEN %s AND %s and A.IsDeleted=0 '''
                 parameters = [FromDate,ToDate] 
                 if int(Party) > 0: 
                     Invoicequery += ' AND Sup.id = %s'
@@ -64,9 +106,11 @@ class ItemSaleReportView(CreateAPIView):
                     else:    
                         Invoicequery += ' AND Sup.id = %s'
                         SPOSInvoicequery += ' AND Sup.id = %s'
-
+                
                 q1 = T_Invoices.objects.raw(Invoicequery,parameters)
+              
                 q2 = T_SPOSInvoices.objects.using('sweetpos_db').raw(SPOSInvoicequery,parameters)
+              
                 combined_invoices = list(q1) + list(q2)   
                 if combined_invoices:
                     ItemList = list()
@@ -98,7 +142,10 @@ class ItemSaleReportView(CreateAPIView):
                                 "FullGRNNumber":a.FullGRNNumber,
                                 "MRPValue":a.MRPValue,
                                 "MobileNo": a.MobileNo,
-                                "CashierName": a.CashierName
+                                "CashierName": a.CashierName,
+                                "BaseItemUnitQuantity": a.BaseUnitQuantity,
+                                "BaseItemUnitName": a.BaseUnitName
+                              
                                 })
                     log_entry = create_transaction_logNew(request, Reportdata, Party, 'From:'+FromDate+','+'To:'+ToDate,281,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': ItemList})

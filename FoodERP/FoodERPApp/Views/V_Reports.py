@@ -2306,9 +2306,11 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                 where InvoiceDate between '{FromDate}' and '{ToDate}' and VoucherCode !=''
                 and SchemeID_id=1  and Party in ({Party}) group by SweetPOS.T_SPOSInvoices.Party,M_Scheme.id ''')
 
+
                 
                 for Code in MATACodeRedemptionQuery:
                    
+
 
                     CodeRedemptionData.append({
                         "id": Code.id,
