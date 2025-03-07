@@ -689,6 +689,8 @@ urlpatterns = [
             url(r'PendingGRNInvoices$',PendingGRNInvoicesAPIView.as_view()),
             url(r'GRNDiscrepancyReport$',GRNDiscrepancyReportAPIView.as_view()),
             url(r'CouponCodeRedemptionReport$',CouponCodeRedemptionReportView.as_view()),
+             url(r'MATAVoucherRedeemptionClaimTotalList$',MATAVoucherRedeemptionClaimView.as_view()),
+            
               
             
             
