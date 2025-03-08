@@ -2298,14 +2298,14 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                 Party = MATAData['Party']
                 CodeRedemptionData = []                            
                 
-                MATACodeRedemptionQuery = M_GiftVoucherCode.objects.raw(f'''Select FoodERP.M_Parties.Name FranchiseName,count(*) VoucherCodeCount,M_Scheme.SchemeValue ClaimPerVoucher,
+                MATACodeRedemptionQuery = M_GiftVoucherCode.objects.raw(f'''Select 1 as id, FoodERP.M_Parties.Name FranchiseName,count(*) VoucherCodeCount,M_Scheme.SchemeValue ClaimPerVoucher,
                 (M_Scheme.SchemeValue*Count(*))TotalClaimAmount 
                 From  M_GiftVoucherCode
                 JOIN FoodERP.M_Parties ON FoodERP.M_Parties.id=Party
                 JOIN FoodERP.MC_SchemeParties ON FoodERP.MC_SchemeParties.PartyID_id=FoodERP.M_Parties.id
                 JOIN FoodERP.M_Scheme ON FoodERP.M_Scheme.id=FoodERP.MC_SchemeParties.SchemeID_id
                 where InvoiceDate between '{FromDate}' and '{ToDate}' and VoucherCode !=''
-                and SchemeID_id=1  and Party in ({Party}) group by M_GiftVoucherCode.Party,M_Scheme.id ''')
+                and SchemeID_id=1  and Party in ({Party}) group by M_GiftVoucherCode.Party,M_Scheme.id,id ''')
 
 
                 
