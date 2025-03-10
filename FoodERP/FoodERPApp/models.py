@@ -2537,6 +2537,14 @@ class MC_SchemeParties(models.Model):
   
     class Meta:
         db_table = "MC_SchemeParties"
+
+class MC_SchemeItems(models.Model):
+    SchemeID = models.ForeignKey(M_Scheme,related_name='SchemeIDForItems', on_delete=models.CASCADE)
+    TypeForItem = models.IntegerField()
+    Item = models.IntegerField()
+    
+    class Meta:
+        db_table = "MC_SchemeItems"
     
 class M_SAPPOSUploadLog(models.Model):
     UploadDate = models.DateTimeField(auto_now=True)
