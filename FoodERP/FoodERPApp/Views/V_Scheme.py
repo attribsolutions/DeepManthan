@@ -41,9 +41,9 @@ class SchemeView(CreateAPIView):
                         for Item in SchemeItems:
                             ItemsType[Item['TypeForItem']].append(str(Item['Item']))
                             
-                        applicable_items = ",".join(ItemsType[1]) if ItemsType[1] else None
-                        non_applicable_items = ",".join(ItemsType[2]) if ItemsType[2] else None
-                        effective_items = ",".join(ItemsType[3]) if ItemsType[3] else None
+                        applicable_items = ",".join(ItemsType[1]) if ItemsType[1] else ""
+                        non_applicable_items = ",".join(ItemsType[2]) if ItemsType[2] else ""
+                        effective_items = ",".join(ItemsType[3]) if ItemsType[3] else ""
 
                         scheme_data = {
                             "SchemeId": Scheme.id,
@@ -64,8 +64,8 @@ class SchemeView(CreateAPIView):
                             "BillEffect": Scheme.BillEffect,                                     
                             "IsQrApplicable": Scheme.IsQrApplicable,
                             "QR_Codes": qr_list,
-                            "ApplicableItems": applicable_items,
-                            "NonApplicableItems": non_applicable_items,
+                            "ItemsApplicable": applicable_items,
+                            "ItemsNotApplicable": non_applicable_items,
                             "EffectiveItems": effective_items
                         }
                         data.append(scheme_data)
