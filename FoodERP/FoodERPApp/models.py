@@ -1168,6 +1168,7 @@ class TC_GRNItems(models.Model):
     QtyInKg = models.DecimalField(max_digits=30, decimal_places=20)
     QtyInBox = models.DecimalField(max_digits=30, decimal_places=20)
     ActualQuantity=models.DecimalField(max_digits=20, decimal_places=3,null=True,blank=True)
+    AccountingQuantity = models.DecimalField(max_digits=20, decimal_places=3, null=True, blank=True)
     DiscrepancyComment = models.CharField(max_length=500 ,null=True,blank=True)
     DiscrepancyReason = models.CharField(max_length=500, null=True, blank=True)
     
@@ -2520,6 +2521,9 @@ class M_Scheme(models.Model):
     QRPrefix=models.CharField(max_length=50)
     IsActive=models.BooleanField(default=False)
     BillAbove=models.CharField(max_length=500,null=True)
+    SchemeDetails = models.CharField(max_length=500, null=True, blank=True)
+    Message = models.CharField(max_length=500, null=True, blank=True)
+    OverLappingScheme = models.BooleanField(default=False)
 
     class Meta:
         db_table = "M_Scheme"
