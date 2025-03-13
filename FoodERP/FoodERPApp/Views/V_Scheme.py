@@ -57,7 +57,7 @@ class SchemeView(CreateAPIView):
                             "BillAbove": Scheme.BillAbove,
                             "QrPrefix": Scheme.QrPrefix,
                             "IsActive": Scheme.IsActive,
-                            "SchemeTypeID_id": Scheme.SchemeTypeID_id,
+                            "SchemeTypeID": Scheme.SchemeTypeID_id,
                             "SchemeTypeName": Scheme.SchemeTypeName,
                             "UsageTime": Scheme.UsageTime,
                             "UsageType": Scheme.UsageType,
