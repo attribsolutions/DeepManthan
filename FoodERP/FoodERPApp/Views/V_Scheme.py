@@ -74,7 +74,7 @@ class SchemeView(CreateAPIView):
                         data.append(scheme_data)
 
                 if data:
-                    create_transaction_logNew(request, PartyData, 0, 'SchemeDetails:' + str(data), 433, 0)
+                    create_transaction_logNew(request, PartyData, 0, 'SchemeDetails:', 433, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': data})
                 else:
                     create_transaction_logNew(request, PartyData, Party, 'Record Not Found', 433, 0)
