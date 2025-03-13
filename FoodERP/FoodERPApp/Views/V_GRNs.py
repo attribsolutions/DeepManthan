@@ -45,9 +45,9 @@ class GRNListFilterView(CreateAPIView):
                     # query = T_GRNs.objects.filter(
                     #     GRNDate__range=[FromDate, ToDate], Customer_id=Customer, Party_id=Supplier)
                 # print('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')    
-                query =T_GRNs.objects.raw(f''' select G.id, G.GRNDate, G.Customer_id, G.GRNNumber, G.FullGRNNumber,G.InvoiceNumber,G.GrandTotal, G.Party_id, G.CreatedBy, G.UpdatedBy,G.CreatedOn, G.Comment
+                query =T_GRNs.objects.raw(f''' select G.id,  G.GRNDate, G.Customer_id, G.GRNNumber, G.FullGRNNumber,G.InvoiceNumber,G.GrandTotal, G.Party_id, G.CreatedBy, G.UpdatedBy,G.CreatedOn, G.Comment
                                             ,party.Name PartyName,cust.Name customerName,cust.id customerid,T_Invoices.InvoiceNumber,
-                                          T_Invoices.InvoiceDate,party.id PartyID,T_Invoices.id InvoiceID,T_Invoices.FullInvoiceNumber
+                                          T_Invoices.InvoiceDate,party.id PartyID,T_Invoices.id InvoiceID,T_Invoices.FullInvoiceNumber, G.IsSave
                                           from T_GRNs G
 
 join M_Parties party on party.id=G.Party_id
@@ -110,7 +110,8 @@ where GRNDate between %s and %s and G.Customer_id= %s {condition}  ''',[FromDate
                                 "Party": a.PartyID,
                                 "PartyName": a.PartyName,
                                 "CreatedOn" : a.CreatedOn,
-                                "POType":POType
+                                "POType":POType,
+                                "IsSave" : a.IsSave
 
                             })
                     # print(GRNListData)
@@ -282,6 +283,7 @@ class T_GRNViewSecond(CreateAPIView):
                         "SystemBatchDate": a['SystemBatchDate'],
                         "SystemBatchCode": a['SystemBatchCode'],
                         "DiscrepancyComment" : a['DiscrepancyComment'],
+                        "AccountingQuantity" : a['AccountingQuantity'],
                         "UnitDetails":[]
                     })
 
@@ -308,6 +310,7 @@ class T_GRNViewSecond(CreateAPIView):
                     "CreatedBy": a['CreatedBy'],
                     "UpdatedBy": a['UpdatedBy'],
                     "Comment" : a['Comment'],
+                    "IsSave" : a['IsSave'],
                     "GRNReferences": GRNReferencesData,
                     "GRNItems": GRNItemListData
                 })
