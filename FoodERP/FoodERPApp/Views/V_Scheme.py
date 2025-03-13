@@ -23,7 +23,7 @@ class SchemeView(CreateAPIView):
                     SchemeDetails = M_Scheme.objects.raw(f'''
                         SELECT M_Scheme.id, SchemeName, SchemeValue, ValueIn, FromPeriod, ToPeriod, FreeItemID, VoucherLimit,
                         QrPrefix, SchemeTypeName, SchemeTypeID_id, UsageTime, BillAbove, UsageType, BillEffect,
-                        IsQrApplicable, IsActive 
+                        IsQrApplicable, IsActive, SchemeDetails, OverLappingScheme, Message
                         FROM M_Scheme 
                         JOIN M_SchemeType ON M_Scheme.SchemeTypeID_id = M_SchemeType.id 
                         JOIN MC_SchemeParties ON MC_SchemeParties.SchemeID_id = M_Scheme.id
@@ -63,6 +63,9 @@ class SchemeView(CreateAPIView):
                             "UsageType": Scheme.UsageType,
                             "BillEffect": Scheme.BillEffect,                                     
                             "IsQrApplicable": Scheme.IsQrApplicable,
+                            "SchemeDetails" : Scheme.SchemeDetails,
+                            "OverLappingScheme" : Scheme.OverLappingScheme,
+                            "Message" : Scheme.Message,
                             "QR_Codes": qr_list,
                             "ItemsApplicable": applicable_items,
                             "ItemsNotApplicable": non_applicable_items,
@@ -80,3 +83,4 @@ class SchemeView(CreateAPIView):
         except Exception as e:
             create_transaction_logNew(request, PartyData, 0, 'SchemeDetails:' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+
