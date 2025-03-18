@@ -6,6 +6,9 @@ from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_Roles import *
 from ..models import *
+from .V_CommFunction import create_transaction_logNew
+from SweetPOS.Views.V_SweetPosRoleAccess import BasicAuthenticationfunction
+from rest_framework.authentication import BasicAuthentication
 
 
 
@@ -132,3 +135,26 @@ class M_RolesViewSecond(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Role Not available', 'Data': []})
         except IntegrityError:   
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Role used in another table', 'Data': []})
+        
+
+class RoleswithIdentifyKeyListView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = [BasicAuthentication]
+
+    @transaction.atomic()
+    def get(self, request):
+        try:
+            with transaction.atomic():
+                RolesData = M_Roles.objects.filter(IdentifyKey__gt=0)
+
+                RolesDataSerializer = M_RolesOfIdentifyKeySerializer(RolesData, many=True)
+
+                log_entry = create_transaction_logNew(request, RolesDataSerializer, 0, '', 448, 0)
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': RolesDataSerializer.data})
+
+        except M_Roles.DoesNotExist:
+            log_entry = create_transaction_logNew(request, 0, 0, 'RoleswithIdentifyKey Does Not Exist', 448, 0)
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'RoleswithIdentifyKey Not Available', 'Data': [] })
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0, 'RoleswithIdentifyKey: ' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
