@@ -265,10 +265,10 @@ class T_GRNViewUpdate(CreateAPIView):
                 GRNupdate_Serializer = T_GRNSerializer(GRNupdateByID, data=GRNupdatedata)
                 if GRNupdate_Serializer.is_valid():
                     GRNupdate_Serializer.save()
-                    log_entry = create_transaction_logNew(request, GRNupdatedata, 0,'GRN Updated - ID: ' + str(id), 449, 0)
+                    log_entry = create_transaction_logNew(request, GRNupdatedata, 0,'GRN Updated - ID: ' + str(id), 450, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GRN Updated Successfully', 'Data': []})
                 else:
-                    log_entry = create_transaction_logNew(request, GRNupdatedata, 0, 'GRNEdit:' + str(GRNupdate_Serializer.errors), 449, 0)
+                    log_entry = create_transaction_logNew(request, GRNupdatedata, 0, 'GRNEdit:' + str(GRNupdate_Serializer.errors), 450, 0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': False, 'Message': GRNupdate_Serializer.errors, 'Data': []})
         except Exception as e:
