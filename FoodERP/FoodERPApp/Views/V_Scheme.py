@@ -25,11 +25,13 @@ class SchemeView(CreateAPIView):
                     SchemeDetails = M_Scheme.objects.raw(f'''
                         SELECT M_Scheme.id, SchemeName, SchemeValue, ValueIn, FromPeriod, ToPeriod, FreeItemID, VoucherLimit,
                         QrPrefix, SchemeTypeName, SchemeTypeID_id, UsageTime, BillAbove, UsageType, BillEffect,
-                        IsQrApplicable, IsActive, SchemeDetails, OverLappingScheme, Message
+                        IsQrApplicable, M_Scheme.IsActive, concat(SchemeDetails,'',M_Parties.SAPPartyCode) SchemeDetails, OverLappingScheme, Message
                         FROM M_Scheme 
                         JOIN M_SchemeType ON M_Scheme.SchemeTypeID_id = M_SchemeType.id 
                         JOIN MC_SchemeParties ON MC_SchemeParties.SchemeID_id = M_Scheme.id
-                        WHERE PartyID_id = {Party} AND IsActive = 1
+                        join M_Parties on M_Parties.id=MC_SchemeParties.PartyID_id  
+                                                         
+                        WHERE PartyID_id = {Party} AND M_Scheme.IsActive = 1
                     ''')
                     
                     data = []
