@@ -1126,7 +1126,7 @@ class InvoiceHideView(CreateAPIView):
     @transaction.atomic
     def post(self, request):
         Invoice_Data = JSONParser().parse(request)
-        print(Invoice_Data)
+        
         try:
             with transaction.atomic():
                 
