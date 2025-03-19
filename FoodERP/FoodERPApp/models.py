@@ -1426,7 +1426,7 @@ class TC_GRNReferences(models.Model):
     Order = models.ForeignKey(T_Orders, related_name='OrderReferences', on_delete=models.PROTECT ,null=True) 
     class Meta:
         db_table = "TC_GRNReferences"   
-        unique_together = [['Invoice']] 
+        # unique_together = [['Invoice']] 
         
 
 
