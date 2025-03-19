@@ -1168,6 +1168,7 @@ class TC_GRNItems(models.Model):
     QtyInKg = models.DecimalField(max_digits=30, decimal_places=20)
     QtyInBox = models.DecimalField(max_digits=30, decimal_places=20)
     ActualQuantity=models.DecimalField(max_digits=20, decimal_places=3,null=True,blank=True)
+    AccountingQuantity = models.DecimalField(max_digits=20, decimal_places=3, null=True, blank=True)
     DiscrepancyComment = models.CharField(max_length=500 ,null=True,blank=True)
     DiscrepancyReason = models.CharField(max_length=500, null=True, blank=True)
     
@@ -1425,7 +1426,7 @@ class TC_GRNReferences(models.Model):
     Order = models.ForeignKey(T_Orders, related_name='OrderReferences', on_delete=models.PROTECT ,null=True) 
     class Meta:
         db_table = "TC_GRNReferences"   
-        unique_together = [['Invoice']] 
+        # unique_together = [['Invoice']] 
         
 
 
@@ -2520,6 +2521,9 @@ class M_Scheme(models.Model):
     QRPrefix=models.CharField(max_length=50)
     IsActive=models.BooleanField(default=False)
     BillAbove=models.CharField(max_length=500,null=True)
+    SchemeDetails = models.CharField(max_length=500, null=True, blank=True)
+    Message = models.CharField(max_length=500, null=True, blank=True)
+    OverLappingScheme = models.BooleanField(default=False)
 
     class Meta:
         db_table = "M_Scheme"
@@ -2537,6 +2541,14 @@ class MC_SchemeParties(models.Model):
   
     class Meta:
         db_table = "MC_SchemeParties"
+
+class MC_SchemeItems(models.Model):
+    SchemeID = models.ForeignKey(M_Scheme,related_name='SchemeIDForItems', on_delete=models.CASCADE)
+    TypeForItem = models.IntegerField()
+    Item = models.IntegerField()
+    
+    class Meta:
+        db_table = "MC_SchemeItems"
     
 class M_SAPPOSUploadLog(models.Model):
     UploadDate = models.DateTimeField(auto_now=True)
