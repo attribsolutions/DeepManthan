@@ -4,6 +4,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import JSONParser
 from ..Views.V_CommFunction import *
 from ..models import *
+from SweetPOS.Views.V_SweetPosRoleAccess import BasicAuthenticationfunction
+from rest_framework.authentication import BasicAuthentication
 
 
      
