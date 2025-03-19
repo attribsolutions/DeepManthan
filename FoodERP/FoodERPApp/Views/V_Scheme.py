@@ -8,6 +8,7 @@ from SweetPOS.Views.V_SweetPosRoleAccess import BasicAuthenticationfunction
 from rest_framework.authentication import BasicAuthentication
 
 
+     
 class SchemeView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = [BasicAuthentication]
@@ -84,3 +85,4 @@ class SchemeView(CreateAPIView):
         except Exception as e:
             log_entry =  create_transaction_logNew(request, PartyData, 0, 'SchemeDetails:' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+

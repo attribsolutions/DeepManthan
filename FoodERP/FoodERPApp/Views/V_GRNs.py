@@ -45,9 +45,9 @@ class GRNListFilterView(CreateAPIView):
                     # query = T_GRNs.objects.filter(
                     #     GRNDate__range=[FromDate, ToDate], Customer_id=Customer, Party_id=Supplier)
                 # print('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')    
-                query =T_GRNs.objects.raw(f''' select G.id, G.GRNDate, G.Customer_id, G.GRNNumber, G.FullGRNNumber,G.InvoiceNumber,G.GrandTotal, G.Party_id, G.CreatedBy, G.UpdatedBy,G.CreatedOn, G.Comment
+                query =T_GRNs.objects.raw(f''' select G.id,  G.GRNDate, G.Customer_id, G.GRNNumber, G.FullGRNNumber,G.InvoiceNumber,G.GrandTotal, G.Party_id, G.CreatedBy, G.UpdatedBy,G.CreatedOn, G.Comment
                                             ,party.Name PartyName,cust.Name customerName,cust.id customerid,T_Invoices.InvoiceNumber,
-                                          T_Invoices.InvoiceDate,party.id PartyID,T_Invoices.id InvoiceID,T_Invoices.FullInvoiceNumber
+                                          T_Invoices.InvoiceDate,party.id PartyID,T_Invoices.id InvoiceID,T_Invoices.FullInvoiceNumber, G.IsSave
                                           from T_GRNs G
 
 join M_Parties party on party.id=G.Party_id
@@ -110,7 +110,8 @@ where GRNDate between %s and %s and G.Customer_id= %s {condition}  ''',[FromDate
                                 "Party": a.PartyID,
                                 "PartyName": a.PartyName,
                                 "CreatedOn" : a.CreatedOn,
-                                "POType":POType
+                                "POType":POType,
+                                "IsSave" : a.IsSave
 
                             })
                     # print(GRNListData)
@@ -235,6 +236,48 @@ class T_GRNView(CreateAPIView):
             log_entry = create_transaction_logNew(request, GRNdata, 0,'GRNSave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
+# UPDATE GRN 
+
+class T_GRNViewUpdate(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    
+    def put(self, request, id=0):
+        GRNupdatedata = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                GRNupdateByID = T_GRNs.objects.get(id=id)
+                
+                
+                for item in GRNupdatedata['GRNItems']:
+                    BaseUnitQuantity = UnitwiseQuantityConversion(
+                        item['Item'], item['Quantity'], item['Unit'], 0, 0, 0, 0).GetBaseUnitQuantity()
+                    item['BaseUnitQuantity'] = BaseUnitQuantity
+                    QtyInNo = UnitwiseQuantityConversion(
+                        item['Item'], item['Quantity'], item['Unit'], 0, 0, 1, 0).ConvertintoSelectedUnit()
+                    item['QtyInNo'] = QtyInNo
+                    QtyInKg = UnitwiseQuantityConversion(
+                        item['Item'], item['Quantity'], item['Unit'], 0, 0, 2, 0).ConvertintoSelectedUnit()
+                    item['QtyInKg'] = QtyInKg
+                    QtyInBox = UnitwiseQuantityConversion(
+                        item['Item'], item['Quantity'], item['Unit'], 0, 0, 4, 0).ConvertintoSelectedUnit()
+                    item['QtyInBox'] = QtyInBox
+                
+                GRNupdate_Serializer = T_GRNSerializer(GRNupdateByID, data=GRNupdatedata)
+                if GRNupdate_Serializer.is_valid():
+                    GRNupdate_Serializer.save()
+                    log_entry = create_transaction_logNew(request, GRNupdatedata, 0,'GRN Updated - ID: ' + str(id), 449, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GRN Updated Successfully', 'Data': []})
+                else:
+                    log_entry = create_transaction_logNew(request, GRNupdatedata, 0, 'GRNEdit:' + str(GRNupdate_Serializer.errors), 449, 0)
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': False, 'Message': GRNupdate_Serializer.errors, 'Data': []})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, GRNupdatedata, 0, 'GRNEdit:' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+        
+        
+
+
 #GRN Single Get API
 
 class T_GRNViewSecond(CreateAPIView):
@@ -282,6 +325,7 @@ class T_GRNViewSecond(CreateAPIView):
                         "SystemBatchDate": a['SystemBatchDate'],
                         "SystemBatchCode": a['SystemBatchCode'],
                         "DiscrepancyComment" : a['DiscrepancyComment'],
+                        "AccountingQuantity" : a['AccountingQuantity'],
                         "UnitDetails":[]
                     })
 
@@ -308,6 +352,7 @@ class T_GRNViewSecond(CreateAPIView):
                     "CreatedBy": a['CreatedBy'],
                     "UpdatedBy": a['UpdatedBy'],
                     "Comment" : a['Comment'],
+                    "IsSave" : a['IsSave'],
                     "GRNReferences": GRNReferencesData,
                     "GRNItems": GRNItemListData
                 })
@@ -340,7 +385,8 @@ class T_GRNViewSecond(CreateAPIView):
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'GRN Used in another Transaction', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'GRNDelete:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})    
+            
 # Get PO Details For Make GRN POST API 
 
 class GetOrderDetailsForGrnView(CreateAPIView):
@@ -358,6 +404,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                 
                 # Check if GRN exists for any of the given OrderIDs
                 grn_exists = TC_GRNReferences.objects.filter(Order_id__in=Order_list).exists()
+              
                 IsSave = 2 if grn_exists else 1
                
                 if Mode == 1:
@@ -827,27 +874,24 @@ class GRNSaveforCSSView(CreateAPIView):
     @transaction.atomic()
     def post(self, request):
         GRNdata = JSONParser().parse(request)
-        try:
+        try: 
+            if 'InvoiceNumber' not in GRNdata or not GRNdata['InvoiceNumber']:
+                return JsonResponse({'StatusCode': 406, 'Status': False, 'Message': 'InvoiceNumber is Required', 'Data': []})
+            
             Customer = GRNdata['Customer']
             InvoiceNumber = GRNdata['InvoiceNumber']
             InvoiceDate = GRNdata['InvoiceDate']
-
+            
             ExistingGRN = T_GRNs.objects.filter(Customer_id=Customer, InvoiceNumber=InvoiceNumber, InvoiceDate=InvoiceDate).exists()
             if ExistingGRN:
-                log_entry = create_transaction_logNew(request, GRNdata, 0, 'GRN already exists with the provided details', 440, 0)
-                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'GRN already exists with the provided details', 'Data': []})
+                log_entry = create_transaction_logNew(request, GRNdata, 0, 'GRN already exists with the provided details. Do you want to continue?', 440, 0)
+                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'GRN already exists with the provided details. Do you want to continue?', 'Data': []})
             log_entry = create_transaction_logNew(request, GRNdata, 0, '', 440, 0)
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GRN can be saved', 'Data': []})
 
         except Exception as e:
             log_entry = create_transaction_logNew(request, GRNdata, 0, 'GRNSaveforCSS:' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
-
-
-
-
-
-
 
 
 

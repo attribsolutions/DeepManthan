@@ -428,7 +428,7 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
                     query =  ( M_Parties.objects.filter(id__in=query,PartyAddress__IsDefault=1)
                             .annotate(Address=F('PartyAddress__Address'),
                                PartyTypeName=F('PartyType_id__Name'),).values('id', 'Name','SAPPartyCode','Latitude','Longitude','MobileNo',  'Address',
-                                'PartyTypeName'))
+                                   'PartyType_id','PartyTypeName'))
                     CustomPrint(query.query)
                     Partylist = list()
                     for a in query:
@@ -441,6 +441,7 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
                             'Longitude' : a['Longitude'],
                             'MobileNo' :a['MobileNo'],
                             'Address' :a['Address'],
+                            'PartyTypeID': a['PartyType_id'],
                             'PartyType' :a['PartyTypeName']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Partylist})

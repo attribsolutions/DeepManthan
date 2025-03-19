@@ -231,6 +231,7 @@ urlpatterns = [
             url(r'RolesFilter$', M_RolesViewFilter.as_view()),
             url(r'RoleswithIdentifyKeyList$', RoleswithIdentifyKeyListView.as_view()),
 
+
     
 # PageMaster 
             url(r'PageMaster/([0-9]+)$', M_PagesViewSecond.as_view()),
@@ -354,6 +355,7 @@ urlpatterns = [
             url(r'MakeOrdersGrn$', GetOrderDetailsForGrnView.as_view()),
             url(r'GRN/([0-9]+)$',T_GRNViewSecond.as_view()),
             url(r'GRN$', T_GRNView.as_view()),
+            url(r'GRNUpdate/([0-9]+)$',T_GRNViewUpdate.as_view()),
             url(r'GRNFilter$', GRNListFilterView.as_view()),
             url(r'GRNSaveforCSS$', GRNSaveforCSSView.as_view()),
             
