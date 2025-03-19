@@ -19,7 +19,8 @@ import jwt
 from .V_CommFunction import create_transaction_logNew
 from django.db.models import *
 from SweetPOS.Views.V_SweetPosRoleAccess import BasicAuthenticationfunction
-from rest_framework.authentication import BasicAuthentication
+from rest_framework.authentication import BasicAuthentication, TokenAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 # Create your views here.
@@ -57,7 +58,7 @@ class UserRegistrationView(CreateAPIView):
 class UserListView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
-    authentication_classes = [BasicAuthentication]
+    authentication_classes = [BasicAuthentication, TokenAuthentication, JWTAuthentication]
     # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
