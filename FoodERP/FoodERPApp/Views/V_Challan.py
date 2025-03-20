@@ -499,7 +499,7 @@ class BOMItemForChallan(CreateAPIView):
         try:
             with transaction.atomic():                
                     Party = Demanddata['Party']     
-                    DemandDate=Demanddata['DemandDate']    
+                    DemandDate=Demanddata['ChallanDate']    
                     BOMItemID=Demanddata['ItemID'] 
                     
                     if BOMItemID:     

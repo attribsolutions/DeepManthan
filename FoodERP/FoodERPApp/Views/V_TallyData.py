@@ -42,7 +42,7 @@ class TallyDataListView(CreateAPIView):
                 if tallyquery:
                     for row in tallyquery:
                         TallyDetails.append({
-                            "GRNid": row.id,
+                            "PurchaseID": row.id,
                             "InvoiceNumber": row.InvoiceNumber,
                             "InvoiceDate": row.InvoiceDate,
                             "PartyCode": row.PartyCode,
@@ -84,6 +84,7 @@ class TallyDataListView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
 
+
 class UpdateIsTallySaveView(CreateAPIView):
     permission_classes = ()
     authentication_classes = [BasicAuthentication]
@@ -92,21 +93,30 @@ class UpdateIsTallySaveView(CreateAPIView):
     def post(self, request, id=0):
         GRNData = JSONParser().parse(request)
         try:
-            GRN_ids = GRNData.get('GRN_ids', '') 
+            mode = GRNData.get('mode', '') 
+            ids = GRNData.get('ids', '') 
             
-            if not GRN_ids:
-                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'IDs not provided', 'Data': []})
+            if not ids:
+                    return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'IDs not provided', 'Data': []})
+            
+            if mode == "Purchase":
 
-            GRNID_list = [int(id.strip()) for id in GRN_ids.split(',') if id.strip().isdigit()]
-           
-            updated_count = T_GRNs.objects.filter(id__in=GRNID_list, IsTallySave=0).update(IsTallySave=1)
-            
-            if updated_count == 0:
-                create_transaction_logNew(request, GRNData, 0, 'No TallyData updated', 452, 0)
+                GRNID_list = [int(id.strip()) for id in ids.split(',') if id.strip().isdigit()]
+                
+                updated_count = T_GRNs.objects.filter(id__in=GRNID_list, IsTallySave=0).update(IsTallySave=1)
+                
+                if updated_count == 0:
+                    create_transaction_logNew(request, GRNData, 0, 'No TallyData updated', 452, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'No Data Updated', 'Data': []})
+                
+                create_transaction_logNew(request, GRNData, 0, f'TallyData Updated successfully IDs are: {",".join(map(str, GRNID_list))}', 452, 0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Data Updated Successfully', 'Data': updated_count})
+
+            elif mode == "Sale":
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'No Data Updated', 'Data': []})
-            
-            create_transaction_logNew(request, GRNData, 0, f'TallyData Updated successfully IDs are: {",".join(map(str, GRNID_list))}', 452, 0)
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Data Updated Successfully', 'Data': updated_count})
+
+            else:
+                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Invalid mode', 'Data': []})
 
         except Exception as e:
             create_transaction_logNew(request, GRNData, 0, f'UpdateIsTallySaveView: {str(e)}', 33, 0)
