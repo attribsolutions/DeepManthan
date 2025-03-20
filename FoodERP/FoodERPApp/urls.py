@@ -370,7 +370,8 @@ urlpatterns = [
             url(r'ChallanItems$', ChallanItemsView.as_view()),# ChallanItems Api
             url(r'ChallanItemStock$', ChallanItemStockView.as_view()),   # ChallanItemsStock Api
             url(r'GetDemandDetails$',DemandDetailsForChallan.as_view()),
-                    
+            url(r'GetBOMForChallanDetails$',BOMItemForChallan.as_view()), 
+            url(r'GetBOMItemDetails$',BOMItemList.as_view()),       
             
                      
 # Bill Of Material All API's
@@ -810,8 +811,8 @@ urlpatterns = [
               url(r'FranchisesCashierDetails$',FranchisesCashierList.as_view()), 
               
 #TallyData
-              url(r'TallyDataList$',TallyDataListView.as_view()), 
-              url(r'UpdateIsTallySave$',UpdateIsTallySaveView.as_view()), 
+              url(r'TallyPurchaseUpload$',TallyDataListView.as_view()), 
+              url(r'PurchaseDataSuccessLog$',UpdateIsTallySaveView.as_view()), 
               
 
 

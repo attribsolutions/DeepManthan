@@ -102,6 +102,9 @@ class T_GRNSerializer(serializers.ModelSerializer):
         instance.InvoiceNumber = validated_data.get('InvoiceNumber', instance.InvoiceNumber)
         
         instance.IsSave = validated_data.get('IsSave', instance.IsSave)
+      
+        if instance.IsTallySave is None:
+            instance.IsTallySave = False
 
         instance.save()
         
