@@ -102,11 +102,11 @@ class UpdateIsTallySaveView(CreateAPIView):
             updated_count = T_GRNs.objects.filter(id__in=GRNID_list, IsTallySave=0).update(IsTallySave=1)
             
             if updated_count == 0:
-                create_transaction_logNew(request, GRNData, 0, 'No GRN updated', 452, 0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'No GRN updated', 'Data': []})
+                create_transaction_logNew(request, GRNData, 0, 'No TallyData updated', 452, 0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'No Data Updated', 'Data': []})
             
-            create_transaction_logNew(request, GRNData, 0, f'GRN Updated successfully IDs are: {",".join(map(str, GRNID_list))}', 452, 0)
-            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GRN Updated successfully', 'Data': updated_count})
+            create_transaction_logNew(request, GRNData, 0, f'TallyData Updated successfully IDs are: {",".join(map(str, GRNID_list))}', 452, 0)
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Data Updated Successfully', 'Data': updated_count})
 
         except Exception as e:
             create_transaction_logNew(request, GRNData, 0, f'UpdateIsTallySaveView: {str(e)}', 33, 0)
