@@ -368,7 +368,8 @@ urlpatterns = [
             url(r'ChallanItems$', ChallanItemsView.as_view()),# ChallanItems Api
             url(r'ChallanItemStock$', ChallanItemStockView.as_view()),   # ChallanItemsStock Api
             url(r'GetDemandDetails$',DemandDetailsForChallan.as_view()),
-                    
+            url(r'GetBOMForChallanDetails$',BOMItemForChallan.as_view()), 
+            url(r'GetBOMItemDetails$',BOMItemList.as_view()),       
             
                      
 # Bill Of Material All API's

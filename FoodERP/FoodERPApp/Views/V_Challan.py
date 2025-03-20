@@ -485,4 +485,100 @@ class DemandDetailsForChallan(CreateAPIView):
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
             
             
+            
+            
+            
+            
+            
+class BOMItemForChallan(CreateAPIView):
+        
+    permission_classes = (IsAuthenticated,)   
+
+    def post(self, request, id=0):
+        Demanddata = JSONParser().parse(request)
+        try:
+            with transaction.atomic():                
+                    Party = Demanddata['Party']     
+                    DemandDate=Demanddata['DemandDate']    
+                    BOMItemID=Demanddata['ItemID'] 
+                    
+                    if BOMItemID:     
+                        obatchwisestockquery=  O_BatchWiseLiveStock.objects.raw(f'''SELECT 1 as id ,M_Items.Name ItemName,BatchDate,BaseUnitConversion,BatchCode,SystemBatchDate,SystemBatchCode,
+                        Round(GetTodaysDateRate({BOMItemID},'{DemandDate}',{Party},0,2),2) AS Rate, O_BatchWiseLiveStock.id, O_BatchWiseLiveStock.Quantity, O_BatchWiseLiveStock.OriginalBaseUnitQuantity, 
+                        O_BatchWiseLiveStock.BaseUnitQuantity, O_BatchWiseLiveStock.IsDamagePieces, O_BatchWiseLiveStock.CreatedBy,
+                        O_BatchWiseLiveStock.CreatedOn, O_BatchWiseLiveStock.GRN_id, O_BatchWiseLiveStock.InterBranchInward_id, 
+                        O_BatchWiseLiveStock.Item_id ItemID, O_BatchWiseLiveStock.LiveBatche_id, O_BatchWiseLiveStock.Party_id, 
+                        O_BatchWiseLiveStock.Production_id, O_BatchWiseLiveStock.PurchaseReturn_id, O_BatchWiseLiveStock.Unit_id,O_LiveBatches.GST_id LiveBatcheGSTID,
+                        O_BatchWiseLiveStock.BaseUnitQuantity ,(case when O_LiveBatches.GST_id is null then O_LiveBatches.GSTPercentage else M_GSTHSNCode.GSTPercentage end )GST
+                        FROM O_BatchWiseLiveStock left  join O_LiveBatches on O_BatchWiseLiveStock.LiveBatche_id=O_LiveBatches.id 
+                        left join MC_ItemUnits on MC_ItemUnits.id=O_BatchWiseLiveStock.Unit_id
+                        left join M_GSTHSNCode on M_GSTHSNCode.id=O_LiveBatches.GST_id
+                        JOIN M_Items ON M_Items.id=O_BatchWiseLiveStock.Item_id
+                        WHERE O_BatchWiseLiveStock.BaseUnitQuantity > 0 AND O_BatchWiseLiveStock.Item_id = {BOMItemID} AND 
+                        O_BatchWiseLiveStock.Party_id = {Party}''')
+                        # CustomPrint(obatchwisestockquery.query)     
+                        stockDatalist = list()
+                        if not obatchwisestockquery:
+                            stockDatalist =[]
+                        else:   
+                            for d in obatchwisestockquery:
+                              
+                                stockDatalist.append({                                    
+                                    "ItemID":d.ItemID,
+                                    "ItemName":d.ItemName,
+                                    "BatchDate":d.BatchDate,
+                                    "BatchCode":d.BatchCode,
+                                    "SystemBatchDate":d.SystemBatchDate,
+                                    "SystemBatchCode":d.SystemBatchCode,   
+                                    "LiveBatcheGSTID" : d.LiveBatcheGSTID,
+                                    "LiveBatche_id":d.LiveBatche_id,
+                                    "Rate":round(d.Rate,2),                                   
+                                    "GSTPercentage" : d.GST,
+                                    "UnitId":d.Unit_id,
+                                    "UnitName":d.BaseUnitConversion, 
+                                    "BaseUnitQuantity":d.BaseUnitQuantity,
+                                    "Quantity":d.Quantity,    
+                                    "OriginalBaseUnitQuantity":d.OriginalBaseUnitQuantity,                                
+                                    }) 
+                            response_data = {                            
+                            'StockDetails': stockDatalist} 
+                    log_entry = create_transaction_logNew(request, response_data, 0, 0, 32, 0, 0, 0, Party)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': response_data})
+                    
+        except Exception as e:
+                log_entry = create_transaction_logNew(request, 0, 0,'DemandDetailsForChallan:'+str (e),33,0)
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+            
+class BOMItemList(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request):
+        BOMItemdata = JSONParser().parse(request)
+        try:
+            with transaction.atomic():                
+                             
+                bom_items=M_BillOfMaterial.objects.raw('''SELECT M_Items.id , M_Items.Name ItemName,
+                    BaseUnitConversion, Quantity from  M_BillOfMaterial 
+                    JOIN MC_BillOfMaterialItems ON MC_BillOfMaterialItems.BOM_id=M_BillOfMaterial.id
+                    JOIN M_Items ON M_Items.id=MC_BillOfMaterialItems.Item_id 
+                    JOIN MC_ItemUnits ON  MC_ItemUnits.id=M_BillOfMaterial.Unit_id
+                    WHERE IsVDCItem=1''')            
+                if bom_items:
+                    ItemDetails=list()
+                    for item in bom_items:
+                        ItemDetails.append({                            
+                            'ItemID': item.id, 
+                            'ItemName': item.ItemName
+                        })
+                    log_entry = create_transaction_logNew( request, BOMItemdata, 0, '', 441, 0,0,0,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemDetails})
+                log_entry = create_transaction_logNew( request, BOMItemdata, 0, 'Data Not Found', 441, 0,0,0,0)           
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+
+        except Exception as e:
+            log_entry = create_transaction_logNew( request, BOMItemdata, 0, 'Cashier:'+str(e), 33,0,0,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+            
+            
+            
     
