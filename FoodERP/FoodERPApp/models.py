@@ -1129,6 +1129,7 @@ class T_GRNs(models.Model):
     Reason = models.ForeignKey(M_GeneralMaster, related_name='GRNReason', on_delete=models.PROTECT)
     InvoiceDate = models.DateField(null=True,blank=True)
     IsSave = models.IntegerField() 
+    IsTallySave = models.BooleanField(default=False)
     class Meta:
         db_table = "T_GRNs"
 
