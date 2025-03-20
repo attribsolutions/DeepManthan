@@ -810,8 +810,8 @@ urlpatterns = [
               url(r'FranchisesCashierDetails$',FranchisesCashierList.as_view()), 
               
 #TallyData
-              url(r'TallyDataList$',TallyDataListView.as_view()), 
-              url(r'UpdateIsTallySave$',UpdateIsTallySaveView.as_view()), 
+              url(r'TallyPurchaseUpload$',TallyDataListView.as_view()), 
+              url(r'PurchaseDataSuccessLog$',UpdateIsTallySaveView.as_view()), 
               
 
 
