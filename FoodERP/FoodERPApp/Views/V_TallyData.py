@@ -27,12 +27,14 @@ class TallyDataListView(CreateAPIView):
                 
                 tallyquery = TC_GRNItems.objects.raw(f'''SELECT T_GRNs.id, T_GRNs.InvoiceNumber, T_GRNs.InvoiceDate, M_Parties.id AS PartyCode, M_Parties.Name AS PartyName,
                                                         M_Items.id AS ItemCode, M_Items.Name AS ItemName, M_GSTHSNCode.HSNCode, GI.Rate,
-                                                        GI.QtyInNo AS No, GI.QtyInKg AS Kg, GI.QtyInBox AS Box, GI.DiscountType, GI.Discount AS DiscountPercentage,
+                                                        GI.Quantity,  M_Units.Name as UnitName, GI.DiscountType, GI.Discount AS DiscountPercentage,
                                                         GI.DiscountAmount, GI.BasicAmount AS TaxableValue, GI.CGSTPercentage, GI.CGST, GI.SGSTPercentage,
                                                         GI.SGST, GI.IGSTPercentage, GI.IGST, GI.GSTPercentage, GI.GSTAmount, GI.Amount AS TotalValue,
                                                         0 AS TCSTaxAmount, T_GRNs.GrandTotal, 'create' AS Statuss, M_Users.LoginName AS User
                                                         FROM T_GRNs 
                                                         JOIN TC_GRNItems GI ON T_GRNs.id = GI.GRN_id
+                                                        JOIN MC_ItemUnits ON GI.Unit_id = MC_ItemUnits.id
+                                                        JOIN M_Units on MC_ItemUnits.UnitID_id = M_Units.id
                                                         JOIN M_Parties ON M_Parties.id = T_GRNs.Customer_id
                                                         JOIN M_Items ON M_Items.id = GI.Item_id
                                                         JOIN M_GSTHSNCode ON M_GSTHSNCode.id = GI.GST_id
@@ -51,9 +53,8 @@ class TallyDataListView(CreateAPIView):
                             "ItemName": row.ItemName,
                             "HSNCode": row.HSNCode,
                             "MRP": row.Rate,
-                            "No": row.No,
-                            "Kg": row.Kg,
-                            "Box": row.Box,
+                            "Quantity": row.Quantity,
+                            "UnitName": row.UnitName,
                             "DiscountType": row.DiscountType,
                             "DiscountPercentage": row.DiscountPercentage,
                             "DiscountAmount": row.DiscountAmount,
