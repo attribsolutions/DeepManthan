@@ -52,12 +52,10 @@ class M_RatesView(CreateAPIView):
             with transaction.atomic():
                 M_Ratesdata = JSONParser().parse(request)
                 
-                MCUnitID = M_Ratesdata[0]['UnitID']
-                
-                query = MC_ItemUnits.objects.filter(id=MCUnitID).values('UnitID')                              
-                UnitID=query[0]['UnitID']
-                M_Ratesdata[0]['UnitID']=UnitID
-                
+                # MCUnitID = M_Ratesdata[0]['UnitID']                
+                # query = MC_ItemUnits.objects.filter(id=MCUnitID).values('UnitID')                              
+                # UnitID=query[0]['UnitID']
+                # M_Ratesdata[0]['UnitID']=UnitID                
                 a=MaxValueMaster(M_RateMaster,'CommonID')
                 jsondata=a.GetMaxValue() 
                 # CustomPrint(jsondata)
