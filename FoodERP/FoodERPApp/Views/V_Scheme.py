@@ -24,7 +24,7 @@ class SchemeView(CreateAPIView):
                 if user is not None:
                     SchemeDetails = M_Scheme.objects.raw(f'''
                         SELECT M_Scheme.id, SchemeName, SchemeValue, ValueIn, FromPeriod, ToPeriod, FreeItemID, VoucherLimit, SchemeValueUpto,
-                        QrPrefix, SchemeTypeName, SchemeTypeID_id, UsageTime, BillAbove, UsageType, BillEffect,
+                        QrPrefix, SchemeTypeName, SchemeTypeID_id, UsageTime, BillAbove, UsageType, BillEffect, Column1, Column2, Column3,
                         IsQrApplicable, M_Scheme.IsActive, concat(SchemeDetails,'',ifnull(M_Parties.SAPPartyCode,'')) SchemeDetails, OverLappingScheme, Message
                         FROM M_Scheme 
                         JOIN M_SchemeType ON M_Scheme.SchemeTypeID_id = M_SchemeType.id 
@@ -71,6 +71,9 @@ class SchemeView(CreateAPIView):
                             "OverLappingScheme" : Scheme.OverLappingScheme,
                             "SchemeValueUpto" : Scheme.SchemeValueUpto,
                             "Message" : Scheme.Message,
+                            "Column1" : Scheme.Column1,
+                            "Column2" : Scheme.Column2,
+                            "Column3" : Scheme.Column3,
                             "QR_Codes": qr_list,
                             "ItemsApplicable": applicable_items,
                             "ItemsNotApplicable": non_applicable_items,
