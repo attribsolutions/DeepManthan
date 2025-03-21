@@ -92,10 +92,10 @@ class UpdateIsTallySaveView(CreateAPIView):
 
     @transaction.atomic
     def post(self, request, id=0):
-        GRNData = JSONParser().parse(request)
+        Data = JSONParser().parse(request)
         try:
-            mode = GRNData.get('mode', '') 
-            ids = GRNData.get('ids', '') 
+            mode = Data.get('mode', '') 
+            ids = Data.get('ids', '') 
             
             if not ids:
                     return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'IDs not provided', 'Data': []})
@@ -107,18 +107,29 @@ class UpdateIsTallySaveView(CreateAPIView):
                 updated_count = T_GRNs.objects.filter(id__in=GRNID_list, IsTallySave=0).update(IsTallySave=1)
                 
                 if updated_count == 0:
-                    create_transaction_logNew(request, GRNData, 0, 'No TallyData updated', 452, 0)
+                    create_transaction_logNew(request, Data, 0, 'No TallyData updated', 452, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'No Data Updated', 'Data': []})
                 
-                create_transaction_logNew(request, GRNData, 0, f'TallyData Updated successfully IDs are: {",".join(map(str, GRNID_list))}', 452, 0)
+                create_transaction_logNew(request, Data, 0, f'PurchaseTallyData Updated successfully IDs are: {",".join(map(str, GRNID_list))}', 452, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Data Updated Successfully', 'Data': updated_count})
 
             elif mode == "Sale":
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'No Data Updated', 'Data': []})
+                
+                InvoiceID_list = [int(id.strip()) for id in ids.split(',') if id.strip().isdigit()]
+                
+                updated_count = T_Invoices.objects.filter(id__in=InvoiceID_list, IsTallySave=0).update(IsTallySave=1)
+                
+                if updated_count == 0:
+                    create_transaction_logNew(request, Data, 0, 'No TallyData updated', 452, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'No Data Updated', 'Data': []})
+                
+                create_transaction_logNew(request, Data, 0, f'SaleTallyData Updated successfully IDs are: {",".join(map(str, InvoiceID_list))}', 452, 0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Data Updated Successfully', 'Data': updated_count})
+
 
             else:
                 return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Invalid mode', 'Data': []})
 
         except Exception as e:
-            create_transaction_logNew(request, GRNData, 0, f'UpdateIsTallySaveView: {str(e)}', 33, 0)
+            create_transaction_logNew(request, Data, 0, f'UpdateIsTallySaveView: {str(e)}', 33, 0)
             return JsonResponse({'StatusCode': 500, 'Status': False, 'Message': str(e), 'Data': []})
