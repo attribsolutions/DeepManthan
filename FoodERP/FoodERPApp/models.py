@@ -2527,6 +2527,9 @@ class M_Scheme(models.Model):
     Message = models.CharField(max_length=500, null=True, blank=True)
     OverLappingScheme = models.BooleanField(default=False)
     SchemeValueUpto  = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True) 
+    Column1 = models.CharField(max_length=500, null=True, blank=True)
+    Column2 = models.CharField(max_length=500, null=True, blank=True)
+    Column3 = models.CharField(max_length=500, null=True, blank=True)
 
     class Meta:
         db_table = "M_Scheme"
