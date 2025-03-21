@@ -550,10 +550,8 @@ class BOMItemForChallan(CreateAPIView):
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
             
 class BOMItemList(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
-    
-    def get(self, request):
-        BOMItemdata = JSONParser().parse(request)
+    permission_classes = (IsAuthenticated,)    
+    def get(self, request):        
         try:
             with transaction.atomic():                
                              
@@ -564,19 +562,20 @@ class BOMItemList(CreateAPIView):
                     JOIN MC_ItemUnits ON  MC_ItemUnits.id=M_BillOfMaterial.Unit_id
                     WHERE IsVDCItem=1''')            
                 if bom_items:
-                    ItemDetails=list()
+                    ItemDetails=[]
                     for item in bom_items:
                         ItemDetails.append({                            
                             'ItemID': item.id, 
                             'ItemName': item.ItemName
                         })
-                    log_entry = create_transaction_logNew( request, BOMItemdata, 0, '', 441, 0,0,0,0)
+                    print(ItemDetails)
+                    log_entry = create_transaction_logNew( request, {}, 0, '', 441, 0,0,0,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemDetails})
-                log_entry = create_transaction_logNew( request, BOMItemdata, 0, 'Data Not Found', 441, 0,0,0,0)           
+                log_entry = create_transaction_logNew( request, {}, 0, 'Data Not Found', 441, 0,0,0,0)           
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
 
         except Exception as e:
-            log_entry = create_transaction_logNew( request, BOMItemdata, 0, 'Cashier:'+str(e), 33,0,0,0)
+            log_entry = create_transaction_logNew( request, {}, 0, 'BOMItem:'+str(e), 33,0,0,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
             
             
