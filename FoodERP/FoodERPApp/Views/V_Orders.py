@@ -450,7 +450,7 @@ class T_OrdersView(CreateAPIView):
                 CssCompany=str(CssCompanyID[0]['Company_id'])
                 # print(CssCompany)         
                 '''Get Max Order Number'''
-                if CssCompany:
+                if CssCompany==4:
                     # print("SHSHSHSHSHS")
                     a = GetMaxNumber.GetCSSPONumber(Division, OrderType, OrderDate)
                 else:
