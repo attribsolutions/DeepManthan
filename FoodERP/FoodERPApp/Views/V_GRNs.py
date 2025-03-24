@@ -144,6 +144,7 @@ class T_GRNView(CreateAPIView):
                 Customer = GRNdata['Customer']
                 CreatedBy = GRNdata['CreatedBy']
                 GRNDate = GRNdata['GRNDate']
+                
                 # CustomPrint(GRNdata['GRNReferences'])
                 # if R in GRNdata['GRNReferences']:
                 #     Query =T_Orders.objects.filter(id=OrderID[0]).update(Inward=GRNReference_data['Inward'])
@@ -164,8 +165,14 @@ class T_GRNView(CreateAPIView):
                     query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
                     DaysofItems = query2[0]['Days'] if query2 else 0
                     batch_date = datetime.strptime(a['BatchDate'], '%Y-%m-%d')                
-                    ItemExpiryDateStr = batch_date + timedelta(days=DaysofItems)
-                    ItemExpiryDate = ItemExpiryDateStr.strftime('%Y-%m-%d')
+                    
+                    if 'ItemExpiryDate' in a and a['ItemExpiryDate']:
+                        ItemExpiryDate = a['ItemExpiryDate'] 
+                    else:
+                        ItemExpiryDateStr = batch_date + timedelta(days=DaysofItems)
+                        ItemExpiryDate = ItemExpiryDateStr.strftime('%Y-%m-%d')  
+
+                    
                     if(item == ""):
                         item = a['Item']
                         b = query1.count()
