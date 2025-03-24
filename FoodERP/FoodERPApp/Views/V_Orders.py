@@ -438,18 +438,25 @@ class T_OrdersView(CreateAPIView):
     @transaction.atomic()
     def post(self, request):
         Orderdata = JSONParser().parse(request)
+        # print(Orderdata)
         try:
             with transaction.atomic():
                 Division = Orderdata['Division']
                 OrderType = Orderdata['OrderType']
                 OrderDate = Orderdata['OrderDate']
                 Supplier  = Orderdata['Supplier']
-                AdvanceAmount =  Orderdata['AdvanceAmount']
-                
+                AdvanceAmount =  Orderdata['AdvanceAmount']     
+                CssCompanyID=M_Parties.objects.filter(id=Division).values("Company_id")
+                CssCompany=str(CssCompanyID[0]['Company_id'])
+                CssCompanyIDSetting=M_Settings.objects.filter(id=61).values("DefaultValue")
+                CssCompanySetting=str(CssCompanyIDSetting[0]['DefaultValue'])                      
                 '''Get Max Order Number'''
-                a = GetMaxNumber.GetOrderNumber(Supplier, OrderType, OrderDate)
+                if CssCompany==CssCompanySetting:                    
+                    a = GetMaxNumber.GetCSSPONumber(Division, OrderType, OrderDate)
+                else:
+                    a = GetMaxNumber.GetOrderNumber(Supplier, OrderType, OrderDate)
                 # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
-                
+                # print(a)
                 for aa in Orderdata['OrderItem']:
 
                     BaseUnitQuantity = UnitwiseQuantityConversion(

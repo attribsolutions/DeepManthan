@@ -49,6 +49,18 @@ class GetMaxNumber:
             a=a+1
            
         return a
+    def GetCSSPONumber(*args):   
+        Return_year= GetYear(args[2])       
+        fs,fe=Return_year
+        MaxOrderNumber=T_Orders.objects.filter(Division_id=args[0]).filter(OrderType=args[1],OrderDate__range=(fs,fe)).values('OrderNo').order_by('-id')[:1]            
+        # MaxOrderNumber=T_Orders.objects.raw('''SELECT 1 id , T_Orders.OrderNo FROM T_Orders WHERE (T_Orders.supplier_id = %s AND T_Orders.OrderType = %s  AND t_orders.OrderDate between %s and %s) ORDER BY T_Orders.id DESC LIMIT 1''',([args[0],args[1],fs,fe]))        
+        if(not MaxOrderNumber):
+                a=1
+        else:               
+            a=int(MaxOrderNumber[0]['OrderNo'])
+            a=a+1
+           
+        return a
     
     def GetGrnNumber(*args):        
         # MaxGrnNumber=T_GRNs.objects.filter(Customer_id=args[0]).values('GRNNumber').order_by('-id')[:1] 
