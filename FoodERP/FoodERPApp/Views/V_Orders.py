@@ -448,10 +448,10 @@ class T_OrdersView(CreateAPIView):
                 AdvanceAmount =  Orderdata['AdvanceAmount']     
                 CssCompanyID=M_Parties.objects.filter(id=Division).values("Company_id")
                 CssCompany=str(CssCompanyID[0]['Company_id'])
-                print(CssCompany)         
+                # print(CssCompany)         
                 '''Get Max Order Number'''
                 if CssCompany:
-                    print("SHSHSHSHSHS")
+                    # print("SHSHSHSHSHS")
                     a = GetMaxNumber.GetCSSPONumber(Division, OrderType, OrderDate)
                 else:
                     a = GetMaxNumber.GetOrderNumber(Supplier, OrderType, OrderDate)
