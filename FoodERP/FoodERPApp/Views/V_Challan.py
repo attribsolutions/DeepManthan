@@ -471,6 +471,7 @@ class DemandDetailsForChallan(CreateAPIView):
                                 "DemandNumber" : b.FullDemandNumber,
                                 "DemandItemDetails":DemandItemDetails
                             })
+                        # print(Demanddata)
                 log_entry = create_transaction_logNew(request, Demanddata, 0,0,32,0,0,0,Customer)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Demanddata[0]})
         except Exception as e:
@@ -494,7 +495,7 @@ class BOMItemForChallan(CreateAPIView):
                     Party = Demanddata['Party']     
                     DemandDate=Demanddata['ChallanDate']    
                     BOMItemID=Demanddata['ItemID'] 
-                    
+                    Demanddata = list() 
                     if BOMItemID:     
                         obatchwisestockquery=  O_BatchWiseLiveStock.objects.raw(f'''SELECT 1 as id ,M_Items.Name ItemName,BatchDate,BaseUnitConversion,BatchCode,SystemBatchDate,SystemBatchCode,
                         Round(GetTodaysDateRate({BOMItemID},'{DemandDate}',{Party},0,2),2) AS Rate, O_BatchWiseLiveStock.id, O_BatchWiseLiveStock.Quantity, O_BatchWiseLiveStock.OriginalBaseUnitQuantity, 
@@ -509,13 +510,14 @@ class BOMItemForChallan(CreateAPIView):
                         JOIN M_Items ON M_Items.id=O_BatchWiseLiveStock.Item_id
                         WHERE O_BatchWiseLiveStock.BaseUnitQuantity > 0 AND O_BatchWiseLiveStock.Item_id = {BOMItemID} AND 
                         O_BatchWiseLiveStock.Party_id = {Party}''')
+                        DemandItemDetails = list()
                         # CustomPrint(obatchwisestockquery.query)     
                         stockDatalist = list()
                         if not obatchwisestockquery:
                             stockDatalist =[]
                         else:   
                             for d in obatchwisestockquery:
-                              
+                                
                                 stockDatalist.append({                                    
                                     "ItemID":d.ItemID,
                                     "ItemName":d.ItemName,
@@ -533,10 +535,47 @@ class BOMItemForChallan(CreateAPIView):
                                     "Quantity":d.Quantity,    
                                     "OriginalBaseUnitQuantity":d.OriginalBaseUnitQuantity,                                
                                     }) 
-                            response_data = {                            
-                            'StockDetails': stockDatalist} 
-                    log_entry = create_transaction_logNew(request, response_data, 0, 0, 32, 0, 0, 0, Party)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': response_data})
+                        DemandItemDetails.append({                                            
+                            
+                            "Item": "",
+                            "ItemName": "",
+                            "Quantity": "",                            
+                            "Rate": "",
+                            "Unit": "",
+                            "UnitName":"",
+                            "DeletedMCUnitsUnitID": "",
+                            "ConversionUnit": "",
+                            "BaseUnitQuantity": "",
+                            "GST": "",          
+                            "HSNCode": "",                           
+                            "BasicAmount": "",
+                            "GSTAmount":"",
+                            "CGST":"",
+                            "SGST": "",
+                            "IGST": "",
+                            "CGSTPercentage": "",
+                            "SGSTPercentage":"" ,
+                            "IGSTPercentage": "",
+                            "Amount":"" ,  
+                            "MRP":"",                         
+                            "UnitDetails":"",
+                            "StockDetails":stockDatalist
+                            })
+                        
+                        Demanddata.append({
+                                "DemandIDs":"",
+                                "DemandDate" : "",
+                                "CustomerName" : "",                        
+                                "CustomerPAN" : "",
+                                "CustomerGSTIN" : "",
+                                "CustomerID" : "",
+                                "DemandNumber" : "",
+                                "DemandItemDetails":DemandItemDetails
+                            })
+                            # response_data = {                            
+                            # 'StockDetails': stockDatalist} 
+                    log_entry = create_transaction_logNew(request, Demanddata, 0, 0, 32, 0, 0, 0, Party)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Demanddata[0]})
                     
         except Exception as e:
                 log_entry = create_transaction_logNew(request, 0, 0,'DemandDetailsForChallan:'+str (e),33,0)
