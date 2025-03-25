@@ -43,25 +43,24 @@ class SAPExportViewDetails(APIView):
 
             # Raw SQL Query
             upload_invoices_query = f'''
-                SELECT 1 id,
-                M_Items.SAPItemCode AS Material, 
+                SELECT 1 id, M_Items.SAPItemCode AS Material, 
                 M_Parties.SapPartyCode AS Store, 
                 C.TotalRevenue, 
                 SUM(SweetPOS.TC_SPOSInvoiceItems.Quantity) AS Quantity, 
-                CASE WHEN MC_ItemUnits.UnitID_id = 2 THEN M_Units.Name ELSE 'EA' END AS UOM, 
-                SweetPOS.TC_SPOSInvoiceItems.Rate,  
+                M_Units.SAPUnit UOM, 
+                MRPValue Rate,  
                 SUM(SweetPOS.TC_SPOSInvoiceItems.CGST) AS CGST, 
                 SUM(SweetPOS.TC_SPOSInvoiceItems.SGST) AS SGST, 
-                DATE_FORMAT(SweetPOS.TC_SPOSInvoiceItems.InvoiceDate,'%%Y%%m%%d') AS SaleDate, 
-                0 AS BasicValue, 
-                0 AS DiscountValue ,M_Parties.Name
+                DATE_FORMAT(SweetPOS.TC_SPOSInvoiceItems.InvoiceDate, '%%Y%%m%%d') SaleDate,
+                SUM(BasicAmount) AS BasicValue, 
+                SUM(DiscountAmount) AS DiscountValue
                 FROM SweetPOS.TC_SPOSInvoiceItems 
                 JOIN FoodERP.M_Items ON M_Items.id = SweetPOS.TC_SPOSInvoiceItems.Item 
                 JOIN FoodERP.M_Parties ON M_Parties.id = SweetPOS.TC_SPOSInvoiceItems.Party 
                 JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.id = SweetPOS.TC_SPOSInvoiceItems.Unit 
                 JOIN FoodERP.M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
                 JOIN (
-                SELECT SUM(BasicAmount) AS TotalRevenue, Party AS DivisionID, InvoiceDate 
+                SELECT SUM(BasicAmount+CGST+SGST) AS TotalRevenue, Party AS DivisionID, InvoiceDate 
                 FROM SweetPOS.TC_SPOSInvoiceItems 
                 WHERE InvoiceDate = %s
                 AND Party IN (%s)  
@@ -72,8 +71,13 @@ class SAPExportViewDetails(APIView):
                 AND SweetPOS.TC_SPOSInvoiceItems.Party IN (%s)  
                 AND M_Items.SAPItemCode != '' 
                 GROUP BY 
-                M_Items.SAPItemCode '''
+                M_Items.SAPItemCode,
+                M_Parties.SapPartyCode, 
+                C.TotalRevenue,MC_ItemUnits.UnitID_id,MRPValue,SweetPOS.TC_SPOSInvoiceItems.InvoiceDate
+                 '''
 
+            
+            
             # Execute query           
             # raw_queryset = T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate,Party,InvoiceDate,Party])   
             # print(raw_queryset.query)         
@@ -125,12 +129,18 @@ class SAPExportViewDetails(APIView):
             FTPFilePath = settings_map.get(52)  # FTPFilePath           
            
             
-            upload_invoices_query =f'''
-                SELECT 1 id, DATE_FORMAT(InvoiceDate, '%%Y%%m%%d') SaleDate, FoodERP.M_Parties.SAPPartyCode Store,
-                A.ClientID, InvoiceNumber BillNumber,M_Parties.Name 
-                FROM T_SPOSInvoices A
+            upload_invoices_query =f'''SELECT 1 id, DATE_FORMAT(InvoiceDate, '%%Y%%m%%d')SaleDate, FoodERP.M_Parties.SAPPartyCode Store,
+                A.ClientID, InvoiceNumber BillNumber 
+                FROM SweetPOS.T_SPOSInvoices A
                 JOIN FoodERP.M_Parties ON A.Party = FoodERP.M_Parties.id
-                WHERE InvoiceDate = %s AND A.Party =%s'''
+                WHERE InvoiceDate = %s AND A.Party in (%s)'''
+                
+
+                # SELECT 1 id, DATE_FORMAT(InvoiceDate, '%%Y%%m%%d') SaleDate, FoodERP.M_Parties.SAPPartyCode Store,
+                # A.ClientID, InvoiceNumber BillNumber,M_Parties.Name 
+                # FROM T_SPOSInvoices A
+                # JOIN FoodERP.M_Parties ON A.Party = FoodERP.M_Parties.id
+                # WHERE InvoiceDate = %s AND A.Party =%s
 
             # Execute query with parameters        
             # raw_queryset = T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate,Party])
@@ -175,8 +185,7 @@ class SAPExportViewDetails(APIView):
             DoNOtUseItemID= settings_map.get(53)  
             
             upload_invoices_query =f'''SELECT 1 id,DATE_FORMAT(InvoiceDate, '%%Y%%m%%d') AS SaleDate,SapItemCode AS Material,
-            SUM(Quantity) AS Quantity,CASE WHEN M_Units.id = 2 THEN M_Units.Name ELSE 'EA' END AS UOM,M_Parties.SapPartyCode AS Store,
-            M_Parties.Name
+            SUM(Quantity) AS Quantity,M_Units.SAPUnit UOM, M_Parties.SapPartyCode AS Store
             FROM SweetPOS.TC_SPOSInvoiceItems JOIN FoodERP.M_Items ON M_Items.id = SweetPOS.TC_SPOSInvoiceItems.Item
             JOIN
             FoodERP.M_Parties ON M_Parties.id = SweetPOS.TC_SPOSInvoiceItems.Party
@@ -185,9 +194,9 @@ class SAPExportViewDetails(APIView):
             JOIN
             FoodERP.M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
             WHERE
-            InvoiceDate = %s  AND  Party = %s  AND M_Items.SAPItemCode != '' AND SweetPOS.TC_SPOSInvoiceItems.Item NOT IN  (%s)
+            InvoiceDate = %s  AND  Party in (%s)  AND M_Items.SAPItemCode != '' AND SweetPOS.TC_SPOSInvoiceItems.Item NOT IN  (%s)
             GROUP BY
-            SapItemCode,M_Units.Name,M_Parties.SapPartyCode,InvoiceDate,M_Parties.Name,M_Items.SAPItemCode,M_Units.id'''
+            SapItemCode,M_Units.Name,M_Parties.SapPartyCode,InvoiceDate,M_Units.id'''
 
             # Execute query with parameters            
             # raw_queryset = T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate,Party,DoNOtUseItemID])
