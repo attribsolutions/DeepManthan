@@ -41,7 +41,7 @@ class BOMListFilterView(CreateAPIView):
                             FROM M_BillOfMaterial
                             JOIN M_Users ON M_Users.id = M_BillOfMaterial.CreatedBy
                             JOIN M_Items ON M_Items.id = M_BillOfMaterial.Item_id
-                            JOIN MC_ItemUnits ON MC_ItemUnits.Item_id = M_BillOfMaterial.Item_id
+                            JOIN MC_ItemUnits ON MC_ItemUnits.Item_id = M_BillOfMaterial.Item_id and IsBase=1
                             JOIN C_Companies ON C_Companies.id = M_BillOfMaterial.Company_id
                             WHERE M_BillOfMaterial.IsDelete = 0
                             AND M_BillOfMaterial.Company_id = {Company}
@@ -58,7 +58,7 @@ class BOMListFilterView(CreateAPIView):
                             JOIN M_Users ON M_Users.id = M_BillOfMaterial.CreatedBy
                             JOIN MC_ItemCategoryDetails ON MC_ItemCategoryDetails.Item_id = M_BillOfMaterial.Item_id
                             JOIN M_Items ON M_Items.id = M_BillOfMaterial.Item_id
-                            JOIN MC_ItemUnits ON MC_ItemUnits.Item_id = M_BillOfMaterial.Item_id  
+                            JOIN MC_ItemUnits ON MC_ItemUnits.Item_id = M_BillOfMaterial.Item_id  and IsBase=1
                             JOIN C_Companies ON C_Companies.id = M_BillOfMaterial.Company_id 
                             WHERE M_BillOfMaterial.IsDelete = 0
                             AND M_BillOfMaterial.Company_id = {Company}
@@ -76,7 +76,7 @@ class BOMListFilterView(CreateAPIView):
                             FROM M_BillOfMaterial
                             JOIN M_Users ON M_Users.id = M_BillOfMaterial.CreatedBy
                             JOIN M_Items ON M_Items.id = M_BillOfMaterial.Item_id
-                            JOIN MC_ItemUnits ON MC_ItemUnits.Item_id = M_BillOfMaterial.Item_id 
+                            JOIN MC_ItemUnits ON MC_ItemUnits.Item_id = M_BillOfMaterial.Item_id and IsBase=1
                             JOIN C_Companies ON C_Companies.id = M_BillOfMaterial.Company_id
                             WHERE M_BillOfMaterial.Item_id = {Item}
                             AND M_BillOfMaterial.Company_id = {Company}
@@ -93,7 +93,7 @@ class BOMListFilterView(CreateAPIView):
                             JOIN M_Users ON M_Users.id = M_BillOfMaterial.CreatedBy
                             JOIN MC_ItemCategoryDetails ON MC_ItemCategoryDetails.Item_id = M_BillOfMaterial.Item_id
                             JOIN M_Items ON M_Items.id = M_BillOfMaterial.Item_id
-                            JOIN MC_ItemUnits ON MC_ItemUnits.Item_id = M_BillOfMaterial.Item_id  
+                            JOIN MC_ItemUnits ON MC_ItemUnits.Item_id = M_BillOfMaterial.Item_id  and IsBase=1
                             JOIN C_Companies ON C_Companies.id = M_BillOfMaterial.Company_id
                             WHERE M_BillOfMaterial.Item_id = {Item}
                             AND M_BillOfMaterial.Company_id = {Company}
