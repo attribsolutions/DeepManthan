@@ -86,7 +86,7 @@ class SAPExportViewDetails(APIView):
             raw_queryset = list(T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate, Party, InvoiceDate, Party]))  
             if not raw_queryset:  
                 raise Exception(f"No records found for Party {Party} on {InvoiceDate}")
-            file_name = f"{datetime.now().strftime('%Y%m%d')}_{raw_queryset[0].Name.strip()}_File1.csv"
+            file_name = f"{datetime.now().strftime('%Y%m%d')}_{raw_queryset[0].Store.strip()}_File1.csv"
             
             ftp_file_path = f"{FTPFilePath}/inbound/POS/POS_day_sales/source/{file_name}"
             
@@ -115,7 +115,7 @@ class SAPExportViewDetails(APIView):
             
         except Exception as exc:
             # Log and return the error
-            self.insert_pos_log(1, "Failed", str(exc),Party,InvoiceDate)
+            self.insert_pos_log(1, "Failed1", str(exc),Party,InvoiceDate)
             return JsonResponse({'error': str(exc)}, status=500)
             raise
             
@@ -150,7 +150,7 @@ class SAPExportViewDetails(APIView):
             raw_queryset = list(T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate, Party]))  
             if not raw_queryset:  
                 raise Exception(f"No records found for Party {Party} on {InvoiceDate}")
-            file_name = f"{datetime.now().strftime('%Y%m%d')}_{raw_queryset[0].Name.strip()}_File3.csv"
+            file_name = f"{datetime.now().strftime('%Y%m%d')}_{raw_queryset[0].Store.strip()}_File3.csv"
             
             ftp_file_path = f"{FTPFilePath}/inbound/POS/POS_day_sales/source/{file_name}"            
             # Prepare CSV content
@@ -171,7 +171,7 @@ class SAPExportViewDetails(APIView):
             pass
         except Exception as exc:
             # Log and raise error
-            self.insert_pos_log(3, "Failed", str(exc),Party,InvoiceDate)
+            self.insert_pos_log(3, "Failed3", str(exc),Party,InvoiceDate)
             raise
         
     def File2(self, Party,InvoiceDate):
@@ -208,7 +208,7 @@ class SAPExportViewDetails(APIView):
             raw_queryset = list(T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate, Party, DoNOtUseItemID]))  
             if not raw_queryset:  
                 raise Exception(f"No records found for Party {Party} on {InvoiceDate}")
-            file_name = f"{datetime.now().strftime('%Y%m%d')}_{raw_queryset[0].Name.strip()}_File2.csv"
+            file_name = f"{datetime.now().strftime('%Y%m%d')}_{raw_queryset[0].Store.strip()}_File2.csv"
             ftp_file_path = f"{FTPFilePath}/inbound/POS/POS_day_sales/source/{file_name}"            
             # Prepare CSV content
             headers = [
@@ -229,7 +229,7 @@ class SAPExportViewDetails(APIView):
             pass
         except Exception as exc:
             # Log and raise error
-            self.insert_pos_log(2, "Failed", str(exc),Party,InvoiceDate)
+            self.insert_pos_log(2, "Failed2", str(exc),Party,InvoiceDate)
             raise
         
     def generate_csv(self, headers, rows):
