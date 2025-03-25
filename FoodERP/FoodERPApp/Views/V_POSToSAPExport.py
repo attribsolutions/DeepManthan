@@ -49,14 +49,14 @@ class SAPExportViewDetails(APIView):
                 (SELECT SUM(BasicAmount+CGST+SGST) AS TotalRevenue 
                 FROM SweetPOS.TC_SPOSInvoiceItems II 
                 join SweetPOS.T_SPOSInvoices  I on I.id=II.Invoice_id
-                WHERE II.InvoiceDate = %s
-                AND II.Party IN (%s) and I.IsDeleted=0    )TotalRevenue, 
+                WHERE I.InvoiceDate = %s
+                AND I.Party IN (%s) and I.IsDeleted=0    )TotalRevenue, 
                 SUM(II.Quantity) AS Quantity, 
                 M_Units.SAPUnit UOM, 
                 MRPValue Rate,  
                 SUM(II.CGST) AS CGST, 
                 SUM(II.SGST) AS SGST, 
-                DATE_FORMAT(II.InvoiceDate, '%%Y%%m%%d') SaleDate, 
+                DATE_FORMAT(I.InvoiceDate, '%%Y%%m%%d') SaleDate, 
                 SUM(II.BasicAmount) AS BasicValue, 
                 SUM(II.DiscountAmount) AS DiscountValue
                 FROM SweetPOS.TC_SPOSInvoiceItems II
@@ -65,12 +65,12 @@ class SAPExportViewDetails(APIView):
                 JOIN FoodERP.M_Parties ON M_Parties.id = II.Party 
                 JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.id = II.Unit 
                 JOIN FoodERP.M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
-                WHERE II.InvoiceDate = %s  
-                AND II.Party IN (%s)  and  I.IsDeleted=0
+                WHERE I.InvoiceDate = %s  
+                AND I.Party IN (%s)  and  I.IsDeleted=0
 			    GROUP BY 
                 M_Items.SAPItemCode,
                 M_Parties.SapPartyCode, 
-                TotalRevenue,MC_ItemUnits.UnitID_id,MRPValue,II.InvoiceDate    '''
+                TotalRevenue,MC_ItemUnits.UnitID_id,MRPValue,I.InvoiceDate    '''
 
             
             
