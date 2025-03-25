@@ -36,9 +36,13 @@ class BOMListFilterView(CreateAPIView):
                                             M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, 
                                             M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom,
                                             M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, 
-                                            M_BillOfMaterial.Unit_id, M_Users.LoginName
+                                            M_BillOfMaterial.Unit_id, MC_ItemUnits.BaseUnitConversion, M_Users.LoginName,
+                                            M_Items.Name AS ItemName, C_Companies.Name AS CompanyName
                             FROM M_BillOfMaterial
                             JOIN M_Users ON M_Users.id = M_BillOfMaterial.CreatedBy
+                            JOIN M_Items ON M_Items.id = M_BillOfMaterial.Item_id
+                            JOIN MC_ItemUnits ON MC_ItemUnits.Item_id = M_BillOfMaterial.Item_id
+                            JOIN C_Companies ON C_Companies.id = M_BillOfMaterial.Company_id
                             WHERE M_BillOfMaterial.IsDelete = 0
                             AND M_BillOfMaterial.Company_id = {Company}
                         ''')
@@ -48,10 +52,14 @@ class BOMListFilterView(CreateAPIView):
                                             M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, 
                                             M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom,
                                             M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, 
-                                            M_BillOfMaterial.Unit_id, M_Users.LoginName
+                                            M_BillOfMaterial.Unit_id, MC_ItemUnits.BaseUnitConversion, M_Users.LoginName, 
+                                            M_Items.Name AS ItemName, C_Companies.Name AS CompanyName
                             FROM M_BillOfMaterial
                             JOIN M_Users ON M_Users.id = M_BillOfMaterial.CreatedBy
                             JOIN MC_ItemCategoryDetails ON MC_ItemCategoryDetails.Item_id = M_BillOfMaterial.Item_id
+                            JOIN M_Items ON M_Items.id = M_BillOfMaterial.Item_id
+                            JOIN MC_ItemUnits ON MC_ItemUnits.Item_id = M_BillOfMaterial.Item_id  
+                            JOIN C_Companies ON C_Companies.id = M_BillOfMaterial.Company_id 
                             WHERE M_BillOfMaterial.IsDelete = 0
                             AND M_BillOfMaterial.Company_id = {Company}
                             AND MC_ItemCategoryDetails.CategoryType_id = {Category}
@@ -63,9 +71,13 @@ class BOMListFilterView(CreateAPIView):
                                             M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, 
                                             M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom, 
                                             M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, 
-                                            M_BillOfMaterial.Unit_id, M_Users.LoginName
+                                            M_BillOfMaterial.Unit_id, MC_ItemUnits.BaseUnitConversion, M_Users.LoginName, 
+                                            M_Items.Name AS ItemName, C_Companies.Name AS CompanyName
                             FROM M_BillOfMaterial
                             JOIN M_Users ON M_Users.id = M_BillOfMaterial.CreatedBy
+                            JOIN M_Items ON M_Items.id = M_BillOfMaterial.Item_id
+                            JOIN MC_ItemUnits ON MC_ItemUnits.Item_id = M_BillOfMaterial.Item_id 
+                            JOIN C_Companies ON C_Companies.id = M_BillOfMaterial.Company_id
                             WHERE M_BillOfMaterial.Item_id = {Item}
                             AND M_BillOfMaterial.Company_id = {Company}
                         ''')
@@ -75,10 +87,14 @@ class BOMListFilterView(CreateAPIView):
                                             M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, 
                                             M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom, 
                                             M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, 
-                                            M_BillOfMaterial.Unit_id, M_Users.LoginName
+                                            M_BillOfMaterial.Unit_id, MC_ItemUnits.BaseUnitConversion, M_Users.LoginName, 
+                                            M_Items.Name AS ItemName, C_Companies.Name AS CompanyName
                             FROM M_BillOfMaterial
                             JOIN M_Users ON M_Users.id = M_BillOfMaterial.CreatedBy
                             JOIN MC_ItemCategoryDetails ON MC_ItemCategoryDetails.Item_id = M_BillOfMaterial.Item_id
+                            JOIN M_Items ON M_Items.id = M_BillOfMaterial.Item_id
+                            JOIN MC_ItemUnits ON MC_ItemUnits.Item_id = M_BillOfMaterial.Item_id  
+                            JOIN C_Companies ON C_Companies.id = M_BillOfMaterial.Company_id
                             WHERE M_BillOfMaterial.Item_id = {Item}
                             AND M_BillOfMaterial.Company_id = {Company}
                             AND MC_ItemCategoryDetails.CategoryType_id = {Category}
@@ -103,13 +119,16 @@ class BOMListFilterView(CreateAPIView):
                         "id": a.id,
                         "BomDate": a.BomDate,
                         "Item": a.Item_id,
+                        "ItemName": a.ItemName, 
                         "Unit": a.Unit_id,
+                        "UnitName": a.BaseUnitConversion,
                         "StockQty": StockintoSelectedUnit,
                         "EstimatedOutputQty": a.EstimatedOutputQty,
                         "Comment": a.Comment,
                         "IsActive": a.IsActive,
                         "IsVDCItem": a.IsVDCItem,
                         "Company": a.Company_id,
+                        "CompanyName": a.CompanyName,
                         "CreatedOn": a.CreatedOn,
                         "CreatedBy": a.CreatedBy,
                         "IsRecordDeleted": a.IsDelete,
