@@ -1418,7 +1418,6 @@ LEFT JOIN M_Employees M_Employees_MT ON M_Employees_MT.id = X.MT
                                                      
 WHERE M_PartyType.id IN(9,10,15,17,19)  ''',[PartyIDs])
                
-                print(query)
                 if query:
                     # ManPower_Serializer = ManPowerSerializer(query, many=True).data
                     ManPowerList = list()

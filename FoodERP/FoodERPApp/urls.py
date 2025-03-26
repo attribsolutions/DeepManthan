@@ -168,6 +168,8 @@ from .Views.V_Scheme import *
 from .Views.V_POSToSAPExport import *
 from .Views.V_InvoiceToFTPforSAP import *
 
+from .Views.V_TallyData import *
+
 
 # from .Views.V_FTP import *
 
@@ -807,6 +809,10 @@ urlpatterns = [
               
 #Cashier Details:
               url(r'FranchisesCashierDetails$',FranchisesCashierList.as_view()), 
+              
+#TallyData
+              url(r'TallyPurchaseUpload$',TallyDataListView.as_view()), 
+              url(r'PurchaseDataSuccessLog$',UpdateIsTallySaveView.as_view()), 
               
 
 

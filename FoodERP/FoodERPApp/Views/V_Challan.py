@@ -22,13 +22,13 @@ class ChallanItemsView(CreateAPIView):
             with transaction.atomic():
                 Company=ChallanitemsData['Company']
                 Query = MC_BillOfMaterialItems.objects.filter(BOM__IsVDCItem=1,BOM__Company=Company).select_related('BOM','Item').values('Item').distinct()
-                CustomPrint(Query.query)
+                
                 ItemList = list()
                 for a in Query:
                     ItemList.append(a['Item'])
                 y=tuple(ItemList)
                 Itemsquery = M_Items.objects.filter(id__in=y,isActive=1)
-                CustomPrint(Itemsquery.query)
+                
                 Itemsdata = M_ItemsSerializer01(Itemsquery,many=True).data    
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data':Itemsdata})      
         except Exception as e:
@@ -98,19 +98,13 @@ class ChallanView(CreateAPIView):
                     Challandata['ChallanNumber'] = a
                     b = GetPrifix.GetChallanPrifix(Party)
                     Challandata['FullChallanNumber'] = b+""+str(a)
-                    CustomPrint(Challandata)
+                   
                     ChallanItems = Challandata['ChallanItems']
-                    # CustomPrint(ChallanItems)
-                    # CustomPrint("Shruti")
+                   
                     BatchWiseLiveStockList=list()
-                    CustomPrint(ChallanItems)
+                   
                     for ChallanItem in ChallanItems:
-                        CustomPrint(ChallanItem['Item'])
-                        # CustomPrint(ChallanItem['Quantity'])
-                        # CustomPrint(ChallanItem['BaseUnitQuantity'])
-                        # CustomPrint(ChallanItem['BatchID'])
-                        # CustomPrint(Challandata['Customer'])
-                        # CustomPrint("FFFFFFFF")                                              
+                                                                    
                         BaseUnitQuantity=UnitwiseQuantityConversion(ChallanItem['Item'],ChallanItem['Quantity'],ChallanItem['Unit'],0,0,0,0).GetBaseUnitQuantity()
                         ChallanItem['BaseUnitQuantity'] =  round(BaseUnitQuantity,3) 
                         # QtyInNo=UnitwiseQuantityConversion(ChallanItem['Item'],ChallanItem['Quantity'],ChallanItem['Unit'],0,0,1,0).ConvertintoSelectedUnit()
@@ -127,15 +121,15 @@ class ChallanView(CreateAPIView):
                             "Party" : Party,
                             # "Customer:":Challandata['Customer'],
                         })
-                    CustomPrint(BatchWiseLiveStockList)
+                    
                     Challandata.update({"BatchWiseLiveStockGRNID":BatchWiseLiveStockList}) 
-                    # CustomPrint(Challandata)
+                  
                     Challan_serializer = ChallanSerializer(data=Challandata) 
-                    # CustomPrint(Challan_serializer)                  
+                                   
                     if Challan_serializer.is_valid():
                         # return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.data, 'Data':[]})
                         Challan_serializer.save()
-                        return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'IB Sales Order Save Successfully', 'Data':[]})
+                        return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'IB Invoice Save Successfully', 'Data':[]})
                     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.errors, 'Data':[]})
                 # else:
    
@@ -241,11 +235,10 @@ class ChallanView(CreateAPIView):
             with transaction.atomic():
                 
                 BranchInvoiceQuery = T_Challan.objects.filter(id=id)
-                CustomPrint(BranchInvoiceQuery.query)
                 
                 if BranchInvoiceQuery.exists():
                     BranchInvoiceSerializedata = ChallanSerializerSecond(BranchInvoiceQuery, many=True).data
-                    CustomPrint(BranchInvoiceSerializedata)
+                    
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': BranchInvoiceSerializedata})
                     BranchInvoiceData = list()
                     for a in BranchInvoiceSerializedata:
@@ -607,7 +600,7 @@ class BOMItemList(CreateAPIView):
                             'ItemID': item.id, 
                             'ItemName': item.ItemName
                         })
-                    print(ItemDetails)
+
                     log_entry = create_transaction_logNew( request, {}, 0, '', 441, 0,0,0,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemDetails})
                 log_entry = create_transaction_logNew( request, {}, 0, 'Data Not Found', 441, 0,0,0,0)           

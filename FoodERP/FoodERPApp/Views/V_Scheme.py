@@ -23,8 +23,8 @@ class SchemeView(CreateAPIView):
                 
                 if user is not None:
                     SchemeDetails = M_Scheme.objects.raw(f'''
-                        SELECT M_Scheme.id, SchemeName, SchemeValue, ValueIn, FromPeriod, ToPeriod, FreeItemID, VoucherLimit,
-                        QrPrefix, SchemeTypeName, SchemeTypeID_id, UsageTime, BillAbove, UsageType, BillEffect,
+                        SELECT M_Scheme.id, SchemeName, SchemeValue, ValueIn, FromPeriod, ToPeriod, FreeItemID, VoucherLimit, SchemeValueUpto,
+                        QrPrefix, SchemeTypeName, SchemeTypeID_id, UsageTime, BillAbove, UsageType, BillEffect, Column1, Column2, Column3,
                         IsQrApplicable, M_Scheme.IsActive, concat(SchemeDetails,'',ifnull(M_Parties.SAPPartyCode,'')) SchemeDetails, OverLappingScheme, Message
                         FROM M_Scheme 
                         JOIN M_SchemeType ON M_Scheme.SchemeTypeID_id = M_SchemeType.id 
@@ -69,7 +69,11 @@ class SchemeView(CreateAPIView):
                             "IsQrApplicable": Scheme.IsQrApplicable,
                             "SchemeDetails" : Scheme.SchemeDetails,
                             "OverLappingScheme" : Scheme.OverLappingScheme,
+                            "SchemeValueUpto" : Scheme.SchemeValueUpto,
                             "Message" : Scheme.Message,
+                            "Col1" : Scheme.Column1,
+                            "Col2" : Scheme.Column2,
+                            "Col3" : Scheme.Column3,
                             "QR_Codes": qr_list,
                             "ItemsApplicable": applicable_items,
                             "ItemsNotApplicable": non_applicable_items,
@@ -87,4 +91,3 @@ class SchemeView(CreateAPIView):
         except Exception as e:
             log_entry =  create_transaction_logNew(request, PartyData, 0, 'SchemeDetails:' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
-

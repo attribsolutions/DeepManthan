@@ -144,6 +144,7 @@ class T_GRNView(CreateAPIView):
                 Customer = GRNdata['Customer']
                 CreatedBy = GRNdata['CreatedBy']
                 GRNDate = GRNdata['GRNDate']
+                
                 # CustomPrint(GRNdata['GRNReferences'])
                 # if R in GRNdata['GRNReferences']:
                 #     Query =T_Orders.objects.filter(id=OrderID[0]).update(Inward=GRNReference_data['Inward'])
@@ -164,8 +165,14 @@ class T_GRNView(CreateAPIView):
                     query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
                     DaysofItems = query2[0]['Days'] if query2 else 0
                     batch_date = datetime.strptime(a['BatchDate'], '%Y-%m-%d')                
-                    ItemExpiryDateStr = batch_date + timedelta(days=DaysofItems)
-                    ItemExpiryDate = ItemExpiryDateStr.strftime('%Y-%m-%d')
+                    
+                    if 'ItemExpiryDate' in a and a['ItemExpiryDate']:
+                        ItemExpiryDate = a['ItemExpiryDate'] 
+                    else:
+                        ItemExpiryDateStr = batch_date + timedelta(days=DaysofItems)
+                        ItemExpiryDate = ItemExpiryDateStr.strftime('%Y-%m-%d')  
+
+                    
                     if(item == ""):
                         item = a['Item']
                         b = query1.count()
@@ -265,10 +272,10 @@ class T_GRNViewUpdate(CreateAPIView):
                 GRNupdate_Serializer = T_GRNSerializer(GRNupdateByID, data=GRNupdatedata)
                 if GRNupdate_Serializer.is_valid():
                     GRNupdate_Serializer.save()
-                    log_entry = create_transaction_logNew(request, GRNupdatedata, 0,'GRN Updated - ID: ' + str(id), 449, 0)
+                    log_entry = create_transaction_logNew(request, GRNupdatedata, 0,'GRN Updated - ID: ' + str(id), 450, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GRN Updated Successfully', 'Data': []})
                 else:
-                    log_entry = create_transaction_logNew(request, GRNupdatedata, 0, 'GRNEdit:' + str(GRNupdate_Serializer.errors), 449, 0)
+                    log_entry = create_transaction_logNew(request, GRNupdatedata, 0, 'GRNEdit:' + str(GRNupdate_Serializer.errors), 450, 0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': False, 'Message': GRNupdate_Serializer.errors, 'Data': []})
         except Exception as e:
@@ -343,6 +350,7 @@ class T_GRNViewSecond(CreateAPIView):
                     "GRNDate": a['GRNDate'],
                     "Customer": a['Customer']['id'],
                     "CustomerName": a['Customer']['Name'],
+                    "PriceList_id": a['Customer']['PriceList_id'],
                     "GRNNumber": a['GRNNumber'],
                     "FullGRNNumber": a['FullGRNNumber'],
                     "InvoiceNumber": a['InvoiceNumber'],

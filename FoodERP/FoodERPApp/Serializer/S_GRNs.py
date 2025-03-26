@@ -102,6 +102,9 @@ class T_GRNSerializer(serializers.ModelSerializer):
         instance.InvoiceNumber = validated_data.get('InvoiceNumber', instance.InvoiceNumber)
         
         instance.IsSave = validated_data.get('IsSave', instance.IsSave)
+      
+        if instance.IsTallySave is None:
+            instance.IsTallySave = False
 
         instance.save()
         
@@ -138,7 +141,7 @@ class T_GRNSerializer(serializers.ModelSerializer):
 class Partiesserializer(serializers.ModelSerializer):
     class Meta:
         model = M_Parties
-        fields = ['id', 'Name']
+        fields = ['id', 'Name', 'PriceList_id']
 class InvoiceDateserializer(serializers.ModelSerializer):
     class Meta:
         model = T_Invoices
@@ -201,3 +204,6 @@ class T_GRNSerializerForGET(serializers.ModelSerializer):
     class Meta:
         model = T_GRNs
         fields = ['id', 'GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber','InvoiceNumber','GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy','CreatedOn', 'Comment', 'IsSave', 'GRNReferences', 'GRNItems']
+
+    def get_PriceList_id(self, obj):
+        return obj.PriceList_id
