@@ -492,22 +492,42 @@ class BOMItemForChallan(CreateAPIView):
         Demanddata = JSONParser().parse(request)
         try:
             with transaction.atomic():                
-                    Party = Demanddata['Party']     
-                    DemandDate=Demanddata['ChallanDate']    
-                    BOMItemID=Demanddata['ItemID'] 
-                    Demanddata = list() 
+                Party = Demanddata['Party']     
+                ChallanDate=Demanddata['ChallanDate']    
+                BOMItemID=Demanddata['ItemID'] 
+                     
+                    
+                 
+                Demanddata = list()
+                BOMItemQuery=M_Items.objects.raw(f'''select  1 id,M_Items.id ItemID,M_Items.Name ItemName ,M_Parties.Name CustomerName,M_Parties.PAN,
+                GSTHsnCodeMaster({BOMItemID},'{ChallanDate}',2,{Party},0) GSTPercentage,
+                GSTHsnCodeMaster({BOMItemID},'{ChallanDate}',3,{Party},0) HSNCode,
+                GetTodaysDateMRP({BOMItemID},'{ChallanDate}',2,0,{Party},0)MRP,
+                GetTodaysDateRate({BOMItemID},'{ChallanDate}',{Party},0,2)Rate,M_Items.BaseUnitID_id Unit_id,M_Units.Name UnitName,M_Parties.id CustomerID,M_Parties.GSTIN
+                from M_Items 
+                JOIN MC_PartyItems ON MC_PartyItems.Item_id=M_Items.id
+                JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id
+                JOIN M_Units ON  M_Units.id=M_Items.BaseUnitID_id 
+                where M_Items.id={BOMItemID}  and M_Parties.id={Party} ''')
+                    
+                            
+                for b in BOMItemQuery: 
+                    
+                    
+                    
                     if BOMItemID:     
                         obatchwisestockquery=  O_BatchWiseLiveStock.objects.raw(f'''SELECT 1 as id ,M_Items.Name ItemName,BatchDate,BaseUnitConversion,BatchCode,SystemBatchDate,SystemBatchCode,
-                        Round(GetTodaysDateRate({BOMItemID},'{DemandDate}',{Party},0,2),2) AS Rate, O_BatchWiseLiveStock.id, O_BatchWiseLiveStock.Quantity, O_BatchWiseLiveStock.OriginalBaseUnitQuantity, 
+                        Round(GetTodaysDateRate({BOMItemID},'{ChallanDate}',{Party},0,2),2) AS Rate, O_BatchWiseLiveStock.id, O_BatchWiseLiveStock.Quantity, O_BatchWiseLiveStock.OriginalBaseUnitQuantity, 
                         O_BatchWiseLiveStock.BaseUnitQuantity, O_BatchWiseLiveStock.IsDamagePieces, O_BatchWiseLiveStock.CreatedBy,
-                        O_BatchWiseLiveStock.CreatedOn, O_BatchWiseLiveStock.GRN_id, O_BatchWiseLiveStock.InterBranchInward_id, 
+                        O_BatchWiseLiveStock.CreatedOn,  O_BatchWiseLiveStock.InterBranchInward_id, T_GRNs.id GRNID,T_GRNs.FullGRNNumber,
                         O_BatchWiseLiveStock.Item_id ItemID, O_BatchWiseLiveStock.LiveBatche_id, O_BatchWiseLiveStock.Party_id, 
                         O_BatchWiseLiveStock.Production_id, O_BatchWiseLiveStock.PurchaseReturn_id, O_BatchWiseLiveStock.Unit_id,O_LiveBatches.GST_id LiveBatcheGSTID,
                         O_BatchWiseLiveStock.BaseUnitQuantity ,(case when O_LiveBatches.GST_id is null then O_LiveBatches.GSTPercentage else M_GSTHSNCode.GSTPercentage end )GST
                         FROM O_BatchWiseLiveStock left  join O_LiveBatches on O_BatchWiseLiveStock.LiveBatche_id=O_LiveBatches.id 
                         left join MC_ItemUnits on MC_ItemUnits.id=O_BatchWiseLiveStock.Unit_id
                         left join M_GSTHSNCode on M_GSTHSNCode.id=O_LiveBatches.GST_id
-                        JOIN M_Items ON M_Items.id=O_BatchWiseLiveStock.Item_id
+                        JOIN M_Items ON M_Items.id=O_BatchWiseLiveStock.Item_id 
+                        Left JOIN T_GRNs ON T_GRNs.id= O_BatchWiseLiveStock.GRN_id                       
                         WHERE O_BatchWiseLiveStock.BaseUnitQuantity > 0 AND O_BatchWiseLiveStock.Item_id = {BOMItemID} AND 
                         O_BatchWiseLiveStock.Party_id = {Party}''')
                         DemandItemDetails = list()
@@ -520,7 +540,6 @@ class BOMItemForChallan(CreateAPIView):
                                 
                                 stockDatalist.append({                                    
                                     "ItemID":d.ItemID,
-                                    "ItemName":d.ItemName,
                                     "BatchDate":d.BatchDate,
                                     "BatchCode":d.BatchCode,
                                     "SystemBatchDate":d.SystemBatchDate,
@@ -533,21 +552,22 @@ class BOMItemForChallan(CreateAPIView):
                                     "UnitName":d.BaseUnitConversion, 
                                     "BaseUnitQuantity":d.BaseUnitQuantity,
                                     "Quantity":d.Quantity,    
-                                    "OriginalBaseUnitQuantity":d.OriginalBaseUnitQuantity,                                
+                                    "OriginalBaseUnitQuantity":d.OriginalBaseUnitQuantity,  
+                                    "GRNID": d.GRNID,     
+                                    "FullGRNNumber":d.FullGRNNumber                       
                                     }) 
-                        DemandItemDetails.append({                                            
-                            
-                            "Item": "",
-                            "ItemName": "",
+                        DemandItemDetails.append({   
+                            "Item": b.ItemID,
+                            "ItemName":b.ItemName,
                             "Quantity": "",                            
-                            "Rate": "",
-                            "Unit": "",
-                            "UnitName":"",
+                            "Rate": b.Rate,
+                            "Unit": b.Unit_id,
+                            "UnitName":b.UnitName,
                             "DeletedMCUnitsUnitID": "",
                             "ConversionUnit": "",
                             "BaseUnitQuantity": "",
-                            "GST": "",          
-                            "HSNCode": "",                           
+                            "GST": b.GSTPercentage,          
+                            "HSNCode": b.HSNCode,                           
                             "BasicAmount": "",
                             "GSTAmount":"",
                             "CGST":"",
@@ -557,23 +577,23 @@ class BOMItemForChallan(CreateAPIView):
                             "SGSTPercentage":"" ,
                             "IGSTPercentage": "",
                             "Amount":"" ,  
-                            "MRP":"",                         
-                            "UnitDetails":"",
+                            "MRP":b.MRP,                         
+                            "UnitDetails":UnitDropdown(d.ItemID,Party,0),
                             "StockDetails":stockDatalist
                             })
                         
                         Demanddata.append({
-                                "DemandIDs":"",
-                                "DemandDate" : "",
-                                "CustomerName" : "",                        
-                                "CustomerPAN" : "",
-                                "CustomerGSTIN" : "",
-                                "CustomerID" : "",
-                                "DemandNumber" : "",
-                                "DemandItemDetails":DemandItemDetails
+                            
+                            "DemandIDs":"",
+                            "DemandDate" : ChallanDate,
+                            "CustomerName" : b.CustomerName,                        
+                            "CustomerPAN" : b.PAN,
+                            "CustomerGSTIN" :b.GSTIN,
+                            "CustomerID" : b.CustomerID,
+                            "DemandNumber" :"",
+                            "DemandItemDetails":DemandItemDetails                                
                             })
-                            # response_data = {                            
-                            # 'StockDetails': stockDatalist} 
+                            
                     log_entry = create_transaction_logNew(request, Demanddata, 0, 0, 32, 0, 0, 0, Party)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Demanddata[0]})
                     

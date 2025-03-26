@@ -1245,7 +1245,7 @@ class T_MaterialIssue(models.Model):
     MaterialIssueDate = models.DateField()
     MaterialIssueNumber = models.IntegerField()
     FullMaterialIssueNumber = models.CharField(max_length=500)
-    NumberOfLot = models.IntegerField()
+    NumberOfLot = models.DecimalField(max_digits=10, decimal_places=3)
     LotQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
@@ -1256,7 +1256,7 @@ class T_MaterialIssue(models.Model):
     Party = models.ForeignKey(M_Parties, on_delete=models.PROTECT)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='MaterialIssueUnitID', on_delete=models.PROTECT)
     Status = models.IntegerField(default=False)
-    RemainNumberOfLot = models.IntegerField()
+    RemainNumberOfLot = models.DecimalField(max_digits=10, decimal_places=3)
     RemaninLotQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     class Meta:
         db_table = "T_MaterialIssue"
