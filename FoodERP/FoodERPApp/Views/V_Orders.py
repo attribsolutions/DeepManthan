@@ -291,6 +291,7 @@ where T_Invoices.InvoiceDate between %s and %s and  Customer_id=%s and Party_id=
                             #     Invoice=a['id']).values('Invoice').count()
                             # if InvoiceID == 0:
                             InvoiceListData.append({
+                                "GRNMode" : OrderType,
                                 "id": a.id,
                                 "OrderDate": a.InvoiceDate,
                                 "FullOrderNumber": a.FullInvoiceNumber,
@@ -361,6 +362,7 @@ where T_Invoices.InvoiceDate between %s and %s and  Customer_id=%s and Party_id=
                         if(c['Inward'] == 1):
                             inward = 1
                     OrderListData.append({
+                        "GRNMode" : OrderType,
                         "id": a['id'],
                         "OrderDate": a['OrderDate'],
                         "FullOrderNumber": a['FullOrderNumber'],
