@@ -89,10 +89,10 @@ class OrderDetailsForInvoice(CreateAPIView):
                                    pp = ""
                                    Condition = f",RateCalculationFunction1(LiveBatcheid, ItemID, {Customer}, UnitID, 0, 0, MRP, 0)Rate"                  
                                 else : 
-                                    pp = "ifnull(O_LiveBatches.Rate,0)Rate"
+                                    pp = ",ifnull(O_LiveBatches.Rate,0)Rate"
                                     Condition = ""    
                                 obatchwisestockquery= O_BatchWiseLiveStock.objects.raw(f'''select * {Condition}
-                                                from (select O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id ItemID,O_LiveBatches.BatchCode,{pp},O_LiveBatches.BatchDate,O_LiveBatches.SystemBatchCode,
+                                                from (select O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id ItemID,O_LiveBatches.BatchCode {pp},O_LiveBatches.BatchDate,O_LiveBatches.SystemBatchCode,
                                                 O_LiveBatches.SystemBatchDate,O_LiveBatches.id LiveBatcheid,O_LiveBatches.MRP_id LiveBatcheMRPID,O_LiveBatches.GST_id LiveBatcheGSTID,
                                                 (case when O_LiveBatches.MRP_id is null then O_LiveBatches.MRPValue else M_MRPMaster.MRP end )MRP,
                                                 (case when O_LiveBatches.GST_id is null then O_LiveBatches.GSTPercentage else M_GSTHSNCode.GSTPercentage end )GST
