@@ -31,7 +31,7 @@ class BOMListFilterView(CreateAPIView):
                 # d = date.today()   
                 if Item == '':
                     if Category == 0:
-                        query = M_BillOfMaterial.objects.raw(f'''SELECT DISTINCT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty,
+                        query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty,
                                             M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, 
                                             M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom,
                                             M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, 
@@ -45,7 +45,7 @@ class BOMListFilterView(CreateAPIView):
                             WHERE M_BillOfMaterial.IsDelete = 0
                             AND M_BillOfMaterial.Company_id = {Company}''')
                     else:
-                        query = M_BillOfMaterial.objects.raw(f'''SELECT DISTINCT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty,
+                        query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty,
                                             M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, 
                                             M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom,
                                             M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, 
@@ -62,7 +62,7 @@ class BOMListFilterView(CreateAPIView):
                             AND MC_ItemCategoryDetails.CategoryType_id = {Category} ''')
                 else:
                     if Category == 0:
-                        query = M_BillOfMaterial.objects.raw(f'''SELECT DISTINCT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty,
+                        query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty,
                                             M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, 
                                             M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom, 
                                             M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, 
@@ -76,7 +76,7 @@ class BOMListFilterView(CreateAPIView):
                             WHERE M_BillOfMaterial.Item_id = {Item}
                             AND M_BillOfMaterial.Company_id = {Company}''')
                     else:
-                        query = M_BillOfMaterial.objects.raw(f'''SELECT DISTINCT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty,
+                        query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty,
                                             M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, 
                                             M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom, 
                                             M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, 
