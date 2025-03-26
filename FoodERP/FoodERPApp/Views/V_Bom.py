@@ -31,8 +31,7 @@ class BOMListFilterView(CreateAPIView):
                 # d = date.today()   
                 if Item == '':
                     if Category == 0:
-                        query = M_BillOfMaterial.objects.raw(f'''
-                            SELECT DISTINCT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty,
+                        query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty,
                                             M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, 
                                             M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom,
                                             M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, 
@@ -44,11 +43,9 @@ class BOMListFilterView(CreateAPIView):
                             JOIN MC_ItemUnits ON MC_ItemUnits.Item_id = M_BillOfMaterial.Item_id and IsBase=1
                             JOIN C_Companies ON C_Companies.id = M_BillOfMaterial.Company_id
                             WHERE M_BillOfMaterial.IsDelete = 0
-                            AND M_BillOfMaterial.Company_id = {Company}
-                        ''')
+                            AND M_BillOfMaterial.Company_id = {Company}''')
                     else:
-                        query = M_BillOfMaterial.objects.raw(f'''
-                            SELECT DISTINCT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty,
+                        query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty,
                                             M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, 
                                             M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom,
                                             M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, 
@@ -62,12 +59,10 @@ class BOMListFilterView(CreateAPIView):
                             JOIN C_Companies ON C_Companies.id = M_BillOfMaterial.Company_id 
                             WHERE M_BillOfMaterial.IsDelete = 0
                             AND M_BillOfMaterial.Company_id = {Company}
-                            AND MC_ItemCategoryDetails.CategoryType_id = {Category}
-                        ''')
+                            AND MC_ItemCategoryDetails.CategoryType_id = {Category} ''')
                 else:
                     if Category == 0:
-                        query = M_BillOfMaterial.objects.raw(f'''
-                            SELECT DISTINCT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty,
+                        query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty,
                                             M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, 
                                             M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom, 
                                             M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, 
@@ -79,11 +74,9 @@ class BOMListFilterView(CreateAPIView):
                             JOIN MC_ItemUnits ON MC_ItemUnits.Item_id = M_BillOfMaterial.Item_id and IsBase=1
                             JOIN C_Companies ON C_Companies.id = M_BillOfMaterial.Company_id
                             WHERE M_BillOfMaterial.Item_id = {Item}
-                            AND M_BillOfMaterial.Company_id = {Company}
-                        ''')
+                            AND M_BillOfMaterial.Company_id = {Company}''')
                     else:
-                        query = M_BillOfMaterial.objects.raw(f'''
-                            SELECT DISTINCT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty,
+                        query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty,
                                             M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, 
                                             M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom, 
                                             M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, 
@@ -97,8 +90,7 @@ class BOMListFilterView(CreateAPIView):
                             JOIN C_Companies ON C_Companies.id = M_BillOfMaterial.Company_id
                             WHERE M_BillOfMaterial.Item_id = {Item}
                             AND M_BillOfMaterial.Company_id = {Company}
-                            AND MC_ItemCategoryDetails.CategoryType_id = {Category}
-                        ''')
+                            AND MC_ItemCategoryDetails.CategoryType_id = {Category}''')
 
                                 
                 # return JsonResponse({'query': str(query.query)})
@@ -135,11 +127,14 @@ class BOMListFilterView(CreateAPIView):
                         "UserName": a.LoginName  
                     }) 
                 if BomListData:
+                    log_entry = create_transaction_logNew(request, BillOfMaterialdata,Party,'Bill Of Material Data',453,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BomListData})
                 else:
+                    log_entry = create_transaction_logNew(request,BillOfMaterialdata,Party,'BillOfMaterial Data Does Not Exist',453,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         
         except Exception as e:
+            log_entry = create_transaction_logNew(request, BillOfMaterialdata, 0,'BillOfMaterialData:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
 
 class M_BOMsView(CreateAPIView):
@@ -166,11 +161,14 @@ class M_BOMsView(CreateAPIView):
                     if(ReferenceBOMID > 0):
                         # CustomPrint("3")
                         query = M_BillOfMaterial.objects.filter(id=ReferenceBOMID).update(IsActive=0,IsDelete=1)
+                    log_entry = create_transaction_logNew(request, BillOfMaterial,0,'Bill Of Material Save Successfully',454,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Bill Of Material Save Successfully', 'Data': []})
                 else:
+                    log_entry = create_transaction_logNew(request, BillOfMaterial,0,'BillOfMaterial Save:'+str(Boms_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Boms_Serializer.errors, 'Data': []})
         except Exception as e:
+                log_entry = create_transaction_logNew(request, BillOfMaterial, 0,'BillOfMaterialData:'+str(e),33,0)
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 class M_BOMsViewSecond(RetrieveAPIView):
