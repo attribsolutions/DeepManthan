@@ -333,6 +333,7 @@ class T_GRNViewSecond(CreateAPIView):
                         "SystemBatchCode": a['SystemBatchCode'],
                         "DiscrepancyComment" : a['DiscrepancyComment'],
                         "AccountingQuantity" : a['AccountingQuantity'],
+                        "ItemExpiryDate" : a['ItemExpiryDate'],
                         "UnitDetails":[]
                     })
 
