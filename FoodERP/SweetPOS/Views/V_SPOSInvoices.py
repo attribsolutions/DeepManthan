@@ -92,7 +92,6 @@ class SPOSInvoiceView(CreateAPIView):
                             Invoicedata['AdvanceAmount'] = None
                         else:
                             Invoicedata['AdvanceAmount'] = Invoicedata.get('AdvanceAmount', None) 
-                        
                         #================================================================================================== 
                         InvoiceItems = Invoicedata['SaleItems']
                         
@@ -153,7 +152,7 @@ class SPOSInvoiceView(CreateAPIView):
                             InvoiceItem['QtyInKg'] = float(QtyInKg)
                             QtyInBox=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,4,0).ConvertintoSelectedUnit()
                             InvoiceItem['QtyInBox'] = float(QtyInBox)
-                           
+                            
                         if 'SPOSInvoicesReferences' in Invoicedata:
                             Invoice_serializer = SPOSInvoiceSerializer1(data=Invoicedata)
                         else:
@@ -172,7 +171,16 @@ class SPOSInvoiceView(CreateAPIView):
                             LastInsertId = Invoice.id
                             LastIDs.append(Invoice.id)
                             
+                            log_entry = create_transaction_logNew(request, inputdata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastIDs),383,0,0,0, 0)    
                             
+                            if 'SchemeID' in Invoicedata and Invoicedata['SchemeID']:
+                                SchemeIDs = Invoicedata['SchemeID'].split(",")
+                                
+                                for scheme_id in SchemeIDs:
+                                    SchemeQuery = f"INSERT INTO SweetPOS.TC_InvoicesSchemes (Invoice_id, scheme) VALUES ({LastInsertId}, {scheme_id})"
+                                    connection.cursor().execute(SchemeQuery) 
+                                log_entry = create_transaction_logNew(request, inputdata,Party ,SchemeIDs,383,0)    
+
                         else:
                             log_entry = create_transaction_logNew(request, inputdata, Party, str(Invoice_serializer.errors),34,0,0,0,0)
                             transaction.set_rollback(True)
@@ -182,7 +190,7 @@ class SPOSInvoiceView(CreateAPIView):
                 return JsonResponse({'status_code': 200, 'Success': True,  'Message': 'Invoice Save Successfully','TransactionID':LastIDs,'Data':[]})
         except Exception as e:
             log_entry = create_transaction_logNew(request, inputdata, 0,'InvoiceSave:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
         
 
 
