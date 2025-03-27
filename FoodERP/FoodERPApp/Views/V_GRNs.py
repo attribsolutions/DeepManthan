@@ -662,7 +662,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                         InvoiceData = list()
                         for a in InvoiceSerializedata:
                             InvoiceItemDetails = list()                           
-                            
+                              
                             for b in a['InvoiceItems']:
                                 checkitemassigninPartyItems=MC_PartyItems.objects.filter(Item=b['Item']['id'],Party=a['Customer']['id']).count()
                                 if checkitemassigninPartyItems > 0:
