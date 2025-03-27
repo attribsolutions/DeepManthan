@@ -228,19 +228,22 @@ group by A.id, GroupType.id, Groupss.id,subgroup.id, M_Items.id , GSTPercentage,
                     
                     PartyID=Party;
                     PartyIDs= Party 
-
+                    
                     ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(PartyID,0).split('!') 
 
                     where_clause = ""
                     Condition=""
+                    
                     # p2 = (today, Unit, [PartyIDs]) 
                     if IsRateWise:
-                        Condition += "ifnull(Round(GetTodaysDateRate(M_Items.id, curdate(),MC_PartyItems.Party_id,0,2),2),0)Rate"
-                        p2 = (today, [PartyIDs])                         
-                        
+                        # Condition += "ifnull(Round(GetTodaysDateRate(M_Items.id, curdate(),MC_PartyItems.Party_id,0,2),2),0)Rate"
+                        # p2 = (today, [PartyIDs])   
+                        Condition += "ifnull(Round(O_LiveBatches.Rate,2),0)Rate" 
+                        p2 = (today,[PartyIDs])  
                     else:     
                         Condition += "RateCalculationFunction1(0, M_Items.id, MC_PartyItems.Party_id, %s, 0, 0, O_LiveBatches.MRPValue, 0)Rate"                  
                         p2 = (today, Unit, [PartyIDs]) 
+                        
                         
                     if Cluster:
                         where_clause += " AND M_Cluster.id = %s "
@@ -279,7 +282,7 @@ group by A.id, GroupType.id, Groupss.id,subgroup.id, M_Items.id , GSTPercentage,
     {ItemsGroupJoinsandOrderby[2]}''')
                     
                     Itemquery = MC_PartyItems.objects.raw(Stockquery, p2)
-                      
+                     
                 if not Itemquery:
                     log_entry = create_transaction_logNew(request, StockReportdata, Party, "BatchWiseLiveStock Not available",88,0) 
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})

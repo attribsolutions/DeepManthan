@@ -63,6 +63,8 @@ class ProductionView(CreateAPIView):
                 NoOfLotsQty=Productiondata['NumberOfLot']
                 NoOfQuantity=Productiondata['EstimatedQuantity']
                 Materialissueid=Productiondata['ProductionMaterialIssue'][0]['MaterialIssue']
+                ProdctionDate=Productiondata['ProductionDate']
+                print(ProdctionDate)
                 query1 = T_Production.objects.filter(Item_id=Item, BatchDate=date.today()).values('id')                
                 BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(Item, Customer, query1.count())
                 
@@ -72,6 +74,12 @@ class ProductionView(CreateAPIView):
                 GSTID = Gst[0]['Gstid']
                 GSTValue=Gst[0]['GST']                
                 
+            
+                CssCustomerPriceList=M_Settings.objects.filter(id=62).values("DefaultValue")
+                CustomerPriceList=str(CssCustomerPriceList[0]['DefaultValue'])  
+                CustomerRateQuery=M_RateMaster.objects.raw( f'''Select 1 id, Round(GetTodaysDateRate({Item}, '{ProdctionDate}',0,{CustomerPriceList},2),2) AS Rate''')
+                CustomerRate = CustomerRateQuery[0].Rate 
+                print(CustomerRate)
                 # MRPs=M_MRPMaster.objects.raw(f'''SELECT 1 id ,GetTodaysDateMRP({Item},'{ProductionDate}',1,0,0,0) MRPID,GetTodaysDateMRP({Item},'{ProductionDate}',2,0,0,0) MRPValue ''') 
                 # first_row = MRPs[0]
                 # MRPID = first_row.MRPID               
@@ -105,7 +113,7 @@ class ProductionView(CreateAPIView):
                 O_LiveBatchesList.append({
                     
                     "MRP": "",
-                    "Rate":"",
+                    "Rate":CustomerRate,
                     "GST": GSTID,
                     "SystemBatchDate": Productiondata['BatchDate'],
                     "SystemBatchCode": Productiondata['BatchCode'],
@@ -142,8 +150,9 @@ class ProductionView(CreateAPIView):
                     
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Production_Serializer.errors, 'Data': []})
-        except Exception as e:            
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})       
+        except Exception as e:
+                log_entry = create_transaction_logNew(request, 0, 0, 'DemandDetailsForChallan:' + str(e), 33, 0)
+                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})       
 
 class ProductionViewSecond(RetrieveAPIView):
     
