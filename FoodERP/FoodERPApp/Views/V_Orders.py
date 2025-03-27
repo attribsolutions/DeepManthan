@@ -291,6 +291,7 @@ where T_Invoices.InvoiceDate between %s and %s and  Customer_id=%s and Party_id=
                             #     Invoice=a['id']).values('Invoice').count()
                             # if InvoiceID == 0:
                             InvoiceListData.append({
+                                "GRNMode" : OrderType,
                                 "id": a.id,
                                 "OrderDate": a.InvoiceDate,
                                 "FullOrderNumber": a.FullInvoiceNumber,
@@ -361,6 +362,7 @@ where T_Invoices.InvoiceDate between %s and %s and  Customer_id=%s and Party_id=
                         if(c['Inward'] == 1):
                             inward = 1
                     OrderListData.append({
+                        "GRNMode" : OrderType,
                         "id": a['id'],
                         "OrderDate": a['OrderDate'],
                         "FullOrderNumber": a['FullOrderNumber'],
@@ -438,18 +440,25 @@ class T_OrdersView(CreateAPIView):
     @transaction.atomic()
     def post(self, request):
         Orderdata = JSONParser().parse(request)
+        # print(Orderdata)
         try:
             with transaction.atomic():
                 Division = Orderdata['Division']
                 OrderType = Orderdata['OrderType']
                 OrderDate = Orderdata['OrderDate']
                 Supplier  = Orderdata['Supplier']
-                AdvanceAmount =  Orderdata['AdvanceAmount']
-                
+                AdvanceAmount =  Orderdata['AdvanceAmount']     
+                CssCompanyID=M_Parties.objects.filter(id=Division).values("Company_id")
+                CssCompany=str(CssCompanyID[0]['Company_id'])
+                CssCompanyIDSetting=M_Settings.objects.filter(id=61).values("DefaultValue")
+                CssCompanySetting=str(CssCompanyIDSetting[0]['DefaultValue'])                      
                 '''Get Max Order Number'''
-                a = GetMaxNumber.GetOrderNumber(Supplier, OrderType, OrderDate)
+                if CssCompany==CssCompanySetting:                    
+                    a = GetMaxNumber.GetCSSPONumber(Division, OrderType, OrderDate)
+                else:
+                    a = GetMaxNumber.GetOrderNumber(Supplier, OrderType, OrderDate)
                 # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
-                
+                # print(a)
                 for aa in Orderdata['OrderItem']:
 
                     BaseUnitQuantity = UnitwiseQuantityConversion(
@@ -751,6 +760,15 @@ class EditOrderView(CreateAPIView):
                                                     WHERE IsDamagePieces = 0 AND Item_id = a.Item_id AND Party_id = {Stockparty} GROUP BY Item_id) AS StockQuantity''')
 
                 if (q1[0]['PartyType__IsRetailer'] == 0 ):
+                    CssCompanyID=M_Settings.objects.filter(id=61).values("DefaultValue")
+                    CssCompany=str(CssCompanyID[0]['DefaultValue'])
+                    IsItemnotassign =f'AND MC_PartyItems.Item_id in (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = {Party})' 
+                    if CssCompany:
+                        ItemCount = MC_PartyItems.objects.raw(f'''SELECT 1 as id, Count(`Item_id`)ItemIDCount FROM MC_PartyItems WHERE MC_PartyItems.Party_id ={Party}''')
+                        if ItemCount[0].ItemIDCount==0:
+                            IsItemnotassign =f'AND MC_PartyItems.Item_id in (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = {Customer})'
+                        
+                            
                     PartyItem = Customer
                     ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Stockparty,0).split('!') 
                     
@@ -771,8 +789,7 @@ ifnull(a.DiscountAmount,0)DiscountAmount,
 (select * from 
     (SELECT MC_PartyItems.Item_id FROM `MC_PartyItems` 
     JOIN M_ChannelWiseItems ON M_ChannelWiseItems.Item_id=MC_PartyItems.Item_id 
-    WHERE `MC_PartyItems`.`Party_id` = %s 
-    AND MC_PartyItems.Item_id in (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = %s) 
+    WHERE `MC_PartyItems`.`Party_id` = %s {IsItemnotassign}    
     AND M_ChannelWiseItems.PartyType_id IN (SELECT PartyType_id FROM  M_Parties where id=%s) 
     AND M_ChannelWiseItems.IsAvailableForOrdering=0 )b 
     
@@ -797,10 +814,11 @@ left join M_GSTHSNCode on M_GSTHSNCode.id=a.GST_id
 {ItemsGroupJoinsandOrderby[2]} ''', ([EffectiveDate], [EffectiveDate], [EffectiveDate], [EffectiveDate],
                                                            [EffectiveDate], [EffectiveDate], [Customer], [Party], [EffectiveDate], 
                                                            [Customer], [Party], [EffectiveDate], [RateParty], [PartyItem],
-                                                           [Party], [PartyItem], [OrderID]))
+                                                            [PartyItem], [OrderID]))
                     
-               
+                    # print(Itemquery.query)   
                 else:
+                    
                     PartyItem = Party
                     ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Stockparty,0).split('!') 
                     
@@ -851,12 +869,14 @@ left join M_GSTHSNCode on M_GSTHSNCode.id=a.GST_id
                               "UnitDetails": UnitDropdown(ItemID, RateParty, 0)
                               })
                     
-                    # bomquery = MC_BillOfMaterialItems.objects.filter(
-                    #     Item_id=ItemID, BOM__IsVDCItem=1).select_related('BOM')
-                    # if bomquery.exists():
-                    b.update({"Bom": True})
-                    # else:
-                    #     b.update({"Bom": False})
+                    bomquery = MC_BillOfMaterialItems.objects.filter(
+                        Item_id=ItemID, BOM__IsVDCItem=1).select_related('BOM')
+                    if bomquery.exists():
+                       
+                        b.update({"Bom": True})
+                    else:
+                        
+                        b.update({"Bom": False})
 
                 if (OrderID != 0 or DemandID != 0):
                     if(OrderID != 0):

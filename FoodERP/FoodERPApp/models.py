@@ -1022,6 +1022,7 @@ class T_Invoices(models.Model):
     DataRecovery = models.BooleanField(default=False)
     # IsDataRecovery = models.BooleanField(default=False)
     HideComment = models.CharField(max_length=500 ,null=True,blank=True)
+    IsTallySave = models.BooleanField(default=False)
     class Meta:
         db_table = "T_Invoices"
         indexes = [
@@ -1129,6 +1130,7 @@ class T_GRNs(models.Model):
     Reason = models.ForeignKey(M_GeneralMaster, related_name='GRNReason', on_delete=models.PROTECT)
     InvoiceDate = models.DateField(null=True,blank=True)
     IsSave = models.IntegerField() 
+    IsTallySave = models.BooleanField(default=False)
     class Meta:
         db_table = "T_GRNs"
 
@@ -1168,6 +1170,7 @@ class TC_GRNItems(models.Model):
     QtyInKg = models.DecimalField(max_digits=30, decimal_places=20)
     QtyInBox = models.DecimalField(max_digits=30, decimal_places=20)
     ActualQuantity=models.DecimalField(max_digits=20, decimal_places=3,null=True,blank=True)
+    AccountingQuantity = models.DecimalField(max_digits=20, decimal_places=3, null=True, blank=True)
     DiscrepancyComment = models.CharField(max_length=500 ,null=True,blank=True)
     DiscrepancyReason = models.CharField(max_length=500, null=True, blank=True)
     
@@ -1242,7 +1245,7 @@ class T_MaterialIssue(models.Model):
     MaterialIssueDate = models.DateField()
     MaterialIssueNumber = models.IntegerField()
     FullMaterialIssueNumber = models.CharField(max_length=500)
-    NumberOfLot = models.IntegerField()
+    NumberOfLot = models.DecimalField(max_digits=10, decimal_places=3)
     LotQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
@@ -1253,7 +1256,7 @@ class T_MaterialIssue(models.Model):
     Party = models.ForeignKey(M_Parties, on_delete=models.PROTECT)
     Unit = models.ForeignKey(MC_ItemUnits, related_name='MaterialIssueUnitID', on_delete=models.PROTECT)
     Status = models.IntegerField(default=False)
-    RemainNumberOfLot = models.IntegerField()
+    RemainNumberOfLot = models.DecimalField(max_digits=10, decimal_places=3)
     RemaninLotQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     class Meta:
         db_table = "T_MaterialIssue"
@@ -1425,7 +1428,7 @@ class TC_GRNReferences(models.Model):
     Order = models.ForeignKey(T_Orders, related_name='OrderReferences', on_delete=models.PROTECT ,null=True) 
     class Meta:
         db_table = "TC_GRNReferences"   
-        unique_together = [['Invoice']] 
+        # unique_together = [['Invoice']] 
         
 
 
@@ -2511,7 +2514,7 @@ class M_SchemeType(models.Model):
 class M_Scheme(models.Model):
     SchemeName = models.CharField(max_length=100)    
     SchemeTypeID = models.ForeignKey(M_SchemeType,related_name='SchemeTypeID', on_delete=models.CASCADE) 
-    SchemeValue = models.IntegerField()
+    SchemeValue  = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True) 
     ValueIn=models.CharField(max_length=100)
     FromPeriod=models.DateField(null=True,blank=True)
     ToPeriod=models.DateField(null=True,blank=True)
@@ -2519,7 +2522,14 @@ class M_Scheme(models.Model):
     VoucherLimit=models.IntegerField(null=True,blank=True)
     QRPrefix=models.CharField(max_length=50)
     IsActive=models.BooleanField(default=False)
-    BillAbove=models.CharField(max_length=500,null=True)
+    BillAbove = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True) 
+    SchemeDetails = models.CharField(max_length=500, null=True, blank=True)
+    Message = models.CharField(max_length=500, null=True, blank=True)
+    OverLappingScheme = models.BooleanField(default=False)
+    SchemeValueUpto  = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True) 
+    Column1 = models.CharField(max_length=500, null=True, blank=True)
+    Column2 = models.CharField(max_length=500, null=True, blank=True)
+    Column3 = models.CharField(max_length=500, null=True, blank=True)
 
     class Meta:
         db_table = "M_Scheme"
@@ -2537,6 +2547,14 @@ class MC_SchemeParties(models.Model):
   
     class Meta:
         db_table = "MC_SchemeParties"
+
+class MC_SchemeItems(models.Model):
+    SchemeID = models.ForeignKey(M_Scheme,related_name='SchemeIDForItems', on_delete=models.CASCADE)
+    TypeForItem = models.IntegerField()
+    Item = models.IntegerField()
+    
+    class Meta:
+        db_table = "MC_SchemeItems"
     
 class M_SAPPOSUploadLog(models.Model):
     UploadDate = models.DateTimeField(auto_now=True)

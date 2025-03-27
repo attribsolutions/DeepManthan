@@ -168,6 +168,8 @@ from .Views.V_Scheme import *
 from .Views.V_POSToSAPExport import *
 from .Views.V_InvoiceToFTPforSAP import *
 
+from .Views.V_TallyData import *
+
 
 # from .Views.V_FTP import *
 
@@ -229,6 +231,8 @@ urlpatterns = [
             url(r'Roles/([0-9]+)$', M_RolesViewSecond.as_view()),
             url(r'Roles$', M_RolesView.as_view()),
             url(r'RolesFilter$', M_RolesViewFilter.as_view()),
+            url(r'RoleswithIdentifyKeyList$', RoleswithIdentifyKeyListView.as_view()),
+
 
     
 # PageMaster 
@@ -353,6 +357,7 @@ urlpatterns = [
             url(r'MakeOrdersGrn$', GetOrderDetailsForGrnView.as_view()),
             url(r'GRN/([0-9]+)$',T_GRNViewSecond.as_view()),
             url(r'GRN$', T_GRNView.as_view()),
+            url(r'GRNUpdate/([0-9]+)$',T_GRNViewUpdate.as_view()),
             url(r'GRNFilter$', GRNListFilterView.as_view()),
             url(r'GRNSaveforCSS$', GRNSaveforCSSView.as_view()),
             
@@ -365,7 +370,8 @@ urlpatterns = [
             url(r'ChallanItems$', ChallanItemsView.as_view()),# ChallanItems Api
             url(r'ChallanItemStock$', ChallanItemStockView.as_view()),   # ChallanItemsStock Api
             url(r'GetDemandDetails$',DemandDetailsForChallan.as_view()),
-                    
+            url(r'GetBOMForChallanDetails$',BOMItemForChallan.as_view()), 
+            url(r'GetBOMItemDetails$',BOMItemList.as_view()),       
             
                      
 # Bill Of Material All API's
@@ -689,7 +695,9 @@ urlpatterns = [
             url(r'PendingGRNInvoices$',PendingGRNInvoicesAPIView.as_view()),
             url(r'GRNDiscrepancyReport$',GRNDiscrepancyReportAPIView.as_view()),
             url(r'CouponCodeRedemptionReport$',CouponCodeRedemptionReportView.as_view()),
-             url(r'MATAVoucherRedeemptionClaimTotalList$',MATAVoucherRedeemptionClaimView.as_view()),
+            url(r'MATAVoucherRedeemptionClaimTotalList$',MATAVoucherRedeemptionClaimView.as_view()),
+            url(r'PeriodicGRNReport$',PeriodicGRNReportView.as_view()),
+             
             
               
             
@@ -803,6 +811,10 @@ urlpatterns = [
               
 #Cashier Details:
               url(r'FranchisesCashierDetails$',FranchisesCashierList.as_view()), 
+              
+#TallyData
+              url(r'TallyPurchaseUpload$',TallyDataListView.as_view()), 
+              url(r'PurchaseDataSuccessLog$',UpdateIsTallySaveView.as_view()), 
               
 
 

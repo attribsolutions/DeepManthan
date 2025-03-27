@@ -640,13 +640,17 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                     for d in MRPquery:
                         MRPs = d['MRP']
                         # print(MRPs)
-                        CalculatedRateusingMRPMargin=RateCalculationFunction(0,Item,CustomerID,0,1,0,0,MRPs).RateWithGST()
-                        Rate=CalculatedRateusingMRPMargin[0]["NoRatewithOutGST"]
+                        CalculatedRateusingMRPMargin1=M_Items.objects.raw(f'''select 1 as id,RateCalculationFunction1(0, {Item}, {CustomerID}, 1, 0, 0, {MRPs}, 0)RatewithoutGST''')
+                       
+                        
+                        # CalculatedRateusingMRPMargin=RateCalculationFunction(0,Item,CustomerID,0,1,0,0,MRPs).RateWithGST()
+                        # Rate=CalculatedRateusingMRPMargin[0]["NoRatewithOutGST"]
                         if MRPs not in unique_MRPs:
                             ItemMRPDetails.append({
                                 "MRP": d['id'],
                                 "MRPValue": MRPs,
-                                "Rate" : round(Rate,2),
+                                # "Rate" : round(Rate,2),
+                                "Rate" : round(CalculatedRateusingMRPMargin1[0].RatewithoutGST,2)
                             })
                             unique_MRPs.add(MRPs)
 

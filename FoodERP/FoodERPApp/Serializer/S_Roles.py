@@ -81,4 +81,14 @@ class M_RolesSerializerSecond(serializers.ModelSerializer):
     RoleEmployeeTypes= RoleEmployeeTypesSerializerSecond(many=True,read_only=True)
     class Meta:
         model =  M_Roles 
-        fields = ['id','Name','Description','isActive','isSCMRole','IsPartyConnection','Dashboard','CreatedBy','UpdatedBy','RoleEmployeeTypes']          
+
+        fields = ['id','Name','Description','isActive','isSCMRole','IsPartyConnection','Dashboard','CreatedBy','UpdatedBy','RoleEmployeeTypes'] 
+        
+
+class M_RolesOfIdentifyKeySerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = M_Roles
+
+        fields = '__all__'         
+

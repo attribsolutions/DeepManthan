@@ -18,6 +18,9 @@ from rest_framework.views import APIView
 import jwt
 from .V_CommFunction import create_transaction_logNew
 from django.db.models import *
+from SweetPOS.Views.V_SweetPosRoleAccess import BasicAuthenticationfunction
+from rest_framework.authentication import BasicAuthentication, TokenAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 # Create your views here.
@@ -55,6 +58,7 @@ class UserRegistrationView(CreateAPIView):
 class UserListView(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
+    authentication_classes = [BasicAuthentication, TokenAuthentication, JWTAuthentication]
     # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
@@ -111,7 +115,7 @@ class UserListView(CreateAPIView):
                              
                 if Usersdata:
                     Usersdata_Serializer = UserListSerializer(Usersdata, many=True).data
-                    # print(Usersdata_Serializer)
+                   
                     UserData = list()
                        
                     for a in Usersdata_Serializer:
@@ -122,6 +126,7 @@ class UserListView(CreateAPIView):
                                 'PartyName': b['Party']['Name'],
                                 'Role': b['Role']['id'],
                                 'RoleName': b['Role']['Name'],
+                                'IdentifyKey' : b['Role']['IdentifyKey'],
 
                             })
                         
@@ -172,7 +177,9 @@ class UserListViewSecond(CreateAPIView):
                     UserData = list()
                     for a in Usersdata_Serializer:
                         RoleData = list()
-                        UserPartiesQuery = MC_UserRoles.objects.raw('''SELECT MC_UserRoles.id,MC_UserRoles.Party_id ,M_Parties.Name PartyName FROM MC_UserRoles left join M_Parties on M_Parties.id= MC_UserRoles.Party_id Where MC_UserRoles.User_id=%s  ''',[id])
+                        UserPartiesQuery = MC_UserRoles.objects.raw('''SELECT MC_UserRoles.id,MC_UserRoles.Party_id ,M_Parties.Name PartyName FROM MC_UserRoles
+                                                                    left join M_Parties on M_Parties.id= MC_UserRoles.Party_id
+                                                                    Where MC_UserRoles.User_id=%s  ''',[id])
                         # CustomPrint(UserPartiesQuery)
                         if not UserPartiesQuery:
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Not Found', 'Data':[] })    
@@ -212,7 +219,6 @@ class UserListViewSecond(CreateAPIView):
                                         party_name = b['Party']['Name'] if b['Party']['id'] is not None else ''
                                         role_id = b['Role']['id']
                                         role_name = b['Role']['Name']
-
                                         
                                         if party_id in PartyRoleData:
                                             PartyRoleData[party_id]['PartyRoles'].append({

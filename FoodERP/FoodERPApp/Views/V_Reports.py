@@ -1418,7 +1418,6 @@ LEFT JOIN M_Employees M_Employees_MT ON M_Employees_MT.id = X.MT
                                                      
 WHERE M_PartyType.id IN(9,10,15,17,19)  ''',[PartyIDs])
                
-                print(query)
                 if query:
                     # ManPower_Serializer = ManPowerSerializer(query, many=True).data
                     ManPowerList = list()
@@ -2332,3 +2331,77 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
             return JsonResponse({"StatusCode": 400,"Status": False,"Message": str(e), "Data": [],})
 
 
+
+class PeriodicGRNReportView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic
+    def post(self, request):
+        PeriodicGRNData = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                FromDate = PeriodicGRNData['FromDate']
+                ToDate = PeriodicGRNData['ToDate']
+                Supplier = PeriodicGRNData['Supplier']
+                PeriodicGRNdataData = []                            
+
+                SupplierCondition = f"AND T_GRNs.Party_id = {Supplier}" if Supplier != 0 else ""
+
+                PeriodicGRNQuery = T_GRNs.objects.raw(f'''SELECT T_GRNs.id, T_GRNs.GRNDate, T_GRNs.GRNNumber as GRNNo,
+                                                        T_Orders.FullOrderNumber AS PO, T_GRNs.Party_id as SupplierID, 
+                                                        M_Parties.Name AS SupplierName, T_GRNs.InvoiceNumber as ChallanNo, 
+                                                        M_Items.id AS ItemID, M_Items.Name AS ItemName, TC_GRNItems.Quantity,
+                                                        TC_GRNItems.Rate, BasicAmount, GSTAmount, Amount, DiscountType, Discount, 
+                                                        DiscountAmount, CGST, SGST, IGST, CGSTPercentage, SGSTPercentage, 
+                                                        IGSTPercentage, GSTPercentage, TC_GRNItems.Unit_id AS UnitID, 
+                                                        M_Units.Name AS UnitName
+                                                        FROM T_GRNs
+                                                        JOIN TC_GRNItems ON T_GRNs.id = TC_GRNItems.GRN_id
+                                                        JOIN M_Items ON TC_GRNItems.Item_id = M_Items.id
+                                                        LEFT JOIN MC_ItemUnits ON TC_GRNItems.Unit_id = MC_ItemUnits.id
+                                                        LEFT JOIN M_Units ON MC_ItemUnits.UnitID_id = M_Units.id
+                                                        JOIN TC_GRNReferences ON T_GRNs.id = TC_GRNReferences.GRN_id
+                                                        LEFT JOIN T_Orders ON TC_GRNReferences.Order_id = T_Orders.id
+                                                        LEFT JOIN M_Parties ON T_GRNs.Party_id = M_Parties.id
+                                                        WHERE T_GRNs.GRNDate BETWEEN '{FromDate}' AND '{ToDate}' {SupplierCondition}''')
+
+                for Periodic in PeriodicGRNQuery:
+                    PeriodicGRNdataData.append({
+                        "id": Periodic.id,
+                        "GRNDate": Periodic.GRNDate,
+                        "GRNNo": Periodic.GRNNo,
+                        "PO": Periodic.PO,
+                        "SupplierID": Periodic.SupplierID,
+                        "Supplier": Periodic.SupplierName,
+                        "ChallanNo": Periodic.ChallanNo,
+                        "ItemID": Periodic.ItemID,
+                        "ItemName": Periodic.ItemName,
+                        "Quantity": Periodic.Quantity,
+                        "Rate": Periodic.Rate,
+                        "BasicAmount": Periodic.BasicAmount,
+                        "GSTAmount": Periodic.GSTAmount,
+                        "Amount": Periodic.Amount,
+                        "DiscountType": Periodic.DiscountType,
+                        "Discount": Periodic.Discount,
+                        "DiscountAmount": Periodic.DiscountAmount,
+                        "CGST": Periodic.CGST,
+                        "SGST": Periodic.SGST,
+                        "IGST": Periodic.IGST,
+                        "CGSTPercentage": Periodic.CGSTPercentage,
+                        "SGSTPercentage": Periodic.SGSTPercentage,
+                        "IGSTPercentage": Periodic.IGSTPercentage,
+                        "GSTPercentage": Periodic.GSTPercentage,
+                        "UnitID": Periodic.UnitID,
+                        "Unit": Periodic.UnitName
+                    })
+
+                if PeriodicGRNdataData:
+                    log_entry = create_transaction_logNew(request, PeriodicGRNData, Supplier, "PeriodicGRNReport", 452, 0, FromDate, ToDate, 0)
+                    return JsonResponse({"StatusCode": 200, "Status": True, "Message": "PeriodicGRNReport", "Data": PeriodicGRNdataData})
+
+                log_entry = create_transaction_logNew(request, PeriodicGRNData, Supplier, "No PeriodicGRNReport found", 452, 0, FromDate, ToDate, 0)
+                return JsonResponse({"StatusCode": 204, "Status": True, "Message": "No PeriodicGRNReport found.", "Data": []})
+
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, PeriodicGRNData, Supplier, "PeriodicGRNReport: " + str(e), 33, 0)
+            return JsonResponse({"StatusCode": 400, "Status": False, "Message": str(e), "Data": []})
