@@ -120,8 +120,8 @@ class MaterialIsssueList(CreateAPIView):
                         if(a['RemainNumberOfLot']!=0):
                             # CustomPrint("Shrutip")
                             if(a['NumberOfLot']!=a['RemainNumberOfLot']):
-                                # CustomPrint("Shrutip")
-                                Percentage=a['RemainNumberOfLot']/a['NumberOfLot']*100 
+                                # print(a['RemainNumberOfLot'],a['NumberOfLot'])
+                                Percentage=float(a['RemainNumberOfLot'])/float(a['NumberOfLot'])*100 
                                 Percentage=100-Percentage
                             else:
                                 Percentage=0
