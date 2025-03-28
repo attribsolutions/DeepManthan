@@ -2342,10 +2342,10 @@ class PeriodicGRNReportView(CreateAPIView):
             with transaction.atomic():
                 FromDate = PeriodicGRNData['FromDate']
                 ToDate = PeriodicGRNData['ToDate']
-                Supplier = PeriodicGRNData['Supplier']
+                PartyID = PeriodicGRNData['PartyID']
                 PeriodicGRNdataData = []                            
 
-                SupplierCondition = f"AND T_GRNs.Party_id = {Supplier}" if Supplier != 0 else ""
+                SupplierCondition = f"AND T_GRNs.Party_id = {PartyID}" if PartyID != 0 else ""
 
                 PeriodicGRNQuery = T_GRNs.objects.raw(f'''SELECT T_GRNs.id, T_GRNs.GRNDate, T_GRNs.GRNNumber as GRNNo,
                                                         T_Orders.FullOrderNumber AS PO, T_GRNs.Party_id as SupplierID, 
@@ -2396,12 +2396,12 @@ class PeriodicGRNReportView(CreateAPIView):
                     })
 
                 if PeriodicGRNdataData:
-                    log_entry = create_transaction_logNew(request, PeriodicGRNData, Supplier, "PeriodicGRNReport", 452, 0, FromDate, ToDate, 0)
+                    log_entry = create_transaction_logNew(request, PeriodicGRNData, PartyID, "PeriodicGRNReport", 452, 0, FromDate, ToDate, 0)
                     return JsonResponse({"StatusCode": 200, "Status": True, "Message": "PeriodicGRNReport", "Data": PeriodicGRNdataData})
 
-                log_entry = create_transaction_logNew(request, PeriodicGRNData, Supplier, "No PeriodicGRNReport found", 452, 0, FromDate, ToDate, 0)
+                log_entry = create_transaction_logNew(request, PeriodicGRNData, PartyID, "No PeriodicGRNReport found", 452, 0, FromDate, ToDate, 0)
                 return JsonResponse({"StatusCode": 204, "Status": True, "Message": "No PeriodicGRNReport found.", "Data": []})
 
         except Exception as e:
-            log_entry = create_transaction_logNew(request, PeriodicGRNData, Supplier, "PeriodicGRNReport: " + str(e), 33, 0)
+            log_entry = create_transaction_logNew(request, PeriodicGRNData, PartyID, "PeriodicGRNReport: " + str(e), 33, 0)
             return JsonResponse({"StatusCode": 400, "Status": False, "Message": str(e), "Data": []})
