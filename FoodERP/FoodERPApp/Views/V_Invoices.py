@@ -33,6 +33,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                 Party = Orderdata['Party']
                 # Customer = Orderdata['Customer']
                 POOrderIDs = Orderdata['OrderIDs']
+                IsRateWise=Orderdata['IsRateWise']
                 Order_list = POOrderIDs.split(",")
                 
                 OrderdataList = list() 
@@ -82,8 +83,16 @@ class OrderDetailsForInvoice(CreateAPIView):
                                             "GST" : p.GST
                                             })
                             else : 
-                                obatchwisestockquery= O_BatchWiseLiveStock.objects.raw(f'''select *,RateCalculationFunction1(LiveBatcheid, ItemID, %s, UnitID, 0, 0, MRP, 0)Rate
-                                                from (select O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id ItemID,O_LiveBatches.BatchCode,O_LiveBatches.BatchDate,O_LiveBatches.SystemBatchCode,
+                                
+                                
+                                if IsRateWise == 1:
+                                   pp = ""
+                                   Condition = f",RateCalculationFunction1(LiveBatcheid, ItemID, {Customer}, UnitID, 0, 0, MRP, 0)Rate"                  
+                                else : 
+                                    pp = ",ifnull(O_LiveBatches.Rate,0)Rate"
+                                    Condition = ""    
+                                obatchwisestockquery= O_BatchWiseLiveStock.objects.raw(f'''select * {Condition}
+                                                from (select O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id ItemID,O_LiveBatches.BatchCode {pp},O_LiveBatches.BatchDate,O_LiveBatches.SystemBatchCode,
                                                 O_LiveBatches.SystemBatchDate,O_LiveBatches.id LiveBatcheid,O_LiveBatches.MRP_id LiveBatcheMRPID,O_LiveBatches.GST_id LiveBatcheGSTID,
                                                 (case when O_LiveBatches.MRP_id is null then O_LiveBatches.MRPValue else M_MRPMaster.MRP end )MRP,
                                                 (case when O_LiveBatches.GST_id is null then O_LiveBatches.GSTPercentage else M_GSTHSNCode.GSTPercentage end )GST
@@ -94,7 +103,8 @@ class OrderDetailsForInvoice(CreateAPIView):
                                                 left join M_MRPMaster on M_MRPMaster.id=O_LiveBatches.MRP_id
                                                 join M_GSTHSNCode on M_GSTHSNCode.id=O_LiveBatches.GST_id
                                                 join MC_ItemUnits on MC_ItemUnits.id=O_BatchWiseLiveStock.Unit_id
-                                                where O_BatchWiseLiveStock.Item_id=%s and O_BatchWiseLiveStock.Party_id=%s and O_BatchWiseLiveStock.BaseUnitQuantity > 0 and IsDamagePieces=0)a ''',[Customer,Item,Party])
+                                                where O_BatchWiseLiveStock.Item_id=%s and O_BatchWiseLiveStock.Party_id=%s and O_BatchWiseLiveStock.BaseUnitQuantity > 0 and IsDamagePieces=0)a ''',[Item,Party])
+                                
                                 stockDatalist = list()
                                 if not obatchwisestockquery:
                                         stockDatalist =[]

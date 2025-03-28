@@ -176,11 +176,15 @@ class TC_GRNItemsSerializerSecond(serializers.ModelSerializer):
     Unit=UnitSerializerSecond(read_only=True)
     GST = M_GstHsnCodeSerializer(read_only=True)
     MRP = M_MRPsSerializer(read_only=True)
+    ItemExpiryDate = serializers.SerializerMethodField()
     class Meta:
         model = TC_GRNItems
         fields = ['Item', 'Quantity', 'Unit', 'BaseUnitQuantity', 'MRP', 'ReferenceRate', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount',
-                  'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'BatchDate', 'BatchCode','SystemBatchCode','SystemBatchDate','MRPValue','GSTPercentage','DiscrepancyComment','AccountingQuantity']          
+                  'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'BatchDate', 'BatchCode','SystemBatchCode','SystemBatchDate','MRPValue','GSTPercentage','DiscrepancyComment','AccountingQuantity', 'ItemExpiryDate']          
 
+    def get_ItemExpiryDate(self, obj):
+        batch = O_LiveBatches.objects.filter(BatchCode=obj.BatchCode, MRP=obj.MRP, GST=obj.GST).order_by('-ItemExpiryDate').first()
+        return batch.ItemExpiryDate if batch else None
     
     def to_representation(self, instance):
         # get representation from ModelSerializer

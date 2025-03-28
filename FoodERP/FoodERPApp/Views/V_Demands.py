@@ -428,7 +428,7 @@ class DemandViewSecond(CreateAPIView):
                                 })
                                 CustomPrint(OrderData)
                     log_entry = create_transaction_logNew(request, {'OrderID':id}, a['Supplier']['id'],'DemandDate:'+a['DemandDate']+','+'Supplier:'+str(a['Supplier']['id']),62,id,"","",a['Customer']['id'])
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData[0]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData})
                 log_entry = create_transaction_logNew(request, {'OrderID':id}, a['Supplier']['id'], 'Order Not Found',62,0,0,0,a['Customer']['id'])
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:

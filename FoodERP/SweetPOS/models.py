@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import UniqueConstraint
+from FoodERPApp.models import M_Scheme
 
 
 # Create your models here.
@@ -360,3 +361,10 @@ class M_ServiceSettings(models.Model):
 #     Item=models.IntegerField(null=True,blank=True)
 #     Party=models.IntegerField(null=True,blank=True)
 #     IsActive=models.BooleanField(default=False)
+
+class TC_InvoicesSchemes(models.Model):
+    Invoice = models.ForeignKey(T_SPOSInvoices, related_name= 'SPOSInvoicesScheme', on_delete=models.CASCADE)
+    # Scheme = models.ForeignKey('FoodERP.M_Scheme', related_name='SPOSSchemes', on_delete=models.CASCADE )
+    scheme = models.IntegerField()    
+    class Meta:
+        db_table = "TC_InvoicesSchemes"
