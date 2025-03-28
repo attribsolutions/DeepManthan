@@ -578,7 +578,7 @@ class BOMItemForChallan(CreateAPIView):
                             "IGSTPercentage": "",
                             "Amount":"" ,  
                             "MRP":b.MRP,                         
-                            "UnitDetails":UnitDropdown(d.ItemID,Party,0),
+                            "UnitDetails":UnitDropdown(BOMItemID,Party,0),
                             "StockDetails":stockDatalist
                             })
                         
