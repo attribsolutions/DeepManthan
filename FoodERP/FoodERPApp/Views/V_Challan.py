@@ -508,7 +508,7 @@ class BOMItemForChallan(CreateAPIView):
                 JOIN MC_PartyItems ON MC_PartyItems.Item_id=M_Items.id
                 JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id
                 JOIN M_Units ON  M_Units.id=M_Items.BaseUnitID_id                 
-                JOIN MC_ItemUnits ON MC_ItemUnits.UnitID_id=M_Units.id and MC_ItemUnits.Item_id={BOMItemID}
+                join MC_ItemUnits on MC_ItemUnits.Item_id=M_Items.id and IsBase=1 and IsDeleted=0
                 where M_Items.id={BOMItemID}  and M_Parties.id={Party} ''')
                     
                             
