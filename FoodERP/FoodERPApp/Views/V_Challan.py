@@ -503,11 +503,12 @@ class BOMItemForChallan(CreateAPIView):
                 GSTHsnCodeMaster({BOMItemID},'{ChallanDate}',2,{Party},0) GSTPercentage,
                 GSTHsnCodeMaster({BOMItemID},'{ChallanDate}',3,{Party},0) HSNCode,
                 GetTodaysDateMRP({BOMItemID},'{ChallanDate}',2,0,{Party},0)MRP,
-                GetTodaysDateRate({BOMItemID},'{ChallanDate}',{Party},0,2)Rate,M_Items.BaseUnitID_id Unit_id,M_Units.Name UnitName,M_Parties.id CustomerID,M_Parties.GSTIN
+                GetTodaysDateRate({BOMItemID},'{ChallanDate}',{Party},0,2)Rate,MC_ItemUnits.id Unit_id,M_Units.Name UnitName,MC_ItemUnits.BaseUnitConversion,M_Parties.id CustomerID,M_Parties.GSTIN
                 from M_Items 
                 JOIN MC_PartyItems ON MC_PartyItems.Item_id=M_Items.id
                 JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id
-                JOIN M_Units ON  M_Units.id=M_Items.BaseUnitID_id 
+                JOIN M_Units ON  M_Units.id=M_Items.BaseUnitID_id                 
+                JOIN MC_ItemUnits ON MC_ItemUnits.UnitID_id=M_Units.id and MC_ItemUnits.Item_id={BOMItemID}
                 where M_Items.id={BOMItemID}  and M_Parties.id={Party} ''')
                     
                             
