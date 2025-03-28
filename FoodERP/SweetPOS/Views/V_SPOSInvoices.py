@@ -179,7 +179,7 @@ class SPOSInvoiceView(CreateAPIView):
                                 for scheme_id in SchemeIDs:
                                     SchemeQuery = f"INSERT INTO SweetPOS.TC_InvoicesSchemes (Invoice_id, scheme) VALUES ({LastInsertId}, {scheme_id})"
                                     connection.cursor().execute(SchemeQuery) 
-                                log_entry = create_transaction_logNew(request, inputdata,Party ,SchemeIDs,383,0)    
+                                log_entry = create_transaction_logNew(request, inputdata, Party, 'SchemeIDs: ' + ", ".join(SchemeIDs), 383, 0) 
 
                         else:
                             log_entry = create_transaction_logNew(request, inputdata, Party, str(Invoice_serializer.errors),34,0,0,0,0)
@@ -219,10 +219,9 @@ class SPOSMaxsaleIDView(CreateAPIView):
                         for row in QueryForMaxSalesID:
                             maxSaleID=row.MaxSaleID
 
-                        log_entry = create_transaction_logNew(request, 0, DivisionID,'',384,0,0,0,ClientID)
+                        log_entry = create_transaction_logNew(request, 0, DivisionID,{'SaleID':maxSaleID},384,0,0,0,ClientID)
                         return JsonResponse({"Success":True,"status_code":200,"SaleID":maxSaleID,"Toprows":QueryforSaleRecordCount[0]['UploadSaleRecordCount']})    
         except Exception as e:
-            
             log_entry = create_transaction_logNew(request, 0, 0,'GET_Max_SweetPOS_SaleID_By_ClientID:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})            
         
@@ -468,6 +467,8 @@ class DeleteInvoiceView(CreateAPIView):
                     for DeleteInvoicedata in DeleteInvoicedatas:
                         InvoiceDeleteUpdate = T_SPOSInvoices.objects.using('sweetpos_db').filter(ClientID=DeleteInvoicedata['ClientID'],ClientSaleID=DeleteInvoicedata['ClientSaleID'],Party=DeleteInvoicedata['PartyID'],InvoiceDate=DeleteInvoicedata['InvoiceDate']).values('id')
                         
+                        if 'VoucherCode' in DeleteInvoicedata and DeleteInvoicedata['VoucherCode']:
+                            queryforvouchercode = M_GiftVoucherCode.objects.filter(VoucherCode=DeleteInvoicedata['VoucherCode']).update(InvoiceDate=None,InvoiceNumber=None,InvoiceAmount=None,Party=0,client=0, IsActive=1)
                         
                         if DeleteInvoicedata['UpdatedInvoiceDetails'] :
                             
