@@ -672,8 +672,10 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                     PartyItemAssign = False
                                     
                                 if IsDivisionFlag == 1:
-                                    CustRate=RateCalculationFunction(0,b['Item']['id'],Query1[0]['Customer'],0,0,b['Unit']["id"],0,0).RateWithGST()
-                                    Rate=CustRate[0]["RateWithoutGST"]
+                                    # CustRate=RateCalculationFunction(0,b['Item']['id'],Query1[0]['Customer'],0,0,b['Unit']["id"],0,0).RateWithGST()
+                                    # Rate=CustRate[0]["RateWithoutGST"]
+                                    CustRate= TC_InvoiceItems.objects.raw(f'''select 1 as id, ifnull(RateCalculationFunction1(0, {b['Item']['id']}, {Query1[0]['Customer']}, 0, {b['Unit']['id']}, 0, 0, 0),0) Rate''')
+                                    Rate =CustRate[0].Rate
                                 else:
                                     Rate = b['Rate']
                                     
