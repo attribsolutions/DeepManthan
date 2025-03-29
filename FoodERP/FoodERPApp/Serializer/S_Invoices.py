@@ -122,13 +122,18 @@ class InvoiceSerializer(serializers.ModelSerializer):
     obatchwiseStock=obatchwiseStockSerializer(many=True)
     class Meta:
         model = T_Invoices
-        fields = ['id','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','Vehicle','Driver', 'InvoiceItems', 'InvoicesReferences', 'obatchwiseStock','TCSAmount']
+        fields = ['id','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','Vehicle','Driver', 'InvoiceItems', 'InvoicesReferences', 'obatchwiseStock','TCSAmount', 'IsTallySave','IsSendToFTPSAP']
 
     def create(self, validated_data):
         InvoiceItems_data = validated_data.pop('InvoiceItems')
         InvoicesReferences_data = validated_data.pop('InvoicesReferences')
         O_BatchWiseLiveStockItems_data = validated_data.pop('obatchwiseStock')
+        validated_data['IsTallySave'] = False
+        validated_data['IsSendToFTPSAP'] = False
+        
         InvoiceID = T_Invoices.objects.create(**validated_data)
+        
+        
         
         for InvoiceItem_data in InvoiceItems_data:
             InvoiceItemID =TC_InvoiceItems.objects.create(Invoice=InvoiceID, **InvoiceItem_data)
@@ -154,12 +159,13 @@ class BulkInvoiceSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = T_Invoices
-        fields = ['InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount','TCSAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','ImportFromExcel', 'InvoiceItems']
+        fields = ['InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount','TCSAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','ImportFromExcel', 'IsSendToFTPSAP','InvoiceItems']
         # fields ='__all__'
     
     def create(self, validated_data):
         CustomPrint(validated_data)
         InvoiceItems_data = validated_data.pop('InvoiceItems')
+        validated_data['IsSendToFTPSAP'] = False
         InvoiceID = T_Invoices.objects.create(**validated_data)
         # CustomPrint(InvoiceID)
         for InvoiceItem_data in InvoiceItems_data:
