@@ -346,6 +346,7 @@ class ChallanListFilterView(CreateAPIView):
                             "id": a['id'],
                             "ChallanDate": a['ChallanDate'],
                             "FullChallanNumber": a['FullChallanNumber'],
+                            "IsVDCChallan" : a['IsVDCChallan'],
                             "CustomerID": a['Customer']['id'],
                             "Customer": a['Customer']['Name'],
                             "PartyID": a['Party']['id'],
