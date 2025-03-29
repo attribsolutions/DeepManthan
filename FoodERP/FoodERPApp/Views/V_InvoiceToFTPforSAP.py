@@ -32,28 +32,23 @@ class InvoiceSendToFTPForSAP(APIView):
                     FTPFilePath = settings_map.get(52)  # FTPFilePath           
                     ItemSAPCode=f'''SELECT 1 id ,  
                     'IN60' AS Vendor,
-                    M_Items.SAPItemCode AS Plant,
+                    M_Parties.SAPPartyCode AS Plant,
                     T_Invoices.InvoiceDate AS DocumentDate,
                     0 AS DeliveryNote,
                     '' AS BillofLading,
                     '' AS HeaderText,
                     T_Invoices.FullInvoiceNumber AS VenderInvoiceNumber,
                     T_Invoices.GrandTotal AS InvoiceheaderAmountwithGST,
-                    M_Parties.SAPPartyCode AS Material,
-                    O_BatchWiseLiveStock.OriginalBaseUnitQuantity Quantity,
-                    O_LiveBatches.BatchCode,O_LiveBatches.BatchDate ProdnDate,TC_InvoiceItems.BatchDate sled  FROM 
-                    T_Invoices JOIN 
-                    TC_InvoiceItems ON TC_InvoiceItems.Invoice_ID = T_Invoices.ID 
-                JOIN 
-                    M_Items ON M_Items.ID = TC_InvoiceItems.Item_ID
-                JOIN 
-                    M_Parties ON M_Parties.ID = T_Invoices.Party_id
-                JOIN  
-                    O_LiveBatches ON O_LiveBatches.id = TC_InvoiceItems.LiveBatch_id
-                JOIN  
-                    O_BatchWiseLiveStock ON O_BatchWiseLiveStock.LiveBatche_id = O_LiveBatches.id
-                WHERE 
-                    T_Invoices.ID = %s '''                   
+                    M_Items.SAPItemCode AS Material,
+                    TC_InvoiceItems.Quantity,
+                    O_LiveBatches.BatchCode,O_LiveBatches.BatchDate ProdnDate,TC_InvoiceItems.ItemExpiryDate sled  
+                    FROM T_Invoices 
+                    JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_ID = T_Invoices.ID 
+                    JOIN M_Items ON M_Items.ID = TC_InvoiceItems.Item_ID
+                    JOIN M_Parties ON M_Parties.ID = T_Invoices.Customer_id
+                    JOIN O_LiveBatches ON O_LiveBatches.id = TC_InvoiceItems.LiveBatch_id
+                    JOIN O_BatchWiseLiveStock ON O_BatchWiseLiveStock.LiveBatche_id = O_LiveBatches.id
+                    WHERE T_Invoices.ID = %s '''                   
                        
                     raw_queryset = T_Invoices.objects.raw(ItemSAPCode, [InvoiceID])   
                     # print(raw_queryset.query)         

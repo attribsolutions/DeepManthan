@@ -580,6 +580,8 @@ urlpatterns = [
             url(r'GetRate',GETRateDetails.as_view()),
             url(r'DeleteRate/([0-9]+)$',M_RatesViewSecond.as_view()),
             url(r'DeleteRateOnList/([0-9]+)$',M_RatesViewThird.as_view()),
+            url(r'RateAdjustment$',RateAdjustmentView.as_view()),
+            
 # BankMaster
             url(r'Bank/([0-9]+)$', BankView.as_view()),
             url(r'Bank$', BankView.as_view()),

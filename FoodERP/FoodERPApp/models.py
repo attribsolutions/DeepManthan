@@ -240,8 +240,12 @@ class M_Parties(models.Model):
     
     class Meta:
         db_table = 'M_Parties'
+        constraints = [
+            UniqueConstraint(fields=['Company', 'SAPPartyCode'], name='unique_company_SAPPartyCode')
+        ]
         indexes = [
             models.Index(fields=['PartyType', 'District','State']),
+            models.Index(fields=['Company', 'SAPPartyCode']),
             
             
         ]
@@ -1023,6 +1027,8 @@ class T_Invoices(models.Model):
     # IsDataRecovery = models.BooleanField(default=False)
     HideComment = models.CharField(max_length=500 ,null=True,blank=True)
     IsTallySave = models.BooleanField(default=False)
+    # IsVDCChallan = models.BooleanField(default=False)
+    IsSendToFTPSAP = models.BooleanField(default=False)
     class Meta:
         db_table = "T_Invoices"
         indexes = [
@@ -1375,7 +1381,7 @@ class T_Challan(models.Model):
     Customer = models.ForeignKey(M_Parties, related_name='ChallanCustomer', on_delete=models.PROTECT)
     GRN = models.ForeignKey(T_GRNs, on_delete=models.PROTECT,blank=True, null=True)
     Party = models.ForeignKey(M_Parties, related_name='ChallanParty', on_delete=models.PROTECT)
-    
+    IsVDCChallan = models.BooleanField(default=False)
 
     class Meta:
         db_table = "T_Challan"

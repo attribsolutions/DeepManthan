@@ -52,6 +52,7 @@ class ChallanSerializer(serializers.ModelSerializer):
         ChallanItems_data = validated_data.pop('ChallanItems')
         O_BatchWiseLiveStockItems_data = validated_data.pop('BatchWiseLiveStockGRNID')
         ChallansReferences_data = validated_data.pop('ChallansReferences')
+       
         ChallanID = T_Challan.objects.create(**validated_data)
         
         for ChallanItem_data in ChallanItems_data:
@@ -66,9 +67,12 @@ class ChallanSerializer(serializers.ModelSerializer):
                 UpdateChildetable=TC_ChallanItems.objects.filter(Challan=ChallanID,Item=O_BatchWiseLiveStockItem_data['Item']).update(LiveBatch=O_BatchWiseLiveStockItem_data['LiveBatche'])
             else:
                 raise serializers.ValidationError("Not In Stock ")
+         
+        if ChallansReferences_data: 
             
-        for ChallansReference_data in ChallansReferences_data:
-            ChallansReferences = TC_ChallanReferences.objects.create(Challan=ChallanID, **ChallansReference_data)
+            for ChallansReference_data in ChallansReferences_data:
+            
+                ChallansReferences = TC_ChallanReferences.objects.create(Challan=ChallanID, **ChallansReference_data)
                       
         return ChallanID   
 
