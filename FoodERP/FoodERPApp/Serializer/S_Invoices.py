@@ -159,12 +159,13 @@ class BulkInvoiceSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = T_Invoices
-        fields = ['InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount','TCSAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','ImportFromExcel', 'InvoiceItems']
+        fields = ['InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount','TCSAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','ImportFromExcel', 'IsSendToFTPSAP','InvoiceItems']
         # fields ='__all__'
     
     def create(self, validated_data):
         CustomPrint(validated_data)
         InvoiceItems_data = validated_data.pop('InvoiceItems')
+        validated_data['IsSendToFTPSAP'] = False
         InvoiceID = T_Invoices.objects.create(**validated_data)
         # CustomPrint(InvoiceID)
         for InvoiceItem_data in InvoiceItems_data:

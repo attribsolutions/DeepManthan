@@ -391,7 +391,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     'id','PaymentType','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal',
                     'RoundOffAmount', 'CreatedBy','CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id',
                     'Party_id', 'Vehicle_id', 'TCSAmount', 'Hide', 'ImportFromExcel', 'PartyName', 'CustomerName','VehicleNo',
-                    'DeletedFromSAP', 'DataRecovery', 'CustomerGSTIN', 'CustomerPAN', 'CustomerPartyType', 'DriverName','MobileNo').order_by('-InvoiceDate')
+                    'DeletedFromSAP', 'DataRecovery', 'CustomerGSTIN', 'CustomerPAN', 'CustomerPartyType', 'DriverName','MobileNo','IsSendToFTPSAP').order_by('-InvoiceDate')
                 
                 user_role_ids = list(MC_UserRoles.objects.filter(User_id=request.user.id).values_list('Role_id', flat=True))                
                 RoleID=M_Settings.objects.filter(id=55).values("DefaultValue")
@@ -612,7 +612,8 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                                 "IsTCSParty": IsTCSParty,
                                 "ImportFromExcel": a['ImportFromExcel'],
                                 "DataRecovery": a['DataRecovery'],
-                                "MobileNo":a['MobileNo']
+                                "MobileNo":a['MobileNo'],
+                                "IsSendToFTPSAP":a.get('IsSendToFTPSAP', None), 
                                 
                             }) 
                 # print(InvoiceListData)
