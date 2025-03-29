@@ -198,6 +198,33 @@ class M_RatesViewThird(CreateAPIView):
         log_entry = create_transaction_logNew(request, {'RateID':id}, 0,'RateID:'+str(id),369,0)
         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Rate Deleted Successfully','DeleteID':id,'Data':[]})
            
-            
-                
-           
+
+class RateAdjustmentView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def post(self, request):
+        Ratedata = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                Party = Ratedata['PartyID']
+
+                for item in Ratedata['StockItems']:
+                    BatchCode = item['BatchCode']
+                    Rate = item.get('Rate')
+
+                    BatchDetails = O_LiveBatches.objects.filter(BatchCode=BatchCode).first()
+
+                    if BatchDetails:
+                        if Rate is not None:
+                            BatchDetails.Rate = Rate
+                            BatchDetails.save()
+                            log_entry = create_transaction_logNew(request, Ratedata, Party, 'Stock Save Successfully', 455, 0)
+                            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Rate Updated Successfully', 'Data': []})
+                    else:
+                        log_entry = create_transaction_logNew(request, 0, 0, "Invalid Rate Data",455,0)
+                        return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Invalid Rate Data', 'Data': []})
+
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, Ratedata, 0,'RateAdjustment:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
