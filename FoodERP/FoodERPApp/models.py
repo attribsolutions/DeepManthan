@@ -1023,6 +1023,8 @@ class T_Invoices(models.Model):
     # IsDataRecovery = models.BooleanField(default=False)
     HideComment = models.CharField(max_length=500 ,null=True,blank=True)
     IsTallySave = models.BooleanField(default=False)
+    IsVDCChallan = models.BooleanField(default=False)
+    IsSendToFTPSAP = models.BooleanField(default=False)
     class Meta:
         db_table = "T_Invoices"
         indexes = [
