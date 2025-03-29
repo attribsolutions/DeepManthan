@@ -122,14 +122,13 @@ class InvoiceSerializer(serializers.ModelSerializer):
     obatchwiseStock=obatchwiseStockSerializer(many=True)
     class Meta:
         model = T_Invoices
-        fields = ['id','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','Vehicle','Driver', 'InvoiceItems', 'InvoicesReferences', 'obatchwiseStock','TCSAmount', 'IsTallySave','IsVDCChallan','IsSendToFTPSAP']
+        fields = ['id','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','Vehicle','Driver', 'InvoiceItems', 'InvoicesReferences', 'obatchwiseStock','TCSAmount', 'IsTallySave','IsSendToFTPSAP']
 
     def create(self, validated_data):
         InvoiceItems_data = validated_data.pop('InvoiceItems')
         InvoicesReferences_data = validated_data.pop('InvoicesReferences')
         O_BatchWiseLiveStockItems_data = validated_data.pop('obatchwiseStock')
         validated_data['IsTallySave'] = False
-        validated_data['IsVDCChallan'] = False
         validated_data['IsSendToFTPSAP'] = False
         
         InvoiceID = T_Invoices.objects.create(**validated_data)
