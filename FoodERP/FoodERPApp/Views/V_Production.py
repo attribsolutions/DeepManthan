@@ -38,7 +38,8 @@ class ProductionList(CreateAPIView):
                 Productiondata = JSONParser().parse(request)
                 FromDate = Productiondata['FromDate']
                 ToDate = Productiondata['ToDate']
-                query = T_Production.objects.filter(ProductionDate__range=[FromDate,ToDate])
+                DivisionID=Productiondata['Party']
+                query = T_Production.objects.filter(ProductionDate__range=[FromDate,ToDate],Division_id=DivisionID)
                 if query:
                     Production_Serializer = H_ProductionSerializerforGET(query, many=True).data                  
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Production_Serializer})  
