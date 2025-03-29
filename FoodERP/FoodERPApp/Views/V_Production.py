@@ -79,7 +79,7 @@ class ProductionView(CreateAPIView):
                 CustomerPriceList=str(CssCustomerPriceList[0]['DefaultValue'])  
                 CustomerRateQuery=M_RateMaster.objects.raw( f'''Select 1 id, Round(GetTodaysDateRate({Item}, '{ProdctionDate}',0,{CustomerPriceList},2),2) AS Rate''')
                 CustomerRate = CustomerRateQuery[0].Rate 
-                print(CustomerRate)
+                # print(CustomerRate)
                 # MRPs=M_MRPMaster.objects.raw(f'''SELECT 1 id ,GetTodaysDateMRP({Item},'{ProductionDate}',1,0,0,0) MRPID,GetTodaysDateMRP({Item},'{ProductionDate}',2,0,0,0) MRPValue ''') 
                 # first_row = MRPs[0]
                 # MRPID = first_row.MRPID               

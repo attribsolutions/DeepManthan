@@ -488,14 +488,13 @@ class BOMItemForChallan(CreateAPIView):
         
     permission_classes = (IsAuthenticated,)   
 
-    def post(self, request, id=0):
+    def post(self, request):
         Demanddata = JSONParser().parse(request)
         try:
             with transaction.atomic():                
                 Party = Demanddata['Party']     
                 ChallanDate=Demanddata['ChallanDate']    
-                BOMItemID=Demanddata['ItemID'] 
-                     
+                BOMItemID=Demanddata['ItemID']                      
                     
                  
                 Demanddata = list()
@@ -503,16 +502,16 @@ class BOMItemForChallan(CreateAPIView):
                 GSTHsnCodeMaster({BOMItemID},'{ChallanDate}',2,{Party},0) GSTPercentage,
                 GSTHsnCodeMaster({BOMItemID},'{ChallanDate}',3,{Party},0) HSNCode,
                 GetTodaysDateMRP({BOMItemID},'{ChallanDate}',2,0,{Party},0)MRP,
-                GetTodaysDateRate({BOMItemID},'{ChallanDate}',{Party},0,2)Rate,M_Items.BaseUnitID_id Unit_id,M_Units.Name UnitName,M_Parties.id CustomerID,M_Parties.GSTIN
+                GetTodaysDateRate({BOMItemID},'{ChallanDate}',{Party},0,2)Rate,MC_ItemUnits.id Unit_id,M_Units.Name UnitName,MC_ItemUnits.BaseUnitConversion,M_Parties.id CustomerID,M_Parties.GSTIN
                 from M_Items 
                 JOIN MC_PartyItems ON MC_PartyItems.Item_id=M_Items.id
                 JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id
-                JOIN M_Units ON  M_Units.id=M_Items.BaseUnitID_id 
+                JOIN M_Units ON  M_Units.id=M_Items.BaseUnitID_id                 
+                join MC_ItemUnits on MC_ItemUnits.Item_id=M_Items.id and IsBase=1 and IsDeleted=0
                 where M_Items.id={BOMItemID}  and M_Parties.id={Party} ''')
                     
                             
-                for b in BOMItemQuery: 
-                    
+                for b in BOMItemQuery:                    
                     
                     
                     if BOMItemID:     
@@ -578,7 +577,7 @@ class BOMItemForChallan(CreateAPIView):
                             "IGSTPercentage": "",
                             "Amount":"" ,  
                             "MRP":b.MRP,                         
-                            "UnitDetails":UnitDropdown(d.ItemID,Party,0),
+                            "UnitDetails":UnitDropdown(BOMItemID,Party,0),
                             "StockDetails":stockDatalist
                             })
                         
@@ -592,8 +591,7 @@ class BOMItemForChallan(CreateAPIView):
                             "CustomerID" : b.CustomerID,
                             "DemandNumber" :"",
                             "DemandItemDetails":DemandItemDetails                                
-                            })
-                            
+                            })                          
                     log_entry = create_transaction_logNew(request, Demanddata, 0, 0, 32, 0, 0, 0, Party)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Demanddata[0]})
                     
@@ -603,26 +601,29 @@ class BOMItemForChallan(CreateAPIView):
             
 class BOMItemList(CreateAPIView):
     permission_classes = (IsAuthenticated,)    
-    def get(self, request):        
+    def post(self, request):
+        BomItemData = JSONParser().parse(request)        
         try:
             with transaction.atomic():                
-                             
-                bom_items=M_BillOfMaterial.objects.raw('''SELECT M_Items.id , M_Items.Name ItemName,
+                Party = BomItemData['Party']               
+                bom_items=M_BillOfMaterial.objects.raw(f'''SELECT M_Items.id , M_Items.Name ItemName,
                     BaseUnitConversion, Quantity from  M_BillOfMaterial 
                     JOIN MC_BillOfMaterialItems ON MC_BillOfMaterialItems.BOM_id=M_BillOfMaterial.id
                     JOIN M_Items ON M_Items.id=MC_BillOfMaterialItems.Item_id 
-                    JOIN MC_ItemUnits ON  MC_ItemUnits.id=M_BillOfMaterial.Unit_id
-                    WHERE IsVDCItem=1''')            
+                    JOIN MC_PartyItems ON MC_PartyItems.Item_id=M_Items.id 
+                    JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id
+                    JOIN MC_ItemUnits ON  MC_ItemUnits.Item_id=M_BillOfMaterial.Item_id and IsBase=1 and IsDeleted=0
+                    WHERE IsVDCItem=1 and M_Parties.id={Party}''')            
                 if bom_items:
                     ItemDetails=[]
                     for item in bom_items:
                         ItemDetails.append({                            
                             'ItemID': item.id, 
                             'ItemName': item.ItemName
-                        })
-
+                        })                    
                     log_entry = create_transaction_logNew( request, {}, 0, '', 441, 0,0,0,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemDetails})
+               
                 log_entry = create_transaction_logNew( request, {}, 0, 'Data Not Found', 441, 0,0,0,0)           
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
 
