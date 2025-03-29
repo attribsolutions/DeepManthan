@@ -202,7 +202,7 @@ class LVersionsView(CreateAPIView):
                 PartyTypeID1=Q11[0]['DefaultValue'].split(',')
                 ExeVersion=PartyTypeID1[0].strip()
                 WinVersion=PartyTypeID1[1].strip()
-                print(ExeVersion,WinVersion)
+                # print(ExeVersion,WinVersion)
                 # ftp_host = "web.chitalebandhu.in"  
                 # ftp_user = "attribftp"  
                 # ftp_pass = "Attrib@318" 
