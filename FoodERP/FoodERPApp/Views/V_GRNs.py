@@ -508,44 +508,38 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                     log_entry = create_transaction_logNew(request, OrderItemSerializedata, OrderSerializedata[0]['CustomerID'],'OrderItemDetails',73,0,0,0,OrderSerializedata[0]['id'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData[0]})
                     
-                elif Mode == 2: #Make GRN from VDCChallan
-                    # CustomPrint("Shrutiiiiii")
-                    ChallanQuery = T_Challan.objects.filter(id=POOrderIDs)
-                    # CustomPrint(POOrderIDs)
-                    # CustomPrint(ChallanQuery.query)
+                elif Mode == 2: #Make GRN from VDCChallan                    
+                    ChallanQuery = T_Challan.objects.filter(id=POOrderIDs)                    
                     if ChallanQuery.exists():
-                        ChallanSerializedata = ChallanSerializerSecond(ChallanQuery, many=True).data
-                        # CustomPrint(ChallanSerializedata)                        
-                        # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ChallanSerializedata})
-                        
+                        ChallanSerializedata = ChallanSerializerSecond(ChallanQuery, many=True).data  
                         ChallanData = list()
                         for x in ChallanSerializedata:
-                            ChallanItemDetails = list()                                                  
-                            for D in x['ChallanReferences']: 
-                                DemandID=D['Demands']
-                                # CustomPrint(DemandID)
-                            DemandQuery=T_Demands.objects.filter(id=DemandID).values('FullDemandNumber','DemandDate')   
-                            FullDemandNumber=DemandQuery[0]['FullDemandNumber']
-                            DemandDate=DemandQuery[0]['DemandDate']
-                            # CustomPrint(DemandQuery.query)
-                            # CustomPrint(DemandDate)
+                            ChallanItemDetails = list()  
+                            if  x['ChallanReferences']:                                                  
+                                for D in x['ChallanReferences']: 
+                                    DemandID=D['Demands']
+                                    # CustomPrint(DemandID)
+                                DemandQuery=T_Demands.objects.filter(id=DemandID).values('FullDemandNumber','DemandDate')   
+                                FullDemandNumber=DemandQuery[0]['FullDemandNumber']
+                                DemandDate=DemandQuery[0]['DemandDate']
+                            
                             for y in x['ChallanItems']:
-                                # CustomPrint("yyyyyyy")
-                                # CustomPrint(y)
+                                
+                                ItemID=y['Item']['id'] 
                                 Qty = y['Quantity']                                
-                                bomquery = MC_BillOfMaterialItems.objects.filter(Item_id=y['Item']['id']).values('BOM')
-                                # CustomPrint(bomquery.query)
-                                Query = M_BillOfMaterial.objects.filter(id=bomquery[0]['BOM'])
-                                # CustomPrint(Query.query)
+                                bomquery = MC_BillOfMaterialItems.objects.raw(f'''SELECT 1 id,MC_BillOfMaterialItems.BOM_id FROM MC_BillOfMaterialItems
+                                JOIN M_BillOfMaterial ON M_BillOfMaterial.id=MC_BillOfMaterialItems.BOM_id
+                                WHERE MC_BillOfMaterialItems.Item_id ={ItemID} and IsVDCItem=1 and IsDelete=1''') 
+                                                                
+                                Query = M_BillOfMaterial.objects.filter(id=bomquery[0].BOM_id)
+                                
                                 BOM_Serializer = M_BOMSerializerSecond001(Query,many=True).data
-                                # CustomPrint("PSSSSSS")
-                                # CustomPrint(BOM_Serializer)
+                                
                                 BillofmaterialData = list()
                                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
                                 for a in BOM_Serializer:
-                                    ParentItem= y['Item']['id']
-                                    # CustomPrint("sssssss")
-                                    # CustomPrint(a)
+                                    ParentItem=  a['Item']['id']     
+                                    # print(ParentItem)
                                     Parentquery = MC_ItemUnits.objects.filter(Item_id=ParentItem,IsDeleted=0)
                                     # CustomPrint(Parentquery.query)
                                     if Parentquery.exists():
@@ -585,7 +579,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                             })                
                                     BillofmaterialData.append({
                                         "Item":ParentItem,
-                                        "ItemName":y['Item']['Name'],
+                                        "ItemName":a['Item']['Name'],
                                         "Quantity": Qty,
                                         "MRP":MRPDetails[0]['id'],
                                         "MRPValue": MRPDetails[0]['MRP'],
@@ -621,8 +615,8 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             "Customer": x['Customer']['id'],
                             "InvoiceNumber":" ",
                             "IsSave": 0,                            
-                            "FullDemandNumber":FullDemandNumber,
-                            "DemandDate":DemandDate,
+                            "FullDemandNumber":x['FullChallanNumber'],
+                            "DemandDate":x['ChallanDate'],
                             "OrderItem": ChallanItemDetails,
                         })
                         # CustomPrint("SPPPPPP")
