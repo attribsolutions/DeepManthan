@@ -27,85 +27,55 @@ class BOMListFilterView(CreateAPIView):
                 Party = BillOfMaterialdata['Party']
                 Item=BillOfMaterialdata['ItemID']
                 Category = BillOfMaterialdata['Category']
-                # Item=""
-                # d = date.today()   
+                 
                 if Item == '':
-                    if Category == 0:
-                        query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty,
-                                            M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, 
-                                            M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom,
-                                            M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, 
-                                            M_BillOfMaterial.Unit_id, MC_ItemUnits.BaseUnitConversion, M_Users.LoginName,
-                                            M_Items.Name AS ItemName, C_Companies.Name AS CompanyName
-                            FROM M_BillOfMaterial
-                            JOIN M_Users ON M_Users.id = M_BillOfMaterial.CreatedBy
-                            JOIN M_Items ON M_Items.id = M_BillOfMaterial.Item_id
-                            JOIN MC_ItemUnits ON MC_ItemUnits.Item_id = M_BillOfMaterial.Item_id and IsBase=1
-                            JOIN C_Companies ON C_Companies.id = M_BillOfMaterial.Company_id
-                            WHERE M_BillOfMaterial.IsDelete = 0
-                            AND M_BillOfMaterial.Company_id = {Company}''')
-                    else:
-                        query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty,
-                                            M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, 
-                                            M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom,
-                                            M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, 
-                                            M_BillOfMaterial.Unit_id, MC_ItemUnits.BaseUnitConversion, M_Users.LoginName, 
-                                            M_Items.Name AS ItemName, C_Companies.Name AS CompanyName
-                            FROM M_BillOfMaterial
-                            JOIN M_Users ON M_Users.id = M_BillOfMaterial.CreatedBy
-                            JOIN MC_ItemCategoryDetails ON MC_ItemCategoryDetails.Item_id = M_BillOfMaterial.Item_id
-                            JOIN M_Items ON M_Items.id = M_BillOfMaterial.Item_id
-                            JOIN MC_ItemUnits ON MC_ItemUnits.Item_id = M_BillOfMaterial.Item_id  and IsBase=1
-                            JOIN C_Companies ON C_Companies.id = M_BillOfMaterial.Company_id 
-                            WHERE M_BillOfMaterial.IsDelete = 0
-                            AND M_BillOfMaterial.Company_id = {Company}
-                            AND MC_ItemCategoryDetails.CategoryType_id = {Category} ''')
+                    Icondition= ""
                 else:
-                    if Category == 0:
-                        query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty,
+                    Icondition= f" AND M_BillOfMaterial.Item_id = {Item}"
+                
+                if Category == 0:
+                    Ccondition= ""
+                else:
+                    Ccondition= f"AND MC_ItemCategoryDetails.CategoryType_id = {Category}"
+                        
+                # old query by shruti
+                # SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty,
+                            #                 M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, 
+                            #                 M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom, 
+                            #                 M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, 
+                            #                 M_BillOfMaterial.Unit_id, MC_ItemUnits.BaseUnitConversion, M_Users.LoginName, 
+                            #                 M_Items.Name AS ItemName, C_Companies.Name AS CompanyName
+                            # FROM M_BillOfMaterial
+                            # JOIN M_Users ON M_Users.id = M_BillOfMaterial.CreatedBy
+                            # JOIN MC_ItemCategoryDetails ON MC_ItemCategoryDetails.Item_id = M_BillOfMaterial.Item_id
+                            # JOIN M_Items ON M_Items.id = M_BillOfMaterial.Item_id
+                            # JOIN MC_ItemUnits ON MC_ItemUnits.Item_id = M_BillOfMaterial.Item_id  and IsBase=1
+                            # JOIN C_Companies ON C_Companies.id = M_BillOfMaterial.Company_id
+                            # WHERE M_BillOfMaterial.IsDelete = 0 AND M_BillOfMaterial.Company_id = {Company} {Icondition} {Ccondition}
+                query = M_BillOfMaterial.objects.raw(f'''select id, BomDate, EstimatedOutputQty, Comment, IsActive, IsDelete, CreatedBy, CreatedOn, ReferenceBom, IsVDCItem, Company_id, a.Item_id, Unit_id, BaseUnitConversion, ItemName, 
+ifnull(UnitwiseQuantityConversion(a.Item_id ,b.StockQuantity ,0 ,BaseUnitID_id ,Unit_id ,0 ,0 ),0) StockQuantity from 
+(SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty,
                                             M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, 
                                             M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom, 
                                             M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, 
-                                            M_BillOfMaterial.Unit_id, MC_ItemUnits.BaseUnitConversion, M_Users.LoginName, 
-                                            M_Items.Name AS ItemName, C_Companies.Name AS CompanyName
+                                            M_BillOfMaterial.Unit_id, MC_ItemUnits.BaseUnitConversion,  
+                                            M_Items.Name AS ItemName, M_Items.BaseUnitID_id
                             FROM M_BillOfMaterial
-                            JOIN M_Users ON M_Users.id = M_BillOfMaterial.CreatedBy
-                            JOIN M_Items ON M_Items.id = M_BillOfMaterial.Item_id
-                            JOIN MC_ItemUnits ON MC_ItemUnits.Item_id = M_BillOfMaterial.Item_id and IsBase=1
-                            JOIN C_Companies ON C_Companies.id = M_BillOfMaterial.Company_id
-                            WHERE M_BillOfMaterial.Item_id = {Item}
-                            AND M_BillOfMaterial.Company_id = {Company}''')
-                    else:
-                        query = M_BillOfMaterial.objects.raw(f'''SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty,
-                                            M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, 
-                                            M_BillOfMaterial.CreatedBy, M_BillOfMaterial.CreatedOn, M_BillOfMaterial.ReferenceBom, 
-                                            M_BillOfMaterial.IsVDCItem, M_BillOfMaterial.Company_id, M_BillOfMaterial.Item_id, 
-                                            M_BillOfMaterial.Unit_id, MC_ItemUnits.BaseUnitConversion, M_Users.LoginName, 
-                                            M_Items.Name AS ItemName, C_Companies.Name AS CompanyName
-                            FROM M_BillOfMaterial
-                            JOIN M_Users ON M_Users.id = M_BillOfMaterial.CreatedBy
+                            join MC_PartyItems on MC_PartyItems.Item_id=M_BillOfMaterial.Item_id and MC_PartyItems.Party_id={Party}
                             JOIN MC_ItemCategoryDetails ON MC_ItemCategoryDetails.Item_id = M_BillOfMaterial.Item_id
                             JOIN M_Items ON M_Items.id = M_BillOfMaterial.Item_id
                             JOIN MC_ItemUnits ON MC_ItemUnits.Item_id = M_BillOfMaterial.Item_id  and IsBase=1
-                            JOIN C_Companies ON C_Companies.id = M_BillOfMaterial.Company_id
-                            WHERE M_BillOfMaterial.Item_id = {Item}
-                            AND M_BillOfMaterial.Company_id = {Company}
-                            AND MC_ItemCategoryDetails.CategoryType_id = {Category}''')
-
-                                
-                # return JsonResponse({'query': str(query.query)})
-                # if query:
-                #     Bom_serializer = M_BOMSerializerSecond(query, many=True).data
-                #     BomListData = list()
-                #     # return JsonResponse({'Date': Bom_serializer})
-                #     CustomPrint(Bom_serializer)
-                
+                            WHERE M_BillOfMaterial.IsDelete = 0 AND M_BillOfMaterial.Company_id ={Company} {Icondition} {Ccondition} )a
+                            left join 
+                            (select sum(BaseUnitQuantity) StockQuantity,Item_id from O_BatchWiseLiveStock where Party_id= {Party} and IsDamagePieces=0 group by Item_id )b
+                            on a.Item_id=b.Item_id
+''')
+                print(query)
                 BomListData = []
                 for a in query:
-                    Stock = float(GetO_BatchWiseLiveStock(a.Item_id, Party))
-                    StockintoSelectedUnit = UnitwiseQuantityConversion(
-                        a.Item_id, Stock, 0, 0, a.Unit_id, 0, 1
-                    ).ConvertintoSelectedUnit()
+                    # Stock = float(GetO_BatchWiseLiveStock(a.Item_id, Party))
+                    # StockintoSelectedUnit = UnitwiseQuantityConversion(a.Item_id, Stock, 0, 0, a.Unit_id, 0, 1
+                    # ).ConvertintoSelectedUnit()
                     
                     BomListData.append({
                         "id": a.id,
@@ -114,17 +84,17 @@ class BOMListFilterView(CreateAPIView):
                         "ItemName": a.ItemName, 
                         "Unit": a.Unit_id,
                         "UnitName": a.BaseUnitConversion,
-                        "StockQty": StockintoSelectedUnit,
+                        "StockQty": round(a.StockQuantity,3),
                         "EstimatedOutputQty": a.EstimatedOutputQty,
                         "Comment": a.Comment,
                         "IsActive": a.IsActive,
                         "IsVDCItem": a.IsVDCItem,
-                        "Company": a.Company_id,
-                        "CompanyName": a.CompanyName,
+                        # "Company": a.Company_id,
+                        # "CompanyName": a.CompanyName,
                         "CreatedOn": a.CreatedOn,
                         "CreatedBy": a.CreatedBy,
                         "IsRecordDeleted": a.IsDelete,
-                        "UserName": a.LoginName  
+                        # "UserName": a.LoginName  
                     }) 
                 if BomListData:
                     log_entry = create_transaction_logNew(request, BillOfMaterialdata,Party,'Bill Of Material Data',453,0)
