@@ -106,10 +106,11 @@ class InvoicesReferencesSerializer(serializers.ModelSerializer):
         fields = ['Order']         
          
 class InvoiceItemsSerializer(serializers.ModelSerializer):
+    TrayQuantity = serializers.FloatField(required=False, allow_null=True)
     
     class Meta:
         model = TC_InvoiceItems
-        fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','LiveBatch','MRPValue','GSTPercentage','QtyInBox','QtyInKg','QtyInNo']   
+        fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','LiveBatch','MRPValue','GSTPercentage','QtyInBox','QtyInKg','QtyInNo','TrayQuantity']   
 
 class obatchwiseStockSerializer(serializers.ModelSerializer):
     class Meta:
@@ -136,7 +137,10 @@ class InvoiceSerializer(serializers.ModelSerializer):
         
         
         for InvoiceItem_data in InvoiceItems_data:
-            InvoiceItemID =TC_InvoiceItems.objects.create(Invoice=InvoiceID, **InvoiceItem_data)
+            TrayQuantity = InvoiceItem_data.pop('TrayQuantity', None)
+            
+            InvoiceItemID = TC_InvoiceItems.objects.create(Invoice=InvoiceID, TrayQuantity=TrayQuantity, **InvoiceItem_data)
+           
             
         for O_BatchWiseLiveStockItem_data in O_BatchWiseLiveStockItems_data:
                 
@@ -170,6 +174,8 @@ class BulkInvoiceSerializer(serializers.ModelSerializer):
         # CustomPrint(InvoiceID)
         for InvoiceItem_data in InvoiceItems_data:
             CustomPrint(InvoiceID)
+            InvoiceItem_data['TrayQuantity'] = InvoiceItem_data.get('TrayQuantity', None)
+            
             InvoiceItemID =TC_InvoiceItems.objects.create(Invoice=InvoiceID, **InvoiceItem_data)
             
         return InvoiceID        

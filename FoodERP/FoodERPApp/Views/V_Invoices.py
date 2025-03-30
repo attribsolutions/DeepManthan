@@ -714,15 +714,25 @@ class InvoiceViewSecond(CreateAPIView):
                         InvoiceItemDetails = list()
                         for b in a['InvoiceItems']:
                             aaaa=UnitwiseQuantityConversion(b['Item']['id'],b['Quantity'],b['Unit']['id'],0,0,0,0).GetConvertingBaseUnitQtyBaseUnitName()
+                            
+                            TrayConversion = UnitwiseQuantityConversion(b['Item']['id'], b['TrayQuantity'], b['Unit']['id'], 0, 0, 0, 0).GetConvertingBaseUnitQtyBaseUnitName()
+                                                    
                             if (aaaa == b['Unit']['UnitID']['Name']):
                                 bb=""
                             else:
                                 bb=aaaa   
                                 
+                            if TrayConversion == b['Unit']['UnitID']['Name']:
+                                TrayUnitName = ""
+                            else:
+                                TrayUnitName = TrayConversion
+                                
                             InvoiceItemDetails.append({
                                 "Item": b['Item']['id'],
                                 "ItemName": b['Item']['Name'],
                                 "Quantity": b['Quantity'],
+                                "TrayQuantity": b['TrayQuantity'],
+                                "TrayUnitName": TrayUnitName,
                                 "MRP": b['MRP']['id'],
                                 "MRPValue": b['MRPValue'],
                                 "Rate": b['Rate'],
