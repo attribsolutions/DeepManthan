@@ -215,7 +215,7 @@ class ChallanView(CreateAPIView):
                 #         # return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.data, 'Data':[]})
                 #         Challan_serializer.save()
                 #         return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Challan Save Successfully', 'Data':[]})
-                #     return JsonResponse({'StatusCode': 406S, 'Status': True,  'Message': Challan_serializer.errors, 'Data':[]})
+                #     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.errors, 'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data': []})
  
@@ -349,10 +349,13 @@ class ChallanListFilterView(CreateAPIView):
                 Party = Challandata['Party']
                 IsVDCChallan=Challandata['IsVDCChallan']                           
                 if IsVDCChallan ==1:
+                    
                     if(Party == ''):
-                        query = T_Challan.objects.filter(ChallanDate__range=[FromDate, ToDate], Party=Customer,IsVDCChallan=1)
+                        
+                        query = T_Challan.objects.filter(ChallanDate__range=[FromDate, ToDate], Customer_id=Customer,IsVDCChallan=1)
+                        
                     else:
-                        query = T_Challan.objects.filter(ChallanDate__range=[FromDate, ToDate], Customer_id=Party, Party=Customer,IsVDCChallan=1) 
+                        query = T_Challan.objects.filter(ChallanDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Party,IsVDCChallan=1) 
                 else:
                          
                     if(Customer == ''):
