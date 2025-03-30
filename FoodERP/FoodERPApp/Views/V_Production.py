@@ -65,7 +65,7 @@ class ProductionView(CreateAPIView):
                 NoOfQuantity=Productiondata['EstimatedQuantity']
                 Materialissueid=Productiondata['ProductionMaterialIssue'][0]['MaterialIssue']
                 ProdctionDate=Productiondata['ProductionDate']
-                print(ProdctionDate)
+                # print(ProdctionDate)
                 query1 = T_Production.objects.filter(Item_id=Item, BatchDate=date.today()).values('id')                
                 BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(Item, Customer, query1.count())
                 
