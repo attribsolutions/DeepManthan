@@ -94,42 +94,56 @@ class ChallanView(CreateAPIView):
                 # if GRN == "":
                     ChallanDate = Challandata['ChallanDate']
                     Party = Challandata['Party']
+                    IsVDCChallan = Challandata.get('IsVDCChallan', 0)
+                    # Customer=Challandata['Customer']
+                    
+                    # if IsVDCChallan==1:
+                    #     Party=Customer 
                     a = GetMaxNumber.GetChallanNumber(Party,ChallanDate)
                     Challandata['ChallanNumber'] = a
                     b = GetPrifix.GetChallanPrifix(Party)
                     Challandata['FullChallanNumber'] = b+""+str(a)
                    
                     ChallanItems = Challandata['ChallanItems']
-                   
+                    # print(ChallanItems)
                     BatchWiseLiveStockList=list()
                    
                     for ChallanItem in ChallanItems:
                                                                     
                         BaseUnitQuantity=UnitwiseQuantityConversion(ChallanItem['Item'],ChallanItem['Quantity'],ChallanItem['Unit'],0,0,0,0).GetBaseUnitQuantity()
                         ChallanItem['BaseUnitQuantity'] =  round(BaseUnitQuantity,3) 
+                        # print(BaseUnitQuantity)
                         # QtyInNo=UnitwiseQuantityConversion(ChallanItem['Item'],ChallanItem['Quantity'],ChallanItem['Unit'],0,0,1,0).ConvertintoSelectedUnit()
                         # ChallanItem['QtyInNo'] =  float(QtyInNo)
                         # QtyInKg=UnitwiseQuantityConversion(ChallanItem['Item'],ChallanItem['Quantity'],ChallanItem['Unit'],0,0,2,0).ConvertintoSelectedUnit()
                         # ChallanItem['QtyInKg'] =  float(QtyInKg)
                         # QtyInBox=UnitwiseQuantityConversion(ChallanItem['Item'],ChallanItem['Quantity'],ChallanItem['Unit'],0,0,4,0).ConvertintoSelectedUnit()
                         # ChallanItem['QtyInBox'] = float(QtyInBox)
-                        BatchWiseLiveStockList.append({
+                        entry = {
                             "Item" : ChallanItem['Item'],
                             "Quantity" : ChallanItem['Quantity'],
                             "BaseUnitQuantity" : ChallanItem['BaseUnitQuantity'],
-                            "LiveBatche" : ChallanItem['BatchID'],                           
-                            "Party" : Party,
+                            "LiveBatche" : ChallanItem['BatchID'], 
+                            # "Party":Party                            
                             # "Customer:":Challandata['Customer'],
-                        })
-                    
+                        }
+                        # print(BatchWiseLiveStockList)
+                        if IsVDCChallan==1:
+                                entry["Party"]=Challandata['Customer'] 
+                        else:                          
+                                entry["Party"]=Party
+                        BatchWiseLiveStockList.append(entry)
+                        
                     Challandata.update({"BatchWiseLiveStockGRNID":BatchWiseLiveStockList}) 
                   
                     Challan_serializer = ChallanSerializer(data=Challandata) 
-                                   
+                    # print(Challan_serializer)             
                     if Challan_serializer.is_valid():
+                        # print("DDDDDDDD")
                         # return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.data, 'Data':[]})
                         Challan_serializer.save()
-                        return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'IB Invoice Save Successfully', 'Data':[]})
+                        # print("SSSSS")
+                        return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':[]})
                     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.errors, 'Data':[]})
                 # else:
    
@@ -201,7 +215,7 @@ class ChallanView(CreateAPIView):
                 #         # return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.data, 'Data':[]})
                 #         Challan_serializer.save()
                 #         return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Challan Save Successfully', 'Data':[]})
-                #     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.errors, 'Data':[]})
+                #     return JsonResponse({'StatusCode': 406S, 'Status': True,  'Message': Challan_serializer.errors, 'Data':[]})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data': []})
  
@@ -333,10 +347,18 @@ class ChallanListFilterView(CreateAPIView):
                 ToDate = Challandata['ToDate']
                 Customer = Challandata['Customer']
                 Party = Challandata['Party']
-                if(Customer == ''):
-                    query = T_Challan.objects.filter(ChallanDate__range=[FromDate, ToDate], Party=Party)
+                IsVDCChallan=Challandata['IsVDCChallan']                           
+                if IsVDCChallan ==1:
+                    if(Party == ''):
+                        query = T_Challan.objects.filter(ChallanDate__range=[FromDate, ToDate], Party=Customer,IsVDCChallan=1)
+                    else:
+                        query = T_Challan.objects.filter(ChallanDate__range=[FromDate, ToDate], Customer_id=Party, Party=Customer,IsVDCChallan=1) 
                 else:
-                    query = T_Challan.objects.filter(ChallanDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Party) 
+                         
+                    if(Customer == ''):
+                        query = T_Challan.objects.filter(ChallanDate__range=[FromDate, ToDate], Party=Party,IsVDCChallan=0)
+                    else:
+                        query = T_Challan.objects.filter(ChallanDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Party,IsVDCChallan=0) 
                     
                 if query:
                     Challan_serializer = ChallanSerializerList(query, many=True).data
