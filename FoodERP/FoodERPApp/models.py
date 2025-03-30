@@ -1077,6 +1077,7 @@ class TC_InvoiceItems(models.Model):
     QtyInNo = models.DecimalField(max_digits=30, decimal_places=20)
     QtyInKg = models.DecimalField(max_digits=30, decimal_places=20)
     QtyInBox = models.DecimalField(max_digits=30, decimal_places=20)
+    TrayQuantity = models.DecimalField(max_digits=30, decimal_places=20)
 
     class Meta:
         db_table = "TC_InvoiceItems"
