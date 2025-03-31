@@ -1138,6 +1138,7 @@ class T_GRNs(models.Model):
     InvoiceDate = models.DateField(null=True,blank=True)
     IsSave = models.IntegerField() 
     IsTallySave = models.BooleanField(default=False)
+    # IsGRNType = models.BooleanField(default=False)
     class Meta:
         db_table = "T_GRNs"
 
