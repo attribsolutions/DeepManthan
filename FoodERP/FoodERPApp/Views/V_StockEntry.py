@@ -1,4 +1,5 @@
 from datetime import timedelta
+from datetime import datetime
 from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -368,7 +369,10 @@ class DeleteDuplicateStockEntryPageView(CreateAPIView):
         try:
             with transaction.atomic():
                 
-                query=T_Stock.objects.raw('''select 1 as id, StockDate,Item_id,Party_id,max(id) maxid, count(*) cnt from T_Stock where StockDate>='20240331' and IsStockAdjustment=0  
+                CurrentYear = datetime.now().year
+                DynamicStockYear = f"{CurrentYear}-03-31"  
+                
+                query=T_Stock.objects.raw(f'''select 1 as id, StockDate,Item_id,Party_id,max(id) maxid, count(*) cnt from T_Stock where StockDate>= {DynamicStockYear} and IsStockAdjustment=0  
 group by StockDate,Item_id,Party_id having count(*) > 1
 order by StockDate,Party_id,Item_id ''')
                 
@@ -376,13 +380,13 @@ order by StockDate,Party_id,Item_id ''')
                     CustomPrint(a.Party_id,)
                     CustomPrint(a.Item_id)
                     CustomPrint(a.maxid)
-                    query2=T_Stock.objects.filter(StockDate='2024-03-31',  Item_id=a.Item_id,Party_id=a.Party_id,
+                    query2=T_Stock.objects.filter(StockDate= DynamicStockYear,  Item_id=a.Item_id,Party_id=a.Party_id,
 ).exclude(id=a.maxid).update(IsDeleted=1)
                    
             return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Delete Duplicate Stock Entry Successfully', 'Data': []})
         except Exception as e:
             
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
    
