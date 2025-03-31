@@ -514,6 +514,8 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                         ChallanSerializedata = ChallanSerializerSecond(ChallanQuery, many=True).data  
                         ChallanData = list()
                         for x in ChallanSerializedata:
+                            Customer=x['Customer']['id']
+                            # print(Customer)
                             ChallanItemDetails = list()  
                             if  x['ChallanReferences']:                                                  
                                 for D in x['ChallanReferences']: 
@@ -526,7 +528,8 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             for y in x['ChallanItems']:
                                 
                                 ItemID=y['Item']['id'] 
-                                Qty = y['Quantity']                                
+                                Qty = y['Quantity']  
+                                                              
                                 bomquery = MC_BillOfMaterialItems.objects.raw(f'''SELECT 1 id,MC_BillOfMaterialItems.BOM_id FROM MC_BillOfMaterialItems
                                 JOIN M_BillOfMaterial ON M_BillOfMaterial.id=MC_BillOfMaterialItems.BOM_id
                                 WHERE MC_BillOfMaterialItems.Item_id ={ItemID} and IsVDCItem=1 and IsDelete=1''') 
@@ -540,6 +543,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                 for a in BOM_Serializer:
                                     ParentItem=  a['Item']['id']     
                                     # print(ParentItem)
+                                    BachCode=SystemBatchCodeGeneration.GetGrnBatchCode(ParentItem, Customer,0)
                                     Parentquery = MC_ItemUnits.objects.filter(Item_id=ParentItem,IsDeleted=0)
                                     # CustomPrint(Parentquery.query)
                                     if Parentquery.exists():
@@ -601,7 +605,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                         "SGSTPercentage": "",
                                         "IGSTPercentage": "",
                                         "Amount":"",
-                                        "BatchCode":y['BatchCode'],
+                                        "BatchCode":BachCode,
                                         "LoginName":"",
                                         "UnitDetails":ParentUnitDetails
                                         
