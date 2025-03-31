@@ -23,7 +23,7 @@ class PartyStockEntryOLiveBatchesSerializer(serializers.ModelSerializer):
     O_BatchWiseLiveStockList = PartyStockEntryOBatchWiseLiveStockSerializer(many=True)
     class Meta:
         model = O_LiveBatches
-        fields = ['MRP','GST','BatchDate','BatchCode','SystemBatchDate','SystemBatchCode','ItemExpiryDate','GSTPercentage','MRPValue','OriginalBatchBaseUnitQuantity','O_BatchWiseLiveStockList','T_StockEntryList']
+        fields = ['MRP','GST','BatchDate','BatchCode','SystemBatchDate','SystemBatchCode','Rate','ItemExpiryDate','GSTPercentage','MRPValue','OriginalBatchBaseUnitQuantity','O_BatchWiseLiveStockList','T_StockEntryList']
         
         
     def create(self, validated_data):

@@ -44,6 +44,11 @@ class StockEntryPageView(CreateAPIView):
                     UnitwiseQuantityConversionobject=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,0)
                     BaseUnitQuantity=UnitwiseQuantityConversionobject.GetBaseUnitQuantity()
                     Item=a['Item']
+                    
+                    ratequery = O_LiveBatches.objects.raw(f""" SELECT 1 as id, GetTodaysDateRate({Item}, '{StockDate}', {Party}, 0, 1) AS Rate""")
+                 
+                    Rate = ratequery[0].Rate if ratequery else 0
+                    
                     if Mode == 1:
                         query3 = O_BatchWiseLiveStock.objects.filter(Item_id=Item,Party_id=Party).aggregate(total=Sum('BaseUnitQuantity'))
                     else:
@@ -67,6 +72,7 @@ class StockEntryPageView(CreateAPIView):
                     "OriginalBaseUnitQuantity": round(BaseUnitQuantity,3),
                     "Party": Party,
                     "CreatedBy":CreatedBy,
+                   
                     
                     
                     })
@@ -100,6 +106,7 @@ class StockEntryPageView(CreateAPIView):
                     "BatchDate": a['BatchDate'],
                     "BatchCode": a['BatchCode'],
                     "Mode" :Mode,
+                    "Rate": Rate ,
                     "OriginalBatchBaseUnitQuantity" : round(BaseUnitQuantity,3),
                     "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList, 
                     "T_StockEntryList" :T_StockEntryList                   
