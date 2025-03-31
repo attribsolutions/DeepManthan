@@ -101,7 +101,7 @@ class ChallanView(CreateAPIView):
                     b = b.strip() if b else ""                                       
                     Challandata['FullChallanNumber'] = b+""+str(a)                   
                     ChallanItems = Challandata['ChallanItems']
-                    # print(ChallanItems)
+                    
                     BatchWiseLiveStockList=list()                   
                     for ChallanItem in ChallanItems:
                                                                     
@@ -126,7 +126,7 @@ class ChallanView(CreateAPIView):
                     if Challan_serializer.is_valid():                        
                         # return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.data, 'Data':[]})
                         Challan_serializer.save()
-                        # print("SSSSS")
+                        
                         return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':[]})
                     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.errors, 'Data':[]})
                 # else:
@@ -345,7 +345,7 @@ class ChallanListFilterView(CreateAPIView):
                 query = T_Challan.objects.filter(**filters)                               
                 if query:
                     Challan_serializer = ChallanSerializerList(query, many=True).data
-                    print(Challan_serializer)
+                    
                     for challan in Challan_serializer:
                         inward = 0
                         for c in challan['GRNReferences']:
@@ -485,7 +485,7 @@ class DemandDetailsForChallan(CreateAPIView):
                                 "DemandNumber" : b.FullDemandNumber,
                                 "DemandItemDetails":DemandItemDetails
                             })
-                        # print(Demanddata)
+                        
                 log_entry = create_transaction_logNew(request, Demanddata, 0,0,32,0,0,0,Customer)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Demanddata[0]})
         except Exception as e:
