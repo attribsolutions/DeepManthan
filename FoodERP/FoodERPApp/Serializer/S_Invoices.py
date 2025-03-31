@@ -106,7 +106,6 @@ class InvoicesReferencesSerializer(serializers.ModelSerializer):
         fields = ['Order']         
          
 class InvoiceItemsSerializer(serializers.ModelSerializer):
-    TrayQuantity = serializers.FloatField(required=False, allow_null=True)
     
     class Meta:
         model = TC_InvoiceItems
@@ -137,9 +136,11 @@ class InvoiceSerializer(serializers.ModelSerializer):
         
         
         for InvoiceItem_data in InvoiceItems_data:
-            TrayQuantity = InvoiceItem_data.pop('TrayQuantity', None)
             
-            InvoiceItemID = TC_InvoiceItems.objects.create(Invoice=InvoiceID, TrayQuantity=TrayQuantity, **InvoiceItem_data)
+            InvoiceItem_data['TrayQuantity'] = InvoiceItem_data.get('TrayQuantity') or None
+                
+            TC_InvoiceItems.objects.create(Invoice=InvoiceID, **InvoiceItem_data)
+
            
             
         for O_BatchWiseLiveStockItem_data in O_BatchWiseLiveStockItems_data:
@@ -174,9 +175,9 @@ class BulkInvoiceSerializer(serializers.ModelSerializer):
         # CustomPrint(InvoiceID)
         for InvoiceItem_data in InvoiceItems_data:
             CustomPrint(InvoiceID)
-            InvoiceItem_data['TrayQuantity'] = InvoiceItem_data.get('TrayQuantity', None)
+            InvoiceItem_data['TrayQuantity'] = InvoiceItem_data.get('TrayQuantity') or None
             
-            InvoiceItemID =TC_InvoiceItems.objects.create(Invoice=InvoiceID, **InvoiceItem_data)
+            InvoiceItemID = TC_InvoiceItems.objects.create(Invoice=InvoiceID,  **InvoiceItem_data)
             
         return InvoiceID        
 
@@ -196,7 +197,7 @@ class InvoiceItemsSerializerSecond(serializers.ModelSerializer):
     LiveBatch= O_LiveBatchesserializers(read_only=True)
     class Meta:
         model = TC_InvoiceItems
-        fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','LiveBatch','MRPValue','GSTPercentage','QtyInBox','QtyInKg','QtyInNo','LiveBatch']
+        fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','LiveBatch','MRPValue','GSTPercentage','QtyInBox','QtyInKg','QtyInNo','TrayQuantity','LiveBatch']
         
     def to_representation(self, instance):
         # get representation from ModelSerializer
