@@ -80,10 +80,15 @@ class ChallanSerializerList(serializers.ModelSerializer):
     Customer = PartiesSerializerSecond(read_only=True)
     Party = PartiesSerializerSecond(read_only=True)
     ChallanItems = ChallanItemsSerializer(many=True)
+    GRNReferences= GRNReferanceSerializer(read_only=True,many=True)
  
     class Meta:
         model = T_Challan
-        fields = '__all__'             
+        fields = '__all__'  
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['GRNReferences'] = data.get('GRNReferences', [])  
+        return data          
 
 class ChallanItemsSerializerForDelete(serializers.ModelSerializer):  
     class Meta:
