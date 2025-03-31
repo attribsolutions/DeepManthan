@@ -10,6 +10,9 @@ from ..Serializer.S_Invoices import *
 from ..Serializer.S_Challan import *
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 from ..models import  *
+from django.db.models import Sum, Value,DecimalField
+from django.db.models.functions import Coalesce
+from decimal import Decimal
 
 
 class ChallanItemsView(CreateAPIView):
@@ -94,8 +97,14 @@ class ChallanView(CreateAPIView):
                 # if GRN == "":
                     ChallanDate = Challandata['ChallanDate']
                     Party = Challandata['Party']
-                    IsVDCChallan = Challandata.get('IsVDCChallan', 0)   
-                    a = GetMaxNumber.GetChallanNumber(Party,ChallanDate)
+                    Customer=Challandata['Customer']
+                    IsVDCChallan = Challandata.get('IsVDCChallan', 0)                     
+                    if IsVDCChallan==1:                        
+                        Party=Customer                                       
+                        a = GetMaxNumber.GetVDCChallanNumber(Party,ChallanDate)
+                    else:
+                        a = GetMaxNumber.GetChallanNumber(Party,ChallanDate)                        
+                        
                     Challandata['ChallanNumber'] = a
                     b = GetPrifix.GetChallanPrifix(Party) 
                     b = b.strip() if b else ""                                       
@@ -333,27 +342,48 @@ class ChallanListFilterView(CreateAPIView):
                 Party = Challandata['Party']
                 IsVDCChallan=Challandata['IsVDCChallan']  
                 filters = {
-                    "ChallanDate__range": [FromDate, ToDate],
-                    "IsVDCChallan": IsVDCChallan
+                    "ChallanDate__range": [FromDate, ToDate],                   
                 }
+                if IsVDCChallan in [0, 1]:  
+                    filters["IsVDCChallan"] = IsVDCChallan  
                 if Party:
                     filters["Party"] = Party
-
                 if Customer:
                     filters["Customer_id"] = Customer
-
-                query = T_Challan.objects.filter(**filters)                               
+                query = T_Challan.objects.filter(**filters)               
                 if query:
-                    Challan_serializer = ChallanSerializerList(query, many=True).data
                     
-                    for challan in Challan_serializer:
-                        inward = 0
-                        for c in challan['GRNReferences']:
-                            if(c['Inward'] == 1):
-                                inward = 1 
+                    Challan_serializer = ChallanSerializerList(query, many=True).data  
+                              
+                    challan_ids = [a['id'] for a in Challan_serializer] 
                     
+                    if challan_ids:
+                        grn_references = {
+                        ref["Challan_id"]: ref["Inward"]
+                        for ref in TC_GRNReferences.objects.filter(Challan_id__in=challan_ids).values("Challan_id", "Inward")
+                        }
+                                                
+                        grn_ids = TC_GRNReferences.objects.filter(Challan_id__in=challan_ids).values_list('GRN_id', flat=True)                        
+                          
+                        
+                        challan_grn_quantities = (TC_GRNItems.objects.filter(GRN_id__in=grn_ids)
+                        .values('GRN_id')  
+                        .annotate(GRNTotalQty=Coalesce(Sum('Quantity'), Value(0, output_field=DecimalField())))  
+                        )                        
+                       
+                        challan_grn_map = {TC_GRNReferences.objects.filter(GRN_id=item['GRN_id']).values_list('Challan_id', flat=True).first(): 
+                            item['GRNTotalQty'] 
+                            for item in challan_grn_quantities
+                        }
+                                    
                     ChallanListData = list()
-                    for a in Challan_serializer:
+                    for a in Challan_serializer:  
+                        challanid = a['id']                          
+                        GRNTotalQty = Decimal(challan_grn_map.get(challanid, 0))                        
+                        
+                        ChallanTotalQty = sum(float(item['Quantity']) for item in a['ChallanItems'])
+                        
+                        GRNTotalRatio = GRNTotalRatio = f"{ChallanTotalQty}/{GRNTotalQty}"
                         ChallanListData.append({
                             "id": a['id'],
                             "ChallanDate": a['ChallanDate'],
@@ -366,7 +396,11 @@ class ChallanListFilterView(CreateAPIView):
                             "GrandTotal": a['GrandTotal'],
                             "CreatedOn": a['CreatedOn'],
                             "POType":3,
-                            "inward":inward
+                            "inward":int(grn_references.get(challanid, 0)),
+                            "GRNTotalQty": GRNTotalQty, 
+                            "ChallanTotalQty": ChallanTotalQty, 
+                            "GRNTotalRatio":GRNTotalRatio
+                            
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ChallanListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
