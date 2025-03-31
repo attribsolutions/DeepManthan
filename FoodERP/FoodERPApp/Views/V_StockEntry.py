@@ -45,8 +45,8 @@ class StockEntryPageView(CreateAPIView):
                     BaseUnitQuantity=UnitwiseQuantityConversionobject.GetBaseUnitQuantity()
                     Item=a['Item']
                     
-                    ratequery = O_LiveBatches.objects.raw(f""" SELECT 1 as id, GetTodaysDateRate({Item}, '{StockDate}', {Party}, 0, 1) AS Rate""")
-                 
+                    ratequery = O_LiveBatches.objects.raw(f""" SELECT 1 as id, ROUND(GetTodaysDateRate({Item}, '{StockDate}', {Party}, 0, 2), 2) AS Rate""")
+                    
                     Rate = ratequery[0].Rate if ratequery else 0
                     
                     if Mode == 1:
