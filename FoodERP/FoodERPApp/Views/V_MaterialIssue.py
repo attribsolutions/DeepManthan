@@ -332,7 +332,7 @@ class MaterialIssueViewSecond(RetrieveAPIView):
                 MLot=MaterialIssueItemdataserializer[0]['NumberOfLot']
                 MQuantity=MaterialIssueItemdataserializer[0]['LotQuantity']
                 query1 = T_WorkOrder.objects.filter(id=workOrderID).values('RemainNumberOfLot','RemaninQuantity','NumberOfLot')
-                ActualLot=query1[0]['RemainNumberOfLot']+MLot
+                ActualLot=float(query1[0]['RemainNumberOfLot'] ) + float(MLot)
                 ActualQty=float(query1[0]['RemaninQuantity'])+float(MQuantity)
                 orignalLot=query1[0]['NumberOfLot']                
                 if(orignalLot==ActualLot):
