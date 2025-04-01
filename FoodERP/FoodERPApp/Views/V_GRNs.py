@@ -584,22 +584,23 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                             "Company": d['Company']['id'],
                                             "CompanyName": d['Company']['Name'],
                                             "MRP": d['MRP'],
-                                            })  
+                                            })
+                                    
                                     if IsVDCChallan==1:
-                                        # print("1111")
+                                        
                                         Item=ParentItem
-                                        ItemName=a['Item']['Name'],
-                                        Unit= a['Unit']['id'],
-                                        UnitName= a['Unit']['BaseUnitConversion'],
-                                        BaseUnitQuantity=a['Unit']['BaseUnitQuantity'],
+                                        ItemName=a['Item']['Name']
+                                        Unit= a['Unit']['id']
+                                        UnitName= a['Unit']['BaseUnitConversion']
+                                        BaseUnitQuantity=a['Unit']['BaseUnitQuantity']
                                         BatchCode=SystemBatchCodeGeneration.GetGrnBatchCode(ParentItem, Customer,0)
                                     else:
-                                        # print('0000000')
+                                        
                                         Item=y['Item']['id']
-                                        ItemName=y['Item']['Name'],
-                                        Unit= y['Unit']['id'],
-                                        UnitName= y['Unit']['BaseUnitConversion'],
-                                        BaseUnitQuantity=y['Unit']['BaseUnitQuantity'],
+                                        ItemName=y['Item']['Name']
+                                        Unit= y['Unit']['id']
+                                        UnitName= y['Unit']['BaseUnitConversion']
+                                        BaseUnitQuantity=y['Unit']['BaseUnitQuantity']
                                         BatchCode= y['BatchCode']            
                                     BillofmaterialData.append({
                                         "Item":Item,
