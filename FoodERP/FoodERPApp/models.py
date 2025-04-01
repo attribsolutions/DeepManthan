@@ -1077,6 +1077,7 @@ class TC_InvoiceItems(models.Model):
     QtyInNo = models.DecimalField(max_digits=30, decimal_places=20)
     QtyInKg = models.DecimalField(max_digits=30, decimal_places=20)
     QtyInBox = models.DecimalField(max_digits=30, decimal_places=20)
+    TrayQuantity = models.DecimalField(max_digits=30, decimal_places=20,blank=True, null=True)
 
     class Meta:
         db_table = "TC_InvoiceItems"
@@ -1137,6 +1138,7 @@ class T_GRNs(models.Model):
     InvoiceDate = models.DateField(null=True,blank=True)
     IsSave = models.IntegerField() 
     IsTallySave = models.BooleanField(default=False)
+    # IsGRNType = models.BooleanField(default=False)
     class Meta:
         db_table = "T_GRNs"
 

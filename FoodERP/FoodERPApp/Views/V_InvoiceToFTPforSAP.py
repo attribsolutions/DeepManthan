@@ -15,13 +15,16 @@ class InvoiceSendToFTPForSAP(APIView):
     permission_classes = (IsAuthenticated,)
     @transaction.atomic
     def post(self, request):
-        InvoiceData = JSONParser().parse(request)        
+        InvoiceData = JSONParser().parse(request) 
+               
         try:
             InvoiceID = InvoiceData['InvoiceID'] 
-            self.Upload_InvoiceToSAP(InvoiceID)
-            return JsonResponse({'message': 'Uploaded successfully'}, status=200)
+            
+            ss=self.Upload_InvoiceToSAP(InvoiceID)
+            
+            return JsonResponse(ss)
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500) 
+            return JsonResponse({'error': Exception(e)}, status=500) 
 
     def Upload_InvoiceToSAP(self, InvoiceID):
             try:
@@ -29,7 +32,8 @@ class InvoiceSendToFTPForSAP(APIView):
                     settings_map = self.get_ftp_settings()
                     user_name = settings_map.get(50)  # Username
                     password = settings_map.get(51)  # Password
-                    FTPFilePath = settings_map.get(52)  # FTPFilePath           
+                    FTPFilePath = settings_map.get(52)  # FTPFilePath       
+                      
                     ItemSAPCode=f'''SELECT 1 id ,  
                     'IN60' AS Vendor,
                     M_Parties.SAPPartyCode AS Plant,
@@ -41,7 +45,7 @@ class InvoiceSendToFTPForSAP(APIView):
                     T_Invoices.GrandTotal AS InvoiceheaderAmountwithGST,
                     M_Items.SAPItemCode AS Material,
                     TC_InvoiceItems.Quantity,
-                    O_LiveBatches.BatchCode,O_LiveBatches.BatchDate ProdnDate,TC_InvoiceItems.ItemExpiryDate sled  
+                    O_LiveBatches.BatchCode,O_LiveBatches.BatchDate ProdnDate,O_LiveBatches.ItemExpiryDate sled  
                     FROM T_Invoices 
                     JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_ID = T_Invoices.ID 
                     JOIN M_Items ON M_Items.ID = TC_InvoiceItems.Item_ID
@@ -51,9 +55,14 @@ class InvoiceSendToFTPForSAP(APIView):
                     WHERE T_Invoices.ID = %s '''                   
                        
                     raw_queryset = T_Invoices.objects.raw(ItemSAPCode, [InvoiceID])   
-                    # print(raw_queryset.query)         
                     
-                    file_name = f"{datetime.now().strftime('%Y%m%d')}_InvoiceFile1.csv"
+                    for i in raw_queryset:
+                        Plant=i.Plant
+                        InvNo =i.VenderInvoiceNumber
+                        
+                                
+                    
+                    file_name = f"{datetime.now().strftime('%Y%m%d')}_{Plant}_{InvNo}_InvoiceFile1.csv"
                     # print(file_name)
                     ftp_file_path = f"{FTPFilePath}/inbound/GRN_MIR7/source/{file_name}"
                     # print(ftp_file_path)
@@ -78,18 +87,22 @@ class InvoiceSendToFTPForSAP(APIView):
                     # Upload to FTP
                     self.upload_to_ftp(ftp_file_path, user_name, password, csv_content) 
                     # print("HHHHHH")           
-                    pass
-                    # Return success response
+                    # pass
+                    
+                    return ({'StatusCode': 200, 'Status': True,'Message': file_name +' File uploaded successfully ', 'Data': []})
                     # return JsonResponse({'message': 'File uploaded successfully', 'file_name': file_name})
                         
             except Exception as exc:
                 # Log and return the error
-                self.insert_pos_log(1, "Failed", str(exc))
-                return JsonResponse({'error': str(exc)}, status=500)
-                raise
+                # self.insert_pos_log(1, "Failed", str(exc))
+                
+                return ({'StatusCode': 400, 'Status': True, 'Message':  str(exc), 'Data':[]})
+                
+                
     def upload_to_ftp(self, ftp_url, username, password, file_content):
         """Upload file content to an FTP server."""        
         try:
+             
             parsed_url = urlparse(ftp_url)
             ftp_base_url = parsed_url.hostname  
             ftp_file_path = parsed_url.path.lstrip('/')  
@@ -98,6 +111,7 @@ class InvoiceSendToFTPForSAP(APIView):
             # Connect to the FTP server
             ftp = FTP(ftp_base_url)  # Create an FTP object and connect
             ftp.login(username, password)  # Login with credentials
+            
             # print(ftp.login(username, password))
             # Navigate to the directory or create it
             try:
