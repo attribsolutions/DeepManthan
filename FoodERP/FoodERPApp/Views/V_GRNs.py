@@ -544,9 +544,10 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                 BillofmaterialData = list()
                                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
                                 for a in BOM_Serializer:
-                                    ParentItem=  a['Item']['id']     
-                                    print(ParentItem)
-                                    BachCode=SystemBatchCodeGeneration.GetGrnBatchCode(ParentItem, Customer,0)
+                                    if IsVDCChallan==1:
+                                        ParentItem=  a['Item']['id'] 
+                                    else:    
+                                         ParentItem=  y['Item']['id']                              
                                     Parentquery = MC_ItemUnits.objects.filter(Item_id=ParentItem,IsDeleted=0)
                                     # CustomPrint(Parentquery.query)
                                     if Parentquery.exists():
@@ -583,17 +584,33 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                             "Company": d['Company']['id'],
                                             "CompanyName": d['Company']['Name'],
                                             "MRP": d['MRP'],
-                                            })                
+                                            })  
+                                    if IsVDCChallan==1:
+                                        # print("1111")
+                                        Item=ParentItem
+                                        ItemName=a['Item']['Name'],
+                                        Unit= a['Unit']['id'],
+                                        UnitName= a['Unit']['BaseUnitConversion'],
+                                        BaseUnitQuantity=a['Unit']['BaseUnitQuantity'],
+                                        BatchCode=SystemBatchCodeGeneration.GetGrnBatchCode(ParentItem, Customer,0)
+                                    else:
+                                        # print('0000000')
+                                        Item=y['Item']['id']
+                                        ItemName=y['Item']['Name'],
+                                        Unit= y['Unit']['id'],
+                                        UnitName= y['Unit']['BaseUnitConversion'],
+                                        BaseUnitQuantity=y['Unit']['BaseUnitQuantity'],
+                                        BatchCode= y['BatchCode']            
                                     BillofmaterialData.append({
-                                        "Item":ParentItem,
-                                        "ItemName":a['Item']['Name'],
+                                        "Item":Item,
+                                        "ItemName":ItemName,
                                         "Quantity": Qty,
                                         "MRP":MRPDetails[0]['id'],
                                         "MRPValue": MRPDetails[0]['MRP'],
                                         "Rate":y['Rate'], 
-                                        "Unit": a['Unit']['id'],
-                                        "UnitName": a['Unit']['BaseUnitConversion'],
-                                        "BaseUnitQuantity": a['Unit']['BaseUnitQuantity'],
+                                        "Unit": Unit,
+                                        "UnitName": UnitName,
+                                        "BaseUnitQuantity": BaseUnitQuantity,
                                         "GST":GSTDetails[0]['id'],
                                         "HSNCode": GSTDetails[0]['HSNCode'],
                                         "GSTPercentage": GSTDetails[0]['GSTPercentage'],
@@ -608,10 +625,9 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                         "SGSTPercentage": "",
                                         "IGSTPercentage": "",
                                         "Amount":"",
-                                        "BatchCode":BachCode,
+                                        "BatchCode":BatchCode,
                                         "LoginName":"",
-                                        "UnitDetails":ParentUnitDetails
-                                        
+                                        "UnitDetails":ParentUnitDetails                                       
         
                                         })       
                                 ChallanItemDetails.append(BillofmaterialData[0])        
