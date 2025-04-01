@@ -106,11 +106,11 @@ class MaterialIsssueList(CreateAPIView):
                 MaterialIsssuedata = JSONParser().parse(request)
                 FromDate = MaterialIsssuedata['FromDate']
                 ToDate = MaterialIsssuedata['ToDate'] 
-                # Party=MaterialIsssuedata['Party']
+                Party=MaterialIsssuedata['Party']
                 if(FromDate=="" and ToDate=="" ): 
-                    query = T_MaterialIssue.objects.filter(~Q(Status=2)) 
+                    query = T_MaterialIssue.objects.filter(~Q(Status=2),Party_id=Party) 
                 else: 
-                    query = T_MaterialIssue.objects.filter(MaterialIssueDate__range=[FromDate, ToDate])                 
+                    query = T_MaterialIssue.objects.filter(MaterialIssueDate__range=[FromDate, ToDate],Party_id=Party)                 
                 if query:
                     MaterialIsssue_serializerdata = MatetrialIssueSerializerSecond( query, many=True).data
                     
@@ -118,16 +118,26 @@ class MaterialIsssueList(CreateAPIView):
                     MaterialIsssueListData = list()
                    
                     for a in MaterialIsssue_serializerdata:
-                        if(a['RemainNumberOfLot']!=0):
-                            # CustomPrint("Shrutip")
-                            if(a['NumberOfLot']!=a['RemainNumberOfLot']):
-                                # print(a['RemainNumberOfLot'],a['NumberOfLot'])
-                                Percentage=float(a['RemainNumberOfLot'])/float(a['NumberOfLot'])*100 
-                                Percentage=100-Percentage
-                            else:
-                                Percentage=0
-                        else:  
-                            Percentage=100   
+                        # if(a['RemainNumberOfLot']!=0):                            
+                        #     if(a['NumberOfLot']!=a['RemainNumberOfLot']):
+                        #         # print(a['RemainNumberOfLot'],a['NumberOfLot'])
+                        #         Percentage=(1-float(a['RemainNumberOfLot'])/float(a['NumberOfLot'])*100) 
+                            
+                        #         # Percentage=100-Percentage
+                        #     else:
+                        #         Percentage=0
+                        # else:  
+                        #     Percentage=100   
+                        total_lot = float(a['NumberOfLot'])
+                        remaining_lot = float(a['RemainNumberOfLot'])
+
+                        if remaining_lot == 0:
+                            Percentage = 100  
+                        elif remaining_lot == total_lot:
+                            Percentage = 0  
+                        else:
+                            Percentage = round((1 - (remaining_lot / total_lot)) * 100, 2)
+                        
                         Productionquery1 = T_MaterialIssue.objects.filter(Item_id=a['Item']['id']).values('id')                
                         BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item']['id'], a['Party']['id'], Productionquery1.count())                     
                         MaterialIsssueListData.append({
