@@ -162,8 +162,8 @@ class CheckStockEntryDateAndNotAllowedBackdatedTransactionView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        TransactionData = JSONParser().parse(request)
         try:
-            TransactionData = JSONParser().parse(request)
             TransactionDate = TransactionData['TransactionDate']
             PartyID = TransactionData['PartyID']
             
@@ -172,12 +172,13 @@ class CheckStockEntryDateAndNotAllowedBackdatedTransactionView(CreateAPIView):
             with connection.cursor() as cursor:
                 cursor.execute(BackDateTransactionQuery, [TransactionDate, PartyID])
                 result = cursor.fetchone()[0]
+                
             if result: 
                 log_entry = create_transaction_logNew(request,TransactionData, PartyID,f'Transactions Allowed for Party: {PartyID} Date: {TransactionDate}',360,0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': bool(result)})
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Transactions Allowed', 'Data': bool(result)})
             else:  
                 log_entry = create_transaction_logNew(request,TransactionData, PartyID,f'Backdated transactions not allowed for Party: {PartyID} Date: {TransactionDate}',360,0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Backdated transactions not allowed', 'Data': bool(result)})
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Backdated transactions not allowed', 'Data': bool(result)})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'TransactionData:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request,0, 0,'TransactionData:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
