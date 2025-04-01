@@ -88,6 +88,10 @@ class InvoiceSendToFTPForSAP(APIView):
                     self.upload_to_ftp(ftp_file_path, user_name, password, csv_content) 
                     # print("HHHHHH")           
                     # pass
+
+                    sapupdatequery = T_Invoices.objects.filter(id=InvoiceID).update(IsSendToFTPSAP=1)
+                  
+
                     
                     return ({'StatusCode': 200, 'Status': True,'Message': file_name +' File uploaded successfully ', 'Data': []})
                     # return JsonResponse({'message': 'File uploaded successfully', 'file_name': file_name})
