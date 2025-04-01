@@ -70,7 +70,7 @@ ifnull(UnitwiseQuantityConversion(a.Item_id ,b.StockQuantity ,0 ,BaseUnitID_id ,
                             (select sum(BaseUnitQuantity) StockQuantity,Item_id from O_BatchWiseLiveStock where Party_id= {Party} and IsDamagePieces=0 group by Item_id )b
                             on a.Item_id=b.Item_id
 ''')
-                print(query)
+                # print(query)
                 BomListData = []
                 for a in query:
                     # Stock = float(GetO_BatchWiseLiveStock(a.Item_id, Party))
@@ -151,7 +151,7 @@ class M_BOMsViewSecond(RetrieveAPIView):
         try:
             with transaction.atomic():
                 Query = M_BillOfMaterial.objects.filter(id=id)
-                print(Query.query)
+                # print(Query.query)
                 if Query.exists():
                     BOM_Serializer = M_BOMSerializerSecond001(Query,many=True).data
                     BillofmaterialData = list()
@@ -285,7 +285,7 @@ class BulkBOMView(RetrieveAPIView):
                             a['Item']['id'], Party))
                         StockintoSelectedUnit = UnitwiseQuantityConversion(
                             a['Item']['id'], Stock, 0, 0, a['Unit']['id'], 0,1).ConvertintoSelectedUnit()
-                        CustomPrint(StockintoSelectedUnit)
+                        # CustomPrint(StockintoSelectedUnit)
                         MaterialDetails =list()                         
                         
                         ParentItem= a['Item']['id']
