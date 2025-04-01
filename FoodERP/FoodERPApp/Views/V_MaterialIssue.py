@@ -194,7 +194,10 @@ class MaterialIssueView(CreateAPIView):
                 MaterialIssueData['FullMaterialIssueNumber'] = b+""+str(a)
                 MaterialIssueData['Status']=0
                 MaterialIssueData['RemainNumberOfLot']=MaterialIssueData['NumberOfLot']
+                print(MaterialIssueData['RemainNumberOfLot'])
+                
                 MaterialIssueData['RemaninLotQuantity']=MaterialIssueData['LotQuantity']
+                print(MaterialIssueData['RemaninLotQuantity'])
                 
                 MaterialIssueItems = MaterialIssueData['MaterialIssueItems']
                 MaterialWorkOrder=MaterialIssueData['MaterialIssueWorkOrder']   
@@ -228,10 +231,11 @@ class MaterialIssueView(CreateAPIView):
                     data=MaterialIssueData)
                 # CustomPrint(MaterialIssue_Serializer)                
                 if MaterialIssue_Serializer.is_valid():
-                    MaterialIssue_Serializer.save() 
+                    MaterialIssue_Serializer.save()                     
                     RemainNumberOfLot=RemaningLots-NoOfLotsQty
                     RemaninQuantity=float(RamaningQty)-float(NoOfQuantity) 
-                    if(RemaningLots==NoOfLotsQty):                      
+                    # if(RemaningLots==NoOfLotsQty):        
+                    if RemainNumberOfLot == 0:              
                        query = T_WorkOrder.objects.filter(id=WorkOrderID).update(Status=2,RemainNumberOfLot=RemainNumberOfLot,RemaninQuantity=RemaninQuantity)
                     else:                       
                        query = T_WorkOrder.objects.filter(id=WorkOrderID).update(Status=1,RemainNumberOfLot=RemainNumberOfLot,RemaninQuantity=RemaninQuantity)                       
