@@ -106,11 +106,11 @@ class MaterialIsssueList(CreateAPIView):
                 MaterialIsssuedata = JSONParser().parse(request)
                 FromDate = MaterialIsssuedata['FromDate']
                 ToDate = MaterialIsssuedata['ToDate'] 
-                Party=MaterialIsssuedata['Party']
+                # Party=MaterialIsssuedata['Party']
                 if(FromDate=="" and ToDate=="" ): 
-                    query = T_MaterialIssue.objects.filter(~Q(Status=2),Party_id=Party) 
+                    query = T_MaterialIssue.objects.filter(~Q(Status=2)) 
                 else: 
-                    query = T_MaterialIssue.objects.filter(MaterialIssueDate__range=[FromDate, ToDate],Party_id=Party)                 
+                    query = T_MaterialIssue.objects.filter(MaterialIssueDate__range=[FromDate, ToDate])                 
                 if query:
                     MaterialIsssue_serializerdata = MatetrialIssueSerializerSecond( query, many=True).data
                     
