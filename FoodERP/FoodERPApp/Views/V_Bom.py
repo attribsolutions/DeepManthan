@@ -147,10 +147,11 @@ class M_BOMsViewSecond(RetrieveAPIView):
     # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
-    def get(self, request, id=0,Company=0):
+    def get(self, request, id=0):
         try:
             with transaction.atomic():
-                Query = M_BillOfMaterial.objects.filter(id=id,Company_id=Company)
+                Query = M_BillOfMaterial.objects.filter(id=id)
+                print(Query.query)
                 if Query.exists():
                     BOM_Serializer = M_BOMSerializerSecond001(Query,many=True).data
                     BillofmaterialData = list()

@@ -55,9 +55,14 @@ class InvoiceSendToFTPForSAP(APIView):
                     WHERE T_Invoices.ID = %s '''                   
                        
                     raw_queryset = T_Invoices.objects.raw(ItemSAPCode, [InvoiceID])   
-                    # print(raw_queryset.query)         
                     
-                    file_name = f"{datetime.now().strftime('%Y%m%d')}_InvoiceFile1.csv"
+                    for i in raw_queryset:
+                        Plant=i.Plant
+                        InvNo =i.VenderInvoiceNumber
+                        
+                                
+                    
+                    file_name = f"{datetime.now().strftime('%Y%m%d')}_{Plant}_{InvNo}_InvoiceFile1.csv"
                     # print(file_name)
                     ftp_file_path = f"{FTPFilePath}/inbound/GRN_MIR7/source/{file_name}"
                     # print(ftp_file_path)
@@ -83,8 +88,10 @@ class InvoiceSendToFTPForSAP(APIView):
                     self.upload_to_ftp(ftp_file_path, user_name, password, csv_content) 
                     # print("HHHHHH")           
                     # pass
+
                     sapupdatequery = T_Invoices.objects.filter(id=InvoiceID).update(IsSendToFTPSAP=1)
                   
+
                     
                     return ({'StatusCode': 200, 'Status': True,'Message': file_name +' File uploaded successfully ', 'Data': []})
                     # return JsonResponse({'message': 'File uploaded successfully', 'file_name': file_name})
