@@ -141,7 +141,8 @@ class ProductionView(CreateAPIView):
                         RamaningQty = float(MaterialissueNOofLots[0]['RemaninLotQuantity']) 
                         RemainNumberOfLot=float(RemaningLots)-float(NoOfLotsQty)
                         RemaninQuantity=float(RamaningQty)-float(NoOfQuantity) 
-                    if(RemaningLots==NoOfLotsQty):                      
+                    # if(RemaningLots==NoOfLotsQty):  
+                    if RemainNumberOfLot == 0:                      
                        query = T_MaterialIssue.objects.filter(id=Materialissueid).update(Status=2,RemainNumberOfLot=RemainNumberOfLot,RemaninLotQuantity=RemaninQuantity)
                     else:                       
                        query = T_MaterialIssue.objects.filter(id=Materialissueid).update(Status=1,RemainNumberOfLot=RemainNumberOfLot,RemaninLotQuantity=RemaninQuantity)                   
