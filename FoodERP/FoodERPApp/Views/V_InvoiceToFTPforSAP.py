@@ -9,6 +9,7 @@ from ..models import *
 import io
 from ftplib import FTP
 from urllib.parse import urlparse
+from ..Views.V_CommFunction import *
 
 
 class InvoiceSendToFTPForSAP(APIView):
@@ -100,13 +101,14 @@ class InvoiceSendToFTPForSAP(APIView):
                     self.upload_to_ftp(ftp_file_path, user_name, password, csv_content) 
                     # print("HHHHHH")           
                     sapupdatequery = T_Invoices.objects.filter(id=InvoiceID).update(IsSendToFTPSAP=1)
+                    log_entry = create_transaction_logNew(0,settings_map, user_name,f'File uploaded successfully: {file_name}',456,0)
                     return ({'StatusCode': 200, 'Status': True,'Message': file_name +' File uploaded successfully ', 'Data': []})
                     # return JsonResponse({'message': 'File uploaded successfully', 'file_name': file_name})
                         
             except Exception as exc:
                 # Log and return the error
                 # self.insert_pos_log(1, "Failed", str(exc))
-                
+                log_entry = create_transaction_logNew(0,settings_map, 0,'FileUploadedError:'+str(exc),33,0)
                 return ({'StatusCode': 400, 'Status': True, 'Message':  str(exc), 'Data':[]})
                 
                 
