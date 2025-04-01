@@ -37,7 +37,9 @@ class InvoiceSendToFTPForSAP(APIView):
                     ItemSAPCode=f'''SELECT 1 id ,  
                     'IN60' AS Vendor,
                     M_Parties.SAPPartyCode AS Plant,
-                    T_Invoices.InvoiceDate AS DocumentDate,
+                    T_Invoices.Party_id PartyID,
+                    T_Invoices.InvoiceDate ,
+                    DATE_FORMAT(T_Invoices.InvoiceDate, '%%d.%%m.%%Y') DocumentDate,
                     0 AS DeliveryNote,
                     '' AS BillofLading,
                     '' AS HeaderText,
@@ -45,7 +47,10 @@ class InvoiceSendToFTPForSAP(APIView):
                     T_Invoices.GrandTotal AS InvoiceheaderAmountwithGST,
                     M_Items.SAPItemCode AS Material,
                     TC_InvoiceItems.Quantity,
-                    O_LiveBatches.BatchCode,O_LiveBatches.BatchDate ProdnDate,O_LiveBatches.ItemExpiryDate sled  
+                    O_LiveBatches.BatchCode,
+                    
+                    DATE_FORMAT(O_LiveBatches.BatchDate, '%%d.%%m.%%Y') ProdnDate,
+                    DATE_FORMAT(O_LiveBatches.ItemExpiryDate, '%%d.%%m.%%Y') sled
                     FROM T_Invoices 
                     JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_ID = T_Invoices.ID 
                     JOIN M_Items ON M_Items.ID = TC_InvoiceItems.Item_ID
@@ -55,14 +60,21 @@ class InvoiceSendToFTPForSAP(APIView):
                     WHERE T_Invoices.ID = %s '''                   
                        
                     raw_queryset = T_Invoices.objects.raw(ItemSAPCode, [InvoiceID])   
-                    
+                    shedshortname =M_Settings.objects.filter(id=64).values('DefaultValue')
+                    dd=shedshortname[0]['DefaultValue']
+                   
                     for i in raw_queryset:
-                        Plant=i.Plant
-                        InvNo =i.VenderInvoiceNumber
-                        
-                                
+                        shortname=dd.split(',')
+                        for j in shortname:
+                            ss=j.split('-')
+                            if int(i.PartyID) == int(ss[0]):
+                                N=ss[1]
+                          
+                        InvoiceDate = i.InvoiceDate
+                        Plant = i.Plant
+                        InvNo =i.VenderInvoiceNumber       
                     
-                    file_name = f"{datetime.now().strftime('%Y%m%d')}_{Plant}_{InvNo}_InvoiceFile1.csv"
+                    file_name = f"{InvoiceDate.strftime('%Y%m%d')}_{Plant}_IN60_{N}_{InvNo}.csv"
                     # print(file_name)
                     ftp_file_path = f"{FTPFilePath}/inbound/GRN_MIR7/source/{file_name}"
                     # print(ftp_file_path)
@@ -87,12 +99,7 @@ class InvoiceSendToFTPForSAP(APIView):
                     # Upload to FTP
                     self.upload_to_ftp(ftp_file_path, user_name, password, csv_content) 
                     # print("HHHHHH")           
-                    # pass
-
                     sapupdatequery = T_Invoices.objects.filter(id=InvoiceID).update(IsSendToFTPSAP=1)
-                  
-
-                    
                     return ({'StatusCode': 200, 'Status': True,'Message': file_name +' File uploaded successfully ', 'Data': []})
                     # return JsonResponse({'message': 'File uploaded successfully', 'file_name': file_name})
                         
