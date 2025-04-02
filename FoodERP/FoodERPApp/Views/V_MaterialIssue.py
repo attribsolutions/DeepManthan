@@ -229,10 +229,11 @@ class MaterialIssueView(CreateAPIView):
                
                 MaterialIssue_Serializer = MaterialIssueSerializer(
                     data=MaterialIssueData)
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': MaterialIssue_Serializer})
                 # CustomPrint(MaterialIssue_Serializer)                
                 if MaterialIssue_Serializer.is_valid():
                     MaterialIssue_Serializer.save()                     
-                    RemainNumberOfLot=RemaningLots-NoOfLotsQty
+                    RemainNumberOfLot=float(RemaningLots)-float(NoOfLotsQty)
                     RemaninQuantity=float(RamaningQty)-float(NoOfQuantity) 
                     # if(RemaningLots==NoOfLotsQty):        
                     if RemainNumberOfLot == 0:              
