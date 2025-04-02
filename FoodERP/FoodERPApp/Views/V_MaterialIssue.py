@@ -8,6 +8,7 @@ from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix,SystemBatchCo
 from ..Serializer.S_WorkOrder import *
 from ..Serializer.S_MaterialIssue import *
 from ..models import *
+from datetime import datetime, timedelta
 
 
 
@@ -137,6 +138,15 @@ class MaterialIsssueList(CreateAPIView):
                             Percentage = 0  
                         else:
                             Percentage = round((1 - (remaining_lot / total_lot)) * 100, 2)
+                            
+                        ItemShelflife=MC_ItemShelfLife.objects.filter(Item_id=a['Item']['id'],IsDeleted=0).values('Days')
+                        
+                        if ItemShelflife:
+                            today = datetime.today()
+                            shelf_date = today + timedelta(days=ItemShelflife[0]['Days'])
+                            shelf_date = shelf_date.strftime("%Y-%m-%d")
+                        else:
+                            shelf_date = today                            
                         
                         Productionquery1 = T_MaterialIssue.objects.filter(Item_id=a['Item']['id']).values('id')                
                         BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item']['id'], a['Party']['id'], Productionquery1.count())                     
@@ -158,7 +168,8 @@ class MaterialIsssueList(CreateAPIView):
                             "CreatedOn": a['CreatedOn'],
                             "Status":a['Status'],
                             "PrintedBatchCode":BatchCode,
-                            "Percentage":Percentage                         
+                            "Percentage":Percentage ,
+                            "ShelfDate":shelf_date                       
                            
                         })                        
                         # CustomPrint(MaterialIsssueListData)
