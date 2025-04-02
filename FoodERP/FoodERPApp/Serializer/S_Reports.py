@@ -44,6 +44,7 @@ class StockProcessingReportSerializer(serializers.Serializer):
     ClosingBalance=serializers.DecimalField(max_digits=10, decimal_places=3)
     ActualStock=serializers.DecimalField(max_digits=10, decimal_places=3)
     StockAdjustment=serializers.DecimalField(max_digits=10, decimal_places=3)
+    Production=serializers.DecimalField(max_digits=10, decimal_places=3)
     
 
 class StockReportSerializer(serializers.Serializer):
