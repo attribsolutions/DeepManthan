@@ -1138,7 +1138,7 @@ class T_GRNs(models.Model):
     InvoiceDate = models.DateField(null=True,blank=True)
     IsSave = models.IntegerField() 
     IsTallySave = models.BooleanField(default=False)
-    # IsGRNType = models.BooleanField(default=False)
+    IsGRNType = models.BooleanField(default=False)
     class Meta:
         db_table = "T_GRNs"
 
@@ -2490,6 +2490,7 @@ class M_GiftVoucherCode(models.Model):
     InvoiceAmount = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True) 
     Party = models.IntegerField()
     client = models.IntegerField()
+    ClientSaleID = models.IntegerField()
 
     class Meta:
         db_table = "M_GiftVoucherCode"
