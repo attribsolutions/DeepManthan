@@ -79,6 +79,7 @@ class giftvouchervalidityCheck(CreateAPIView):
                 InvoiceAmount = giftvoucherData.get('InvoiceAmount', None)
                 Party = giftvoucherData.get('Party', None)
                 client = giftvoucherData.get('client', 0)
+                ClientSaleID = giftvoucherData.get('ClientID',None)
 
                 voucher_details = M_GiftVoucherCode.objects.filter(VoucherCode=VoucherCode).first()
 
@@ -113,6 +114,7 @@ class giftvouchervalidityCheck(CreateAPIView):
                 voucher_details.InvoiceAmount = InvoiceAmount
                 voucher_details.Party = Party
                 voucher_details.client = client
+                voucher_details.ClientSaleID = ClientSaleID
                 voucher_details.save()
 
                 log_entry = create_transaction_logNew(request, giftvoucherData, Party, '', 435, 0)
