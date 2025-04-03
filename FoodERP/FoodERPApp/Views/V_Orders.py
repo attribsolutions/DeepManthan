@@ -302,7 +302,7 @@ where T_Invoices.InvoiceDate between %s and %s and  Customer_id=%s and Party_id=
                                 "Supplier": a.SupplierName,
                                 "OrderAmount": a.GrandTotal,
                                 "Description": "",
-                                "OrderType": "",
+                                "OrderType": OrderType,
                                 "POType": "",
                                 "BillingAddress": "",
                                 "ShippingAddress": "",
@@ -1151,3 +1151,4 @@ class TestOrdersView(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+
