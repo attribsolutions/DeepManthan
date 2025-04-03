@@ -32,6 +32,7 @@ class GRNListFilterView(CreateAPIView):
                 ToDate = GRNdata['ToDate']
                 Customer = GRNdata['Party']
                 Supplier = GRNdata['Supplier']
+                IsGRNType=GRNdata['IsGRNType']
                 # print('aaaaaaaaaaaaaaaaaaaaa')
                 if(Supplier == ''):
                     # print("shruti")
@@ -54,7 +55,7 @@ join M_Parties party on party.id=G.Party_id
 join M_Parties cust on cust.id=G.Customer_id
 join TC_GRNReferences on TC_GRNReferences.GRN_id=G.id
 left join T_Invoices on T_Invoices.id=TC_GRNReferences.Invoice_id
-where GRNDate between %s and %s and G.Customer_id= %s {condition}  ''',[FromDate,ToDate,Customer])
+where GRNDate between %s and %s and G.Customer_id= %s and IsGRNType={IsGRNType} {condition}''',[FromDate,ToDate,Customer])
                 
                 # print(query)
                 if not query:

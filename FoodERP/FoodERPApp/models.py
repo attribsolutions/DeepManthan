@@ -1138,7 +1138,7 @@ class T_GRNs(models.Model):
     InvoiceDate = models.DateField(null=True,blank=True)
     IsSave = models.IntegerField() 
     IsTallySave = models.BooleanField(default=False)
-    # IsGRNType = models.BooleanField(default=False)
+    IsGRNType = models.BooleanField(default=False)
     class Meta:
         db_table = "T_GRNs"
 
@@ -2094,6 +2094,8 @@ class O_DateWiseLiveStock(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     MRPValue = models.DecimalField(max_digits=20,decimal_places=10)
     StockAdjustment = models.DecimalField(max_digits=20,decimal_places=10)
+    Production = models.DecimalField(max_digits=20,decimal_places=10)
+
 
     class Meta:
         db_table="O_DateWiseLiveStock"      
@@ -2488,6 +2490,7 @@ class M_GiftVoucherCode(models.Model):
     InvoiceAmount = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True) 
     Party = models.IntegerField()
     client = models.IntegerField()
+    ClientSaleID = models.IntegerField()
 
     class Meta:
         db_table = "M_GiftVoucherCode"
