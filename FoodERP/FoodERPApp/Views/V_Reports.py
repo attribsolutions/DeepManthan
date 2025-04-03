@@ -2368,7 +2368,7 @@ class PeriodicGRNReportView(CreateAPIView):
                                                         LEFT JOIN M_Units ON MC_ItemUnits.UnitID_id = M_Units.id
                                                         JOIN TC_GRNReferences ON T_GRNs.id = TC_GRNReferences.GRN_id
                                                         LEFT JOIN T_Orders ON TC_GRNReferences.Order_id = T_Orders.id
-                                                        LEFT JOIN M_Parties ON T_GRNs.Customer_id = M_Parties.id
+                                                        LEFT JOIN M_Parties ON T_GRNs.Party_id = M_Parties.id
                                                         WHERE T_GRNs.GRNDate BETWEEN '{FromDate}' AND '{ToDate}' {SupplierCondition}''')
                 for Periodic in PeriodicGRNQuery:
                     PeriodicGRNdataData.append({
