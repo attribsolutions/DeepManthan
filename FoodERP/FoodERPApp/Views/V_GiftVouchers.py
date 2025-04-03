@@ -79,7 +79,7 @@ class giftvouchervalidityCheck(CreateAPIView):
                 InvoiceAmount = giftvoucherData.get('InvoiceAmount', None)
                 Party = giftvoucherData.get('Party', None)
                 client = giftvoucherData.get('client', 0)
-                ClientSaleID = giftvoucherData.get('ClientID',None)
+                ClientSaleID = giftvoucherData.get('ClientID',0)
 
                 voucher_details = M_GiftVoucherCode.objects.filter(VoucherCode=VoucherCode).first()
 
