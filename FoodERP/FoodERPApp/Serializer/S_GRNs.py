@@ -46,7 +46,7 @@ class T_GRNSerializer(serializers.ModelSerializer):
     GRNReferences = TC_GRNReferencesSerializer(many=True) 
     class Meta:
         model = T_GRNs
-        fields = ['GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber','InvoiceNumber','InvoiceDate','GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy', 'IsSave', 'Comment', 'GRNItems','O_LiveBatchesList','GRNReferences']
+        fields = ['GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber','InvoiceNumber','InvoiceDate','GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy', 'IsSave', 'Comment','IsGRNType', 'GRNItems','O_LiveBatchesList','GRNReferences']
        
     def create(self, validated_data):
        
