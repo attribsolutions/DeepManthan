@@ -448,10 +448,11 @@ class StockProcessingView(CreateAPIView):
                     StockProcessQuery = O_DateWiseLiveStock.objects.raw('''select id,ItemID,UnitID,
                     round(OpeningBalance,3) OpeningBalance,
                     round(GRN,3) GRN,
+                    round(ProductionQty,3) Production,
                     round(SalesReturn,3) SalesReturn,
                     round(Sale,3) Sale,
                     round(PurchaseReturn,3) PurchaseReturn,
-                    round(((OpeningBalance+GRN+SalesReturn+StockAdjustment)-(Sale+PurchaseReturn)),3) ClosingBalance,
+                    round(((OpeningBalance+ProductionQty+GRN+SalesReturn+StockAdjustment)-(Sale+PurchaseReturn)),3) ClosingBalance,
                     StockAdjustment,ActualStock
  from
 
@@ -463,8 +464,8 @@ IFNULL(GRNQuantity,0)GRN,
 IFNULL(SalesReturnQuantity,0)SalesReturn,
 IFNULL(PurchesReturnQuantity,0)PurchaseReturn,
 IFNULL(StockAdjustmentQTY,0)StockAdjustment,
-IFNULL(ActualStock,0)ActualStock
-
+IFNULL(ActualStock,0)ActualStock,
+IFNULL(ProductionQty,0)ProductionQty
 from
 
 (Select Item_id,M_Items.BaseUnitID_id UnitID  from MC_PartyItems join M_Items on M_Items.id=MC_PartyItems.Item_id where Party_id=%s)I
@@ -505,19 +506,22 @@ on I.Item_id=StockAdjustment.Item_id
 
 left join (SELECT Item_id,sum(BaseUnitQuantity)ActualStock FROM T_Stock where IsDeleted=0 and IsStockAdjustment=0 and StockDate = %s and Party_id= %s group by Item_id)ActualStock
 on I.Item_id=ActualStock.Item_id
+                                                                        
+left join (select Item_id,sum(ActualQuantity)ProductionQty from T_Production where ProductionDate=%s and Division_id=%s group by Item_id)Production
+on I.Item_id=Production.Item_id                                                                        
 
 )R
 where 
 OpeningBalance!=0 OR GRN!=0 OR Sale!=0 OR PurchaseReturn != 0 OR SalesReturn !=0 OR StockAdjustment!=0 ''',
-                                                                        ([Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party]))
+                                                                        ([Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party]))
 
-                    # CustomPrint(StockProcessQuery)
+                    # print(StockProcessQuery)
                     serializer = StockProcessingReportSerializer(
                         StockProcessQuery, many=True).data
                     # CustomPrint(serializer)
                     for a in serializer:
 
-                        stock = O_DateWiseLiveStock(StockDate=Date, OpeningBalance=a["OpeningBalance"], GRN=a["GRN"], Sale=a["Sale"], PurchaseReturn=a["PurchaseReturn"], SalesReturn=a["SalesReturn"], ClosingBalance=a[
+                        stock = O_DateWiseLiveStock(StockDate=Date, OpeningBalance=a["OpeningBalance"], GRN=a["GRN"],Production=a['Production'], Sale=a["Sale"], PurchaseReturn=a["PurchaseReturn"], SalesReturn=a["SalesReturn"], ClosingBalance=a[
                                                     "ClosingBalance"], ActualStock=0, StockAdjustment=a["StockAdjustment"], Item_id=a["ItemID"], Unit_id=a["UnitID"], Party_id=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
                         stock.save()
                     current_date += timedelta(days=1)
@@ -569,6 +573,7 @@ class StockReportView(CreateAPIView):
                     StockreportQuery = O_DateWiseLiveStock.objects.raw(f'''SELECT  1 as id,A.Item_id,A.Unit_id,
                     UnitwiseQuantityConversion(A.Item_id,ifnull(OpeningBalance,0),0,A.Unit_id,0,{unitcondi},0)OpeningBalance, 
                     UnitwiseQuantityConversion(A.Item_id,GRNInward,0,A.Unit_id,0,{unitcondi},0)GRNInward, 
+                    UnitwiseQuantityConversion(A.Item_id,Production,0,A.Unit_id,0,{unitcondi},0)Production,
                     UnitwiseQuantityConversion(A.Item_id,Sale,0,A.Unit_id,0,{unitcondi},0)Sale, 
                     UnitwiseQuantityConversion(A.Item_id,ClosingBalance,0,A.Unit_id,0,{unitcondi},0)ClosingBalance, 
                     UnitwiseQuantityConversion(A.Item_id,ActualStock,0,A.Unit_id,0,{unitcondi},0)ActualStock,
@@ -580,7 +585,7 @@ class StockReportView(CreateAPIView):
                     ,GroupTypeName,GroupName,SubGroupName,CASE WHEN {Unit} = 0 THEN UnitName else '{unitname}' END UnitName
                     FROM 
         
-        ( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit_id,M_Units.Name UnitName ,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
+        ( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit_id,M_Units.Name UnitName, SUM(Production)Production,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
         {ItemsGroupJoinsandOrderby[0]}
         FROM O_DateWiseLiveStock
         
@@ -2345,7 +2350,8 @@ class PeriodicGRNReportView(CreateAPIView):
                 PartyID = PeriodicGRNData['PartyID']
                 PeriodicGRNdataData = []                            
 
-                SupplierCondition = f"AND T_GRNs.Party_id = {PartyID}" if PartyID != 0 else ""
+                SupplierCondition = f"AND T_GRNs.Customer_id = {PartyID}" if PartyID != 0 else ""
+          
 
                 PeriodicGRNQuery = T_GRNs.objects.raw(f'''SELECT T_GRNs.id, T_GRNs.GRNDate, T_GRNs.GRNNumber as GRNNo,
                                                         T_Orders.FullOrderNumber AS PO, T_GRNs.Party_id as SupplierID, 
@@ -2362,9 +2368,8 @@ class PeriodicGRNReportView(CreateAPIView):
                                                         LEFT JOIN M_Units ON MC_ItemUnits.UnitID_id = M_Units.id
                                                         JOIN TC_GRNReferences ON T_GRNs.id = TC_GRNReferences.GRN_id
                                                         LEFT JOIN T_Orders ON TC_GRNReferences.Order_id = T_Orders.id
-                                                        LEFT JOIN M_Parties ON T_GRNs.Party_id = M_Parties.id
+                                                        LEFT JOIN M_Parties ON T_GRNs.Customer_id = M_Parties.id
                                                         WHERE T_GRNs.GRNDate BETWEEN '{FromDate}' AND '{ToDate}' {SupplierCondition}''')
-
                 for Periodic in PeriodicGRNQuery:
                     PeriodicGRNdataData.append({
                         "id": Periodic.id,
