@@ -1100,10 +1100,10 @@ class MaterialRegisterDownloadView(CreateAPIView):
                 q2 = M_Settings.objects.filter(id=14).values('DefaultValue')
                 DefaultValues = q2[0]['DefaultValue']
 
-                query = T_PurchaseReturn.objects.raw('''SELECT 1 as id,a.* from (SELECT 1 Sequence, T_GRNs.GRNDate TransactionDate,T_GRNs.CreatedOn,T_GRNs.FullGRNNumber TransactionNumber,M_Parties.Name,QtyInBox,QtyInKg,QtyInNo FROM T_GRNs 
+                query = T_PurchaseReturn.objects.raw(f'''SELECT 1 as id,a.* from (SELECT 1 Sequence, T_GRNs.GRNDate TransactionDate,T_GRNs.CreatedOn,T_GRNs.FullGRNNumber TransactionNumber,M_Parties.Name,QtyInBox,QtyInKg,QtyInNo FROM T_GRNs 
 JOIN TC_GRNItems ON TC_GRNItems.GRN_id=T_GRNs.id
 JOIN M_Parties ON M_Parties.id = T_GRNs.Party_id
-WHERE GRNDate Between %s AND %s AND Customer_id=%s and TC_GRNItems.Item_id=%s
+WHERE GRNDate Between %s AND %s AND Customer_id=%s and TC_GRNItems.Item_id=%s and T_GRNs.IsGRNType=1
 
 UNION ALL
 
@@ -1140,8 +1140,32 @@ UNION ALL
 SELECT 5 Sequence, T_PurchaseReturn.ReturnDate TransactionDate,T_PurchaseReturn.CreatedOn,T_PurchaseReturn.FullReturnNumber TransactionNumber,M_Parties.Name,UnitwiseQuantityConversion(%s,Quantity,0,1,0,4,0)QtyInBox,UnitwiseQuantityConversion(%s,Quantity,0,1,0,2,0)QtyInKg,UnitwiseQuantityConversion(%s,Quantity,0,1,0,1,0)QtyInNo  FROM T_PurchaseReturn 
 JOIN TC_PurchaseReturnItems ON TC_PurchaseReturnItems.PurchaseReturn_id=T_PurchaseReturn.id
 JOIN M_Parties ON M_Parties.id = T_PurchaseReturn.Party_id
-WHERE ReturnDate Between %s AND %s AND Customer_id=%s AND TC_PurchaseReturnItems.Item_id=%s and ((TC_PurchaseReturnItems.ItemReason_id IN (SELECT DefaultValue FROM M_Settings WHERE id = 14) and T_PurchaseReturn.Mode =3) OR(T_PurchaseReturn.Mode =2)))a order by TransactionDate, CreatedOn ''', ([FromDate, ToDate, Party, Item, Item, Item, Item, FromDate, ToDate, Party, Item, DefaultValues, Item, BaseUnitID, Item, BaseUnitID, Item, BaseUnitID, FromDate, ToDate, Party, Item, Item, BaseUnitID, Item, BaseUnitID, Item, BaseUnitID, FromDate, ToDate, Party, Item, FromDate, ToDate, Party, Item, Item, Item, Item, FromDate, ToDate, Party, Item]))
-                # CustomPrint(query)
+WHERE ReturnDate Between %s AND %s AND Customer_id=%s AND TC_PurchaseReturnItems.Item_id=%s and ((TC_PurchaseReturnItems.ItemReason_id IN (SELECT DefaultValue FROM M_Settings WHERE id = 14) and T_PurchaseReturn.Mode =3) OR(T_PurchaseReturn.Mode =2))
+                                                     
+UNION ALL
+
+select 6 Sequence,ProductionDate TransactionDate,T_Production.CreatedOn,concat('PRD',T_Production.id) TransactionNumber,M_Parties.Name,ActualQuantity QtyInBox,ActualQuantity QtyInKg,ActualQuantity QtyInNo 
+ from T_Production 
+ JOIN M_Parties ON M_Parties.id = T_Production.Division_id
+ where ProductionDate Between %s AND %s AND Division_id ={Party}  and Item_id={Item}
+ 
+union all
+ 
+select 7 Sequence ,C.ChallanDate TransactionDate,C.CreatedOn,C.FullChallanNumber TransactionNumber,M_Parties.Name,CI.BaseUnitQuantity QtyInBox,CI.BaseUnitQuantity QtyInKg,CI.BaseUnitQuantity QtyInNo  
+ from T_Challan C
+ join TC_ChallanItems CI on C.id=CI.Challan_id
+ JOIN M_Parties ON M_Parties.id = C.Party_id
+ where C.ChallanDate Between %s AND %s AND C.Party_id={Party}  and Item_id={Item}
+ 
+union all
+ 
+SELECT 8 Sequence, T_GRNs.GRNDate TransactionDate,T_GRNs.CreatedOn,concat('IB',T_GRNs.FullGRNNumber) TransactionNumber,M_Parties.Name,QtyInBox,QtyInKg,QtyInNo FROM T_GRNs 
+ JOIN TC_GRNItems ON TC_GRNItems.GRN_id=T_GRNs.id
+ JOIN M_Parties ON M_Parties.id = T_GRNs.Party_id
+ WHERE GRNDate Between %s AND %s AND Customer_id={Party} and TC_GRNItems.Item_id={Item} and T_GRNs.IsGRNType=0                                                                                                          
+                                                     
+                                )a order by TransactionDate, CreatedOn ''', ([FromDate, ToDate, Party, Item, Item, Item, Item, FromDate, ToDate, Party, Item, DefaultValues, Item, BaseUnitID, Item, BaseUnitID, Item, BaseUnitID, FromDate, ToDate, Party, Item, Item, BaseUnitID, Item, BaseUnitID, Item, BaseUnitID, FromDate, ToDate, Party, Item, FromDate, ToDate, Party, Item, Item, Item, Item, FromDate, ToDate, Party, Item, FromDate, ToDate, FromDate, ToDate, FromDate, ToDate]))
+                # print(query)
                 if query:
                     MaterialRegisterList = MaterialRegisterSerializerView(
                         query, many=True).data
