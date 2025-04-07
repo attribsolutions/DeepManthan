@@ -203,7 +203,7 @@ class ProductionViewSecond(RetrieveAPIView):
                 query = T_MaterialIssue.objects.filter(id=Materialissueid).update(Status=Status,RemainNumberOfLot=ActualLot,RemaninLotQuantity=ActualQty)
                 # Productiondata = T_Production.objects.get(id=id)
                 # Productiondata.delete()
-                Productiondata = T_Production.objects.get(id=id).update(IsDelete = 1)
+                Productiondata = T_Production.objects.filter(id=id).update(IsDelete = 1)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Production  Deleted Successfully', 'Data':[]})
         except T_Production.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Production Not available', 'Data': []})    
