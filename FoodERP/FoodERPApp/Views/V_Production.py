@@ -40,7 +40,7 @@ class ProductionList(CreateAPIView):
                 FromDate = Productiondata['FromDate']
                 ToDate = Productiondata['ToDate']
                 DivisionID=Productiondata['Party']
-                query = T_Production.objects.filter(ProductionDate__range=[FromDate,ToDate],Division_id=DivisionID,IsDeleted=0)
+                query = T_Production.objects.filter(ProductionDate__range=[FromDate,ToDate],Division_id=DivisionID,IsDelete=0)
                 if query:
                     Production_Serializer = H_ProductionSerializerforGET(query, many=True).data                  
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Production_Serializer})  
@@ -203,7 +203,7 @@ class ProductionViewSecond(RetrieveAPIView):
                 query = T_MaterialIssue.objects.filter(id=Materialissueid).update(Status=Status,RemainNumberOfLot=ActualLot,RemaninLotQuantity=ActualQty)
                 # Productiondata = T_Production.objects.get(id=id)
                 # Productiondata.delete()
-                Productiondata = T_Production.objects.get(id=id).update(IsDeleted = 1)
+                Productiondata = T_Production.objects.get(id=id).update(IsDelete = 1)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Production  Deleted Successfully', 'Data':[]})
         except T_Production.DoesNotExist:
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Production Not available', 'Data': []})    
