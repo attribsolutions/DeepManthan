@@ -178,9 +178,15 @@ class ProductionViewSecond(RetrieveAPIView):
         try:
             with transaction.atomic():
                 O_BatchWiseLiveStockData = O_BatchWiseLiveStock.objects.filter(Production_id=id).values('OriginalBaseUnitQuantity','BaseUnitQuantity')
+                # print(O_BatchWiseLiveStockData.query)
                 for a in O_BatchWiseLiveStockData:
                     if (a['OriginalBaseUnitQuantity'] != a['BaseUnitQuantity']) :
                         return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'Production Quantity Used in another Transaction', 'Data': []})  
+                    else:
+                        batch_stock = O_BatchWiseLiveStock.objects.filter(Production_id=id)                        
+                        parent_ids = batch_stock.values_list('LiveBatche_id', flat=True)  
+                        O_LiveBatches.objects.filter(id__in=parent_ids).delete()
+                        batch_stock.delete() 
                 CustomPrint(id)
                 MaterialissueidOnProd = TC_ProductionMaterialIssue.objects.filter(Production_id=id).values('MaterialIssue_id')
                 CustomPrint(MaterialissueidOnProd.query)
