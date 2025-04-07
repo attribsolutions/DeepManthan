@@ -449,10 +449,12 @@ class StockProcessingView(CreateAPIView):
                     round(OpeningBalance,3) OpeningBalance,
                     round(GRN,3) GRN,
                     round(ProductionQty,3) Production,
+                    round(IBPurchaseQuantity,3) IBPurchase,
+                    round(IBSaleQuantity,3) IBSale,
                     round(SalesReturn,3) SalesReturn,
                     round(Sale,3) Sale,
                     round(PurchaseReturn,3) PurchaseReturn,
-                    round(((OpeningBalance+ProductionQty+GRN+SalesReturn+StockAdjustment)-(Sale+PurchaseReturn)),3) ClosingBalance,
+                    round(((OpeningBalance+IBPurchaseQuantity+ProductionQty+GRN+SalesReturn+StockAdjustment)-(Sale+IBSaleQuantity+PurchaseReturn)),3) ClosingBalance,
                     StockAdjustment,ActualStock
  from
 
@@ -465,7 +467,9 @@ IFNULL(SalesReturnQuantity,0)SalesReturn,
 IFNULL(PurchesReturnQuantity,0)PurchaseReturn,
 IFNULL(StockAdjustmentQTY,0)StockAdjustment,
 IFNULL(ActualStock,0)ActualStock,
-IFNULL(ProductionQty,0)ProductionQty
+IFNULL(ProductionQty,0)ProductionQty,
+IFNULL(IBSaleQuantity,0)IBSaleQuantity,
+IFNULL(IBPurchaseQuantity,0)IBPurchaseQuantity
 from
 
 (Select Item_id,M_Items.BaseUnitID_id UnitID  from MC_PartyItems join M_Items on M_Items.id=MC_PartyItems.Item_id where Party_id=%s)I
@@ -510,19 +514,30 @@ on I.Item_id=ActualStock.Item_id
 left join (select Item_id,sum(ActualQuantity)ProductionQty from T_Production where ProductionDate=%s and Division_id=%s group by Item_id)Production
 on I.Item_id=Production.Item_id                                                                        
 
-)R
-where 
-OpeningBalance!=0 OR GRN!=0 OR Sale!=0 OR PurchaseReturn != 0 OR SalesReturn !=0 OR StockAdjustment!=0 ''',
-                                                                        ([Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party]))
+left join (select Item_id,sum(BaseUnitQuantity)IBSaleQuantity,sum(Amount)IBSalevalue
+from T_Challan
+join TC_ChallanItems on TC_ChallanItems.Challan_id=T_Challan.id
+where ChallanDate = %s and Party_id=%s GROUP BY Item_id)IBSale
+on I.Item_id=IBSale.Item_id  
 
-                    # print(StockProcessQuery)
+left join (select Item_id,sum(BaseUnitQuantity)IBPurchaseQuantity,sum(Amount)IBPurchasevalue
+from T_Challan
+join TC_ChallanItems on TC_ChallanItems.Challan_id=T_Challan.id
+where ChallanDate = %s and Customer_id=%s GROUP BY Item_id)IBPurchase
+on I.Item_id=IBPurchase.Item_id                                                                                                                                               
+                                    )R                                    
+where 
+OpeningBalance!=0 OR GRN!=0 OR Sale!=0 OR PurchaseReturn != 0 OR SalesReturn !=0 OR StockAdjustment!=0 OR IBPurchaseQuantity !=0 OR IBSaleQuantity != 0 OR ProductionQty != 0 ''',
+                                                                        ([Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party]))
+
+                    print(StockProcessQuery)
                     serializer = StockProcessingReportSerializer(
                         StockProcessQuery, many=True).data
                     # CustomPrint(serializer)
                     for a in serializer:
 
-                        stock = O_DateWiseLiveStock(StockDate=Date, OpeningBalance=a["OpeningBalance"], GRN=a["GRN"],Production=a['Production'], Sale=a["Sale"], PurchaseReturn=a["PurchaseReturn"], SalesReturn=a["SalesReturn"], ClosingBalance=a[
-                                                    "ClosingBalance"], ActualStock=0, StockAdjustment=a["StockAdjustment"], Item_id=a["ItemID"], Unit_id=a["UnitID"], Party_id=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
+                        stock = O_DateWiseLiveStock(StockDate=Date, OpeningBalance=a["OpeningBalance"], GRN=a["GRN"],Production=a['Production'],IBSale=a['IBSale'],IBPurchase=a['IBPurchase'], Sale=a["Sale"], PurchaseReturn=a["PurchaseReturn"], SalesReturn=a["SalesReturn"], ClosingBalance=a[
+                                                    "ClosingBalance"], ActualStock=a["ActualStock"], StockAdjustment=a["StockAdjustment"], Item_id=a["ItemID"], Unit_id=a["UnitID"], Party_id=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
                         stock.save()
                     current_date += timedelta(days=1)
                 log_entry = create_transaction_logNew(request, Orderdata, Party, 'Stock Process Successfully', 209, 0, start_date_str, end_date_str, 0)
@@ -574,6 +589,8 @@ class StockReportView(CreateAPIView):
                     UnitwiseQuantityConversion(A.Item_id,ifnull(OpeningBalance,0),0,A.Unit_id,0,{unitcondi},0)OpeningBalance, 
                     UnitwiseQuantityConversion(A.Item_id,GRNInward,0,A.Unit_id,0,{unitcondi},0)GRNInward, 
                     UnitwiseQuantityConversion(A.Item_id,Production,0,A.Unit_id,0,{unitcondi},0)Production,
+                    UnitwiseQuantityConversion(A.Item_id,IBSale,0,A.Unit_id,0,{unitcondi},0)IBSale,
+                    UnitwiseQuantityConversion(A.Item_id,IBPurchase,0,A.Unit_id,0,{unitcondi},0)IBPurchase,
                     UnitwiseQuantityConversion(A.Item_id,Sale,0,A.Unit_id,0,{unitcondi},0)Sale, 
                     UnitwiseQuantityConversion(A.Item_id,ClosingBalance,0,A.Unit_id,0,{unitcondi},0)ClosingBalance, 
                     UnitwiseQuantityConversion(A.Item_id,ActualStock,0,A.Unit_id,0,{unitcondi},0)ActualStock,
@@ -585,7 +602,7 @@ class StockReportView(CreateAPIView):
                     ,GroupTypeName,GroupName,SubGroupName,CASE WHEN {Unit} = 0 THEN UnitName else '{unitname}' END UnitName
                     FROM 
         
-        ( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit_id,M_Units.Name UnitName, SUM(Production)Production,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
+        ( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit_id,M_Units.Name UnitName, SUM(Production)Production,SUM(GRN) GRNInward, SUM(Sale) Sale,SUM(IBSale) IBSale,SUM(IBPurchase) IBPurchase, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
         {ItemsGroupJoinsandOrderby[0]}
         FROM O_DateWiseLiveStock
         
@@ -609,7 +626,7 @@ class StockReportView(CreateAPIView):
             WHERE Party_id =%s AND StockDate BETWEEN %s AND %s 
             GROUP BY Item_id) D 		
             ON A.Item_id = D.Item_id ''', ([FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate]))
-                    CustomPrint(StockreportQuery)
+                    # print(StockreportQuery)
                     serializer = StockReportSerializer(
                         StockreportQuery, many=True).data
 
