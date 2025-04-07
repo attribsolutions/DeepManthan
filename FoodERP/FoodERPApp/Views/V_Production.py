@@ -9,7 +9,8 @@ from rest_framework.parsers import JSONParser
 from ..Views.V_CommFunction import *
 from ..Views.V_TransactionNumberfun import SystemBatchCodeGeneration
 from ..Serializer.S_Production import *
-from ..models import *         
+from ..models import *  
+from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix       
 
 class MaterialIssueDetailsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -85,18 +86,18 @@ class ProductionView(CreateAPIView):
                 # first_row = MRPs[0]
                 # MRPID = first_row.MRPID               
                 # MRPValue=first_row.MRPValue
-                # CustomPrint(MRPID)
-                # CustomPrint(MRPValue)
+              
                
                 
                 # ProductionItemCount=T_Production.objects.filter(Item_id=Item, ProductionDate=ProductionDate).count()
                 # ProductionItemCount_str = str(ProductionItemCount)
-                
-                # CustomPrint(Productiondata['BatchCode'])
-                Productiondata['BatchCode'] = BatchCode
-                # CustomPrint(ProductionItemCount_str)
-                # productionbatchcode = Productiondata['BatchCode'] 
-                # CustomPrint(Productiondata['BatchCode'])
+                a = GetMaxNumber.GetProductionNumber(Customer,ProdctionDate)
+                Productiondata['ProductionNumber'] = a
+                b = GetPrifix.GetProductionPrifix(Customer)
+                b = b.strip() if b else ""                
+                Productiondata['FullProductionNumber'] = b+""+str(a)
+               
+                Productiondata['BatchCode'] = BatchCode                
                 Productiondata['BatchDate'] = date.today()
                 O_BatchWiseLiveStockList=list()
                 O_LiveBatchesList=list()
