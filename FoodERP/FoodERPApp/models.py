@@ -908,7 +908,7 @@ class MC_PartyPrefixs(models.Model):
     IBInwardprefix = models.CharField(max_length=500 ,null=True,blank=True)
     PurchaseReturnprefix = models.CharField(max_length=500 ,null=True,blank=True)
     Party =models.ForeignKey(M_Parties, related_name='PartyPrefix', on_delete=models.CASCADE)
-
+    Productionprefix = models.CharField(max_length=500 ,null=True,blank=True)
     class Meta:
         db_table = "MC_PartyPrefixs"        
             
@@ -1138,7 +1138,7 @@ class T_GRNs(models.Model):
     InvoiceDate = models.DateField(null=True,blank=True)
     IsSave = models.IntegerField() 
     IsTallySave = models.BooleanField(default=False)
-    # IsGRNType = models.BooleanField(default=False)
+    IsGRNType = models.BooleanField(default=False)
     class Meta:
         db_table = "T_GRNs"
 
@@ -1266,6 +1266,7 @@ class T_MaterialIssue(models.Model):
     Status = models.IntegerField(default=False)
     RemainNumberOfLot = models.DecimalField(max_digits=10, decimal_places=3)
     RemaninLotQuantity = models.DecimalField(max_digits=15, decimal_places=3)
+    IsDelete = models.BooleanField(default=False)
     class Meta:
         db_table = "T_MaterialIssue"
 
@@ -1312,7 +1313,9 @@ class T_Production(models.Model):
         Division = models.ForeignKey(M_Parties, on_delete=models.PROTECT)
         Item = models.ForeignKey(M_Items, on_delete=models.PROTECT)
         Unit = models.ForeignKey(MC_ItemUnits, related_name='ProductionUnitID', on_delete=models.PROTECT)
-
+        ProductionNumber = models.IntegerField()
+        FullProductionNumber = models.CharField(max_length=500)
+        IsDelete = models.BooleanField(default=False)
         class Meta:
             db_table = "T_Production"
 
@@ -2095,6 +2098,8 @@ class O_DateWiseLiveStock(models.Model):
     MRPValue = models.DecimalField(max_digits=20,decimal_places=10)
     StockAdjustment = models.DecimalField(max_digits=20,decimal_places=10)
     Production = models.DecimalField(max_digits=20,decimal_places=10)
+    IBSale = models.DecimalField(max_digits=20,decimal_places=10)
+    IBPurchase = models.DecimalField(max_digits=20,decimal_places=10)
 
 
     class Meta:
@@ -2490,6 +2495,7 @@ class M_GiftVoucherCode(models.Model):
     InvoiceAmount = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True) 
     Party = models.IntegerField()
     client = models.IntegerField()
+    ClientSaleID = models.IntegerField()
 
     class Meta:
         db_table = "M_GiftVoucherCode"

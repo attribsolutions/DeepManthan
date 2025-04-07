@@ -164,6 +164,7 @@ class UserListView(CreateAPIView):
 class UserListViewSecond(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)
+    authentication_classes = [BasicAuthentication, TokenAuthentication, JWTAuthentication]
     # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
