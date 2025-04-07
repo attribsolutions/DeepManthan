@@ -111,9 +111,9 @@ class MaterialIsssueList(CreateAPIView):
                 ToDate = MaterialIsssuedata['ToDate'] 
                 Party=MaterialIsssuedata['Party']
                 if(FromDate=="" and ToDate=="" ): 
-                    query = T_MaterialIssue.objects.filter(~Q(Status=2),Party_id=Party,IsDeleted=0) 
+                    query = T_MaterialIssue.objects.filter(~Q(Status=2),Party_id=Party,IsDelete=0) 
                 else: 
-                    query = T_MaterialIssue.objects.filter(MaterialIssueDate__range=[FromDate, ToDate],Party_id=Party,IsDeleted=0)                 
+                    query = T_MaterialIssue.objects.filter(MaterialIssueDate__range=[FromDate, ToDate],Party_id=Party,IsDelete=0)                 
                 if query:
                     MaterialIsssue_serializerdata = MatetrialIssueSerializerSecond( query, many=True).data
                     
@@ -356,7 +356,7 @@ class MaterialIssueViewSecond(RetrieveAPIView):
                 query = T_WorkOrder.objects.filter(id=workOrderID).update(Status=Status,RemainNumberOfLot=ActualLot,RemaninQuantity=ActualQty)
                 # MaterialIssuedata = T_MaterialIssue.objects.get(id=id)
                 # MaterialIssuedata.delete()
-                MaterialIssuedata = T_MaterialIssue.objects.filter(id=id).update(IsDeleted = 1)
+                MaterialIssuedata = T_MaterialIssue.objects.filter(id=id).update(IsDelete = 1)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Material Issue Delete Successfully', 'Data': []})
                 # else:
                 #     transaction.set_rollback(True)
