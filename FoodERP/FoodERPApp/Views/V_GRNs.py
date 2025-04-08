@@ -517,7 +517,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                         for x in ChallanSerializedata:
                             Customer=x['Customer']['id']
                             IsVDCChallan=x['IsVDCChallan']
-                            
+                            # print(IsVDCChallan)
                             # print(Customer)
                             ChallanItemDetails = list()  
                             if  x['ChallanReferences']:                                                  
@@ -532,14 +532,18 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                 
                                 ItemID=y['Item']['id'] 
                                 Qty = y['Quantity']  
-                               
+                                if IsVDCChallan==1:
+                                   IsVDC='and IsVDCItem={IsVDCChallan}'
+                                else:
+                                    IsVDC=''
+                                    
                                                             
                                 bomquery = MC_BillOfMaterialItems.objects.raw(f'''SELECT 1 id,MC_BillOfMaterialItems.BOM_id FROM MC_BillOfMaterialItems
                                 JOIN M_BillOfMaterial ON M_BillOfMaterial.id=MC_BillOfMaterialItems.BOM_id
-                                WHERE MC_BillOfMaterialItems.Item_id ={ItemID} and IsVDCItem={IsVDCChallan} and IsDelete=0''') 
-                                                                
+                                WHERE MC_BillOfMaterialItems.Item_id ={ItemID} {IsVDC} and IsDelete=0''') 
+                                                              
                                 Query = M_BillOfMaterial.objects.filter(id=bomquery[0].BOM_id)
-                                
+                                # print(Query)
                                 BOM_Serializer = M_BOMSerializerSecond001(Query,many=True).data
                                 
                                 BillofmaterialData = list()

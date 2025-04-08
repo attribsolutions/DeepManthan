@@ -27,6 +27,7 @@ class BOMListFilterView(CreateAPIView):
                 Party = BillOfMaterialdata['Party']
                 Item=BillOfMaterialdata['ItemID']
                 Category = BillOfMaterialdata['Category']
+                IsVDCItem=BillOfMaterialdata['IsVDCItem']
                  
                 if Item == '':
                     Icondition= ""
@@ -65,12 +66,12 @@ ifnull(UnitwiseQuantityConversion(a.Item_id ,b.StockQuantity ,0 ,BaseUnitID_id ,
                             JOIN MC_ItemCategoryDetails ON MC_ItemCategoryDetails.Item_id = M_BillOfMaterial.Item_id
                             JOIN M_Items ON M_Items.id = M_BillOfMaterial.Item_id
                             JOIN MC_ItemUnits ON MC_ItemUnits.Item_id = M_BillOfMaterial.Item_id  and IsBase=1
-                            WHERE M_BillOfMaterial.IsDelete = 0 AND M_BillOfMaterial.Company_id ={Company} {Icondition} {Ccondition} )a
+                            WHERE M_BillOfMaterial.IsDelete = 0 AND M_BillOfMaterial.Company_id ={Company} and IsVDCItem={IsVDCItem} {Icondition} {Ccondition} )a
                             left join 
                             (select sum(BaseUnitQuantity) StockQuantity,Item_id from O_BatchWiseLiveStock where Party_id= {Party} and IsDamagePieces=0 group by Item_id )b
                             on a.Item_id=b.Item_id
 ''')
-                # print(query)
+                print(query)
                 BomListData = []
                 for a in query:
                     # Stock = float(GetO_BatchWiseLiveStock(a.Item_id, Party))
