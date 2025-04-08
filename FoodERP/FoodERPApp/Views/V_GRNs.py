@@ -533,9 +533,9 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                 ItemID=y['Item']['id'] 
                                 Qty = y['Quantity']  
                                 if IsVDCChallan==1:
-                                   IsVDC='and IsVDCItem={IsVDCChallan}'
+                                    IsVDC= f"and IsVDCItem={IsVDCChallan}"
                                 else:
-                                    IsVDC=''
+                                    IsVDC=""
                                     
                                                             
                                 bomquery = MC_BillOfMaterialItems.objects.raw(f'''SELECT 1 id,MC_BillOfMaterialItems.BOM_id FROM MC_BillOfMaterialItems
