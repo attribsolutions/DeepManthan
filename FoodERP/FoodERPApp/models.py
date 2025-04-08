@@ -1266,6 +1266,7 @@ class T_MaterialIssue(models.Model):
     Status = models.IntegerField(default=False)
     RemainNumberOfLot = models.DecimalField(max_digits=10, decimal_places=3)
     RemaninLotQuantity = models.DecimalField(max_digits=15, decimal_places=3)
+    IsDelete = models.BooleanField(default=False)
     class Meta:
         db_table = "T_MaterialIssue"
 
@@ -1314,6 +1315,7 @@ class T_Production(models.Model):
         Unit = models.ForeignKey(MC_ItemUnits, related_name='ProductionUnitID', on_delete=models.PROTECT)
         ProductionNumber = models.IntegerField()
         FullProductionNumber = models.CharField(max_length=500)
+        IsDelete = models.BooleanField(default=False)
         class Meta:
             db_table = "T_Production"
 
