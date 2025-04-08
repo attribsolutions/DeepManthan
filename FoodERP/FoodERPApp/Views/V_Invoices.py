@@ -843,13 +843,15 @@ class InvoiceViewSecond(CreateAPIView):
                 
                 for a in Invoicedataserializer[0]['InvoiceItems']:
                     BaseUnitQuantity11=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,0).GetBaseUnitQuantity()
+                    # print(BaseUnitQuantity11)
                     # CustomPrint(a['LiveBatch'])
                     if a['LiveBatch'] is None:
                         pass
                     else:
                         selectQuery=O_BatchWiseLiveStock.objects.filter(LiveBatche=a['LiveBatch']).values('BaseUnitQuantity')
-                        UpdateQuery=O_BatchWiseLiveStock.objects.filter(LiveBatche=a['LiveBatch']).update(BaseUnitQuantity = int(selectQuery[0]['BaseUnitQuantity'] )+int(BaseUnitQuantity11))
-                
+                        # print(selectQuery)
+                        UpdateQuery=O_BatchWiseLiveStock.objects.filter(LiveBatche=a['LiveBatch']).update(BaseUnitQuantity = float(selectQuery[0]['BaseUnitQuantity'] )+float(BaseUnitQuantity11))
+                        # print(UpdateQuery)
                 row1 = T_Invoices.objects.filter(id=id).values('id','InvoiceDate','InvoiceNumber','FullInvoiceNumber','GrandTotal','RoundOffAmount','CreatedBy','CreatedOn','UpdatedBy','UpdatedOn','Customer','Driver','Party','Vehicle','TCSAmount','Hide')
                 new_row1 = T_DeletedInvoices(Invoice=row1[0]['id'],InvoiceDate=row1[0]['InvoiceDate'],InvoiceNumber=row1[0]['InvoiceNumber'],FullInvoiceNumber=row1[0]['FullInvoiceNumber'],GrandTotal=row1[0]['GrandTotal'],RoundOffAmount=row1[0]['RoundOffAmount'],CreatedBy=row1[0]['CreatedBy'],CreatedOn=row1[0]['CreatedOn'],UpdatedBy=row1[0]['UpdatedBy'],UpdatedOn=row1[0]['UpdatedOn'],Customer=row1[0]['Customer'],Driver=row1[0]['Driver'],Party=row1[0]['Party'],Vehicle=row1[0]['Vehicle'],TCSAmount=row1[0]['TCSAmount'],Hide=row1[0]['Hide'])
                 new_row1.save() 
