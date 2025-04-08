@@ -2394,7 +2394,7 @@ class PeriodicGRNReportView(CreateAPIView):
                 SupplierCondition = f"AND T_GRNs.Customer_id = {PartyID}" if PartyID != 0 else ""
           
 
-                PeriodicGRNQuery = T_GRNs.objects.raw(f'''SELECT T_GRNs.id, T_GRNs.GRNDate, T_GRNs.GRNNumber as GRNNo,
+                PeriodicGRNQuery = T_GRNs.objects.raw(f'''SELECT T_GRNs.id, T_GRNs.GRNDate, T_GRNs.FullGRNNumber as GRNNo,
                                                         T_Orders.FullOrderNumber AS PO, T_GRNs.Party_id as SupplierID, 
                                                         M_Parties.Name AS SupplierName, T_GRNs.InvoiceNumber as ChallanNo, 
                                                         M_Items.id AS ItemID, M_Items.Name AS ItemName, TC_GRNItems.Quantity,
