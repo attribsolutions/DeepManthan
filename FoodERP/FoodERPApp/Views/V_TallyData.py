@@ -12,7 +12,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 class TallyDataListView(CreateAPIView):
-    permission_classes = ()
+    permission_classes = [IsAuthenticated]
     authentication_classes = [BasicAuthentication]
     
     @transaction.atomic()
@@ -39,7 +39,7 @@ class TallyDataListView(CreateAPIView):
                                                         JOIN M_Items ON M_Items.id = GI.Item_id
                                                         JOIN M_GSTHSNCode ON M_GSTHSNCode.id = GI.GST_id
                                                         JOIN M_Users ON M_Users.id = T_GRNs.CreatedBy
-                                                        WHERE T_GRNs.GRNDate BETWEEN '2025-02-01' and '2025-03-18' 
+                                                        WHERE T_GRNs.GRNDate BETWEEN '2025-01-01' and '2025-03-28' 
                                                         AND IsSave = 0 AND M_Parties.Company_id = 4''')
                 if tallyquery:
                     for row in tallyquery:
@@ -73,12 +73,14 @@ class TallyDataListView(CreateAPIView):
                             "Status": row.Statuss,
                             "User": row.User
                         })
+                        
+                if TallyDetails:
 
                     log_entry = create_transaction_logNew(request, 0, 0, ','.join(str(row.id) for row in tallyquery),451, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TallyDetails})  
-            
-            log_entry = create_transaction_logNew(request, 0, 0, "Data Not Available", 451, 0, 0, 0, 0)
-            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Data Not Available', 'Data': []}) 
+                else:
+                    log_entry = create_transaction_logNew(request, 0, 0, "Data Not Available", 451, 0, 0, 0, 0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Data Not Available', 'Data': []}) 
         
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'TallyData:' + str(e), 33, 0)
@@ -86,8 +88,9 @@ class TallyDataListView(CreateAPIView):
 
 
 
+
 class UpdateIsTallySaveView(CreateAPIView):
-    permission_classes = ()
+    permission_classes = [IsAuthenticated]
     authentication_classes = [BasicAuthentication]
 
     @transaction.atomic
