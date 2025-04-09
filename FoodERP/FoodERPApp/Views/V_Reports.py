@@ -481,7 +481,7 @@ on I.Item_id=CB.ItemID
 
 left join (SELECT Item_id,SUM(BaseUnitQuantity) GRNQuantity,SUM(Amount) GRNValue
 FROM T_GRNs JOIN TC_GRNItems ON TC_GRNItems.GRN_id = T_GRNs.id
-WHERE GRNDate = %s AND Customer_id = %s GROUP BY Item_id)GRN
+WHERE GRNDate = %s AND Customer_id = %s and T_GRNs.IsGRNType=1 GROUP BY Item_id)GRN
 
 on I.Item_id=GRN.Item_id
 
@@ -520,17 +520,18 @@ join TC_ChallanItems on TC_ChallanItems.Challan_id=T_Challan.id
 where ChallanDate = %s and Party_id=%s GROUP BY Item_id)IBSale
 on I.Item_id=IBSale.Item_id  
 
-left join (select Item_id,sum(BaseUnitQuantity)IBPurchaseQuantity,sum(Amount)IBPurchasevalue
-from T_Challan
-join TC_ChallanItems on TC_ChallanItems.Challan_id=T_Challan.id
-where ChallanDate = %s and Customer_id=%s GROUP BY Item_id)IBPurchase
-on I.Item_id=IBPurchase.Item_id                                                                                                                                               
+left join (SELECT Item_id,SUM(BaseUnitQuantity) IBPurchaseQuantity,SUM(Amount) IBPurchasevalue
+FROM T_GRNs JOIN TC_GRNItems ON TC_GRNItems.GRN_id = T_GRNs.id
+WHERE GRNDate = %s AND Customer_id = %s and T_GRNs.IsGRNType=0 GROUP BY Item_id)IBPurchase
+
+on I.Item_id=IBPurchase.Item_id                                                                        
+
                                     )R                                    
 where 
 OpeningBalance!=0 OR GRN!=0 OR Sale!=0 OR PurchaseReturn != 0 OR SalesReturn !=0 OR StockAdjustment!=0 OR IBPurchaseQuantity !=0 OR IBSaleQuantity != 0 OR ProductionQty != 0 ''',
                                                                         ([Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party]))
 
-                    print(StockProcessQuery)
+                    # print(StockProcessQuery)
                     serializer = StockProcessingReportSerializer(
                         StockProcessQuery, many=True).data
                     # CustomPrint(serializer)
