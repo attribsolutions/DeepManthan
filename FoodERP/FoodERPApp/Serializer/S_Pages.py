@@ -108,6 +108,8 @@ class M_PagesSerializer1(serializers.ModelSerializer):
     def update(self, instance, validated_data):
             
             # * Page Info
+            instance.id = validated_data.get(
+                'id', instance.id)
             instance.Name = validated_data.get(
                 'Name', instance.Name)
             instance.PageHeading = validated_data.get(
