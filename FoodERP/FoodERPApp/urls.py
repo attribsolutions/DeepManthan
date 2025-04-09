@@ -170,6 +170,7 @@ from .Views.V_InvoiceToFTPforSAP import *
 
 from .Views.V_TallyData import *
 
+from .Views.V_CommonMaster import GetNewPageEntry
 
 # from .Views.V_FTP import *
 
@@ -244,6 +245,7 @@ urlpatterns = [
             url(r'GetFieldValidationOnControlType/([0-9]+)$', FieldValidationsView.as_view()),
             url(r'FieldValidations$', FieldValidationsViewSecond.as_view()),
             url(r'FieldValidations/([0-9]+)$', FieldValidationsViewThird.as_view()),
+            url(r'NewPageEntry',GetNewPageEntry.as_view()),
     
 # Company 
             url(r'Company/([0-9]+)$', C_CompaniesViewSecond.as_view()),
