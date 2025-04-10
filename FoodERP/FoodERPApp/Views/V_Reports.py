@@ -481,7 +481,7 @@ on I.Item_id=CB.ItemID
 
 left join (SELECT Item_id,SUM(BaseUnitQuantity) GRNQuantity,SUM(Amount) GRNValue
 FROM T_GRNs JOIN TC_GRNItems ON TC_GRNItems.GRN_id = T_GRNs.id
-WHERE GRNDate = %s AND Customer_id = %s GROUP BY Item_id)GRN
+WHERE GRNDate = %s AND Customer_id = %s and T_GRNs.IsGRNType=1 GROUP BY Item_id)GRN
 
 on I.Item_id=GRN.Item_id
 
@@ -520,17 +520,18 @@ join TC_ChallanItems on TC_ChallanItems.Challan_id=T_Challan.id
 where ChallanDate = %s and Party_id=%s GROUP BY Item_id)IBSale
 on I.Item_id=IBSale.Item_id  
 
-left join (select Item_id,sum(BaseUnitQuantity)IBPurchaseQuantity,sum(Amount)IBPurchasevalue
-from T_Challan
-join TC_ChallanItems on TC_ChallanItems.Challan_id=T_Challan.id
-where ChallanDate = %s and Customer_id=%s GROUP BY Item_id)IBPurchase
-on I.Item_id=IBPurchase.Item_id                                                                                                                                               
+left join (SELECT Item_id,SUM(BaseUnitQuantity) IBPurchaseQuantity,SUM(Amount) IBPurchasevalue
+FROM T_GRNs JOIN TC_GRNItems ON TC_GRNItems.GRN_id = T_GRNs.id
+WHERE GRNDate = %s AND Customer_id = %s and T_GRNs.IsGRNType=0 GROUP BY Item_id)IBPurchase
+
+on I.Item_id=IBPurchase.Item_id                                                                        
+
                                     )R                                    
 where 
 OpeningBalance!=0 OR GRN!=0 OR Sale!=0 OR PurchaseReturn != 0 OR SalesReturn !=0 OR StockAdjustment!=0 OR IBPurchaseQuantity !=0 OR IBSaleQuantity != 0 OR ProductionQty != 0 ''',
                                                                         ([Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party]))
 
-                    print(StockProcessQuery)
+                    # print(StockProcessQuery)
                     serializer = StockProcessingReportSerializer(
                         StockProcessQuery, many=True).data
                     # CustomPrint(serializer)
@@ -1161,14 +1162,14 @@ WHERE ReturnDate Between %s AND %s AND Customer_id=%s AND TC_PurchaseReturnItems
                                                      
 UNION ALL
 
-select 6 Sequence,ProductionDate TransactionDate,T_Production.CreatedOn,concat('PRD',T_Production.id) TransactionNumber,M_Parties.Name,ActualQuantity QtyInBox,ActualQuantity QtyInKg,ActualQuantity QtyInNo 
+select 7 Sequence,ProductionDate TransactionDate,T_Production.CreatedOn,T_Production.FullProductionNumber TransactionNumber,M_Parties.Name,ActualQuantity QtyInBox,ActualQuantity QtyInKg,ActualQuantity QtyInNo 
  from T_Production 
  JOIN M_Parties ON M_Parties.id = T_Production.Division_id
  where ProductionDate Between %s AND %s AND Division_id ={Party}  and Item_id={Item}
  
 union all
  
-select 7 Sequence ,C.ChallanDate TransactionDate,C.CreatedOn,C.FullChallanNumber TransactionNumber,M_Parties.Name,CI.BaseUnitQuantity QtyInBox,CI.BaseUnitQuantity QtyInKg,CI.BaseUnitQuantity QtyInNo  
+select 8 Sequence ,C.ChallanDate TransactionDate,C.CreatedOn,C.FullChallanNumber TransactionNumber,M_Parties.Name,CI.BaseUnitQuantity QtyInBox,CI.BaseUnitQuantity QtyInKg,CI.BaseUnitQuantity QtyInNo  
  from T_Challan C
  join TC_ChallanItems CI on C.id=CI.Challan_id
  JOIN M_Parties ON M_Parties.id = C.Party_id
@@ -1176,7 +1177,7 @@ select 7 Sequence ,C.ChallanDate TransactionDate,C.CreatedOn,C.FullChallanNumber
  
 union all
  
-SELECT 8 Sequence, T_GRNs.GRNDate TransactionDate,T_GRNs.CreatedOn,concat('IB',T_GRNs.FullGRNNumber) TransactionNumber,M_Parties.Name,QtyInBox,QtyInKg,QtyInNo FROM T_GRNs 
+SELECT 9 Sequence, T_GRNs.GRNDate TransactionDate,T_GRNs.CreatedOn,T_GRNs.FullGRNNumber TransactionNumber,M_Parties.Name,QtyInBox,QtyInKg,QtyInNo FROM T_GRNs 
  JOIN TC_GRNItems ON TC_GRNItems.GRN_id=T_GRNs.id
  JOIN M_Parties ON M_Parties.id = T_GRNs.Party_id
  WHERE GRNDate Between %s AND %s AND Customer_id={Party} and TC_GRNItems.Item_id={Item} and T_GRNs.IsGRNType=0                                                                                                          
@@ -2394,7 +2395,7 @@ class PeriodicGRNReportView(CreateAPIView):
                 SupplierCondition = f"AND T_GRNs.Customer_id = {PartyID}" if PartyID != 0 else ""
           
 
-                PeriodicGRNQuery = T_GRNs.objects.raw(f'''SELECT T_GRNs.id, T_GRNs.GRNDate, T_GRNs.GRNNumber as GRNNo,
+                PeriodicGRNQuery = T_GRNs.objects.raw(f'''SELECT T_GRNs.id, T_GRNs.GRNDate, T_GRNs.FullGRNNumber as GRNNo,
                                                         T_Orders.FullOrderNumber AS PO, T_GRNs.Party_id as SupplierID, 
                                                         M_Parties.Name AS SupplierName, T_GRNs.InvoiceNumber as ChallanNo, 
                                                         M_Items.id AS ItemID, M_Items.Name AS ItemName, TC_GRNItems.Quantity,
