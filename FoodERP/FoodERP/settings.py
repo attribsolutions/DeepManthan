@@ -28,7 +28,7 @@ ALLOWED_HOSTS = ['localhost','127.0.0.1','www.cbmfooderp.com','cbmfooderp.com','
 CORS_ORIGIN_ALLOW_ALL = True #we allow the all domain to access through API
 # CRONTAB_DJANGO_SETTINGS_MODULE = 'FoodERP.settings'
 INSTALLED_APPS = [
-    # 'django_crontab',
+    'django_crontab',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
