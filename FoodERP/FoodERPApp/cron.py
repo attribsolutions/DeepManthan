@@ -12,7 +12,7 @@ from .models import *
 
 def my_cron_job():
     print("my_cron_job Function Call")
-    url_query = M_Settings.objects.filter(id=58).values('DefaultValue')
+    url_query = M_Settings.objects.filter(id=65).values('DefaultValue')
     API_URL= url_query[0]['DefaultValue']
     
     headers = {
