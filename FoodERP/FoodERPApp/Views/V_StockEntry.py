@@ -292,7 +292,7 @@ group by A.id, GroupType.id, Groupss.id,subgroup.id, M_Items.id , GSTPercentage,
     {ItemsGroupJoinsandOrderby[2]}''')
                     
                     Itemquery = MC_PartyItems.objects.raw(Stockquery, p2)
-                print(Itemquery)    
+              
                 if not Itemquery:
                     log_entry = create_transaction_logNew(request, StockReportdata, Party, "BatchWiseLiveStock Not available",88,0) 
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
