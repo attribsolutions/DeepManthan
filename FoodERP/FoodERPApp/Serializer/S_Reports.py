@@ -47,7 +47,7 @@ class StockProcessingReportSerializer(serializers.Serializer):
     Production=serializers.DecimalField(max_digits=10, decimal_places=3)
     IBPurchase =serializers.DecimalField(max_digits=10, decimal_places=3)
     IBSale  =serializers.DecimalField(max_digits=10, decimal_places=3)
-    
+    MaterialIssue =serializers.DecimalField(max_digits=10, decimal_places=3)
 
 class StockReportSerializer(serializers.Serializer):
     
@@ -70,6 +70,7 @@ class StockReportSerializer(serializers.Serializer):
     Production =serializers.DecimalField(max_digits=10, decimal_places=3)
     IBPurchase =serializers.DecimalField(max_digits=10, decimal_places=3)
     IBSale  =serializers.DecimalField(max_digits=10, decimal_places=3)
+    MaterialIssue =serializers.DecimalField(max_digits=10, decimal_places=3)
     
 class PurchaseGSTRateWiseReportSerializer(serializers.Serializer):
     
