@@ -170,7 +170,6 @@ from .Views.V_InvoiceToFTPforSAP import *
 
 from .Views.V_TallyData import *
 
-from .Views.V_CommonMaster import GetNewPageEntry
 
 # from .Views.V_FTP import *
 
@@ -245,7 +244,6 @@ urlpatterns = [
             url(r'GetFieldValidationOnControlType/([0-9]+)$', FieldValidationsView.as_view()),
             url(r'FieldValidations$', FieldValidationsViewSecond.as_view()),
             url(r'FieldValidations/([0-9]+)$', FieldValidationsViewThird.as_view()),
-            url(r'NewPageEntry',GetNewPageEntry.as_view()),
     
 # Company 
             url(r'Company/([0-9]+)$', C_CompaniesViewSecond.as_view()),
@@ -292,6 +290,8 @@ urlpatterns = [
             url(r'POType$',POTypeView.as_view()),
             url(r'OrderEdit$',EditOrderView.as_view()),
             url(r'OrderConfirms$',ConfirmOrderView.as_view()),
+            # url(r'TodaysOrdersList$',TodaysOrdersListView.as_view()),
+            
             
             
 
@@ -362,6 +362,9 @@ urlpatterns = [
             url(r'GRNUpdate/([0-9]+)$',T_GRNViewUpdate.as_view()),
             url(r'GRNFilter$', GRNListFilterView.as_view()),
             url(r'GRNSaveforCSS$', GRNSaveforCSSView.as_view()),
+            # url(r'DeleteAccountingGRN/([0-9]+)$',DeleteAccountingGRNView.as_view()),
+            
+
             
             
 # GRN All API's
@@ -806,6 +809,8 @@ urlpatterns = [
              
 #Scheme Details:
               url(r'SchemeDetails$',SchemeView.as_view()), 
+              # url(r'SchemeListView$',SchemeListView.as_view()), 
+              
 
 #SAPExport:
               url(r'SAPExportDetails$',SAPExportViewDetails.as_view()), 
@@ -817,8 +822,8 @@ urlpatterns = [
               url(r'FranchisesCashierDetails$',FranchisesCashierList.as_view()), 
               
 #TallyData
-              url(r'TallyPurchaseUpload$',TallyDataListView.as_view()), 
-              url(r'PurchaseDataSuccessLog$',UpdateIsTallySaveView.as_view()), 
+              url(r'TallyDataUpload$',TallyDataListView.as_view()), 
+              url(r'TallyDataSuccessLog$',UpdateIsTallySaveView.as_view()), 
               
 
 
