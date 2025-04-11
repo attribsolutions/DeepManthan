@@ -497,7 +497,7 @@ class M_Pages(models.Model):
     UpdatedOn = models.DateTimeField(auto_now=True)
     Module = models.ForeignKey(H_Modules, related_name='PagesModule', on_delete=models.PROTECT)
     IsSweetPOSPage = models.BooleanField(default=False)
-
+    Is_New = models.BooleanField(default=False)
     class Meta:
         db_table = "M_Pages"
 
@@ -2100,6 +2100,7 @@ class O_DateWiseLiveStock(models.Model):
     Production = models.DecimalField(max_digits=20,decimal_places=10)
     IBSale = models.DecimalField(max_digits=20,decimal_places=10)
     IBPurchase = models.DecimalField(max_digits=20,decimal_places=10)
+    MaterialIssue = models.DecimalField(max_digits=20,decimal_places=10)
 
 
     class Meta:
