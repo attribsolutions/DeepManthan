@@ -592,8 +592,10 @@ class StockReportView(CreateAPIView):
                     # print('aaaaa')
                     if(Unit==0):
                         unitcondi='A.Unit_id'
+                        unitcondiPOS='A.Unit'
                     else:
                         unitcondi=Unit  
+                        unitcondiPOS=Unit
                     StockreportQuery = O_DateWiseLiveStock.objects.raw(f'''SELECT  1 as id,A.Item_id,A.Unit_id,
                     UnitwiseQuantityConversion(A.Item_id,ifnull(OpeningBalance,0),0,A.Unit_id,0,{unitcondi},0)OpeningBalance, 
                     UnitwiseQuantityConversion(A.Item_id,GRNInward,0,A.Unit_id,0,{unitcondi},0)GRNInward, 
@@ -610,6 +612,7 @@ class StockReportView(CreateAPIView):
                     UnitwiseQuantityConversion(A.Item_id,SalesReturn,0,A.Unit_id,0,{unitcondi},0)SalesReturn,
                     UnitwiseQuantityConversion(A.Item_id,StockAdjustment,0,A.Unit_id,0,{unitcondi},0)StockAdjustment
                     ,GroupTypeName,GroupName,SubGroupName,CASE WHEN {Unit} = 0 THEN UnitName else '{unitname}' END UnitName
+                    ,(FoodERP.RateCalculationFunction1(0, A.Item_id, {Party}, A.Unit_id, 0, 0, 0, 1) * FoodERP.UnitwiseQuantityConversion(A.Item_id,ClosingBalance,0,A.Unit_id,0,A.Unit_id,0))ClosingAmount
                     FROM 
         
         ( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit_id,M_Units.Name UnitName,sum(MaterialIssue)MaterialIssue, SUM(Production)Production,SUM(GRN) GRNInward, SUM(Sale) Sale,SUM(IBSale) IBSale,SUM(IBPurchase) IBPurchase, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
@@ -635,8 +638,51 @@ class StockReportView(CreateAPIView):
             FROM T_Stock 
             WHERE Party_id =%s AND StockDate BETWEEN %s AND %s 
             GROUP BY Item_id) D 		
-            ON A.Item_id = D.Item_id ''', ([FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate]))
-                    # print(StockreportQuery)
+            ON A.Item_id = D.Item_id
+             
+            UNION
+               
+                  SELECT 1 as id,A.Item_id,A.Unit,
+                    FoodERP.UnitwiseQuantityConversion(A.Item_id,ifnull(OpeningBalance,0),0,A.Unit,0,{unitcondiPOS},0)OpeningBalance,
+                    FoodERP.UnitwiseQuantityConversion(A.Item_id,GRNInward,0,A.Unit,0,{unitcondiPOS},0)GRNInward,
+                    FoodERP.UnitwiseQuantityConversion(A.Item_id,Sale,0,A.Unit,0,{unitcondiPOS},0)Sale,
+                    FoodERP.UnitwiseQuantityConversion(A.Item_id,ClosingBalance,0,A.Unit,0,{unitcondiPOS},0)ClosingBalance,
+                    FoodERP.UnitwiseQuantityConversion(A.Item_id,ActualStock,0,A.Unit,0,{unitcondiPOS},0)ActualStock,
+                    0 Production,
+                    0 IBSale,
+                    0 MaterialIssue,
+                    0 IBPurchase,
+                    A.ItemName,
+                    D.QuantityInBaseUnit,
+                    FoodERP.UnitwiseQuantityConversion(A.Item_id,PurchaseReturn,0,A.Unit,0,{unitcondiPOS},0)PurchaseReturn,
+                    FoodERP.UnitwiseQuantityConversion(A.Item_id,SalesReturn,0,A.Unit,0,{unitcondiPOS},0)SalesReturn,
+                    FoodERP.UnitwiseQuantityConversion(A.Item_id,StockAdjustment,0,A.Unit,0,{unitcondiPOS},0)StockAdjustment
+                    ,GroupTypeName,GroupName,SubGroupName,
+                    CASE WHEN {Unit} = 0 THEN UnitName else '{unitname}' END UnitName,               
+                    (FoodERP.RateCalculationFunction1(0, A.Item_id, {Party}, A.Unit, 0, 0, 0, 1) * FoodERP.UnitwiseQuantityConversion(A.Item_id,ClosingBalance,0,A.Unit,0,A.Unit,0))ClosingAmount
+                    FROM
+                    ( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit,M_Units.Name UnitName,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
+                        {ItemsGroupJoinsandOrderby[0]}
+                        FROM SweetPOS.O_SPOSDateWiseLiveStock SPOSDatewise
+
+                    JOIN FoodERP.M_Items ON M_Items.id=SPOSDatewise.Item
+                    join FoodERP.M_Units on M_Units.id= SPOSDatewise.Unit
+                    {ItemsGroupJoinsandOrderby[1]}
+                    WHERE StockDate BETWEEN %s AND %s AND Party=%s GROUP BY Item,Unit,GroupType.id,Groupss.id,subgroup.id
+                    {ItemsGroupJoinsandOrderby[2]}) A
+
+                    left JOIN (SELECT Item, OpeningBalance FROM SweetPOS.O_SPOSDateWiseLiveStock WHERE StockDate = %s AND Party=%s) B
+                    ON A.Item_id = B.Item
+
+                    left JOIN (SELECT Item, ClosingBalance, ActualStock FROM SweetPOS.O_SPOSDateWiseLiveStock WHERE StockDate = %s AND Party=%s) C 
+                    ON A.Item_id = C.Item
+
+                    LEFT JOIN (SELECT Item, SUM(BaseunitQuantity) QuantityInBaseUnit
+                    FROM SweetPOS.T_SPOSStock
+                    WHERE Party =%s AND StockDate BETWEEN %s AND %s
+                    GROUP BY Item) D
+                    ON A.Item_id = D.Item    ''', ([FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate],[FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate]))
+                    print(StockreportQuery)
                     serializer = StockReportSerializer(
                         StockreportQuery, many=True).data
 
