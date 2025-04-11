@@ -7,6 +7,7 @@ from rest_framework.parsers import JSONParser
 from ..Serializer.S_PartyItems import *
 from ..models import *
 from ..Views.V_CommFunction import *
+from django.utils import timezone
 
 
 class PartyItemsListView(CreateAPIView):
@@ -140,17 +141,24 @@ class PartyItemsView(CreateAPIView):
             with transaction.atomic():
                 PartyItems_serializer = MC_PartyItemSerializer(data=PartyItems_data, many=True)
             if PartyItems_serializer.is_valid():
-                id = PartyItems_serializer.data[0]['Party']
-                MC_PartyItem_data = MC_PartyItems.objects.filter(Party=id)
+                PartyID = PartyItems_serializer.data[0]['Party']
+                MC_PartyItem_data = MC_PartyItems.objects.filter(Party=PartyID)
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyItems Save Successfully', 'Data' :str(MC_PartyItem_data.query)})
                 MC_PartyItem_data.delete()
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyItems Save Successfully', 'Data' :PartyItems_serializer.data[0]['Party']})
                 Item = PartyItems_serializer.save()
                 LastInsertID = Item[0].id
-                log_entry = create_transaction_logNew(request,PartyItems_data,PartyItems_data[0]['Party'],'TransactionID:'+str(LastInsertID),182,LastInsertID)
+                
+                # Prepare transaction log details
+                user = request.user.LoginName
+                timestamp = timezone.now().strftime('%Y-%m-%d %H:%M:%S')
+                # ItemDetails = ", ".join([f"ItemID:{item.Item.id}" for item in Item])
+                TransactionDetails = f"PartyItem Saved by {user} on {timestamp}"
+                
+                log_entry = create_transaction_logNew(request,PartyItems_data,PartyID,TransactionDetails,182,LastInsertID)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyItems Save Successfully','TransactionID':LastInsertID, 'Data': []})
             else:
-                log_entry = create_transaction_logNew(request,PartyItems_data,PartyItems_data[0]['Party'],'PartyItem Save:'+str(PartyItems_serializer.errors),34,0)
+                log_entry = create_transaction_logNew(request,PartyItems_data,PartyID,'PartyItem Save:'+str(PartyItems_serializer.errors),34,0)
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PartyItems_serializer.errors, 'Data': []})
         except Exception as e:
