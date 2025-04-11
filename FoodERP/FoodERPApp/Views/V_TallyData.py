@@ -9,6 +9,7 @@ from ..models import *
 from SweetPOS.Views.V_SweetPosRoleAccess import BasicAuthenticationfunction
 from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from datetime import datetime
 
 
 
@@ -67,10 +68,11 @@ class TallyDataListView(CreateAPIView):
                 
                 if tallyquery:
                     for row in tallyquery:
+                        InvoiceDate = row.InvoiceDate.strftime('%d-%m-%Y') if row.InvoiceDate else None
                         TallyDetails.append({
                             ID: row.id,
                             "InvoiceNumber": row.InvoiceNumber,
-                            "InvoiceDate": row.InvoiceDate,
+                            "InvoiceDate": InvoiceDate,
                             "PartyCode": row.PartyCode,
                             "PartyName": row.PartyName,
                             "ItemCode": row.ItemCode,
