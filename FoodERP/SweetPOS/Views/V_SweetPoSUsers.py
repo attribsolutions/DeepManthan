@@ -228,13 +228,33 @@ class LVersionsView(CreateAPIView):
                 #     return JsonResponse({"StatusCode": 404, "Status": False, "Message": "'ExeVersion' Not Found", "Data": []})
                 # else:
                 #     return Response({"message": "'ExeVersion' Not Found", "status": "error"}, status=404)                 
-                query = M_SweetPOSUser.objects.raw("""SELECT 1 AS id,l.MacID, 
-                    MAX(CASE WHEN l.ExeVersion LIKE 'WS%%' THEN l.ExeVersion END) AS WinService,
-                    MAX(CASE WHEN l.ExeVersion NOT LIKE 'WS%%' THEN l.ExeVersion END) AS ExeVersion,
-                    m.MachineName 
-                    FROM SweetPOS.M_SweetPOSLogin l
-                    LEFT JOIN SweetPOS.M_SweetPOSMachine m ON m.MacID = l.MacID
-                    WHERE l.DivisionID =%s GROUP BY l.MacID, m.MachineName""", [Party])            
+                # query = M_SweetPOSUser.objects.raw("""SELECT 1 AS id,l.MacID, 
+                #     MAX(CASE WHEN l.ExeVersion LIKE 'WS%%' THEN l.ExeVersion END) AS WinService,
+                #     MAX(CASE WHEN l.ExeVersion NOT LIKE 'WS%%' THEN l.ExeVersion END) AS ExeVersion,
+                #     m.MachineName 
+                #     FROM SweetPOS.M_SweetPOSLogin l
+                #     LEFT JOIN SweetPOS.M_SweetPOSMachine m ON m.MacID = l.MacID
+                #     WHERE l.DivisionID =%s GROUP BY l.MacID, m.MachineName""", [Party])       
+                
+                query=M_SweetPOSUser.objects.raw("""SELECT 
+    m.MacID, 
+    MAX(CASE WHEN l.ExeVersion LIKE 'WS%%' THEN l.ExeVersion END) AS WinService,
+    MAX(CASE WHEN l.ExeVersion NOT LIKE 'WS%%' THEN l.ExeVersion END) AS ExeVersion,
+    m.MachineName
+FROM SweetPOS.M_SweetPOSMachine m
+LEFT JOIN (
+    SELECT 
+        MacID, 
+        ExeVersion,
+        ROW_NUMBER() OVER (PARTITION BY MacID, 
+                                      CASE WHEN ExeVersion LIKE 'WS%%' THEN 'WinService' ELSE 'ExeVersion' END
+                           ORDER BY CreatedOn DESC) AS rn
+    FROM SweetPOS.M_SweetPOSLogin
+    WHERE DivisionID = {Party}
+) l ON m.MacID = l.MacID AND l.rn = 1
+WHERE m.MacID IN (SELECT DISTINCT MacID FROM SweetPOS.M_SweetPOSLogin WHERE DivisionID = {Party})
+GROUP BY m.MacID, m.MachineName
+ORDER BY m.MacID""")     
                 user_list = []
                 for row in query:
                     user_list.append({

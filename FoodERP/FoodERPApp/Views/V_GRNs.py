@@ -145,15 +145,19 @@ class T_GRNView(CreateAPIView):
                 Customer = GRNdata['Customer']
                 CreatedBy = GRNdata['CreatedBy']
                 GRNDate = GRNdata['GRNDate']
-                
+                IsGRNType= GRNdata['IsGRNType']
                 # CustomPrint(GRNdata['GRNReferences'])
                 # if R in GRNdata['GRNReferences']:
                 #     Query =T_Orders.objects.filter(id=OrderID[0]).update(Inward=GRNReference_data['Inward'])
 # ==========================Get Max GRN Number=====================================================
                 a = GetMaxNumber.GetGrnNumber(Customer,GRNDate)
                 GRNdata['GRNNumber'] = a
-                b = GetPrifix.GetGrnPrifix(Customer)
+                if IsGRNType !=0:                    
+                    b = GetPrifix.GetGrnPrifix(Customer)
+                else:
+                    b = GetPrifix.GetIBInwardPrifix(Customer)
                 
+                b = b.strip() if b else ""
                 GRNdata['FullGRNNumber'] = b+""+str(a)
 #================================================================================================== 
                 item = ""
@@ -531,111 +535,112 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             for y in x['ChallanItems']:
                                 
                                 ItemID=y['Item']['id'] 
-                                Qty = y['Quantity']  
+                                Qty = y['Quantity'] 
+                                BillofmaterialData = list() 
                                 if IsVDCChallan==1:
-                                    IsVDC= f"and IsVDCItem={IsVDCChallan}"
-                                else:
-                                    IsVDC=""
+                                    # IsVDC= f"and IsVDCItem={IsVDCChallan}"
+                                # else:
+                                #     IsVDC=""
                                     
                                                             
-                                bomquery = MC_BillOfMaterialItems.objects.raw(f'''SELECT 1 id,MC_BillOfMaterialItems.BOM_id FROM MC_BillOfMaterialItems
-                                JOIN M_BillOfMaterial ON M_BillOfMaterial.id=MC_BillOfMaterialItems.BOM_id
-                                WHERE MC_BillOfMaterialItems.Item_id ={ItemID} {IsVDC} and IsDelete=0''') 
-                                                              
-                                Query = M_BillOfMaterial.objects.filter(id=bomquery[0].BOM_id)
-                                # print(Query)
-                                BOM_Serializer = M_BOMSerializerSecond001(Query,many=True).data
-                                
-                                BillofmaterialData = list()
-                                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
-                                for a in BOM_Serializer:
-                                    if IsVDCChallan==1:
-                                        ParentItem=  a['Item']['id'] 
-                                    else:    
-                                         ParentItem=  y['Item']['id']                              
-                                    Parentquery = MC_ItemUnits.objects.filter(Item_id=ParentItem,IsDeleted=0)
-                                    # CustomPrint(Parentquery.query)
-                                    if Parentquery.exists():
-                                        ParentUnitdata = Mc_ItemUnitSerializerThird(Parentquery, many=True).data
-                                        ParentUnitDetails = list()
-                                        for b in ParentUnitdata:
-                                            if b['IsDeleted']== 0 :
-                                                ParentUnitDetails.append({
-                                                "Unit": b['id'],
-                                                "UnitName": b['BaseUnitConversion'],
-                                                })
-                                            
-                                    GSTquery = M_GSTHSNCode.objects.filter(Item_id=ParentItem,IsDeleted=0)
-                                    # CustomPrint(GSTquery.query)
-                                    if GSTquery.exists():
-                                        GSTdata =ItemGSTHSNSerializerSecond(GSTquery, many=True).data
-                                        GSTDetails = list()
-                                        for c in GSTdata:
-                                            GSTDetails.append({
-                                            "id": c['id'],
-                                            "EffectiveDate": c['EffectiveDate'],
-                                            "GSTPercentage": c['GSTPercentage'],
-                                            "HSNCode": c['HSNCode'],
-                                        })
-                                    MRPquery = M_MRPMaster.objects.filter(Item_id=ParentItem,IsDeleted=0)
-                                    # CustomPrint(MRPquery.query)
-                                    if MRPquery.exists():
-                                        MRPdata =ItemMRPSerializerSecond(MRPquery, many=True).data
-                                        MRPDetails = list()
-                                        for d in MRPdata:
-                                            MRPDetails.append({
-                                            "id": d['id'],
-                                            "EffectiveDate": d['EffectiveDate'],
-                                            "Company": d['Company']['id'],
-                                            "CompanyName": d['Company']['Name'],
-                                            "MRP": d['MRP'],
-                                            })
+                                    bomquery = MC_BillOfMaterialItems.objects.raw(f'''SELECT 1 id,MC_BillOfMaterialItems.BOM_id FROM MC_BillOfMaterialItems
+                                    JOIN M_BillOfMaterial ON M_BillOfMaterial.id=MC_BillOfMaterialItems.BOM_id
+                                    WHERE MC_BillOfMaterialItems.Item_id ={ItemID} and IsDelete=0''') 
+                                                                
+                                    Query = M_BillOfMaterial.objects.filter(id=bomquery[0].BOM_id)
+                                    # print(Query)
+                                    BOM_Serializer = M_BOMSerializerSecond001(Query,many=True).data
                                     
-                                    if IsVDCChallan==1:
+                                    
+                                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
+                                    for a in BOM_Serializer:
+                                        # if IsVDCChallan==1:
+                                            ParentItem=  a['Item']['id'] 
+                                else:    
+                                    ParentItem=  y['Item']['id']                              
+                                Parentquery = MC_ItemUnits.objects.filter(Item_id=ParentItem,IsDeleted=0)
+                                # CustomPrint(Parentquery.query)
+                                if Parentquery.exists():
+                                    ParentUnitdata = Mc_ItemUnitSerializerThird(Parentquery, many=True).data
+                                    ParentUnitDetails = list()
+                                    for b in ParentUnitdata:
+                                        if b['IsDeleted']== 0 :
+                                            ParentUnitDetails.append({
+                                            "Unit": b['id'],
+                                            "UnitName": b['BaseUnitConversion'],
+                                            })
                                         
-                                        Item=ParentItem
-                                        ItemName=a['Item']['Name']
-                                        Unit= a['Unit']['id']
-                                        UnitName= a['Unit']['BaseUnitConversion']
-                                        BaseUnitQuantity=a['Unit']['BaseUnitQuantity']
-                                        BatchCode=SystemBatchCodeGeneration.GetGrnBatchCode(ParentItem, Customer,0)
-                                    else:
-                                        
-                                        Item=y['Item']['id']
-                                        ItemName=y['Item']['Name']
-                                        Unit= y['Unit']['id']
-                                        UnitName= y['Unit']['BaseUnitConversion']
-                                        BaseUnitQuantity=y['Unit']['BaseUnitQuantity']
-                                        BatchCode= y['BatchCode']            
-                                    BillofmaterialData.append({
-                                        "Item":Item,
-                                        "ItemName":ItemName,
-                                        "Quantity": Qty,
-                                        "MRP":MRPDetails[0]['id'],
-                                        "MRPValue": MRPDetails[0]['MRP'],
-                                        "Rate":y['Rate'], 
-                                        "Unit": Unit,
-                                        "UnitName": UnitName,
-                                        "BaseUnitQuantity": BaseUnitQuantity,
-                                        "GST":GSTDetails[0]['id'],
-                                        "HSNCode": GSTDetails[0]['HSNCode'],
-                                        "GSTPercentage": GSTDetails[0]['GSTPercentage'],
-                                        "Margin": "",
-                                        "MarginValue":"",
-                                        "BasicAmount": "",
-                                        "GSTAmount": "",
-                                        "CGST": "",
-                                        "SGST": "",
-                                        "IGST": "",
-                                        "CGSTPercentage": "",
-                                        "SGSTPercentage": "",
-                                        "IGSTPercentage": "",
-                                        "Amount":"",
-                                        "BatchCode":BatchCode,
-                                        "LoginName":"",
-                                        "UnitDetails":ParentUnitDetails                                       
-        
-                                        })       
+                                GSTquery = M_GSTHSNCode.objects.filter(Item_id=ParentItem,IsDeleted=0)
+                                # CustomPrint(GSTquery.query)
+                                if GSTquery.exists():
+                                    GSTdata =ItemGSTHSNSerializerSecond(GSTquery, many=True).data
+                                    GSTDetails = list()
+                                    for c in GSTdata:
+                                        GSTDetails.append({
+                                        "id": c['id'],
+                                        "EffectiveDate": c['EffectiveDate'],
+                                        "GSTPercentage": c['GSTPercentage'],
+                                        "HSNCode": c['HSNCode'],
+                                    })
+                                MRPquery = M_MRPMaster.objects.filter(Item_id=ParentItem,IsDeleted=0)
+                                # CustomPrint(MRPquery.query)
+                                if MRPquery.exists():
+                                    MRPdata =ItemMRPSerializerSecond(MRPquery, many=True).data
+                                    MRPDetails = list()
+                                    for d in MRPdata:
+                                        MRPDetails.append({
+                                        "id": d['id'],
+                                        "EffectiveDate": d['EffectiveDate'],
+                                        "Company": d['Company']['id'],
+                                        "CompanyName": d['Company']['Name'],
+                                        "MRP": d['MRP'],
+                                        })
+                                    
+                                if IsVDCChallan==1:
+                                    
+                                    Item=ParentItem
+                                    ItemName=a['Item']['Name']
+                                    Unit= a['Unit']['id']
+                                    UnitName= a['Unit']['BaseUnitConversion']
+                                    BaseUnitQuantity=a['Unit']['BaseUnitQuantity']
+                                    BatchCode=SystemBatchCodeGeneration.GetGrnBatchCode(ParentItem, Customer,0)
+                                else:
+                                    
+                                    Item=y['Item']['id']
+                                    ItemName=y['Item']['Name']
+                                    Unit= y['Unit']['id']
+                                    UnitName= y['Unit']['BaseUnitConversion']
+                                    BaseUnitQuantity=y['Unit']['BaseUnitQuantity']
+                                    BatchCode= y['BatchCode']            
+                                BillofmaterialData.append({
+                                    "Item":Item,
+                                    "ItemName":ItemName,
+                                    "Quantity": Qty,
+                                    "MRP":MRPDetails[0]['id'],
+                                    "MRPValue": MRPDetails[0]['MRP'],
+                                    "Rate":y['Rate'], 
+                                    "Unit": Unit,
+                                    "UnitName": UnitName,
+                                    "BaseUnitQuantity": BaseUnitQuantity,
+                                    "GST":GSTDetails[0]['id'],
+                                    "HSNCode": GSTDetails[0]['HSNCode'],
+                                    "GSTPercentage": GSTDetails[0]['GSTPercentage'],
+                                    "Margin": "",
+                                    "MarginValue":"",
+                                    "BasicAmount": "",
+                                    "GSTAmount": "",
+                                    "CGST": "",
+                                    "SGST": "",
+                                    "IGST": "",
+                                    "CGSTPercentage": "",
+                                    "SGSTPercentage": "",
+                                    "IGSTPercentage": "",
+                                    "Amount":"",
+                                    "BatchCode":BatchCode,
+                                    "LoginName":"",
+                                    "UnitDetails":ParentUnitDetails                                       
+    
+                                    })       
                                 ChallanItemDetails.append(BillofmaterialData[0])        
                         ChallanData.append({
                             "Supplier": x['Party']['id'],
