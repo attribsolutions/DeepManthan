@@ -2478,11 +2478,33 @@ class PeriodicGRNReportView(CreateAPIView):
                 FromDate = PeriodicGRNData['FromDate']
                 ToDate = PeriodicGRNData['ToDate']
                 PartyID = PeriodicGRNData['PartyID']
+                SupplierID=PeriodicGRNData['SupplierID']
+                ItemID=PeriodicGRNData['ItemID']
+                GRNType=PeriodicGRNData['GRNTypeID'] 
                 PeriodicGRNdataData = []                            
 
                 SupplierCondition = f"AND T_GRNs.Customer_id = {PartyID}" if PartyID != 0 else ""
           
-
+                SupplierCondition = f"AND T_GRNs.Customer_id = {PartyID}" if PartyID != 0 else ""
+          
+                if SupplierID !="":
+                    Supplier= f"AND T_GRNs.Party_id={SupplierID}"
+                else:
+                    Supplier=""
+                    
+                if ItemID!="":
+                    Item= f"AND TC_GRNItems.Item_id={ItemID}"
+                else:
+                    Item=""
+                
+                if GRNType!="":
+                    
+                    if GRNType=="199":                        
+                        GRNTypeID=f"AND T_GRNs.IsGRNType=1"
+                    else:
+                        GRNTypeID=f"AND T_GRNs.IsGRNType=0"
+                else:
+                    GRNTypeID=""
                 PeriodicGRNQuery = T_GRNs.objects.raw(f'''SELECT T_GRNs.id, T_GRNs.GRNDate, T_GRNs.FullGRNNumber as GRNNo,
                                                         T_Orders.FullOrderNumber AS PO, T_GRNs.Party_id as SupplierID, 
                                                         M_Parties.Name AS SupplierName, T_GRNs.InvoiceNumber as ChallanNo, 
@@ -2499,7 +2521,7 @@ class PeriodicGRNReportView(CreateAPIView):
                                                         JOIN TC_GRNReferences ON T_GRNs.id = TC_GRNReferences.GRN_id
                                                         LEFT JOIN T_Orders ON TC_GRNReferences.Order_id = T_Orders.id
                                                         LEFT JOIN M_Parties ON T_GRNs.Party_id = M_Parties.id
-                                                        WHERE T_GRNs.GRNDate BETWEEN '{FromDate}' AND '{ToDate}' {SupplierCondition}''')
+                                                        WHERE T_GRNs.GRNDate BETWEEN '{FromDate}' AND '{ToDate}' {SupplierCondition}  {Supplier} {Item} {GRNTypeID}''')
                 for Periodic in PeriodicGRNQuery:
                     PeriodicGRNdataData.append({
                         "id": Periodic.id,
