@@ -152,8 +152,13 @@ class GetPartydetailsView(CreateAPIView):
                     # party_values = [str(record['Party']) for record in EmpParties]
                     party_values=""
                 else:
-                    party_values =f"AND M_Parties.id={Party}"
-                
+                    party_values =f"AND M_Parties.id={Party}" 
+                    
+                    
+                if Cluster==0:
+                    Cluster_value=""
+                else:
+                    Cluster_value=f"AND M_Cluster.id ={Cluster}"
                 
                     
                 PartyDetailData= list()
@@ -170,7 +175,7 @@ class GetPartydetailsView(CreateAPIView):
                                                                             LEFT JOIN M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id
                                                                             LEFT JOIN M_Employees ON M_PartyDetails.id = M_Employees.id
                                                                             LEFT JOIN M_Parties a ON a.id = M_PartyDetails.Supplier_id 
-                                                                            where Group_id = {Group} AND M_Cluster.id ={Cluster} )b on a.partyID=b.Party_id ''')
+                                                                            where Group_id = {Group} {Cluster_value} )b on a.partyID=b.Party_id ''')
                     
 
                 else:
@@ -186,7 +191,7 @@ class GetPartydetailsView(CreateAPIView):
                                                                             LEFT JOIN M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id
                                                                             LEFT JOIN M_Employees ON M_PartyDetails.id = M_Employees.id
                                                                             LEFT JOIN M_Parties a ON a.id = M_PartyDetails.Supplier_id
-                                                                            where Group_id IS NULL AND M_Cluster.id ={Cluster} )b on a.partyID=b.Party_id  ''')
+                                                                            where Group_id IS NULL {Cluster_value} )b on a.partyID=b.Party_id  ''')
                 
                 print(PartydetailsOnclusterdata.query)
                 if PartydetailsOnclusterdata:
