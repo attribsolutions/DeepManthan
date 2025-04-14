@@ -166,7 +166,7 @@ class GetPartydetailsView(CreateAPIView):
                                                                             LEFT JOIN M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id
                                                                             LEFT JOIN M_Employees ON M_PartyDetails.id = M_Employees.id
                                                                             LEFT JOIN M_Parties a ON a.id = M_PartyDetails.Supplier_id 
-                                                                            where Group_id = {Group} AND M_Cluster.id ={Cluster )b on a.partyID=b.Party_id ''')
+                                                                            where Group_id = {Group} AND M_Cluster.id ={Cluster} )b on a.partyID=b.Party_id ''')
                     
 
                 else:
