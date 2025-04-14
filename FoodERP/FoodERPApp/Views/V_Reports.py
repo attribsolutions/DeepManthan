@@ -668,7 +668,7 @@ class StockReportView(CreateAPIView):
                     JOIN FoodERP.M_Items ON M_Items.id=SPOSDatewise.Item
                     join FoodERP.M_Units on M_Units.id= SPOSDatewise.Unit
                     {ItemsGroupJoinsandOrderby[1]}
-                    WHERE StockDate BETWEEN %s AND %s AND Party=%s and Item=373 GROUP BY Item,Unit,GroupType.id,Groupss.id,subgroup.id
+                    WHERE StockDate BETWEEN %s AND %s AND Party=%s  GROUP BY Item,Unit,GroupType.id,Groupss.id,subgroup.id
                     {ItemsGroupJoinsandOrderby[2]}) A
 
                     left JOIN (SELECT Item, OpeningBalance FROM SweetPOS.O_SPOSDateWiseLiveStock WHERE StockDate = %s AND Party=%s) B
