@@ -80,7 +80,11 @@ class PartyDetailsView(CreateAPIView):
                 PartyDetails_serializer = PartyDetailsSerializer(data=PartyDetails_data, many=True)
                
                 if PartyDetails_serializer.is_valid():
-                    PartyDetailsdata = M_PartyDetails.objects.filter(Group=PartyDetails_data[0]['Group'],Party=PartyDetails_data[0]['Party'])
+                    
+                    party_ids = [entry['Party'] for entry in PartyDetails_data]
+
+                    PartyDetailsdata = M_PartyDetails.objects.filter(Group=PartyDetails_data[0]['Group'],Party__in =party_ids)
+                    # print(PartyDetailsdata.query)
                     PartyDetailsdata.delete()   
                     PartyDetails_serializer.save() 
                     log_entry = create_transaction_logNew(request, PartyDetails_data,0,'GroupID:'+str(PartyDetails_data[0]['Group']),446,0)
