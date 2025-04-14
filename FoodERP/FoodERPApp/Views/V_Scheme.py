@@ -6,6 +6,7 @@ from ..Views.V_CommFunction import *
 from ..models import *
 from SweetPOS.Views.V_SweetPosRoleAccess import BasicAuthenticationfunction
 from rest_framework.authentication import BasicAuthentication
+from ..Serializer.S_Scheme import *
 
 
      
@@ -82,12 +83,35 @@ class SchemeView(CreateAPIView):
                         data.append(scheme_data)
 
                 if data:
-                    log_entry = create_transaction_logNew(request, PartyData, 0, 'SchemeDetails:', 433, 0)
+                    log_entry = create_transaction_logNew(request, data, 0, Party, 433, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': data})
                 else:
-                    log_entry = create_transaction_logNew(request, PartyData, Party, 'Record Not Found', 433, 0)
+                    log_entry = create_transaction_logNew(request, data, Party, 'Record Not Found', 433, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
 
         except Exception as e:
             log_entry =  create_transaction_logNew(request, PartyData, 0, 'SchemeDetails:' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+        
+ 
+class SchemeListView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    
+    @transaction.atomic()
+    def get(self, request ):
+        try:
+            with transaction.atomic():
+                Scheme_data = M_Scheme.objects.all()
+                Scheme_data_serializer = SchemeSerializer(Scheme_data,many=True)
+                log_entry = create_transaction_logNew(request, Scheme_data_serializer,0,'',328,0)
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': Scheme_data_serializer.data})
+        except  M_Scheme.DoesNotExist:
+            log_entry = create_transaction_logNew(request,0,0,'Scheme Data Does Not Exist',328,0)
+            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Scheme Data Not available', 'Data': []})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'GETAllSchemes:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
+    
+    
+
+
