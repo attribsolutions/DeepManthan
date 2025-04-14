@@ -143,7 +143,7 @@ class GetPartydetailsView(CreateAPIView):
         
         try:
             with transaction.atomic():
-                if Party=="":
+                if Party==0:
                     # EmpParties = MC_ManagementParties.objects.filter(Employee=Employee).values('Party')                
                     # party_values = [str(record['Party']) for record in EmpParties]
                     party_values=""
@@ -184,7 +184,7 @@ class GetPartydetailsView(CreateAPIView):
                                                                             LEFT JOIN M_Parties a ON a.id = M_PartyDetails.Supplier_id
                                                                             where Group_id IS NULL AND M_Cluster.id ={Cluster} )b on a.partyID=b.Party_id  ''')
                 
-                # print(PartydetailsOnclusterdata.query)
+                print(PartydetailsOnclusterdata.query)
                 if PartydetailsOnclusterdata:
                     
                     for row in PartydetailsOnclusterdata:
