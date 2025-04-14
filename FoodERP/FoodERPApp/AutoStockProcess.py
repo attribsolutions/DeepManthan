@@ -21,7 +21,7 @@ def autostockprocess():
     auth = ("superadmin", "1234")
 
     try:
-        response = requests.get(API_URL, auth=auth, headers=headers, timeout=10)
+        response = requests.post(API_URL, auth=auth, headers=headers, json={}, timeout=10)
         response_data = response.json()
         
         if response_data.get("StatusCode") == 200:
