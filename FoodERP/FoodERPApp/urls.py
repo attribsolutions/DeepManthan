@@ -773,7 +773,8 @@ urlpatterns = [
 #PartyDetails
               url(r'PartyDetails$',PartyDetailsView.as_view()),
               url(r'PartyDetails/([0-9]+)$',PartyDetailsView.as_view()),
-              url(r'GetPartydetails/([0-9]+)/([0-9]+)$',GetPartydetailsView.as_view()), #Employee/GroupID  
+              # url(r'GetPartydetails/([0-9]+)/([0-9]+)$',GetPartydetailsView.as_view()), #Employee/GroupID  
+              url(r'GetPartydetails$',GetPartydetailsView.as_view()), 
               url(r'downloadQr/([0-9]+)/([0-9]+)$',FileDownloadView.as_view()),
               url(r'SettingsDataSave$',SettingsView.as_view()),  
               url(r'SystemSettings/([0-9]+)$',SystemSettingsView.as_view()),    
