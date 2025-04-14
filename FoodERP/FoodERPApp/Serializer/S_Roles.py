@@ -23,10 +23,16 @@ class M_RolesSerializer(serializers.ModelSerializer):
     # Company=C_CompanySerializer1(read_only=True)
     class Meta:
         model =  M_Roles 
-        fields = ['id','Name','Description','isActive','isSCMRole','IsPartyConnection','Dashboard','CreatedBy','UpdatedBy','RoleEmployeeTypes','Company']
+        fields = ['id','Name','Description','isActive','isSCMRole','IsPartyConnection','Dashboard','CreatedBy','UpdatedBy','RoleEmployeeTypes','Company','IdentifyKey']
         
     def create(self, validated_data):
         RoleEmployeeTypes_data = validated_data.pop('RoleEmployeeTypes')
+        
+         # Handle IdentifyKey logic
+        IdentifyKey = validated_data.get('IdentifyKey')
+        if not IdentifyKey:
+            validated_data['IdentifyKey'] = 0
+        
         RoleID = M_Roles.objects.create(**validated_data)
         for RoleEmployeeType_data in RoleEmployeeTypes_data:
             RoleEmployeeType =MC_RolesEmployeeTypes.objects.create(Role=RoleID, **RoleEmployeeType_data) 
@@ -35,22 +41,15 @@ class M_RolesSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         
         
-        instance.Name = validated_data.get(
-            'Name', instance.Name)
-        instance.Description = validated_data.get(
-            'Description', instance.Description)    
-        instance.isActive = validated_data.get(
-            'isActive', instance.isActive)
-        instance.isSCMRole = validated_data.get(
-            'isSCMRole', instance.isSCMRole)
-        instance.IsPartyConnection = validated_data.get(
-            'IsPartyConnection', instance.IsPartyConnection)
-        instance.Dashboard = validated_data.get(
-            'Dashboard', instance.Dashboard)
-        instance.UpdatedBy = validated_data.get(
-            'UpdatedBy', instance.UpdatedBy) 
-        instance.UpdatedOn = validated_data.get(
-            'UpdatedOn', instance.UpdatedOn)           
+        instance.Name = validated_data.get('Name', instance.Name)
+        instance.Description = validated_data.get('Description', instance.Description)    
+        instance.isActive = validated_data.get('isActive', instance.isActive)
+        instance.isSCMRole = validated_data.get('isSCMRole', instance.isSCMRole)
+        instance.IsPartyConnection = validated_data.get('IsPartyConnection', instance.IsPartyConnection)
+        instance.Dashboard = validated_data.get('Dashboard', instance.Dashboard)
+        instance.UpdatedBy = validated_data.get('UpdatedBy', instance.UpdatedBy) 
+        instance.UpdatedOn = validated_data.get('UpdatedOn', instance.UpdatedOn)     
+        instance.IdentifyKey = validated_data.get('IdentifyKey', 0) or 0      
         
         instance.save()
 

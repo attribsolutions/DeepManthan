@@ -292,6 +292,7 @@ urlpatterns = [
             url(r'OrderEdit$',EditOrderView.as_view()),
             url(r'OrderConfirms$',ConfirmOrderView.as_view()),
             # url(r'TodaysOrdersList$',TodaysOrdersListView.as_view()),
+            # url(r'SyncTodayOrdersToCSS$',SyncTodayOrdersToCSSView.as_view()),
             
             
             
@@ -363,7 +364,7 @@ urlpatterns = [
             url(r'GRNUpdate/([0-9]+)$',T_GRNViewUpdate.as_view()),
             url(r'GRNFilter$', GRNListFilterView.as_view()),
             url(r'GRNSaveforCSS$', GRNSaveforCSSView.as_view()),
-            # url(r'DeleteAccountingGRN/([0-9]+)$',DeleteAccountingGRNView.as_view()),
+            url(r'DeleteAccountingGRN/([0-9]+)$',DeleteAccountingGRNView.as_view()),
             
 
             
@@ -772,7 +773,8 @@ urlpatterns = [
 #PartyDetails
               url(r'PartyDetails$',PartyDetailsView.as_view()),
               url(r'PartyDetails/([0-9]+)$',PartyDetailsView.as_view()),
-              url(r'GetPartydetails/([0-9]+)/([0-9]+)$',GetPartydetailsView.as_view()), #Employee/GroupID  
+              # url(r'GetPartydetails/([0-9]+)/([0-9]+)$',GetPartydetailsView.as_view()), #Employee/GroupID  
+              url(r'GetPartydetails$',GetPartydetailsView.as_view()), 
               url(r'downloadQr/([0-9]+)/([0-9]+)$',FileDownloadView.as_view()),
               url(r'SettingsDataSave$',SettingsView.as_view()),  
               url(r'SystemSettings/([0-9]+)$',SystemSettingsView.as_view()),    
@@ -810,7 +812,7 @@ urlpatterns = [
              
 #Scheme Details:
               url(r'SchemeDetails$',SchemeView.as_view()), 
-              # url(r'SchemeListView$',SchemeListView.as_view()), 
+              url(r'SchemeList$',SchemeListView.as_view()), 
               
 
 #SAPExport:

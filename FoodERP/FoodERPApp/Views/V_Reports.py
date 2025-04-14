@@ -573,7 +573,7 @@ class StockReportView(CreateAPIView):
                 # PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
                 PartyIDs = [int(p) for p in Orderdata['Party'].split(',')]
                 
-                StockData = []
+                
 
                 for Party in PartyIDs:
                     PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
@@ -668,7 +668,7 @@ class StockReportView(CreateAPIView):
                     JOIN FoodERP.M_Items ON M_Items.id=SPOSDatewise.Item
                     join FoodERP.M_Units on M_Units.id= SPOSDatewise.Unit
                     {ItemsGroupJoinsandOrderby[1]}
-                    WHERE StockDate BETWEEN %s AND %s AND Party=%s GROUP BY Item,Unit,GroupType.id,Groupss.id,subgroup.id
+                    WHERE StockDate BETWEEN %s AND %s AND Party=%s  GROUP BY Item,Unit,GroupType.id,Groupss.id,subgroup.id
                     {ItemsGroupJoinsandOrderby[2]}) A
 
                     left JOIN (SELECT Item, OpeningBalance FROM SweetPOS.O_SPOSDateWiseLiveStock WHERE StockDate = %s AND Party=%s) B
@@ -682,19 +682,44 @@ class StockReportView(CreateAPIView):
                     WHERE Party =%s AND StockDate BETWEEN %s AND %s
                     GROUP BY Item) D
                     ON A.Item_id = D.Item    ''', ([FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate],[FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate]))
-                    print(StockreportQuery)
-                    serializer = StockReportSerializer(
-                        StockreportQuery, many=True).data
-
+                    # print(StockreportQuery)
+                    # serializer = StockReportSerializer(StockreportQuery, many=True).data
+                    # print(serializer )
                     # StockData = list()
-                    if serializer:
+                    StockData = []
+                    StockDetails =list()
+                    if StockreportQuery:
+                    
+                        for a in StockreportQuery:
+                            print(a.Sale)
+                            StockDetails.append({
+                                "Item_id": a.Item_id,
+                                "Unit_id": a.Unit_id,
+                                "UnitName":  a.UnitName,
+                                "OpeningBalance":  round(a.OpeningBalance,3),
+                                "GRNInward":  round(a.GRNInward,3),
+                                "SalesReturn" : round(a.SalesReturn,3),
+                                "Sale" :  round(a.Sale,3),
+                                "PurchaseReturn" : round(a.PurchaseReturn,3),
+                                "ClosingBalance":  round(a.ClosingBalance,3),
+                                "ClosingAmount" : round(a.ClosingAmount,3),
+                                "ActualStock":  round(a.ActualStock,3),
+                                "ItemName" : a.ItemName,
+                                "GroupTypeName" : a.GroupTypeName,
+                                "GroupName" : a.GroupName,
+                                "SubGroupName" : a.SubGroupName,
+                                "StockAdjustment":  round(a.StockAdjustment,3),
+                                "Production" :  round(a.Production,3),
+                                "IBPurchase" :  round(a.IBPurchase,3),
+                                "IBSale"  :  round(a.IBSale,3),
+                                "MaterialIssue" :  round(a.MaterialIssue,3)
+
+                             })
                         StockData.append({
-
-                            "FromDate": FromDate,
-                            "ToDate": ToDate,
-                            "PartyName": PartyNameQ[0]["Name"],
-                            "StockDetails": serializer
-
+                        "FromDate": FromDate,
+                        "ToDate": ToDate,
+                        "PartyName": PartyNameQ[0]["Name"],
+                        "StockDetails": StockDetails
                         })
 
                 if StockData:
@@ -2453,11 +2478,33 @@ class PeriodicGRNReportView(CreateAPIView):
                 FromDate = PeriodicGRNData['FromDate']
                 ToDate = PeriodicGRNData['ToDate']
                 PartyID = PeriodicGRNData['PartyID']
+                SupplierID=PeriodicGRNData['SupplierID']
+                ItemID=PeriodicGRNData['ItemID']
+                GRNType=PeriodicGRNData['GRNTypeID'] 
                 PeriodicGRNdataData = []                            
 
                 SupplierCondition = f"AND T_GRNs.Customer_id = {PartyID}" if PartyID != 0 else ""
           
-
+                SupplierCondition = f"AND T_GRNs.Customer_id = {PartyID}" if PartyID != 0 else ""
+          
+                if SupplierID !="":
+                    Supplier= f"AND T_GRNs.Party_id={SupplierID}"
+                else:
+                    Supplier=""
+                    
+                if ItemID!="":
+                    Item= f"AND TC_GRNItems.Item_id={ItemID}"
+                else:
+                    Item=""
+                
+                if GRNType!="":
+                    
+                    if GRNType=="199":                        
+                        GRNTypeID=f"AND T_GRNs.IsGRNType=1"
+                    else:
+                        GRNTypeID=f"AND T_GRNs.IsGRNType=0"
+                else:
+                    GRNTypeID=""
                 PeriodicGRNQuery = T_GRNs.objects.raw(f'''SELECT T_GRNs.id, T_GRNs.GRNDate, T_GRNs.FullGRNNumber as GRNNo,
                                                         T_Orders.FullOrderNumber AS PO, T_GRNs.Party_id as SupplierID, 
                                                         M_Parties.Name AS SupplierName, T_GRNs.InvoiceNumber as ChallanNo, 
@@ -2474,7 +2521,7 @@ class PeriodicGRNReportView(CreateAPIView):
                                                         JOIN TC_GRNReferences ON T_GRNs.id = TC_GRNReferences.GRN_id
                                                         LEFT JOIN T_Orders ON TC_GRNReferences.Order_id = T_Orders.id
                                                         LEFT JOIN M_Parties ON T_GRNs.Party_id = M_Parties.id
-                                                        WHERE T_GRNs.GRNDate BETWEEN '{FromDate}' AND '{ToDate}' {SupplierCondition}''')
+                                                        WHERE T_GRNs.GRNDate BETWEEN '{FromDate}' AND '{ToDate}' {SupplierCondition}  {Supplier} {Item} {GRNTypeID}''')
                 for Periodic in PeriodicGRNQuery:
                     PeriodicGRNdataData.append({
                         "id": Periodic.id,

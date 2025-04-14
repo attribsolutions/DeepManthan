@@ -934,3 +934,29 @@ class GRNSaveforCSSView(CreateAPIView):
 
 
 
+
+
+class DeleteAccountingGRNView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        try:
+            with transaction.atomic():
+                GRN = T_GRNs.objects.get(id=id)
+
+                if GRN.IsSave != 0:
+                    return JsonResponse({ 'StatusCode': 400,'Status': False,'Message': 'Only accounting GRNs can be deleted.','Data': [] })
+
+                GRN.IsSave = 1
+                GRN.save()
+
+                create_transaction_logNew(request, {'GRNID': id}, 0, 'Accounting GRN marked as deleted', 457, 0)
+                return JsonResponse({'StatusCode': 200,'Status': True,'Message': 'Accounting GRN marked as deleted.','Data': []})
+
+        except T_GRNs.DoesNotExist:
+            log_entry = create_transaction_logNew(request, {'GRNID': id}, 0, '', 457, 0)
+            return JsonResponse({'StatusCode': 204,'Status': False,'Message': 'GRN not found.','Data': []})
+        except Exception as e:
+            create_transaction_logNew(request, {'GRNID': id}, 0, 'Error updating GRN: ' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400,'Status': False,'Message': str(e),'Data': [] })

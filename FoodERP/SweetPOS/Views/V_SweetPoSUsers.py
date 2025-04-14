@@ -236,7 +236,7 @@ class LVersionsView(CreateAPIView):
                 #     LEFT JOIN SweetPOS.M_SweetPOSMachine m ON m.MacID = l.MacID
                 #     WHERE l.DivisionID =%s GROUP BY l.MacID, m.MachineName""", [Party])       
                 
-                query=M_SweetPOSUser.objects.raw("""SELECT 
+                query=M_SweetPOSUser.objects.raw(f"""SELECT  1 AS id,
     m.MacID, 
     MAX(CASE WHEN l.ExeVersion LIKE 'WS%%' THEN l.ExeVersion END) AS WinService,
     MAX(CASE WHEN l.ExeVersion NOT LIKE 'WS%%' THEN l.ExeVersion END) AS ExeVersion,
