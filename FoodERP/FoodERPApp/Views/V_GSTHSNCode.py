@@ -146,7 +146,7 @@ class GETGstHsnDetails(CreateAPIView):
                                             and IsDeleted=0 order by  EffectiveDate desc,id desc limit 1 )HSNCode,
                                             (SELECT id FROM M_GSTHSNCode where Item_id=M_Items.id and EffectiveDate = %s   {partytype}  
                                             and IsDeleted=0 order by  EffectiveDate desc,id desc limit 1 )IDD
-                                            From M_Items where M_Items.Company_id={Company})a limit 200''',[today,today,EffectiveDate,EffectiveDate,EffectiveDate])
+                                            From M_Items where M_Items.Company_id={Company} and IsCBMItem=1)a ''',[today,today,EffectiveDate,EffectiveDate,EffectiveDate])
                 if not query:
                     # log_entry = create_transaction_logNew(request, 0, 0, "Items Not available",121,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []}) 
