@@ -59,9 +59,12 @@ class OrderDetailsForInvoice(CreateAPIView):
                     if OrderItemQuery:
                         for b in OrderItemQuery:
                             
-                            
                             PartyTypeID=b.PartyTypeID
                             Customer=b.CustomerID
+                            if Customer == 19795:
+                                setting = M_Settings.objects.filter(id=67, IsActive=True, DefaultValue__isnull=False).first()
+                                if setting:
+                                    Customer = int(setting.DefaultValue)
                             Item= b.ItemID 
                             UnitID = b.MIUnitID  
                                               
