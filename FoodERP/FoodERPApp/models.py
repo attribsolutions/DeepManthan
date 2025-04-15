@@ -237,7 +237,7 @@ class M_Parties(models.Model):
     SkyggeID = models.CharField(max_length=500,null=True, blank=True)
     UploadSalesDatafromExcelParty= models.BooleanField(default=False)
     Country = models.ForeignKey(M_Country, related_name='PartiesCountry',on_delete=models.PROTECT,null=True, blank=True)
-    
+    ShortName = models.CharField(max_length=100,null=True, blank=True)
     class Meta:
         db_table = 'M_Parties'
         constraints = [
@@ -748,6 +748,8 @@ class M_Items(models.Model):
     IsCBMItem  = models.BooleanField(default=False)
     IsMixItem = models.BooleanField(default=False)
     IsStockProcessItem = models.BooleanField(default=False)
+    ItemCode = models.IntegerField(default=False,null=True,blank=True)
+    
     class Meta:
         constraints = [
             UniqueConstraint(fields=['Company', 'SAPItemCode'], name='unique_company_sapitemcode')
@@ -2584,4 +2586,38 @@ class M_SAPPOSUploadLog(models.Model):
 
     class Meta:
         db_table = "M_SAPPOSUploadLog"
+
+class M_AccountGroupType(models.Model):
+    Name = models.CharField(max_length=500)
     
+    class Meta:
+        db_table="M_AccountGroupType"
+
+class M_Ledger(models.Model):
+    Name = models.CharField(max_length=500)
+    AccountGroupType = models.ForeignKey(M_AccountGroupType, on_delete=models.CASCADE, related_name='ledgers')
+    GST_Percent = models.DecimalField(max_digits=5, decimal_places=2,null=True)
+    HSN = models.CharField(max_length=50,null=True)
+    class Meta:
+        db_table="M_Ledger"
+
+class T_Voucher(models.Model):   
+    FullVoucherNumber = models.CharField(max_length=100)
+    VoucherNumber = models.CharField(max_length=50)
+    VoucherType = models.CharField(max_length=50)
+    GRN = models.ForeignKey(T_GRNs, related_name='Voucher_GRN', on_delete=models.CASCADE , null=True, blank=True)
+    Invoice= models.ForeignKey(T_Invoices,related_name='Voucher_Invoice',on_delete=models.CASCADE , null=True, blank=True)
+    CreditNote = models.ForeignKey(T_CreditDebitNotes,related_name='Voucher_CreditNote',on_delete=models.CASCADE ,null=True, blank=True)
+    DebitNote= models.ForeignKey(T_CreditDebitNotes,related_name='Voucher_DebitNote',on_delete=models.CASCADE,null=True, blank=True)
+    VoucherDate = models.DateField()
+    Amount = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    class Meta:
+        db_table="T_Voucher"
+
+class TC_VoucherDetails(models.Model):    
+    Voucher = models.ForeignKey(T_Voucher ,related_name='details', on_delete=models.CASCADE)
+    LedgerId = models.ForeignKey(M_Ledger, related_name='voucher_entries', on_delete=models.CASCADE)
+    DrAmt = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    CrAmt = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    class Meta:
+        db_table="TC_VoucherDetails"
