@@ -328,7 +328,7 @@ class UploadFileList(APIView):
                             "UploadStatus":row.UploadStatus,
                         })
                     log_entry = create_transaction_logNew( request, 0, 0, '', 441, 0,0,0,0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': POSSAPDetails})
+                    return JsonResponse({'StatusCode': 200, 'Status': True,'Message': 'Data Upload Successfully', 'Data': POSSAPDetails})
                 log_entry = create_transaction_logNew( request, POSSAPDetails, 0, 'Data Not Found', 441, 0,0,0,0)           
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
 
