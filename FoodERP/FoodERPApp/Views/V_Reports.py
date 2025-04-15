@@ -668,7 +668,7 @@ class StockReportView(CreateAPIView):
                     JOIN FoodERP.M_Items ON M_Items.id=SPOSDatewise.Item
                     join FoodERP.M_Units on M_Units.id= SPOSDatewise.Unit
                     {ItemsGroupJoinsandOrderby[1]}
-                    WHERE StockDate BETWEEN %s AND %s AND Party=%s and Item=373 GROUP BY Item,Unit,GroupType.id,Groupss.id,subgroup.id
+                    WHERE StockDate BETWEEN %s AND %s AND Party=%s  GROUP BY Item,Unit,GroupType.id,Groupss.id,subgroup.id
                     {ItemsGroupJoinsandOrderby[2]}) A
 
                     left JOIN (SELECT Item, OpeningBalance FROM SweetPOS.O_SPOSDateWiseLiveStock WHERE StockDate = %s AND Party=%s) B
@@ -2370,6 +2370,8 @@ class GRNDiscrepancyReportAPIView(CreateAPIView):
             return JsonResponse({"StatusCode": 400,"Status": False,"Message": str(e), "Data": [],})
 
 
+
+
 class CouponCodeRedemptionReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
@@ -2380,19 +2382,29 @@ class CouponCodeRedemptionReportView(CreateAPIView):
             with transaction.atomic():
                 FromDate = CouponCodeData['FromDate']
                 ToDate = CouponCodeData['ToDate']
-                Party = CouponCodeData.get('Party', 0)
+                SchemeID = int(CouponCodeData.get('SchemeID', 0))
+                Party = int(CouponCodeData.get('Party', 0))
                 CouponCodeRedemptionData = []
+                
+                conditions = ["M_GiftVoucherCode.IsActive = 0",f"M_GiftVoucherCode.InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}'"]
 
-                GetParties = f"AND M_GiftVoucherCode.Party = {Party}" if Party != 0 else ""
+                if Party != 0:
+                    conditions.append(f"M_GiftVoucherCode.Party = {Party}")
+                if SchemeID != 0:
+                    conditions.append(f"TC_InvoicesSchemes.scheme = {SchemeID}")
+
+                where_clause = " AND ".join(conditions)
                 
+                CouponCodeRedemptionQuery = M_GiftVoucherCode.objects.raw(f'''SELECT M_GiftVoucherCode.id, VoucherType_id, 
+                                            M_GiftVoucherCode.VoucherCode, M_GiftVoucherCode.UpdatedOn, M_GiftVoucherCode.InvoiceDate, 
+                                            M_GiftVoucherCode.InvoiceNumber, M_GiftVoucherCode.InvoiceAmount, M_GiftVoucherCode.Party, M_GiftVoucherCode.client, M_GiftVoucherCode.IsActive, 
+                                            M_Parties.Name as PartyName, TC_InvoicesSchemes.scheme AS SchemeID
+                                            FROM M_GiftVoucherCode
+                                            JOIN M_Parties ON M_GiftVoucherCode.Party = M_Parties.id
+                                            JOIN SweetPOS.T_SPOSInvoices ON M_GiftVoucherCode.ClientSaleID = T_SPOSInvoices.ClientSaleID
+                                            JOIN SweetPOS.TC_InvoicesSchemes ON T_SPOSInvoices.id = TC_InvoicesSchemes.Invoice_id
+                                            WHERE  {where_clause} ''')
                 
-                CouponCodeRedemptionQuery = TC_GRNItems.objects.raw(f'''SELECT M_GiftVoucherCode.id, VoucherType_id, VoucherCode, M_GiftVoucherCode.UpdatedOn, InvoiceDate, 
-                                                                        InvoiceNumber, InvoiceAmount, Party, client, M_GiftVoucherCode.IsActive, M_Parties.Name as PartyName
-                                                                        FROM M_GiftVoucherCode
-                                                                        JOIN M_Parties  ON M_GiftVoucherCode.Party = M_Parties.id
-                                                                        WHERE M_GiftVoucherCode.IsActive = 0
-                                                                        AND InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}'
-                                                                        {GetParties}''')
                 for CouponCode in CouponCodeRedemptionQuery:
                     CouponCodeRedemptionData.append({
                         "id": CouponCode.id,
@@ -2405,6 +2417,7 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                         "PartyID": CouponCode.Party,
                         "PartyName": CouponCode.PartyName,
                         "client": CouponCode.client,
+                        "SchemeID": CouponCode.SchemeID, 
                     })
                 if CouponCodeRedemptionData:
                     log_entry = create_transaction_logNew(request, CouponCodeData, 0, "", 443, 0, FromDate, ToDate, 0)
@@ -2416,6 +2429,7 @@ class CouponCodeRedemptionReportView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, CouponCodeData, 0, "CouponCodeRedemptionReport: " + str(e), 33, 0)
             return JsonResponse({"StatusCode": 400,"Status": False,"Message": str(e), "Data": [],})
+        
         
         
         
