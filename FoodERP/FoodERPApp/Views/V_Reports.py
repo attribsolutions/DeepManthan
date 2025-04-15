@@ -2385,14 +2385,15 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                 SchemeID = int(CouponCodeData.get('SchemeID', 0))
                 Party = int(CouponCodeData.get('Party', 0))
                 CouponCodeRedemptionData = []
-
-                GetParties = f"AND M_GiftVoucherCode.Party = {Party}" if Party != 0 else ""
-            
-                if SchemeID == 0 and Party != 0:
-                    GetScheme = f"AND M_GiftVoucherCode.Party = {Party}"
-                else: 
-                    GetScheme = f"AND TC_InvoicesSchemes.scheme = {SchemeID}"
                 
+                conditions = ["M_GiftVoucherCode.IsActive = 0",f"M_GiftVoucherCode.InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}'"]
+
+                if Party != 0:
+                    conditions.append(f"M_GiftVoucherCode.Party = {Party}")
+                if SchemeID != 0:
+                    conditions.append(f"TC_InvoicesSchemes.scheme = {SchemeID}")
+
+                where_clause = " AND ".join(conditions)
                 
                 CouponCodeRedemptionQuery = M_GiftVoucherCode.objects.raw(f'''SELECT M_GiftVoucherCode.id, VoucherType_id, 
                                             M_GiftVoucherCode.VoucherCode, M_GiftVoucherCode.UpdatedOn, M_GiftVoucherCode.InvoiceDate, 
@@ -2402,9 +2403,7 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                                             JOIN M_Parties ON M_GiftVoucherCode.Party = M_Parties.id
                                             JOIN SweetPOS.T_SPOSInvoices ON M_GiftVoucherCode.ClientSaleID = T_SPOSInvoices.ClientSaleID
                                             JOIN SweetPOS.TC_InvoicesSchemes ON T_SPOSInvoices.id = TC_InvoicesSchemes.Invoice_id
-                                            WHERE M_GiftVoucherCode.IsActive = 0
-                                            AND M_GiftVoucherCode.InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}'
-                                            {GetParties} {GetScheme}''')
+                                            WHERE  {where_clause} ''')
                 
                 for CouponCode in CouponCodeRedemptionQuery:
                     CouponCodeRedemptionData.append({
