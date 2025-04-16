@@ -660,7 +660,7 @@ class BOMItemList(CreateAPIView):
                     JOIN M_Items ON M_Items.id=MC_BillOfMaterialItems.Item_id 
                     JOIN MC_PartyItems ON MC_PartyItems.Item_id=M_Items.id 
                     JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id
-                    JOIN MC_ItemUnits ON  MC_ItemUnits.Item_id=M_BillOfMaterial.Item_id and IsBase=1 and IsDeleted=0
+                    JOIN MC_ItemUnits ON  MC_ItemUnits.Item_id=M_BillOfMaterial.Item_id and IsBase=1 and IsDelete=0
                     WHERE IsVDCItem=1 and M_Parties.id={Party}''')            
                 if bom_items:
                     ItemDetails=[]

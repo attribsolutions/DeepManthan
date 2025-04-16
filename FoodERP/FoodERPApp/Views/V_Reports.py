@@ -2513,10 +2513,16 @@ class PeriodicGRNReportView(CreateAPIView):
                 
                 if GRNType!="":
                     
-                    if GRNType=="199":                        
+                    if GRNType==199: 
+                        # For Regular GRN   
                         GRNTypeID=f"AND T_GRNs.IsGRNType=1"
-                    else:
+                    elif GRNType==200:
+                        # For IB GRN
                         GRNTypeID=f"AND T_GRNs.IsGRNType=0"
+                    else:
+                        # For VDC GRN   
+                        # This is for future development; currently, the VDC type is 0 and needs to be changed to 2
+                        GRNTypeID=f"AND T_GRNs.IsGRNType=2"    
                 else:
                     GRNTypeID=""
                 PeriodicGRNQuery = T_GRNs.objects.raw(f'''SELECT T_GRNs.id, T_GRNs.GRNDate, T_GRNs.FullGRNNumber as GRNNo,
