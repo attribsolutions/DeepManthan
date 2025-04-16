@@ -701,7 +701,7 @@ class StockReportView(CreateAPIView):
                                 "GRNInward":  round(a.GRNInward,3),
                                 "SalesReturn" : round(a.SalesReturn,3),
                                 "Sale" :  round(a.Sale,3),
-                                "PurchaseReturn" : round(a.PurchaseReturn,3),
+                                "PurchaseReturn" : round(a.PurchaseReturn,3),  
                                 "ClosingBalance":  round(a.ClosingBalance,3),
                                 "ClosingAmount" : round(a.ClosingAmount,3),
                                 "ActualStock":  round(a.ActualStock,3),
