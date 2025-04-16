@@ -28,7 +28,7 @@ class ItemSaleReportView(CreateAPIView):
 
                 
                 Invoicequery = '''SELECT T_Invoices.id, T_Invoices.InvoiceDate, SupPartyType.Name SaleMadeFrom, CustPartyType.Name SaleMadeTo, 
-                                FullInvoiceNumber,Sup.Name SupplierName, M_Routes.Name RouteName, Cust.Name CustomerName, M_Group.Name GroupName,
+                                FullInvoiceNumber,Sup.Name SupplierName,Sup.ShortName SupShortName, M_Routes.Name RouteName, Cust.Name CustomerName,Cust.ShortName CustShortName, M_Group.Name GroupName,
                                 MC_SubGroup.Name SubGroupName, M_Items.Name ItemName,  QtyInKg, QtyInNo, QtyInBox, Rate, BasicAmount, 
                                 DiscountAmount, GSTPercentage, GSTAmount, Amount, T_Invoices.GrandTotal, RoundOffAmount, TCSAmount, 
                                 T_GRNs.FullGRNNumber, TC_InvoiceItems.MRPValue, 0 MobileNo, "" CashierName, FoodERP.M_Units.Name AS BaseUnitName,
@@ -56,7 +56,7 @@ class ItemSaleReportView(CreateAPIView):
                                 LEFT JOIN T_GRNs ON GRN_id = T_GRNs.ID WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s'''
                             
                 SPOSInvoicequery='''SELECT A.id, A.InvoiceDate, SupPartyType.Name SaleMadeFrom, CustPartyType.Name SaleMadeTo, 
-                                A.FullInvoiceNumber, Sup.Name SupplierName, M_Routes.Name RouteName, Cust.Name CustomerName, 
+                                A.FullInvoiceNumber, Sup.Name SupplierName,Sup.ShortName SupShortName, M_Routes.Name RouteName, Cust.Name CustomerName, Cust.ShortName CustShortName,
                                 M_Group.Name GroupName, MC_SubGroup.Name SubGroupName, M_Items.Name ItemName, B.QtyInKg, B.QtyInNo, B.QtyInBox,
                                 B.Rate, B.BasicAmount, A.DiscountAmount, B.GSTPercentage, B.GSTAmount, B.Amount, A.GrandTotal, A.RoundOffAmount,
                                 A.TCSAmount, T_GRNs.FullGRNNumber, B.MRPValue, A.MobileNo , M.LoginName CashierName, FoodERP.M_Units.Name AS BaseUnitName,
@@ -86,6 +86,8 @@ class ItemSaleReportView(CreateAPIView):
                                 -- JOIN SweetPOS.M_SweetPOSUser M ON M.id = A.CreatedBy -- Comment For changing M_SweetPOSUser to M_Users
                                 LEFT JOIN FoodERP.M_Users M ON M.id = A.CreatedBy
                                 WHERE A.InvoiceDate BETWEEN %s AND %s and A.IsDeleted=0 '''
+                                
+                print(Invoicequery)
                 parameters = [FromDate,ToDate] 
                 if int(Party) > 0: 
                     Invoicequery += ' AND Sup.id = %s'
@@ -144,7 +146,9 @@ class ItemSaleReportView(CreateAPIView):
                                 "MobileNo": a.MobileNo,
                                 "CashierName": a.CashierName,
                                 "BaseItemUnitQuantity": a.BaseUnitQuantity,
-                                "BaseItemUnitName": a.BaseUnitName
+                                "BaseItemUnitName": a.BaseUnitName,
+                                "Sup_ShortName":a.SupShortName,
+                                "Cust_ShortName":a.CustShortName
                               
                                 })
                     log_entry = create_transaction_logNew(request, Reportdata, Party, 'From:'+FromDate+','+'To:'+ToDate,281,0,FromDate,ToDate,0)

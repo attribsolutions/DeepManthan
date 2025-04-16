@@ -533,7 +533,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                 DemandDate=DemandQuery[0]['DemandDate']
                             
                             for y in x['ChallanItems']:
-                                
+                                print(y)
                                 ItemID=y['Item']['id'] 
                                 Qty = y['Quantity'] 
                                 BillofmaterialData = list() 
@@ -545,7 +545,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                                             
                                     bomquery = MC_BillOfMaterialItems.objects.raw(f'''SELECT 1 id,MC_BillOfMaterialItems.BOM_id FROM MC_BillOfMaterialItems
                                     JOIN M_BillOfMaterial ON M_BillOfMaterial.id=MC_BillOfMaterialItems.BOM_id
-                                    WHERE MC_BillOfMaterialItems.Item_id ={ItemID} and IsDelete=0''') 
+                                    WHERE MC_BillOfMaterialItems.Item_id ={ItemID} and IsDelete=0 AND ISVDCItem=1''') 
                                                                 
                                     Query = M_BillOfMaterial.objects.filter(id=bomquery[0].BOM_id)
                                     # print(Query)
