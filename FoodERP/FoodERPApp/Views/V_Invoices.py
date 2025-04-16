@@ -35,7 +35,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                 POOrderIDs = Orderdata['OrderIDs']
                 IsRateWise=Orderdata['IsRateWise']
                 Order_list = POOrderIDs.split(",")
-                
+             
                 OrderdataList = list() 
                 for OrderID in Order_list: 
                     OrderItemDetails = list()
@@ -49,24 +49,30 @@ class OrderDetailsForInvoice(CreateAPIView):
                                     FROM TC_OrderItems
                                     join T_Orders on T_Orders.id=TC_OrderItems.Order_id
                                     join M_Parties on M_Parties.id=T_Orders.Customer_id
-                                    join MC_PartySubParty on MC_PartySubParty.SubParty_id = M_Parties.id and MC_PartySubParty.Party_id=%s
+                                    join MC_PartySubParty on MC_PartySubParty.SubParty_id = M_Parties.id and MC_PartySubParty.Party_id= {Party}
                                     join M_Items on M_Items.id=TC_OrderItems.Item_id
                                     join MC_ItemUnits on MC_ItemUnits.id=TC_OrderItems.Unit_id
                                     join M_GSTHSNCode on M_GSTHSNCode.id=TC_OrderItems.GST_id
                                     left join M_MarginMaster on M_MarginMaster.id=TC_OrderItems.Margin_id
-                                    where TC_OrderItems.Order_id=%s and TC_OrderItems.IsDeleted=0''',[Party,OrderID])                
-                    # print(OrderItemQuery.query)
+                                    where TC_OrderItems.Order_id=%s and TC_OrderItems.IsDeleted=0''',[OrderID])              
                     if OrderItemQuery:
                         for b in OrderItemQuery:
-                            
                             PartyTypeID=b.PartyTypeID
-                            Customer=b.CustomerID
-                            if Customer == 84296:
-                                setting = M_Settings.objects.filter(id=67, IsActive=True, DefaultValue__isnull=False).first()
-                                if setting:
-                                    Customer = int(setting.DefaultValue)
                             Item= b.ItemID 
-                            UnitID = b.MIUnitID  
+                            UnitID = b.MIUnitID 
+                            Customer = b.CustomerID  
+                            
+                            SettingQuery = M_Settings.objects.filter(id=67, IsActive=True, DefaultValue__isnull=False).values("DefaultValue").first()
+
+                            if SettingQuery:
+                                DefaultVal = SettingQuery["DefaultValue"]  
+                                if "-" in DefaultVal:
+                                    DeccanID, AnandID = map(int, DefaultVal.split("-"))
+                                    if Customer == DeccanID:
+                                        Customer = AnandID
+                                      
+                            party = M_Parties.objects.filter(id=Customer).values("Name").first()
+                            CustomerName = party["Name"] if party else b.CustomerName 
                                               
                             if PartyTypeID == 19:
                                 franchisemrpquery = M_Items.objects.raw(f'''select 1 as id, FoodERP.RateCalculationFunction1(0, {Item}, {Customer}, {UnitID}, 0, 0, 0, 0)Rate,
@@ -85,9 +91,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                                             "BaseUnitQuantity" : p.BaseUnitQuantity,
                                             "GST" : p.GST
                                             })
-                            else : 
-                                
-                                
+                            else :     
                                 if IsRateWise == 1:
                                    pp = ""
                                    Condition = f",RateCalculationFunction1(LiveBatcheid, ItemID, {Customer}, UnitID, 0, 0, MRP, 0)Rate"                  
@@ -107,7 +111,6 @@ class OrderDetailsForInvoice(CreateAPIView):
                                                 join M_GSTHSNCode on M_GSTHSNCode.id=O_LiveBatches.GST_id
                                                 join MC_ItemUnits on MC_ItemUnits.id=O_BatchWiseLiveStock.Unit_id
                                                 where O_BatchWiseLiveStock.Item_id=%s and O_BatchWiseLiveStock.Party_id=%s and O_BatchWiseLiveStock.BaseUnitQuantity > 0 and IsDamagePieces=0)a ''',[Item,Party])
-                                
                                 stockDatalist = list()
                                 if not obatchwisestockquery:
                                         stockDatalist =[]
@@ -128,7 +131,6 @@ class OrderDetailsForInvoice(CreateAPIView):
                                             "GST" : d.GST,
                                             "UnitName":d.BaseUnitConversion, 
                                             "BaseUnitQuantity":d.BaseUnitQuantity,
-                                            
                                             })
                                 
                             # =====================Current Discount================================================
@@ -176,7 +178,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                         OrderdataList.append({
                                 "OrderIDs":OrderID,
                                 "OrderDate" :  b.OrderDate,
-                                "CustomerName" : b.CustomerName,
+                                "CustomerName" : CustomerName,
                                 "IsTCSParty" : b.IsTCSParty,
                                 "CustomerPAN" : b.PAN,
                                 "CustomerGSTIN" : b.GSTIN,
