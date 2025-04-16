@@ -147,40 +147,26 @@ class GetPartydetailsView(CreateAPIView):
         
         try:
             with transaction.atomic():
+                PartyDetailData= list()
                 if Party==0:
                     # EmpParties = MC_ManagementParties.objects.filter(Employee=Employee).values('Party')                
                     # party_values = [str(record['Party']) for record in EmpParties]
                     party_values=""
                 else:
-                    party_values =f"AND M_Parties.id={Party}" 
-                    
+                    party_values =f"AND M_Parties.id={Party}"                     
                     
                 if Cluster==0:
                     Cluster_value=""
                 else:
-                    Cluster_value=f"AND M_Cluster.id ={Cluster}"
+                    Cluster_value=f"AND M_Cluster.id ={Cluster}"               
+                    
                 
-                    
-                PartyDetailData= list()
                 if int(Group) > 0:
-                    
-                    PartydetailsOnclusterdata = M_PartyDetails.objects.raw(f'''select 1 as id, PartyID, PartyName, Group_id, Cluster_id, ClusterName, SubCluster_id, SubClusterName, Supplier_id, SupplierName,GM, NH, RH, ASM, SE, SO, SR, MT from 
-                                                                            (select id PartyID,Name PartyName from M_Parties where PartyType_id in (9,10,15,19) {party_values})a
-                                                                             join 
-                                                                            (select  Party_id,M_PartyDetails.Group_id,M_PartyDetails.Cluster_id,M_Cluster.Name ClusterName,M_PartyDetails.SubCluster_id,
-                                                                            M_SubCluster.Name SubClusterName,M_PartyDetails.Supplier_id ,a.Name SupplierName, M_PartyDetails.GM, M_PartyDetails.NH,
-                                                                            M_PartyDetails.RH, M_PartyDetails.ASM, M_PartyDetails.SE, M_PartyDetails.SO, M_PartyDetails.SR, M_PartyDetails.MT
-                                                                            from M_PartyDetails 
-                                                                            LEFT JOIN M_Cluster ON M_PartyDetails.Cluster_id = M_Cluster.id
-                                                                            LEFT JOIN M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id
-                                                                            LEFT JOIN M_Employees ON M_PartyDetails.id = M_Employees.id
-                                                                            LEFT JOIN M_Parties a ON a.id = M_PartyDetails.Supplier_id 
-                                                                            where Group_id = {Group} {Cluster_value} )b on a.partyID=b.Party_id ''')
-                    
-
+                    Group_value=f" Group_id = {Group}"
                 else:
-                   
-                    PartydetailsOnclusterdata = M_PartyDetails.objects.raw(f'''select 1 as id, PartyID, PartyName, Group_id, Cluster_id, ClusterName, SubCluster_id, SubClusterName, Supplier_id, SupplierName, GM, NH, RH, ASM, SE, SO, SR, MT from 
+                    Group_value="Group_id IS NULL"                    
+                                  
+                PartydetailsOnclusterdata = M_PartyDetails.objects.raw(f'''select 1 as id, PartyID, PartyName, Group_id, Cluster_id, ClusterName, SubCluster_id, SubClusterName, Supplier_id, SupplierName, GM, NH, RH, ASM, SE, SO, SR, MT from 
                                                                             (select id PartyID,Name PartyName from M_Parties where PartyType_id in (9,10,15,19) {party_values})a
                                                                              join 
                                                                             (select  Party_id,M_PartyDetails.Group_id,M_PartyDetails.Cluster_id,M_Cluster.Name ClusterName,M_PartyDetails.SubCluster_id,
@@ -191,7 +177,7 @@ class GetPartydetailsView(CreateAPIView):
                                                                             LEFT JOIN M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id
                                                                             LEFT JOIN M_Employees ON M_PartyDetails.id = M_Employees.id
                                                                             LEFT JOIN M_Parties a ON a.id = M_PartyDetails.Supplier_id
-                                                                            where Group_id IS NULL {Cluster_value} )b on a.partyID=b.Party_id  ''')
+                                                                            where {Group_value} {Cluster_value} )b on a.partyID=b.Party_id  ''')
                 
                 # print(PartydetailsOnclusterdata.query)
                 if PartydetailsOnclusterdata:
@@ -208,12 +194,7 @@ class GetPartydetailsView(CreateAPIView):
                                 "Supplier_id" : a.id,
                                 "SupplierName" : a.Name,
                                 "seletedSupplier" : seletedSupplier
-                            })
-                        
-                        
-                        
-                        
-                        
+                            })                              
                         PartyDetailData.append({
                                 "id": row.id,
                                 "PartyID": row.PartyID,
@@ -233,9 +214,7 @@ class GetPartydetailsView(CreateAPIView):
                                 "SO": SalesTeamData(row.SO),
                                 "SR": SalesTeamData(row.SR),
                                 "MT": SalesTeamData(row.MT),
-
-
-                        })
+                                })
                     
                     log_entry = create_transaction_logNew(request, PartyDetailData,0,'GroupID:'+str(Group),445,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartyDetailData})
