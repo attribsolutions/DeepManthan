@@ -87,7 +87,7 @@ class ItemSaleReportView(CreateAPIView):
                                 LEFT JOIN FoodERP.M_Users M ON M.id = A.CreatedBy
                                 WHERE A.InvoiceDate BETWEEN %s AND %s and A.IsDeleted=0 '''
                                 
-                print(Invoicequery)
+                
                 parameters = [FromDate,ToDate] 
                 if int(Party) > 0: 
                     Invoicequery += ' AND Sup.id = %s'
@@ -112,8 +112,9 @@ class ItemSaleReportView(CreateAPIView):
                 q1 = T_Invoices.objects.raw(Invoicequery,parameters)
               
                 q2 = T_SPOSInvoices.objects.using('sweetpos_db').raw(SPOSInvoicequery,parameters)
-              
-                combined_invoices = list(q1) + list(q2)   
+                # print(q1)
+                combined_invoices = list(q1) + list(q2)  
+                # print(combined_invoices) 
                 if combined_invoices:
                     ItemList = list()
                     for a in combined_invoices:
@@ -151,6 +152,8 @@ class ItemSaleReportView(CreateAPIView):
                                 "Cust_ShortName":a.CustShortName
                               
                                 })
+                        
+                        
                     log_entry = create_transaction_logNew(request, Reportdata, Party, 'From:'+FromDate+','+'To:'+ToDate,281,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': ItemList})
                 
