@@ -171,6 +171,8 @@ from .Views.V_InvoiceToFTPforSAP import *
 from .Views.V_TallyData import *
 
 from .Views.V_CommonMaster import GetNewPageEntry
+
+from .Views.V_TallyLedger import *
 # from .Views.V_FTP import *
 
 
@@ -828,6 +830,8 @@ urlpatterns = [
               url(r'TallyDataUpload$',TallyDataListView.as_view()), 
               url(r'TallyDataSuccessLog$',UpdateIsTallySaveView.as_view()), 
               
+#TallyLedger
+              url(r'TallyLedger$',LedgerListView.as_view()), 
 
 
               
