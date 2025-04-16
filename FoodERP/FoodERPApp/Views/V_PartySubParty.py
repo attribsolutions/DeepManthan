@@ -289,6 +289,8 @@ class RetailerandSSDDView(CreateAPIView):
                 PartyID=PartySubPartydata['PartyID']
                 Type=PartySubPartydata['Type']   
                 
+                q2 = []
+                
                 if Type == 1: ##All Retailer under given Party and Company
                     if CompanyID == 4: ##ForCSS show all Customers under given Party
                         setting = M_Settings.objects.filter(id=68, IsActive=True, DefaultValue__isnull=False).values("DefaultValue").first()
