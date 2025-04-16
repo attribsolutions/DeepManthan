@@ -93,9 +93,10 @@ class ItemSerializer(serializers.ModelSerializer):
     
     ItemShelfLife = ItemShelfLifeSerializer(many=True)
    
+    ItemCode = serializers.DecimalField(max_digits=20,decimal_places=0,required=False, default=0)
     class Meta:
         model = M_Items
-        fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode','SAPItemCode', 'isActive', 'IsSCM', 'CanBeSold', 'CanBePurchase', 'BrandName', 'Tag','Length','Breadth','Height','StoringCondition','Grammage','CreatedBy', 'UpdatedBy','ItemCategoryDetails','ItemGroupDetails', 'ItemUnitDetails', 'ItemDivisionDetails', 'ItemMRPDetails', 'ItemMarginDetails', 'ItemGSTHSNDetails', 'ItemShelfLife','IsCBMItem','IsMixItem','IsStockProcessItem' ]
+        fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode','SAPItemCode', 'isActive', 'IsSCM', 'CanBeSold', 'CanBePurchase', 'BrandName', 'Tag','Length','Breadth','Height','StoringCondition','Grammage','ItemCode','CreatedBy', 'UpdatedBy','ItemCategoryDetails','ItemGroupDetails', 'ItemUnitDetails', 'ItemDivisionDetails', 'ItemMRPDetails', 'ItemMarginDetails', 'ItemGSTHSNDetails', 'ItemShelfLife','IsCBMItem','IsMixItem','IsStockProcessItem' ]
        
     def create(self, validated_data):
         ItemCategorys_data = validated_data.pop('ItemCategoryDetails')
