@@ -23,12 +23,9 @@ class LedgerListView(CreateAPIView):
         try:
             with transaction.atomic():
                 Ledger_data = M_Ledger.objects.all()
-                Ledger_data_serializer = TallyLedgerSerializer(Ledger_data,many=True)
+                Ledger_data_serializer = TallyLedgerSerializer(Ledger_data,many=True)                
                 log_entry = create_transaction_logNew(request, Ledger_data_serializer,0,'',328,0)
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': Ledger_data_serializer.data})
-        except  M_Scheme.DoesNotExist:
-            log_entry = create_transaction_logNew(request,0,0,'Ledger Data Does Not Exist',328,0)
-            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Ledger Data Not available', 'Data': []})
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': Ledger_data_serializer.data})        
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
