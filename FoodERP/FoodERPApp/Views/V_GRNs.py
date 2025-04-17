@@ -15,6 +15,7 @@ from ..models import *
 from django.db.models import *
 from datetime import datetime, timedelta 
 from decimal import Decimal
+from rest_framework.views import APIView
 
 # GRN List API
 
@@ -252,7 +253,7 @@ class T_GRNView(CreateAPIView):
 
 # UPDATE GRN 
 
-class T_GRNViewUpdate(CreateAPIView):
+class T_GRNViewUpdate(APIView):
     permission_classes = (IsAuthenticated,)
     
     def put(self, request, id=0):
@@ -260,7 +261,7 @@ class T_GRNViewUpdate(CreateAPIView):
         try:
             with transaction.atomic():
                 GRNupdateByID = T_GRNs.objects.get(id=id)
-                
+                print(GRNupdateByID)
                 
                 for item in GRNupdatedata['GRNItems']:
                     BaseUnitQuantity = UnitwiseQuantityConversion(
@@ -286,7 +287,7 @@ class T_GRNViewUpdate(CreateAPIView):
                     total_expense_amount = 0
                     for exp in GRNupdatedata.get('GRNExpenses', []):                        
                         expense = TC_GRNExpenses.objects.create(
-                            GRN_id=id,                        
+                            GRN_id=exp.get('GRN',0),                        
                             Ledger_id=exp.get('Ledger',0),
                             Amount=Decimal(exp.get('Amount', 0) or 0),
                             GSTPercentage=exp.get('GSTPercentage', 0),

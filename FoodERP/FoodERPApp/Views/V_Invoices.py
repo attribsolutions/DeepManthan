@@ -1383,6 +1383,46 @@ class FranchisesCashierList(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew( request, POSCashierdata, 0, 'Cashier:'+str(e), 33,0,0,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+        
+        
+        
+class InvoiceItemWiseProduction(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    
+    def post(self, request):
+        ProductionItemWisedata = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                
+                Party = ProductionItemWisedata['Party']     
+                Item = ProductionItemWisedata['Item']             
+                ItemWiseProductionStockQuery=O_BatchWiseLiveStock.objects.raw(f'''select O_BatchWiseLiveStock.id,
+                O_BatchWiseLiveStock.Item_id ItemID,
+                O_LiveBatches.BatchCode ,O_LiveBatches.BatchDate,O_LiveBatches.SystemBatchCode,
+                O_LiveBatches.SystemBatchDate,O_LiveBatches.id LiveBatcheid,O_LiveBatches.MRP_id LiveBatcheMRPID,
+                O_LiveBatches.GST_id LiveBatcheGSTID,O_BatchWiseLiveStock.BaseUnitQuantity, O_LiveBatches.Rate 
+                from O_BatchWiseLiveStock 
+                JOIN  o_livebatches ON o_livebatches.id=O_BatchWiseLiveStock.LiveBatche_id
+                where O_BatchWiseLiveStock.Item_id={Item} and O_BatchWiseLiveStock.Party_id={Party} 
+                and O_BatchWiseLiveStock.BaseUnitQuantity > 0 and IsDamagePieces=0 ''')              
+                if ItemWiseProductionStockQuery:
+                    BatchDetails=list()
+                    for row in ItemWiseProductionStockQuery:
+                        BatchDetails.append({                            
+                           "BatchCode": row.BatchCode,
+                           "BatchDate":row.BatchDate,
+                           "Rate":row.Rate,
+                           "BaseUnitQuantity":row.BaseUnitQuantity     
+                           
+                        })
+                    log_entry = create_transaction_logNew( request, BatchDetails, Party, '', 458, 0,0,0,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': BatchDetails})
+                log_entry = create_transaction_logNew( request, BatchDetails, Party, 'Data Not Found', 458, 0,0,0,0)           
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+
+        except Exception as e:
+            log_entry = create_transaction_logNew( request, ProductionItemWisedata, 0, str(e), 33,0,0,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 
