@@ -963,7 +963,7 @@ class GRNSaveforCSSView(CreateAPIView):
 
 
 
-class DeleteAccountingGRNView(APIView):
+class DeleteAccountingGRNView(CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     @transaction.atomic()
