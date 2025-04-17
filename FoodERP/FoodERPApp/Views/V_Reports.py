@@ -669,7 +669,7 @@ class StockReportView(CreateAPIView):
                     JOIN FoodERP.M_Items ON M_Items.id=SPOSDatewise.Item
                     join FoodERP.M_Units on M_Units.id= SPOSDatewise.Unit
                     {ItemsGroupJoinsandOrderby[1]}
-                    WHERE StockDate BETWEEN %s AND %s AND Party=%s  and Item=376  GROUP BY Item,Unit,GroupType.id,Groupss.id,subgroup.id
+                    WHERE StockDate BETWEEN %s AND %s AND Party=%s    GROUP BY Item,Unit,GroupType.id,Groupss.id,subgroup.id
                     {ItemsGroupJoinsandOrderby[2]}) A
 
                     left JOIN (SELECT Item, OpeningBalance FROM SweetPOS.O_SPOSDateWiseLiveStock WHERE StockDate = %s AND Party=%s) B
@@ -701,7 +701,7 @@ class StockReportView(CreateAPIView):
                                 "GRNInward":  round(a.GRNInward,3),
                                 "SalesReturn" : round(a.SalesReturn,3),
                                 "Sale" :  round(a.Sale,3),
-                                "PurchaseReturn" : round(a.PurchaseReturn,3),
+                                "PurchaseReturn" : round(a.PurchaseReturn,3),  
                                 "ClosingBalance":  round(a.ClosingBalance,3),
                                 "ClosingAmount" : round(a.ClosingAmount,3),
                                 "ActualStock":  round(a.ActualStock,3),

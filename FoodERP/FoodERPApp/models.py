@@ -1141,6 +1141,7 @@ class T_GRNs(models.Model):
     IsSave = models.IntegerField() 
     IsTallySave = models.BooleanField(default=False)
     IsGRNType = models.BooleanField(default=False)
+    TotalExpenses = models.DecimalField(max_digits=20, decimal_places=2,null=True,blank=True)
     class Meta:
         db_table = "T_GRNs"
 
@@ -2553,7 +2554,7 @@ class M_Scheme(models.Model):
     class Meta:
         db_table = "M_Scheme"
 
-class M_SchemeQRs(models.Model):
+class MC_SchemeQRs(models.Model):
     SchemeID=models.ForeignKey(M_Scheme,related_name='SchemeIDforQR', on_delete=models.CASCADE)
     QRCode = models.CharField(max_length=100) 
 
@@ -2621,3 +2622,17 @@ class TC_VoucherDetails(models.Model):
     CrAmt = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     class Meta:
         db_table="TC_VoucherDetails"
+
+
+class TC_GRNExpenses(models.Model):
+    GRN = models.ForeignKey(T_GRNs, related_name='ExpensesGRN', on_delete=models.CASCADE)    
+    Ledger = models.ForeignKey(M_Ledger, related_name='LedgerExpenses', on_delete=models.CASCADE) 
+    BasicAmount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    GSTPercentage = models.DecimalField(max_digits=5, decimal_places=2,default=0) 
+    CGST = models.DecimalField(max_digits=10, decimal_places=2)
+    SGST = models.DecimalField(max_digits=10, decimal_places=2)
+    IGST = models.DecimalField(max_digits=10, decimal_places=2)
+    Amount = models.DecimalField(max_digits=12, decimal_places=2, default=0) 
+    class Meta:
+        db_table = 'TC_GRNExpenses'
+        
