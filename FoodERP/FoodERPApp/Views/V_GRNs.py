@@ -14,6 +14,7 @@ from ..Serializer.S_Bom import *
 from ..models import *
 from django.db.models import *
 from datetime import datetime, timedelta 
+from decimal import Decimal
 
 # GRN List API
 
@@ -276,7 +277,33 @@ class T_GRNViewUpdate(CreateAPIView):
                 
                 GRNupdate_Serializer = T_GRNSerializer(GRNupdateByID, data=GRNupdatedata)
                 if GRNupdate_Serializer.is_valid():
-                    GRNupdate_Serializer.save()
+                    GRNupdate_Serializer.save()                    
+                print("SHSHSHSH")   
+                # TC_GRNExpenses save
+                # TC_GRNExpenses.objects.filter(grn_id=id).delete()
+
+                # Save new GRNExpenses data
+                total_expense_amount = 0
+                for exp in GRNupdatedata.get('GRNExpenses', []):
+                    # print(exp)
+                    expense = TC_GRNExpenses.objects.create(
+                        GRN_id=id,                        
+                        Ledger_id=exp.get('Ledger',0),
+                        Amount=Decimal(exp.get('Amount', 0) or 0),
+                        GSTPercentage=exp.get('GSTPercentage', 0),
+                        CGST=exp.get('CGST', 0),
+                        SGST=exp.get('SGST', 0),
+                        IGST=exp.get('IGST', 0),
+                        BasicAmount=exp.get('BasicAmount', 0)
+                    )
+                    
+                    total_expense_amount += Decimal(expense.Amount or 0)
+
+                    # Update TotalExpenses in T_GRNs
+                    GRNupdateByID.TotalExpenses = total_expense_amount
+                    GRNupdateByID.save()
+                    
+                    
                     log_entry = create_transaction_logNew(request, GRNupdatedata, 0,'GRN Updated - ID: ' + str(id), 450, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GRN Updated Successfully', 'Data': []})
                 else:
@@ -285,7 +312,7 @@ class T_GRNViewUpdate(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': False, 'Message': GRNupdate_Serializer.errors, 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, GRNupdatedata, 0, 'GRNEdit:' + str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': Exception(e), 'Data': []})
         
         
 
