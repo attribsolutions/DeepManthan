@@ -967,10 +967,12 @@ class DeleteAccountingGRNView(CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     @transaction.atomic()
-    def put(self, request, id=0):
+    def post(self, request):
+        GRNdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                GRN = T_GRNs.objects.get(id=id) 
+                DeletedGRN_id=GRNdata['id']
+                GRN = T_GRNs.objects.get(id=DeletedGRN_id) 
                 print(GRN)
                 #GRN record update (ISSave=1, TotalExpenses=0)
                 GRN.IsSave = 1
