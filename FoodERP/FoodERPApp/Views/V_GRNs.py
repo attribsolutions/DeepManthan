@@ -49,7 +49,7 @@ class GRNListFilterView(CreateAPIView):
                 # print('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')    
                 query =T_GRNs.objects.raw(f''' select G.id,  G.GRNDate, G.Customer_id, G.GRNNumber, G.FullGRNNumber,G.InvoiceNumber,G.GrandTotal, G.Party_id, G.CreatedBy, G.UpdatedBy,G.CreatedOn, G.Comment
                                             ,party.Name PartyName,cust.Name customerName,cust.id customerid,T_Invoices.InvoiceNumber,
-                                          T_Invoices.InvoiceDate,party.id PartyID,T_Invoices.id InvoiceID,T_Invoices.FullInvoiceNumber, G.IsSave
+                                          T_Invoices.InvoiceDate,party.id PartyID,T_Invoices.id InvoiceID,T_Invoices.FullInvoiceNumber, G.IsSave,G.TotalExpenses
                                           from T_GRNs G
 
 join M_Parties party on party.id=G.Party_id
@@ -113,7 +113,8 @@ where GRNDate between %s and %s and G.Customer_id= %s and IsGRNType={IsGRNType} 
                                 "PartyName": a.PartyName,
                                 "CreatedOn" : a.CreatedOn,
                                 "POType":POType,
-                                "IsSave" : a.IsSave
+                                "IsSave" : a.IsSave,
+                                "TotalExpenses":a.TotalExpenses
 
                             })
                     # print(GRNListData)
@@ -277,8 +278,7 @@ class T_GRNViewUpdate(CreateAPIView):
                 
                 GRNupdate_Serializer = T_GRNSerializer(GRNupdateByID, data=GRNupdatedata)
                 if GRNupdate_Serializer.is_valid():
-                    GRNupdate_Serializer.save()                    
-                print("SHSHSHSH")   
+                    GRNupdate_Serializer.save()  
                 # TC_GRNExpenses save
                 # TC_GRNExpenses.objects.filter(grn_id=id).delete()
 
