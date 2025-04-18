@@ -37,6 +37,10 @@ class TC_GRNItemsSerializer(serializers.ModelSerializer):
         fields = ['Item', 'Quantity', 'Unit', 'BaseUnitQuantity', 'MRP', 'ReferenceRate', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount',
                   'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'BatchDate', 'BatchCode','SystemBatchCode','SystemBatchDate','GSTPercentage','MRPValue','QtyInBox','QtyInKg','QtyInNo','ActualQuantity','DiscrepancyComment','DiscrepancyReason','AccountingQuantity']
 
+class TC_GRNExpensesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TC_GRNExpenses
+        fields = '__all__'
 class T_GRNSerializer(serializers.ModelSerializer):
 
     GRNItems = TC_GRNItemsSerializer(many=True)
@@ -44,9 +48,11 @@ class T_GRNSerializer(serializers.ModelSerializer):
     O_LiveBatchesList=O_LiveBatchesSerializer(many=True, required=False)
     
     GRNReferences = TC_GRNReferencesSerializer(many=True) 
+    
+    GRNExpenses = TC_GRNExpensesSerializer(many=True, required=False)
     class Meta:
         model = T_GRNs
-        fields = ['GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber','InvoiceNumber','InvoiceDate','GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy', 'IsSave', 'Comment','IsGRNType', 'GRNItems','O_LiveBatchesList','GRNReferences']
+        fields = ['GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber','InvoiceNumber','InvoiceDate','GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy', 'IsSave', 'Comment','IsGRNType', 'GRNItems','O_LiveBatchesList','GRNReferences','GRNExpenses']
        
     def create(self, validated_data):
        
