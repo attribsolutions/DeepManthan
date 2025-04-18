@@ -969,11 +969,11 @@ class DeleteAccountingGRNView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
-        AcoountGRNdata = JSONParser().parse(request)
+        GRNdata = JSONParser().parse(request)
         # print(GRNdata)
         try:
             with transaction.atomic():
-                DeletedGRN_id=AcoountGRNdata['GRNid']
+                DeletedGRN_id=GRNdata['GRNid']
                 # print(DeletedGRN_id)
                 GRN = T_GRNs.objects.get(id=DeletedGRN_id) 
                 # print(GRN)
@@ -985,10 +985,12 @@ class DeleteAccountingGRNView(CreateAPIView):
                 TC_GRNItems.objects.filter(GRN=DeletedGRN_id).update(AccountingQuantity=0)
                 # GRNExpenses delete record
                 TC_GRNExpenses.objects.filter(GRN_id=DeletedGRN_id).delete()
-                create_transaction_logNew(request, {'GRNID': DeletedGRN_id}, 0, 'Accounting GRN marked as deleted', 457, 0)
+                log_entry =create_transaction_logNew(request, {'GRNID': DeletedGRN_id}, 0, 'Accounting GRN marked as deleted', 457, 0)
                 return JsonResponse({'StatusCode': 200,'Status': True,'Message': 'Accounting GRN marked as deleted.','Data': []})
 
-        
+        except T_GRNs.DoesNotExist:
+            log_entry = create_transaction_logNew(request, {'GRNID': DeletedGRN_id}, 0, '', 457, 0)
+            return JsonResponse({'StatusCode': 204,'Status': False,'Message': 'GRN not found.','Data': []})
         except Exception as e:
-            create_transaction_logNew(request, {'GRNID': DeletedGRN_id}, 0, 'Error updating GRN: ' + str(e), 33, 0)
+            log_entry =create_transaction_logNew(request, {'GRNID': DeletedGRN_id}, 0, 'Error updating GRN: ' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400,'Status': False,'Message': str(e),'Data': [] })
