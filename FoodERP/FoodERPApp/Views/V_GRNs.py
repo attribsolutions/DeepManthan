@@ -969,11 +969,11 @@ class DeleteAccountingGRNView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
-        GRNdata = JSONParser().parse(request)
-        print(GRNdata)
+        AcoountGRNdata = JSONParser().parse(request)
+        # print(GRNdata)
         try:
             with transaction.atomic():
-                DeletedGRN_id=GRNdata['GRNid']
+                DeletedGRN_id=AcoountGRNdata['GRNid']
                 # print(DeletedGRN_id)
                 GRN = T_GRNs.objects.get(id=DeletedGRN_id) 
                 # print(GRN)
