@@ -29,21 +29,35 @@ class TallyDataListView(CreateAPIView):
                 TallyDetails = []
                 
                 if Mode == "Purchase":
-                    tallyquery = TC_GRNItems.objects.raw(f'''SELECT T_GRNs.id, T_GRNs.InvoiceNumber, T_GRNs.InvoiceDate, M_Parties.id AS PartyCode, M_Parties.Name AS PartyName,
-                                                            M_Items.id AS ItemCode, M_Items.Name AS ItemName, M_GSTHSNCode.HSNCode, GI.Rate,
-                                                            GI.Quantity,  M_Units.Name as UnitName, GI.DiscountType, GI.Discount AS DiscountPercentage,
-                                                            GI.DiscountAmount, GI.BasicAmount AS TaxableValue, GI.CGSTPercentage, GI.CGST, GI.SGSTPercentage,
-                                                            GI.SGST, GI.IGSTPercentage, GI.IGST, GI.GSTPercentage, GI.GSTAmount, GI.Amount AS TotalValue,
-                                                            0 AS TCSTaxAmount, T_GRNs.GrandTotal, 'create' AS Statuss, M_Users.LoginName AS User
-                                                            FROM T_GRNs 
-                                                            JOIN TC_GRNItems GI ON T_GRNs.id = GI.GRN_id
-                                                            JOIN MC_ItemUnits ON GI.Unit_id = MC_ItemUnits.id
-                                                            JOIN M_Units on MC_ItemUnits.UnitID_id = M_Units.id
-                                                            JOIN M_Parties ON M_Parties.id = T_GRNs.Customer_id
-                                                            JOIN M_Items ON M_Items.id = GI.Item_id
-                                                            JOIN M_GSTHSNCode ON M_GSTHSNCode.id = GI.GST_id
-                                                            JOIN M_Users ON M_Users.id = T_GRNs.CreatedBy
-                                                            WHERE M_Parties.Company_id = 4 AND T_GRNs.IsTallySave=0''')
+                    query=(f''' SELECT * FROM (SELECT GRN.id ,GRN.InvoiceNumber,
+                    GRN.InvoiceDate,
+                    P.id AS PartyCode,P.Name AS PartyName,I.id AS ItemCode,I.Name AS ItemName,H.HSNCode,
+                    GI.Rate ,GI.Quantity,U.Name AS UnitName,GI.DiscountType,GI.Discount AS DiscountPercentage,
+                    GI.DiscountAmount,GI.BasicAmount AS TaxableValue,GI.CGSTPercentage,GI.CGST,GI.SGSTPercentage,GI.SGST,
+                    GI.IGSTPercentage,GI.IGST,GI.GSTPercentage,GI.GSTAmount,GI.Amount AS TotalValue,0 AS TCSTaxAmount,
+                    GRN.GrandTotal,'create' AS Statuss,U2.LoginName AS User,'Item' AS EntryType FROM T_GRNs GRN
+                    JOIN TC_GRNItems GI ON GRN.id = GI.GRN_id JOIN M_Parties P ON GRN.Customer_id = P.id
+                    JOIN M_Items I ON GI.Item_id = I.id JOIN M_GSTHSNCode H ON GI.GST_id = H.id
+                    JOIN MC_ItemUnits IU ON GI.Unit_id = IU.id JOIN M_Units U ON IU.UnitID_id = U.id
+                    JOIN M_Users U2 ON GRN.CreatedBy = U2.id  WHERE P.Company_id = 4 AND GRN.IsTallySave = 0
+                    UNION ALL
+
+                    SELECT GRN.id ,
+                    GRN.InvoiceNumber,GRN.InvoiceDate,P.id AS PartyCode,P.Name AS PartyName,NULL AS ItemCode,L.Name AS ItemName,
+                    L.HSN AS HSNCode,NULL AS Rate,NULL AS Quantity,NULL AS UnitName,
+                    NULL AS DiscountType,NULL AS DiscountPercentage, NULL AS DiscountAmount,
+                    E.BasicAmount AS TaxableValue,"" CGSTPercentage,E.CGST AS CGST,
+                    "" SGSTPercentage,E.SGST AS SGST,""IGSTPercentage,E.IGST AS IGST,E.GSTPercentage AS GSTPercentage,
+                    0 as GSTAmount,E.Amount AS TotalValue,0 AS TCSTaxAmount,GRN.GrandTotal,'create' AS Statuss,
+                    U2.LoginName AS User,'Ledger' AS EntryType
+                    FROM T_GRNs GRN
+                    JOIN TC_GRNExpenses E ON GRN.id = E.GRN_id
+                    JOIN M_Ledger L ON E.Ledger_id = L.id
+                    LEFT JOIN M_AccountGroupType AGT ON L.AccountGroupType_id = AGT.id
+                    JOIN M_Parties P ON GRN.Customer_id = P.id
+                    JOIN M_Users U2 ON GRN.CreatedBy = U2.id
+                    WHERE P.Company_id = 4 AND GRN.IsTallySave = 0)B Order by B.id''')
+                    tallyquery = TC_GRNItems.objects.raw(query)
                     ID = "PurchaseID"
                 
                 elif Mode == "Sale":
