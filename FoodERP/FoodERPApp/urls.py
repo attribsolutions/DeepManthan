@@ -339,6 +339,8 @@ urlpatterns = [
             url(r'InvoicesFilterSecond$', InvoiceListFilterViewSecond.as_view()),
             url(r'InvoiceNoList$', InvoiceNoView.as_view()),
             url(r'BulkInvoices$', BulkInvoiceView.as_view()), #InvoiceExcelUpload
+            url(r'InvoiceReferesh$', InvoiceItemWiseProduction.as_view()),
+            
             
             url(r'Uploaded_EInvoicea/([0-9]+)/([0-9]+)/([0-9]+)$', Uploaded_EInvoice.as_view()),
             url(r'Uploaded_EwayBill/([0-9]+)/([0-9]+)/([0-9]+)$', Uploaded_EwayBill.as_view()),
@@ -367,7 +369,7 @@ urlpatterns = [
             url(r'GRNFilter$', GRNListFilterView.as_view()),
             url(r'GRNSaveforCSS$', GRNSaveforCSSView.as_view()),
             url(r'DeleteAccountingGRN/([0-9]+)$',DeleteAccountingGRNView.as_view()),
-            
+           
 
             
             
