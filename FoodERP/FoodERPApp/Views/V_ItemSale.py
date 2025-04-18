@@ -23,6 +23,7 @@ class ItemSaleReportView(CreateAPIView):
                 PartyType =Reportdata['PartyType']
                 Party = Reportdata['Party']
                 EmployeeID = Reportdata['Employee']
+                ItemID = Reportdata['ItemID']
                 
                 
 
@@ -108,6 +109,15 @@ class ItemSaleReportView(CreateAPIView):
                     else:    
                         Invoicequery += ' AND Sup.id = %s'
                         SPOSInvoicequery += ' AND Sup.id = %s'
+                if ItemID == "0":
+                    Invoicequery += ' '
+                    SPOSInvoicequery += ' '
+                    
+                else:    
+                    Invoicequery += ' AND M_Items.id in %s'
+                    SPOSInvoicequery += ' AND M_Items.id in %s'
+                    Item_values =  ItemID.split(',')
+                    parameters.append(Item_values)
                 
                 q1 = T_Invoices.objects.raw(Invoicequery,parameters)
               

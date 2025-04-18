@@ -1057,8 +1057,18 @@ class BulkInvoiceView(CreateAPIView):
                     for aa in Invoicedata['BulkData']:
                         
                         aa['InvoiceNumber']=1   #Invoice Import 
+                        today = datetime.strptime(Invoicedata['BulkData'][0]['InvoiceDate'], "%Y-%m-%d")
+                        if today.month >= 4:
+                            fy_start = datetime(today.year, 4, 1)
+                            fy_end = datetime(today.year + 1, 3, 31)
+                        else:
+                            fy_start = datetime(today.year - 1, 4, 1)
+                            fy_end = datetime(today.year, 3, 31)
 
-                        checkduplicate=T_Invoices.objects.filter(FullInvoiceNumber=aa['FullInvoiceNumber'] ,Party=aa['Party'])
+                           
+                        
+                        checkduplicate=T_Invoices.objects.filter(FullInvoiceNumber=aa['FullInvoiceNumber'] ,Party=aa['Party'],InvoiceDate__range=(fy_start, fy_end))
+                        
                         if checkduplicate:
                             return JsonResponse({'StatusCode': 226, 'Status': True,  'Message': 'Invoice No : '+ str(aa['FullInvoiceNumber']) +' already Uploaded ', 'Data':[]})
                         else:
