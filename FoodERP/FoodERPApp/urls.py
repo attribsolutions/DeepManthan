@@ -368,7 +368,7 @@ urlpatterns = [
             url(r'GRNUpdate/([0-9]+)$',T_GRNViewUpdate.as_view()),
             url(r'GRNFilter$', GRNListFilterView.as_view()),
             url(r'GRNSaveforCSS$', GRNSaveforCSSView.as_view()),
-            url(r'DeleteAccountingGRN$',DeleteAccountingGRNView.as_view()),
+            url(r'DeleteAccountingGRN/([0-9]+)$',DeleteAccountingGRNView.as_view()),
            
 
             
