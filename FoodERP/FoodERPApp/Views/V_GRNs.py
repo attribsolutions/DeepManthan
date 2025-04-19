@@ -400,6 +400,7 @@ class T_GRNViewSecond(CreateAPIView):
                     "GRNNumber": a['GRNNumber'],
                     "FullGRNNumber": a['FullGRNNumber'],
                     "InvoiceNumber": a['InvoiceNumber'],
+                    "InvoiceDate" : a["InvoiceDate"],
                     "GrandTotal": a['GrandTotal'],
                     "Party": a['Party']['id'],
                     "PartyName": a['Party']['Name'],
