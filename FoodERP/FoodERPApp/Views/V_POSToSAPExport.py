@@ -29,8 +29,8 @@ class SAPExportViewDetails(APIView):
             # Call the orchestrator method
             self.File1(Party,InvoiceDate)
             self.File2(Party,InvoiceDate)            
-            self.File3(Party,InvoiceDate) 
-            return JsonResponse({'message': 'Files are uploaded successfully'}, status=200)
+            ss= self.File3(Party,InvoiceDate) 
+            return JsonResponse(ss)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)   
     
