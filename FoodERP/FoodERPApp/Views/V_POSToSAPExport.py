@@ -28,8 +28,8 @@ class SAPExportViewDetails(APIView):
             
             # Call the orchestrator method
             self.File1(Party,InvoiceDate)
-            self.File3(Party,InvoiceDate)            
-            self.File2(Party,InvoiceDate) 
+            self.File2(Party,InvoiceDate)            
+            self.File3(Party,InvoiceDate) 
             return JsonResponse({'message': 'Files are uploaded successfully'}, status=200)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)   
@@ -114,8 +114,7 @@ class SAPExportViewDetails(APIView):
         except Exception as exc:
             # Log and return the error
             self.insert_pos_log(1, "Failed1", str(exc),Party,InvoiceDate)
-            return JsonResponse({'error': str(exc)}, status=500)
-            raise
+            return ({'StatusCode': 400, 'Status': True, 'Message':  str(exc), 'Data':[]})
             
     def File3(self, Party,InvoiceDate):
         try:
@@ -167,11 +166,12 @@ class SAPExportViewDetails(APIView):
 
             # Upload to FTP
             self.upload_to_ftp(ftp_file_path, user_name, password, csv_content,Party,InvoiceDate)           
-            pass
+            return ({'StatusCode': 200, 'Status': True,'Message': file_name +' File uploaded successfully ', 'Data': []})
         except Exception as exc:
             # Log and raise error
             self.insert_pos_log(3, "Failed3", str(exc),Party,InvoiceDate)
-            raise
+            return ({'StatusCode': 400, 'Status': True, 'Message':  str(exc), 'Data':[]})
+         
         
     def File2(self, Party,InvoiceDate):
         try:
@@ -230,7 +230,7 @@ class SAPExportViewDetails(APIView):
         except Exception as exc:
             # Log and raise error
             self.insert_pos_log(2, "Failed2", str(exc),Party,InvoiceDate)
-            raise
+            return ({'StatusCode': 400, 'Status': True, 'Message':  str(exc), 'Data':[]})
         
     def generate_csv(self, headers, rows):
         """Generate CSV content as bytes."""

@@ -333,6 +333,17 @@ class T_GRNViewSecond(CreateAPIView):
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRN_serializer})
                 GRNItemListData = list()
                 for a in GRN_serializer['GRNItems']:
+                    GSTquery=GSTListFun(a['Item']['id'],GRN_serializer['Customer']['id'],0) 
+                    if GSTquery.exists():
+                        # Gstdata = ItemGSTHSNSerializerSecond(GSTquery, many=True).data
+                        ItemGSTDetails = list()
+                        for e in GSTquery:
+                            ItemGSTDetails.append({
+                            "GST": e['id'],
+                            "GSTPercentage": e['GSTPercentage'],   
+                        })
+                    
+                    
                     GRNItemListData.append({
                         "Item": a['Item']['id'],
                         "ItemName": a['Item']['Name'],
@@ -348,6 +359,7 @@ class T_GRNViewSecond(CreateAPIView):
                         "TaxType": a['TaxType'],
                         "GST": a['GST']['id'],
                         "GSTPercentage": a['GSTPercentage'],
+                        "GSTDropdown":ItemGSTDetails,
                         "HSNCode": a['GST']['HSNCode'],
                         "GSTAmount": a['GSTAmount'],
                         "Amount": a['Amount'],
