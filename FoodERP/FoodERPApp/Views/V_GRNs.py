@@ -16,6 +16,7 @@ from django.db.models import *
 from datetime import datetime, timedelta 
 from decimal import Decimal
 from rest_framework.views import APIView
+from django.forms.models import model_to_dict
 
 # GRN List API
 
@@ -261,7 +262,13 @@ class T_GRNViewUpdate(APIView):
         try:
             with transaction.atomic():
                 GRNupdateByID = T_GRNs.objects.get(id=id)
-                print(GRNupdateByID)
+                gg = T_GRNs.objects.filter(id=id).values('AccountingGRNStatus')
+                print(gg[0]['AccountingGRNStatus'])
+                
+                if gg[0]['AccountingGRNStatus'] == 1:
+                    # gg.update(AccountingGRNStatus=2)
+                    GRNupdatedata['AccountingGRNStatus'] = 2
+                    
                 
                 for item in GRNupdatedata['GRNItems']:
                     BaseUnitQuantity = UnitwiseQuantityConversion(
@@ -276,7 +283,7 @@ class T_GRNViewUpdate(APIView):
                     QtyInBox = UnitwiseQuantityConversion(
                         item['Item'], item['Quantity'], item['Unit'], 0, 0, 4, 0).ConvertintoSelectedUnit()
                     item['QtyInBox'] = QtyInBox
-                
+                print(GRNupdatedata)
                 GRNupdate_Serializer = T_GRNSerializer(GRNupdateByID, data=GRNupdatedata)
                 if GRNupdate_Serializer.is_valid():
                     GRNupdate_Serializer.save()  
@@ -302,6 +309,7 @@ class T_GRNViewUpdate(APIView):
 
                         # Update TotalExpenses in T_GRNs
                     GRNupdateByID.TotalExpenses = total_expense_amount
+                    
                     GRNupdateByID.save()
                         
                         
@@ -981,19 +989,21 @@ class DeleteAccountingGRNView(APIView):
     permission_classes = [IsAuthenticated]
 
     @transaction.atomic()
-    def put(self, request,id=0):
-        # AccountDetails= JSONParser().parse(request)
+    def post(self, request):
+        AccountDetails= JSONParser().parse(request)
        
         try:
             with transaction.atomic():
-                # DeletedGRN_id=AccountDetails['GRNid']
+                id=AccountDetails['GRNid']
                 # print(DeletedGRN_id)
-                GRN = T_GRNs.objects.get(id=id) 
-                # print(GRN)
+                GRN = T_GRNs.objects.filter(id=id).update(IsSave = 1,TotalExpenses = 0,AccountingGRNStatus = 1) 
+                # print('kkjfdgfsvttf',GRN)
                 #GRN record update (ISSave=1, TotalExpenses=0)
-                GRN.IsSave = 1
-                GRN.TotalExpenses = 0
-                GRN.save()
+                # GRN.IsSave = 1
+                # GRN.TotalExpenses = 0
+                # GRN.AccountingGRNStatus = 1
+                # GRN.AccountingQuantity = 0
+                # GRN.save()
                 #GRNItems update - AccountingQuantity = 0
                 TC_GRNItems.objects.filter(GRN=id).update(AccountingQuantity=0)
                 # GRNExpenses delete record
@@ -1006,4 +1016,4 @@ class DeleteAccountingGRNView(APIView):
             return JsonResponse({'StatusCode': 204,'Status': False,'Message': 'GRN not found.','Data': []})
         except Exception as e:
             log_entry =create_transaction_logNew(request, {'GRNID':id}, 0, 'Error updating GRN: ' + str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400,'Status': False,'Message': str(e),'Data': [] })
+            return JsonResponse({'StatusCode': 400,'Status': False,'Message': Exception(e),'Data': [] })
