@@ -99,7 +99,7 @@ class TallyDataListView(CreateAPIView):
                                                                 TI.Quantity,  M_Units.Name as UnitName, TI.DiscountType, TI.Discount AS DiscountPercentage,
                                                                 TI.DiscountAmount, TI.BasicAmount AS TaxableValue, TI.CGSTPercentage, TI.CGST, TI.SGSTPercentage,
                                                                 TI.SGST, TI.IGSTPercentage, TI.IGST, TI.GSTPercentage, TI.GSTAmount, TI.Amount AS TotalValue,
-                                                                0 AS TCSTaxAmount, T_DeletedInvoices.GrandTotal, 'Canceled' AS Statuss, M_Users.LoginName AS User,0 as TotalExpenses
+                                                                0 AS TCSTaxAmount, T_DeletedInvoices.GrandTotal, 'Canceled' AS Statuss, M_Users.LoginName AS User,T_DeletedInvoices.RoundOffAmount RoundOff,0 as TotalExpenses
                                                                 FROM T_DeletedInvoices 
                                                                 JOIN TC_DeletedInvoiceItems TI ON T_DeletedInvoices.Invoice = TI.Invoice
                                                                 JOIN MC_ItemUnits ON TI.Unit = MC_ItemUnits.id
