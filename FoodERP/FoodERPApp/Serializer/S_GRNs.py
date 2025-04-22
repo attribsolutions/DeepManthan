@@ -215,7 +215,7 @@ class T_GRNSerializerForGET(serializers.ModelSerializer):
     
     class Meta:
         model = T_GRNs
-        fields = ['id', 'GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber','InvoiceDate','InvoiceNumber','GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy','CreatedOn', 'Comment', 'IsSave', 'GRNReferences', 'GRNItems']
+        fields = ['id', 'GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber','InvoiceDate','InvoiceNumber','GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy','CreatedOn', 'Comment', 'IsSave', 'GRNReferences','RoundOffAmount', 'GRNItems']
 
     def get_PriceList_id(self, obj):
         return obj.PriceList_id
