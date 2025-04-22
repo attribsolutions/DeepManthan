@@ -533,7 +533,7 @@ class M_Roles(models.Model):
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
     Company = models.ForeignKey(C_Companies, related_name='RoleCompany', on_delete=models.PROTECT)
-    IdentifyKey = models.IntegerField()
+    IdentifyKey = models.IntegerField(null=True,blank=True)
 
     class Meta:
         db_table = "M_Roles"
@@ -645,6 +645,8 @@ class M_GroupType(models.Model):
     UpdatedOn = models.DateTimeField(auto_now=True)
     IsReserved = models.BooleanField(default=False)
     Sequence = models.DecimalField(max_digits=5, decimal_places=2,null=True,blank=True)
+    IsPos = models.BooleanField(default=False)
+    Company = models.ForeignKey(C_Companies, related_name='ItemGroupTypeCompany', on_delete=models.PROTECT)
     class Meta:
         db_table = "M_GroupType"
 
@@ -1129,6 +1131,7 @@ class T_GRNs(models.Model):
     FullGRNNumber = models.CharField(max_length=500)
     InvoiceNumber = models.CharField(max_length=300) # This Invoice Number  - Vendors Invoice Number
     GrandTotal = models.DecimalField(max_digits=20, decimal_places=2)
+    RoundOffAmount = models.DecimalField(max_digits=15, decimal_places=2)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
@@ -1142,6 +1145,7 @@ class T_GRNs(models.Model):
     IsTallySave = models.BooleanField(default=False)
     IsGRNType = models.BooleanField(default=False)
     TotalExpenses = models.DecimalField(max_digits=20, decimal_places=2,null=True,blank=True)
+    AccountingGRNStatus = models.IntegerField() 
     class Meta:
         db_table = "T_GRNs"
 
@@ -2218,9 +2222,9 @@ class T_DeletedInvoices(models.Model):
     Party = models.IntegerField(null=True)
     Vehicle = models.IntegerField(null=True)
     TCSAmount = models.DecimalField(max_digits=20, decimal_places=2)
-
     Hide = models.BooleanField()
     DeletedOn = models.DateTimeField(auto_now_add=True) 
+    IsTallySave = models.BooleanField(default=False)
 
     class Meta:
         db_table = "T_DeletedInvoices"        
@@ -2503,6 +2507,9 @@ class M_GiftVoucherCode(models.Model):
 
     class Meta:
         db_table = "M_GiftVoucherCode"
+        indexes = [
+            models.Index(fields=['client', 'ClientSaleID']),
+        ] 
 
 # class debug_log(models.Model):
 #     debug_message = models.CharField(max_length=300, null=True)

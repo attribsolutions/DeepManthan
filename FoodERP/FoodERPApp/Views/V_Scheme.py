@@ -37,7 +37,7 @@ class SchemeView(CreateAPIView):
                     
                     data = []
                     for Scheme in SchemeDetails:   
-                        qr_codes = M_SchemeQRs.objects.filter(SchemeID_id=Scheme.id).values('id', 'QRCode')
+                        qr_codes = MC_SchemeQRs.objects.filter(SchemeID_id=Scheme.id).values('id', 'QRCode')
                         qr_list = [{"QRID": qr['id'], "QRCode": qr['QRCode']} for qr in qr_codes]
 
                         SchemeItems = MC_SchemeItems.objects.filter(SchemeID=Scheme.id).values('TypeForItem', 'Item')
