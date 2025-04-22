@@ -1408,21 +1408,38 @@ class InvoiceItemWiseProduction(CreateAPIView):
                 Item = ProductionItemWisedata['Item']             
                 ItemWiseProductionStockQuery=O_BatchWiseLiveStock.objects.raw(f'''select O_BatchWiseLiveStock.id,
                 O_BatchWiseLiveStock.Item_id ItemID,
-                O_LiveBatches.BatchCode ,O_LiveBatches.BatchDate,O_LiveBatches.SystemBatchCode,
+                O_LiveBatches.BatchCode ,O_LiveBatches.BatchDate,O_LiveBatches.SystemBatchCode,MC_ItemUnits.BaseUnitConversion,
                 O_LiveBatches.SystemBatchDate,O_LiveBatches.id LiveBatcheid,O_LiveBatches.MRP_id LiveBatcheMRPID,
-                O_LiveBatches.GST_id LiveBatcheGSTID,O_BatchWiseLiveStock.BaseUnitQuantity, O_LiveBatches.Rate 
-                from O_BatchWiseLiveStock 
-                JOIN  o_livebatches ON o_livebatches.id=O_BatchWiseLiveStock.LiveBatche_id
+                O_LiveBatches.GST_id LiveBatcheGSTID,O_BatchWiseLiveStock.BaseUnitQuantity,ifnull(O_LiveBatches.Rate,0)Rate,
+                (case when O_LiveBatches.MRP_id is null then O_LiveBatches.MRPValue else M_MRPMaster.MRP end )MRP,
+                (case when O_LiveBatches.GST_id is null then O_LiveBatches.GSTPercentage else M_GSTHSNCode.GSTPercentage end )GST 
+                FROM O_BatchWiseLiveStock 
+                JOIN  O_LiveBatches ON O_LiveBatches.id=O_BatchWiseLiveStock.LiveBatche_id
+                join M_Items on M_Items.id =O_BatchWiseLiveStock.Item_id
+                left join M_MRPMaster on M_MRPMaster.id=O_LiveBatches.MRP_id
+                join M_GSTHSNCode on M_GSTHSNCode.id=O_LiveBatches.GST_id
+                join MC_ItemUnits on MC_ItemUnits.id=O_BatchWiseLiveStock.Unit_id
                 where O_BatchWiseLiveStock.Item_id={Item} and O_BatchWiseLiveStock.Party_id={Party} 
                 and O_BatchWiseLiveStock.BaseUnitQuantity > 0 and IsDamagePieces=0 ''')              
                 if ItemWiseProductionStockQuery:
                     BatchDetails=list()
-                    for row in ItemWiseProductionStockQuery:
+                    for d in ItemWiseProductionStockQuery:
                         BatchDetails.append({                            
-                           "BatchCode": row.BatchCode,
-                           "BatchDate":row.BatchDate,
-                           "Rate":row.Rate,
-                           "BaseUnitQuantity":row.BaseUnitQuantity     
+                           
+                                "id": d.id,
+                                "Item":d.ItemID,
+                                "BatchDate":d.BatchDate,
+                                "BatchCode":d.BatchCode,
+                                "SystemBatchDate":d.SystemBatchDate,
+                                "SystemBatchCode":d.SystemBatchCode,
+                                "LiveBatche" : d.LiveBatcheid,
+                                "LiveBatcheMRPID" : d.LiveBatcheMRPID,
+                                "LiveBatcheGSTID" : d.LiveBatcheGSTID,
+                                "Rate":round(d.Rate,2),
+                                "MRP" : d.MRP,
+                                "GST" : d.GST,
+                                "UnitName":d.BaseUnitConversion, 
+                                "BaseUnitQuantity":d.BaseUnitQuantity,  
                            
                         })
                     log_entry = create_transaction_logNew( request, BatchDetails, Party, '', 458, 0,0,0,0)
