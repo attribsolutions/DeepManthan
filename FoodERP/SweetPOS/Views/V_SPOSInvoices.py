@@ -632,7 +632,7 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                         "TopSaleItems": TopSaleItems_List
                     })
                 if Party_List:
-                    log_entry = create_transaction_logNew(request, SaleData, 0, 'TopSaleItems:' + str(Party_List), 390, 0)
+                    log_entry = create_transaction_logNew( request,{"RequestData": SaleData, "TopSaleItems": str(Party_List)},0, 'TopSaleItems-> Details available in child table',390,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Party_List})
                 else:
                     log_entry = create_transaction_logNew(request, SaleData, Party, 'Record Not Found', 390, 0)
