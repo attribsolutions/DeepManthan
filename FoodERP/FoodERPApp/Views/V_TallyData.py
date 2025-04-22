@@ -38,13 +38,16 @@ class TallyDataListView(CreateAPIView):
                     GRN.GrandTotal,
                     CASE AccountingGRNStatus
                         WHEN 0 THEN 'Created'
-                        WHEN 1 THEN 'Canceld'
-                        ELSE 'Edited'END AS Statuss,U2.LoginName AS User,'Item' AS EntryType, 
+                        WHEN 1 THEN 'Canceled'
+                        ELSE 'Edited'END AS Statuss,U2.LoginName AS User, 
                     GRN.RoundOffAmount RoundOff,GRN.TotalExpenses
                     FROM T_GRNs GRN
-                    JOIN TC_GRNItems GI ON GRN.id = GI.GRN_id JOIN M_Parties P ON GRN.Party_id = P.id
-                    JOIN M_Items I ON GI.Item_id = I.id JOIN M_GSTHSNCode H ON GI.GST_id = H.id
-                    JOIN MC_ItemUnits IU ON GI.Unit_id = IU.id JOIN M_Units U ON IU.UnitID_id = U.id
+                    JOIN TC_GRNItems GI ON GRN.id = GI.GRN_id 
+                    JOIN M_Parties P ON GRN.Party_id = P.id
+                    JOIN M_Items I ON GI.Item_id = I.id 
+                    JOIN M_GSTHSNCode H ON GI.GST_id = H.id
+                    JOIN MC_ItemUnits IU ON GI.Unit_id = IU.id 
+                    JOIN M_Units U ON IU.UnitID_id = U.id
                     JOIN M_Users U2 ON GRN.CreatedBy = U2.id  
                     WHERE P.Company_id = 4 AND GRN.IsTallySave = 0 
                     AND ((IsSave=0 and AccountingGRNStatus=0) OR (IsSave=1 and AccountingGRNStatus=1) OR (IsSave=0 and AccountingGRNStatus=2))
@@ -59,9 +62,9 @@ class TallyDataListView(CreateAPIView):
                     0 as GSTAmount,E.Amount AS TotalValue,0 AS TCSTaxAmount,GRN.GrandTotal,
                     CASE AccountingGRNStatus
                         WHEN 0 THEN 'Created'
-                        WHEN 1 THEN 'Canceld'
+                        WHEN 1 THEN 'Canceled'
                         ELSE 'Edited'END AS Statuss,
-                    U2.LoginName AS User,'Ledger' AS EntryType,GRN.RoundOffAmount RoundOff,GRN.TotalExpenses
+                    U2.LoginName AS User,GRN.RoundOffAmount RoundOff,GRN.TotalExpenses
                     FROM T_GRNs GRN
                     JOIN TC_GRNExpenses E ON GRN.id = E.GRN_id
                     JOIN M_Ledger L ON E.Ledger_id = L.id
