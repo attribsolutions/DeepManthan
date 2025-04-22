@@ -14,6 +14,9 @@ from ..Serializer.S_Bom import *
 from ..models import *
 from django.db.models import *
 from datetime import datetime, timedelta 
+from decimal import Decimal
+from rest_framework.views import APIView
+from django.forms.models import model_to_dict
 
 # GRN List API
 
@@ -48,7 +51,7 @@ class GRNListFilterView(CreateAPIView):
                 # print('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')    
                 query =T_GRNs.objects.raw(f''' select G.id,  G.GRNDate, G.Customer_id, G.GRNNumber, G.FullGRNNumber,G.InvoiceNumber,G.GrandTotal, G.Party_id, G.CreatedBy, G.UpdatedBy,G.CreatedOn, G.Comment
                                             ,party.Name PartyName,cust.Name customerName,cust.id customerid,T_Invoices.InvoiceNumber,
-                                          T_Invoices.InvoiceDate,party.id PartyID,T_Invoices.id InvoiceID,T_Invoices.FullInvoiceNumber, G.IsSave
+                                          T_Invoices.InvoiceDate,party.id PartyID,T_Invoices.id InvoiceID,T_Invoices.FullInvoiceNumber, G.IsSave,G.TotalExpenses
                                           from T_GRNs G
 
 join M_Parties party on party.id=G.Party_id
@@ -112,7 +115,8 @@ where GRNDate between %s and %s and G.Customer_id= %s and IsGRNType={IsGRNType} 
                                 "PartyName": a.PartyName,
                                 "CreatedOn" : a.CreatedOn,
                                 "POType":POType,
-                                "IsSave" : a.IsSave
+                                "IsSave" : a.IsSave,
+                                "TotalExpenses":a.TotalExpenses
 
                             })
                     # print(GRNListData)
@@ -250,7 +254,7 @@ class T_GRNView(CreateAPIView):
 
 # UPDATE GRN 
 
-class T_GRNViewUpdate(CreateAPIView):
+class T_GRNViewUpdate(APIView):
     permission_classes = (IsAuthenticated,)
     
     def put(self, request, id=0):
@@ -258,7 +262,13 @@ class T_GRNViewUpdate(CreateAPIView):
         try:
             with transaction.atomic():
                 GRNupdateByID = T_GRNs.objects.get(id=id)
+                gg = T_GRNs.objects.filter(id=id).values('AccountingGRNStatus')
+                print(gg[0]['AccountingGRNStatus'])
                 
+                if gg[0]['AccountingGRNStatus'] == 1:
+                    # gg.update(AccountingGRNStatus=2)
+                    GRNupdatedata['AccountingGRNStatus'] = 2
+                    
                 
                 for item in GRNupdatedata['GRNItems']:
                     BaseUnitQuantity = UnitwiseQuantityConversion(
@@ -273,19 +283,45 @@ class T_GRNViewUpdate(CreateAPIView):
                     QtyInBox = UnitwiseQuantityConversion(
                         item['Item'], item['Quantity'], item['Unit'], 0, 0, 4, 0).ConvertintoSelectedUnit()
                     item['QtyInBox'] = QtyInBox
-                
+                print(GRNupdatedata)
                 GRNupdate_Serializer = T_GRNSerializer(GRNupdateByID, data=GRNupdatedata)
                 if GRNupdate_Serializer.is_valid():
-                    GRNupdate_Serializer.save()
+                    GRNupdate_Serializer.save()  
+                # TC_GRNExpenses save
+                # TC_GRNExpenses.objects.filter(grn_id=id).delete()
+
+                    # Save new GRNExpenses data
+                    total_expense_amount = 0
+                    for exp in GRNupdatedata.get('GRNExpenses', []):                        
+                        expense = TC_GRNExpenses.objects.create(
+                            GRN_id=exp.get('GRN',0),                        
+                            Ledger_id=exp.get('Ledger',0),
+                            Amount=Decimal(exp.get('Amount', 0) or 0),
+                            GSTPercentage=exp.get('GSTPercentage', 0),
+                            CGST=exp.get('CGST', 0),
+                            SGST=exp.get('SGST', 0),
+                            IGST=exp.get('IGST', 0),
+                            BasicAmount=exp.get('BasicAmount', 0)
+                        )
+                        
+                        # total_expense_amount += Decimal(expense.Amount or 0)
+                    total_expense_amount= GRNupdatedata['TotalExpense']
+
+                        # Update TotalExpenses in T_GRNs
+                    GRNupdateByID.TotalExpenses = total_expense_amount
+                    
+                    GRNupdateByID.save()
+                        
+                        
                     log_entry = create_transaction_logNew(request, GRNupdatedata, 0,'GRN Updated - ID: ' + str(id), 450, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GRN Updated Successfully', 'Data': []})
                 else:
                     log_entry = create_transaction_logNew(request, GRNupdatedata, 0, 'GRNEdit:' + str(GRNupdate_Serializer.errors), 450, 0)
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': False, 'Message': GRNupdate_Serializer.errors, 'Data': []})
+                return JsonResponse({'StatusCode': 406, 'Status': False, 'Message': GRNupdate_Serializer.errors, 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, GRNupdatedata, 0, 'GRNEdit:' + str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': Exception(e), 'Data': []})
         
         
 
@@ -305,6 +341,17 @@ class T_GRNViewSecond(CreateAPIView):
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRN_serializer})
                 GRNItemListData = list()
                 for a in GRN_serializer['GRNItems']:
+                    GSTquery=GSTListFun(a['Item']['id'],GRN_serializer['Customer']['id'],0) 
+                    if GSTquery.exists():
+                        # Gstdata = ItemGSTHSNSerializerSecond(GSTquery, many=True).data
+                        ItemGSTDetails = list()
+                        for e in GSTquery:
+                            ItemGSTDetails.append({
+                            "GST": e['id'],
+                            "GSTPercentage": e['GSTPercentage'],   
+                        })
+                    
+                    
                     GRNItemListData.append({
                         "Item": a['Item']['id'],
                         "ItemName": a['Item']['Name'],
@@ -320,6 +367,7 @@ class T_GRNViewSecond(CreateAPIView):
                         "TaxType": a['TaxType'],
                         "GST": a['GST']['id'],
                         "GSTPercentage": a['GSTPercentage'],
+                        "GSTDropdown":ItemGSTDetails,
                         "HSNCode": a['GST']['HSNCode'],
                         "GSTAmount": a['GSTAmount'],
                         "Amount": a['Amount'],
@@ -360,6 +408,7 @@ class T_GRNViewSecond(CreateAPIView):
                     "GRNNumber": a['GRNNumber'],
                     "FullGRNNumber": a['FullGRNNumber'],
                     "InvoiceNumber": a['InvoiceNumber'],
+                    "InvoiceDate" : a["InvoiceDate"],
                     "GrandTotal": a['GrandTotal'],
                     "Party": a['Party']['id'],
                     "PartyName": a['Party']['Name'],
@@ -936,27 +985,35 @@ class GRNSaveforCSSView(CreateAPIView):
 
 
 
-class DeleteAccountingGRNView(CreateAPIView):
+class DeleteAccountingGRNView(APIView):
     permission_classes = [IsAuthenticated]
 
     @transaction.atomic()
-    def delete(self, request, id=0):
+    def post(self, request):
+        AccountDetails= JSONParser().parse(request)
+       
         try:
             with transaction.atomic():
-                GRN = T_GRNs.objects.get(id=id)
-
-                if GRN.IsSave != 0:
-                    return JsonResponse({ 'StatusCode': 400,'Status': False,'Message': 'Only accounting GRNs can be deleted.','Data': [] })
-
-                GRN.IsSave = 1
-                GRN.save()
-
-                create_transaction_logNew(request, {'GRNID': id}, 0, 'Accounting GRN marked as deleted', 457, 0)
+                id=AccountDetails['GRNid']
+                # print(DeletedGRN_id)
+                GRN = T_GRNs.objects.filter(id=id).update(IsSave = 1,TotalExpenses = 0,AccountingGRNStatus = 1) 
+                # print('kkjfdgfsvttf',GRN)
+                #GRN record update (ISSave=1, TotalExpenses=0)
+                # GRN.IsSave = 1
+                # GRN.TotalExpenses = 0
+                # GRN.AccountingGRNStatus = 1
+                # GRN.AccountingQuantity = 0
+                # GRN.save()
+                #GRNItems update - AccountingQuantity = 0
+                TC_GRNItems.objects.filter(GRN=id).update(AccountingQuantity=0)
+                # GRNExpenses delete record
+                TC_GRNExpenses.objects.filter(GRN_id=id).delete()
+                log_entry =create_transaction_logNew(request, {'GRNID':id}, 0, 'Accounting GRN marked as deleted', 457, 0)
                 return JsonResponse({'StatusCode': 200,'Status': True,'Message': 'Accounting GRN marked as deleted.','Data': []})
 
         except T_GRNs.DoesNotExist:
-            log_entry = create_transaction_logNew(request, {'GRNID': id}, 0, '', 457, 0)
+            log_entry = create_transaction_logNew(request, {'GRNID':id}, 0, '', 457, 0)
             return JsonResponse({'StatusCode': 204,'Status': False,'Message': 'GRN not found.','Data': []})
         except Exception as e:
-            create_transaction_logNew(request, {'GRNID': id}, 0, 'Error updating GRN: ' + str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400,'Status': False,'Message': str(e),'Data': [] })
+            log_entry =create_transaction_logNew(request, {'GRNID':id}, 0, 'Error updating GRN: ' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400,'Status': False,'Message': Exception(e),'Data': [] })

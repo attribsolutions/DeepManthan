@@ -29,21 +29,49 @@ class TallyDataListView(CreateAPIView):
                 TallyDetails = []
                 
                 if Mode == "Purchase":
-                    tallyquery = TC_GRNItems.objects.raw(f'''SELECT T_GRNs.id, T_GRNs.InvoiceNumber, T_GRNs.InvoiceDate, M_Parties.id AS PartyCode, M_Parties.Name AS PartyName,
-                                                            M_Items.id AS ItemCode, M_Items.Name AS ItemName, M_GSTHSNCode.HSNCode, GI.Rate,
-                                                            GI.Quantity,  M_Units.Name as UnitName, GI.DiscountType, GI.Discount AS DiscountPercentage,
-                                                            GI.DiscountAmount, GI.BasicAmount AS TaxableValue, GI.CGSTPercentage, GI.CGST, GI.SGSTPercentage,
-                                                            GI.SGST, GI.IGSTPercentage, GI.IGST, GI.GSTPercentage, GI.GSTAmount, GI.Amount AS TotalValue,
-                                                            0 AS TCSTaxAmount, T_GRNs.GrandTotal, 'create' AS Statuss, M_Users.LoginName AS User
-                                                            FROM T_GRNs 
-                                                            JOIN TC_GRNItems GI ON T_GRNs.id = GI.GRN_id
-                                                            JOIN MC_ItemUnits ON GI.Unit_id = MC_ItemUnits.id
-                                                            JOIN M_Units on MC_ItemUnits.UnitID_id = M_Units.id
-                                                            JOIN M_Parties ON M_Parties.id = T_GRNs.Customer_id
-                                                            JOIN M_Items ON M_Items.id = GI.Item_id
-                                                            JOIN M_GSTHSNCode ON M_GSTHSNCode.id = GI.GST_id
-                                                            JOIN M_Users ON M_Users.id = T_GRNs.CreatedBy
-                                                            WHERE M_Parties.Company_id = 4 AND T_GRNs.IsTallySave=0''')
+                    query=(f''' SELECT * FROM (SELECT GRN.id ,GRN.InvoiceNumber,
+                    GRN.InvoiceDate,
+                    P.id AS PartyCode,P.Name AS PartyName,I.id AS ItemCode,I.Name AS ItemName,H.HSNCode,
+                    GI.Rate ,GI.Quantity,U.Name AS UnitName,GI.DiscountType,GI.Discount AS DiscountPercentage,
+                    GI.DiscountAmount,GI.BasicAmount AS TaxableValue,GI.CGSTPercentage,GI.CGST,GI.SGSTPercentage,GI.SGST,
+                    GI.IGSTPercentage,GI.IGST,GI.GSTPercentage,GI.GSTAmount,GI.Amount AS TotalValue,0 AS TCSTaxAmount,
+                    GRN.GrandTotal,
+                    CASE AccountingGRNStatus
+                        WHEN 0 THEN 'Created'
+                        WHEN 1 THEN 'Canceld'
+                        ELSE 'Edited'END AS Statuss,U2.LoginName AS User,'Item' AS EntryType, 
+                    GRN.RoundOffAmount RoundOff,GRN.TotalExpenses
+                    FROM T_GRNs GRN
+                    JOIN TC_GRNItems GI ON GRN.id = GI.GRN_id JOIN M_Parties P ON GRN.Party_id = P.id
+                    JOIN M_Items I ON GI.Item_id = I.id JOIN M_GSTHSNCode H ON GI.GST_id = H.id
+                    JOIN MC_ItemUnits IU ON GI.Unit_id = IU.id JOIN M_Units U ON IU.UnitID_id = U.id
+                    JOIN M_Users U2 ON GRN.CreatedBy = U2.id  
+                    WHERE P.Company_id = 4 AND GRN.IsTallySave = 0 
+                    AND ((IsSave=0 and AccountingGRNStatus=0) OR (IsSave=1 and AccountingGRNStatus=1) OR (IsSave=0 and AccountingGRNStatus=2))
+                    UNION ALL
+
+                    SELECT GRN.id ,
+                    GRN.InvoiceNumber,GRN.InvoiceDate,P.id AS PartyCode,P.Name AS PartyName,NULL AS ItemCode,L.Name AS ItemName,
+                    L.HSN AS HSNCode,NULL AS Rate,NULL AS Quantity,NULL AS UnitName,
+                    NULL AS DiscountType,NULL AS DiscountPercentage, NULL AS DiscountAmount,
+                    E.BasicAmount AS TaxableValue,"" CGSTPercentage,E.CGST AS CGST,
+                    "" SGSTPercentage,E.SGST AS SGST,""IGSTPercentage,E.IGST AS IGST,E.GSTPercentage AS GSTPercentage,
+                    0 as GSTAmount,E.Amount AS TotalValue,0 AS TCSTaxAmount,GRN.GrandTotal,
+                    CASE AccountingGRNStatus
+                        WHEN 0 THEN 'Created'
+                        WHEN 1 THEN 'Canceld'
+                        ELSE 'Edited'END AS Statuss,
+                    U2.LoginName AS User,'Ledger' AS EntryType,GRN.RoundOffAmount RoundOff,GRN.TotalExpenses
+                    FROM T_GRNs GRN
+                    JOIN TC_GRNExpenses E ON GRN.id = E.GRN_id
+                    JOIN M_Ledger L ON E.Ledger_id = L.id
+                    LEFT JOIN M_AccountGroupType AGT ON L.AccountGroupType_id = AGT.id
+                    JOIN M_Parties P ON GRN.Party_id = P.id
+                    JOIN M_Users U2 ON GRN.CreatedBy = U2.id
+                    WHERE P.Company_id = 4 AND GRN.IsTallySave = 0 
+                    AND ((IsSave=0 and AccountingGRNStatus=0) OR (IsSave=1 and AccountingGRNStatus=1) OR (IsSave=0 and AccountingGRNStatus=2))
+                    )B Order by B.id''')
+                    tallyquery = TC_GRNItems.objects.raw(query)
                     ID = "PurchaseID"
                 
                 elif Mode == "Sale":
@@ -52,7 +80,7 @@ class TallyDataListView(CreateAPIView):
                                                                 TI.Quantity,  M_Units.Name as UnitName, TI.DiscountType, TI.Discount AS DiscountPercentage,
                                                                 TI.DiscountAmount, TI.BasicAmount AS TaxableValue, TI.CGSTPercentage, TI.CGST, TI.SGSTPercentage,
                                                                 TI.SGST, TI.IGSTPercentage, TI.IGST, TI.GSTPercentage, TI.GSTAmount, TI.Amount AS TotalValue,
-                                                                0 AS TCSTaxAmount, T_Invoices.GrandTotal, 'create' AS Statuss, M_Users.LoginName AS User
+                                                                0 AS TCSTaxAmount, T_Invoices.GrandTotal, 'Created' AS Statuss, M_Users.LoginName AS User,T_Invoices.RoundOffAmount RoundOff,0 as TotalExpenses
                                                                 FROM T_Invoices 
                                                                 JOIN TC_InvoiceItems TI ON T_Invoices.id = TI.Invoice_id
                                                                 JOIN MC_ItemUnits ON TI.Unit_id = MC_ItemUnits.id
@@ -61,7 +89,26 @@ class TallyDataListView(CreateAPIView):
                                                                 JOIN M_Items ON M_Items.id = TI.Item_id
                                                                 JOIN M_GSTHSNCode ON M_GSTHSNCode.id = TI.GST_id
                                                                 JOIN M_Users ON M_Users.id = T_Invoices.CreatedBy
-                                                                WHERE M_Parties.Company_id = 4 AND T_Invoices.IsTallySave=0''')
+                                                                WHERE M_Parties.Company_id = 4 AND T_Invoices.IsTallySave=0
+                                                             
+                                                             UNION 
+                                                             
+                                                             SELECT T_DeletedInvoices.id, T_DeletedInvoices.InvoiceNumber, T_DeletedInvoices.InvoiceDate, M_Parties.id AS PartyCode,
+                                                                M_Parties.Name AS PartyName,
+                                                                M_Items.id AS ItemCode, M_Items.Name AS ItemName, M_GSTHSNCode.HSNCode, TI.Rate,
+                                                                TI.Quantity,  M_Units.Name as UnitName, TI.DiscountType, TI.Discount AS DiscountPercentage,
+                                                                TI.DiscountAmount, TI.BasicAmount AS TaxableValue, TI.CGSTPercentage, TI.CGST, TI.SGSTPercentage,
+                                                                TI.SGST, TI.IGSTPercentage, TI.IGST, TI.GSTPercentage, TI.GSTAmount, TI.Amount AS TotalValue,
+                                                                0 AS TCSTaxAmount, T_DeletedInvoices.GrandTotal, 'Canceled' AS Statuss, M_Users.LoginName AS User,0 as TotalExpenses
+                                                                FROM T_DeletedInvoices 
+                                                                JOIN TC_DeletedInvoiceItems TI ON T_DeletedInvoices.Invoice = TI.Invoice
+                                                                JOIN MC_ItemUnits ON TI.Unit = MC_ItemUnits.id
+                                                                JOIN M_Units on MC_ItemUnits.UnitID_id = M_Units.id
+                                                                JOIN M_Parties ON M_Parties.id = T_DeletedInvoices.Customer
+                                                                JOIN M_Items ON M_Items.id = TI.Item
+                                                                JOIN M_GSTHSNCode ON M_GSTHSNCode.id = TI.GST
+                                                                JOIN M_Users ON M_Users.id = T_DeletedInvoices.CreatedBy
+                                                                WHERE M_Parties.Company_id = 4 AND T_DeletedInvoices.IsTallySave=0''')
                     ID = "SaleID"
                 else:
                     return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Invalid Mode', 'Data': []})
@@ -95,7 +142,8 @@ class TallyDataListView(CreateAPIView):
                             "GSTAmount": row.GSTAmount,
                             "TotalValue": row.TotalValue,
                             "TCSTaxAmount": row.TCSTaxAmount,
-                            "GrandTotal": row.GrandTotal,
+                            "GrandTotal": round((row.GrandTotal+row.TotalExpenses),2),
+                            "RoundOff" : row.RoundOff,
                             "Status": row.Statuss,
                             "User": row.User
                         })
@@ -143,8 +191,12 @@ class UpdateIsTallySaveView(CreateAPIView):
                 
                 InvoiceID_list = [int(id.strip()) for id in ids.split(',') if id.strip().isdigit()]
                 
-                updated_count = T_Invoices.objects.filter(id__in=InvoiceID_list, IsTallySave=0).update(IsTallySave=1)
-                
+                for Billid in ids.split(','):
+                    aa=T_Invoices.objects.filter(id=Billid).count()
+                    if aa > 0:
+                        updated_count = T_Invoices.objects.filter(id__in=Billid).update(IsTallySave=1)
+                    else:
+                        updated_count =T_DeletedInvoices.objects.filter(Invoice_in=Billid).update(IsTallySave=1)
                 if updated_count == 0:
                     log_entry = create_transaction_logNew(request, Data, 0, 'No TallyData updated', 452, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'No Data Updated', 'Data': []})
