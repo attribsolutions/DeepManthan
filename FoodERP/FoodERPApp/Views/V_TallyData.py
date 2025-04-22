@@ -96,7 +96,7 @@ class TallyDataListView(CreateAPIView):
                                                              
                                                              UNION 
                                                              
-                                                             SELECT T_DeletedInvoices.id, T_DeletedInvoices.InvoiceNumber, T_DeletedInvoices.InvoiceDate, M_Parties.id AS PartyCode,
+                                                             SELECT T_DeletedInvoices.Invoice, T_DeletedInvoices.InvoiceNumber, T_DeletedInvoices.InvoiceDate, M_Parties.id AS PartyCode,
                                                                 M_Parties.Name AS PartyName,
                                                                 M_Items.id AS ItemCode, M_Items.Name AS ItemName, M_GSTHSNCode.HSNCode, TI.Rate,
                                                                 TI.Quantity,  M_Units.Name as UnitName, TI.DiscountType, TI.Discount AS DiscountPercentage,
@@ -195,11 +195,15 @@ class UpdateIsTallySaveView(CreateAPIView):
                 InvoiceID_list = [int(id.strip()) for id in ids.split(',') if id.strip().isdigit()]
                 
                 for Billid in ids.split(','):
+                    
                     aa=T_Invoices.objects.filter(id=Billid).count()
+                    
                     if aa > 0:
-                        updated_count = T_Invoices.objects.filter(id__in=Billid).update(IsTallySave=1)
+                        
+                        updated_count = T_Invoices.objects.filter(id = Billid).update(IsTallySave=1)
                     else:
-                        updated_count =T_DeletedInvoices.objects.filter(Invoice_in=Billid).update(IsTallySave=1)
+                        
+                        updated_count =T_DeletedInvoices.objects.filter(Invoice=Billid).update(IsTallySave=1)
                 if updated_count == 0:
                     log_entry = create_transaction_logNew(request, Data, 0, 'No TallyData updated', 452, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'No Data Updated', 'Data': []})
