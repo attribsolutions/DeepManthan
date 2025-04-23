@@ -2377,7 +2377,9 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                                             M_Parties.Name as PartyName, TC_InvoicesSchemes.scheme AS SchemeID
                                             FROM M_GiftVoucherCode
                                             JOIN M_Parties ON M_GiftVoucherCode.Party = M_Parties.id
-                                            JOIN SweetPOS.T_SPOSInvoices ON M_GiftVoucherCode.ClientSaleID = T_SPOSInvoices.ClientSaleID
+                                            JOIN SweetPOS.T_SPOSInvoices ON M_GiftVoucherCode.ClientSaleID = T_SPOSInvoices.ClientSaleID 
+                                                                        and M_GiftVoucherCode.client = T_SPOSInvoices.ClientID
+                                                                        and M_GiftVoucherCode.Party = T_SPOSInvoices.Party
                                             JOIN SweetPOS.TC_InvoicesSchemes ON T_SPOSInvoices.id = TC_InvoicesSchemes.Invoice_id
                                             WHERE  {where_clause} ''')
                 
