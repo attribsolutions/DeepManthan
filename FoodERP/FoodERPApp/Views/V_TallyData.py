@@ -38,13 +38,16 @@ class TallyDataListView(CreateAPIView):
                     GRN.GrandTotal,
                     CASE AccountingGRNStatus
                         WHEN 0 THEN 'Created'
-                        WHEN 1 THEN 'Canceld'
-                        ELSE 'Edited'END AS Statuss,U2.LoginName AS User,'Item' AS EntryType, 
+                        WHEN 1 THEN 'Canceled'
+                        ELSE 'Edited'END AS Statuss,U2.LoginName AS User, 
                     GRN.RoundOffAmount RoundOff,GRN.TotalExpenses
                     FROM T_GRNs GRN
-                    JOIN TC_GRNItems GI ON GRN.id = GI.GRN_id JOIN M_Parties P ON GRN.Party_id = P.id
-                    JOIN M_Items I ON GI.Item_id = I.id JOIN M_GSTHSNCode H ON GI.GST_id = H.id
-                    JOIN MC_ItemUnits IU ON GI.Unit_id = IU.id JOIN M_Units U ON IU.UnitID_id = U.id
+                    JOIN TC_GRNItems GI ON GRN.id = GI.GRN_id 
+                    JOIN M_Parties P ON GRN.Party_id = P.id
+                    JOIN M_Items I ON GI.Item_id = I.id 
+                    JOIN M_GSTHSNCode H ON GI.GST_id = H.id
+                    JOIN MC_ItemUnits IU ON GI.Unit_id = IU.id 
+                    JOIN M_Units U ON IU.UnitID_id = U.id
                     JOIN M_Users U2 ON GRN.CreatedBy = U2.id  
                     WHERE P.Company_id = 4 AND GRN.IsTallySave = 0 
                     AND ((IsSave=0 and AccountingGRNStatus=0) OR (IsSave=1 and AccountingGRNStatus=1) OR (IsSave=0 and AccountingGRNStatus=2))
@@ -59,9 +62,9 @@ class TallyDataListView(CreateAPIView):
                     0 as GSTAmount,E.Amount AS TotalValue,0 AS TCSTaxAmount,GRN.GrandTotal,
                     CASE AccountingGRNStatus
                         WHEN 0 THEN 'Created'
-                        WHEN 1 THEN 'Canceld'
+                        WHEN 1 THEN 'Canceled'
                         ELSE 'Edited'END AS Statuss,
-                    U2.LoginName AS User,'Ledger' AS EntryType,GRN.RoundOffAmount RoundOff,GRN.TotalExpenses
+                    U2.LoginName AS User,GRN.RoundOffAmount RoundOff,GRN.TotalExpenses
                     FROM T_GRNs GRN
                     JOIN TC_GRNExpenses E ON GRN.id = E.GRN_id
                     JOIN M_Ledger L ON E.Ledger_id = L.id
@@ -93,13 +96,13 @@ class TallyDataListView(CreateAPIView):
                                                              
                                                              UNION 
                                                              
-                                                             SELECT T_DeletedInvoices.id, T_DeletedInvoices.InvoiceNumber, T_DeletedInvoices.InvoiceDate, M_Parties.id AS PartyCode,
+                                                             SELECT T_DeletedInvoices.Invoice, T_DeletedInvoices.InvoiceNumber, T_DeletedInvoices.InvoiceDate, M_Parties.id AS PartyCode,
                                                                 M_Parties.Name AS PartyName,
                                                                 M_Items.id AS ItemCode, M_Items.Name AS ItemName, M_GSTHSNCode.HSNCode, TI.Rate,
                                                                 TI.Quantity,  M_Units.Name as UnitName, TI.DiscountType, TI.Discount AS DiscountPercentage,
                                                                 TI.DiscountAmount, TI.BasicAmount AS TaxableValue, TI.CGSTPercentage, TI.CGST, TI.SGSTPercentage,
                                                                 TI.SGST, TI.IGSTPercentage, TI.IGST, TI.GSTPercentage, TI.GSTAmount, TI.Amount AS TotalValue,
-                                                                0 AS TCSTaxAmount, T_DeletedInvoices.GrandTotal, 'Canceled' AS Statuss, M_Users.LoginName AS User,0 as TotalExpenses
+                                                                0 AS TCSTaxAmount, T_DeletedInvoices.GrandTotal, 'Canceled' AS Statuss, M_Users.LoginName AS User,T_DeletedInvoices.RoundOffAmount RoundOff,0 as TotalExpenses
                                                                 FROM T_DeletedInvoices 
                                                                 JOIN TC_DeletedInvoiceItems TI ON T_DeletedInvoices.Invoice = TI.Invoice
                                                                 JOIN MC_ItemUnits ON TI.Unit = MC_ItemUnits.id
@@ -192,11 +195,15 @@ class UpdateIsTallySaveView(CreateAPIView):
                 InvoiceID_list = [int(id.strip()) for id in ids.split(',') if id.strip().isdigit()]
                 
                 for Billid in ids.split(','):
+                    
                     aa=T_Invoices.objects.filter(id=Billid).count()
+                    
                     if aa > 0:
-                        updated_count = T_Invoices.objects.filter(id__in=Billid).update(IsTallySave=1)
+                        
+                        updated_count = T_Invoices.objects.filter(id = Billid).update(IsTallySave=1)
                     else:
-                        updated_count =T_DeletedInvoices.objects.filter(Invoice_in=Billid).update(IsTallySave=1)
+                        
+                        updated_count =T_DeletedInvoices.objects.filter(Invoice=Billid).update(IsTallySave=1)
                 if updated_count == 0:
                     log_entry = create_transaction_logNew(request, Data, 0, 'No TallyData updated', 452, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'No Data Updated', 'Data': []})
