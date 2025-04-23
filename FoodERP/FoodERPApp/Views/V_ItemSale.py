@@ -31,7 +31,7 @@ class ItemSaleReportView(CreateAPIView):
                 Invoicequery = '''SELECT T_Invoices.id, T_Invoices.InvoiceDate, SupPartyType.Name SaleMadeFrom, CustPartyType.Name SaleMadeTo, 
                                 FullInvoiceNumber,Sup.Name SupplierName,Sup.ShortName SupShortName, M_Routes.Name RouteName, Cust.Name CustomerName,Cust.ShortName CustShortName, M_Group.Name GroupName,
                                 MC_SubGroup.Name SubGroupName, M_Items.Name ItemName,  QtyInKg, QtyInNo, QtyInBox, Rate, BasicAmount, 
-                                DiscountAmount, GSTPercentage, GSTAmount, Amount, T_Invoices.GrandTotal, RoundOffAmount, TCSAmount, 
+                                DiscountAmount, GSTPercentage, GSTAmount, Amount, T_Invoices.GrandTotal, T_Invoices.RoundOffAmount, TCSAmount, 
                                 T_GRNs.FullGRNNumber, TC_InvoiceItems.MRPValue, 0 MobileNo, "" CashierName, FoodERP.M_Units.Name AS BaseUnitName,
                                  CASE 
         WHEN FoodERP.M_Units.Name = 'kg' THEN QtyInKg
