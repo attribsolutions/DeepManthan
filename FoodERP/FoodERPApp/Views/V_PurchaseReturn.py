@@ -716,8 +716,7 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
 
                 if BatchCode != "":
 
-                    query = TC_GRNItems.objects.filter(Item=ItemID,BatchCode=BatchCode).order_by('id')[:1]
-                    
+                    query = TC_GRNItems.objects.filter(Item=ItemID,BatchCode=BatchCode).order_by('id')[:1]                    
                     if query:
                         GRNItemsdata = TC_GRNItemsSerializerSecond(query, many=True).data
                         Rate=RateCalculationFunction(0,Itemquery[0]["id"],CustomerID,0,1,0,0).RateWithGST()
@@ -736,16 +735,28 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message' : 'Batch Code is Not Available', 'Data': []})      
 
                 else: 
-
+                    
+                        CssCompanyID=M_Settings.objects.filter(id=61).values("DefaultValue")
+                        CssCompany=str(CssCompanyID[0]['DefaultValue'])                        
+                        if int(CssCompany)==4:                            
+                            with connection.cursor() as cursor:
+                                cursor.execute(f'''
+                                    SELECT ROUND(GetTodaysDateRate({ItemID}, CURDATE(), {PartyID}, 0, 2), 2) AS VRate
+                                ''')
+                                row = cursor.fetchone() 
+                            Rate=row[0] if row else None                           
+                        else:
+                            Rate=""               
+                        
                         MRP = ""
-                        MRPValue= ""
-                        Rate= ""
+                        MRPValue= ""                                                
                         GST= ""
                         GSTPercentage= ""
                         BatchCode= ""
                         BatchDate= ""
                         Unit = Unitquery[0]["id"]
                         UnitName = "No"
+                       
 
 
                 GRMItems = list()
@@ -754,17 +765,19 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                         "ItemName": Itemquery[0]["Name"],
                         "MRP": MRP,
                         "MRPValue": MRPValue,
-                        "Rate": Rate,
+                        "Rate": Rate,                
                         "GST": GST,
                         "GSTPercentage": GSTPercentage,
                         "BatchCode": BatchCode,
                         "BatchDate": BatchDate,
                         "Unit" : Unitquery[0]["id"],
                         "UnitName" : "No",
+                        
                         # "ItemUnitDetails": ItemUnitDetails, 
                         "ItemMRPDetails":ItemMRPDetails,
                         "ItemGSTDetails":ItemGSTDetails,
                         "StockDetails":StockDatalist 
+                        
                 })   
                 log_entry = create_transaction_logNew(request, PurchaseReturndata,0,'',58,0,0,0,CustomerID)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRMItems})
