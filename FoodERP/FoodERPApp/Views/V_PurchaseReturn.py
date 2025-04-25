@@ -633,7 +633,7 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                 
                 MRPquery=MRPListFun(Item,CustomerID,0)
                 # print(MRPquery)
-                if MRPquery.exists():
+                if MRPquery.exists():                    
                     # MRPdata = ItemMRPSerializerSecond(MRPquery, many=True).data
                     ItemMRPDetails = list()
                     unique_MRPs = set()
@@ -652,8 +652,8 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                                 # "Rate" : round(Rate,2),
                                 "Rate" : round(CalculatedRateusingMRPMargin1[0].RatewithoutGST,2)
                             })
-                            unique_MRPs.add(MRPs)
-
+                            unique_MRPs.add(MRPs)                        
+                
                     # for d in MRPdata:
                     #     CalculatedRateusingMRPMargin=RateCalculationFunction(0,Item,CustomerID,0,1,0,0,d['MRP']).RateWithGST()
                     #     Rate=CalculatedRateusingMRPMargin[0]["NoRatewithOutGST"]
@@ -746,7 +746,7 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                                 row = cursor.fetchone() 
                             Rate=row[0] if row else None                           
                         else:
-                            Rate=""               
+                            Rate=""                
                         
                         MRP = ""
                         MRPValue= ""                                                
@@ -759,8 +759,8 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                        
 
 
-                GRMItems = list()
-                GRMItems.append({
+                
+                GRMItem={
                         "Item": Itemquery[0]["id"],
                         "ItemName": Itemquery[0]["Name"],
                         "MRP": MRP,
@@ -774,11 +774,16 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                         "UnitName" : "No",
                         
                         # "ItemUnitDetails": ItemUnitDetails, 
-                        "ItemMRPDetails":ItemMRPDetails,
+                        # "ItemMRPDetails":ItemMRPDetails,
                         "ItemGSTDetails":ItemGSTDetails,
-                        "StockDetails":StockDatalist 
-                        
-                })   
+                        "StockDetails":StockDatalist                         
+                } 
+                if int(CssCompany) != 4:
+                    print("545454545")
+                    GRMItem["ItemMRPDetails"] = ItemMRPDetails
+
+                GRMItems = list()
+                GRMItems.append(GRMItem)                  
                 log_entry = create_transaction_logNew(request, PurchaseReturndata,0,'',58,0,0,0,CustomerID)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRMItems})
         except M_Items.DoesNotExist:
