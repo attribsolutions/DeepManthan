@@ -2374,14 +2374,18 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                 CouponCodeRedemptionQuery = M_GiftVoucherCode.objects.raw(f'''SELECT M_GiftVoucherCode.id, VoucherType_id, 
                                             M_GiftVoucherCode.VoucherCode, M_GiftVoucherCode.UpdatedOn, M_GiftVoucherCode.InvoiceDate, 
                                             M_GiftVoucherCode.InvoiceNumber, M_GiftVoucherCode.InvoiceAmount, M_GiftVoucherCode.Party, M_GiftVoucherCode.client, M_GiftVoucherCode.IsActive, 
-                                            M_Parties.Name as PartyName, TC_InvoicesSchemes.scheme AS SchemeID
+                                            M_Parties.Name as PartyName, TC_InvoicesSchemes.scheme AS SchemeID, SUM(TC_SPOSInvoiceItems.DiscountAmount) AS DiscountAmount
                                             FROM M_GiftVoucherCode
                                             JOIN M_Parties ON M_GiftVoucherCode.Party = M_Parties.id
                                             JOIN SweetPOS.T_SPOSInvoices ON M_GiftVoucherCode.ClientSaleID = T_SPOSInvoices.ClientSaleID 
                                                                         and M_GiftVoucherCode.client = T_SPOSInvoices.ClientID
                                                                         and M_GiftVoucherCode.Party = T_SPOSInvoices.Party
                                             JOIN SweetPOS.TC_InvoicesSchemes ON T_SPOSInvoices.id = TC_InvoicesSchemes.Invoice_id
-                                            WHERE  {where_clause} ''')
+                                            JOIN SweetPOS.TC_SPOSInvoiceItems ON T_SPOSInvoices.id = TC_SPOSInvoiceItems.Invoice_id
+                                            WHERE  {where_clause}
+                                            GROUP BY M_GiftVoucherCode.id,VoucherType_id, M_GiftVoucherCode.VoucherCode, M_GiftVoucherCode.UpdatedOn, 
+                                            M_GiftVoucherCode.InvoiceDate,M_GiftVoucherCode.InvoiceNumber, M_GiftVoucherCode.InvoiceAmount, M_GiftVoucherCode.Party, 
+                                            M_GiftVoucherCode.client, M_GiftVoucherCode.IsActive,M_Parties.Name,TC_InvoicesSchemes.scheme''')
                 
                 for CouponCode in CouponCodeRedemptionQuery:
                     CouponCodeRedemptionData.append({
@@ -2396,6 +2400,7 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                         "PartyName": CouponCode.PartyName,
                         "client": CouponCode.client,
                         "SchemeID": CouponCode.SchemeID, 
+                        "DiscountAmount": CouponCode.DiscountAmount
                     })
                 if CouponCodeRedemptionData:
                     log_entry = create_transaction_logNew(request, CouponCodeData, 0, "", 443, 0, FromDate, ToDate, 0)
