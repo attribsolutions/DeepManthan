@@ -625,7 +625,17 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                 Itemquery = M_Items.objects.filter(id=ItemID).values("id","Name")
                 Item =Itemquery[0]["id"]
                 Unitquery = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0,UnitID_id=1).values("id")
-                
+                CssCompanyID=M_Settings.objects.filter(id=61).values("DefaultValue")
+                CssCompany=str(CssCompanyID[0]['DefaultValue'])                        
+                if int(CssCompany)==4:                            
+                    with connection.cursor() as cursor:
+                        cursor.execute(f'''
+                            SELECT ROUND(GetTodaysDateRate({ItemID}, CURDATE(), {PartyID}, 0, 2), 2) AS VRate
+                        ''')
+                        row = cursor.fetchone() 
+                    Rate=row[0] if row else None                           
+                else:
+                    Rate=""       
                 
                 # MRPquery = M_MRPMaster.objects.filter(Item_id=Item ).order_by('-id')
                 # if not MRPquery:
@@ -640,8 +650,11 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                     for d in MRPquery:
                         MRPs = d['MRP']
                         # print(MRPs)
-                        CalculatedRateusingMRPMargin1=M_Items.objects.raw(f'''select 1 as id,RateCalculationFunction1(0, {Item}, {CustomerID}, 1, 0, 0, {MRPs}, 0)RatewithoutGST''')
-                       
+                        if int(CssCompany)!=4:
+                           CalculatedRateusingMRPMargin1=M_Items.objects.raw(f'''select 1 as id,RateCalculationFunction1(0, {Item}, {CustomerID}, 1, 0, 0, {MRPs}, 0)RatewithoutGST''')
+                           Rate=round(CalculatedRateusingMRPMargin1[0].RatewithoutGST,2)
+                        else:
+                            Rate=Rate
                         
                         # CalculatedRateusingMRPMargin=RateCalculationFunction(0,Item,CustomerID,0,1,0,0,MRPs).RateWithGST()
                         # Rate=CalculatedRateusingMRPMargin[0]["NoRatewithOutGST"]
@@ -650,10 +663,10 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                                 "MRP": d['id'],
                                 "MRPValue": MRPs,
                                 # "Rate" : round(Rate,2),
-                                "Rate" : round(CalculatedRateusingMRPMargin1[0].RatewithoutGST,2)
+                                "Rate" : Rate
                             })
-                            unique_MRPs.add(MRPs)                        
-                
+                            unique_MRPs.add(MRPs)     
+                        
                     # for d in MRPdata:
                     #     CalculatedRateusingMRPMargin=RateCalculationFunction(0,Item,CustomerID,0,1,0,0,d['MRP']).RateWithGST()
                     #     Rate=CalculatedRateusingMRPMargin[0]["NoRatewithOutGST"]
@@ -736,17 +749,7 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
 
                 else: 
                     
-                        CssCompanyID=M_Settings.objects.filter(id=61).values("DefaultValue")
-                        CssCompany=str(CssCompanyID[0]['DefaultValue'])                        
-                        if int(CssCompany)==4:                            
-                            with connection.cursor() as cursor:
-                                cursor.execute(f'''
-                                    SELECT ROUND(GetTodaysDateRate({ItemID}, CURDATE(), {PartyID}, 0, 2), 2) AS VRate
-                                ''')
-                                row = cursor.fetchone() 
-                            Rate=row[0] if row else None                           
-                        else:
-                            Rate=""                
+                                 
                         
                         MRP = ""
                         MRPValue= ""                                                
@@ -771,16 +774,12 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                         "BatchCode": BatchCode,
                         "BatchDate": BatchDate,
                         "Unit" : Unitquery[0]["id"],
-                        "UnitName" : "No",
-                        
+                        "UnitName" : "No",                        
                         # "ItemUnitDetails": ItemUnitDetails, 
-                        # "ItemMRPDetails":ItemMRPDetails,
+                        "ItemMRPDetails":ItemMRPDetails,
                         "ItemGSTDetails":ItemGSTDetails,
                         "StockDetails":StockDatalist                         
-                } 
-                if int(CssCompany) != 4:
-                    print("545454545")
-                    GRMItem["ItemMRPDetails"] = ItemMRPDetails
+                }                 
 
                 GRMItems = list()
                 GRMItems.append(GRMItem)                  
