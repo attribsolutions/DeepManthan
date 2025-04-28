@@ -1242,6 +1242,7 @@ class T_WorkOrder(models.Model):
     Status = models.IntegerField(default=False)
     RemainNumberOfLot = models.DecimalField(max_digits=10, decimal_places=3)
     RemaninQuantity = models.DecimalField(max_digits=15, decimal_places=3)
+    CommonID = models.IntegerField(null=True,blank=True)
     class Meta:
         db_table = "T_WorkOrder"
 
