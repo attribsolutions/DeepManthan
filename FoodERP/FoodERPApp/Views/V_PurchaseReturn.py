@@ -782,11 +782,11 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                         "UnitName" : Unitquery[0]["UnitID__Name"],                        
                         # "ItemUnitDetails": ItemUnitDetails, 
                         "ItemMRPDetails":ItemMRPDetails,
-                        "ItemGSTDetails":ItemGSTDetails                                                
+                        "ItemGSTDetails":ItemGSTDetails,
+                        "StockDetails":StockDatalist                         
                 }                 
-                if CssCompany!=4:
-                    GRMItem["StockDetails"] = StockDatalist 
-                GRMItems = []
+
+                GRMItems = list()
                 GRMItems.append(GRMItem)                  
                 log_entry = create_transaction_logNew(request, PurchaseReturndata,0,'',58,0,0,0,CustomerID)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRMItems})
