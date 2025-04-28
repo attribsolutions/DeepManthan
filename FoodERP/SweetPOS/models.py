@@ -192,6 +192,7 @@ class T_SPOSStock(models.Model):
     BatchCodeID = models.CharField(max_length=500,blank=True,null=True)
     Difference = models.DecimalField(max_digits=20, decimal_places=3,blank=True,null=True)
     IsStockAdjustment = models.BooleanField(default=False)
+    ClientID =models.IntegerField()
    
     class Meta:
         db_table="T_SPOSStock" 
@@ -325,6 +326,7 @@ class M_SweetPOSMachine(models.Model):
     ServerDatabase = models.CharField(max_length=100,null=True,blank=True)
     Invoiceprefix = models.CharField(max_length=100 ,null=True,blank=True)
     ServiceTimeInterval = models.TimeField(null=True,blank=True)
+    PrimaryUser =   models.IntegerField(null=True,blank=True)
 
     class Meta:
         constraints = [
