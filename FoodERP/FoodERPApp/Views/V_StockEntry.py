@@ -502,17 +502,17 @@ class M_GetStockEntryList(CreateAPIView):
                     return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Party is required', 'Data': []})
 
                 query = '''
-                    SELECT 1 as id, s.StockDate, p.Name as PartyName, s.Party_id FROM T_Stock as s 
+                    SELECT 1 as id, s.StockDate, p.Name as PartyName, s.Party_id, NULL as ClientID FROM T_Stock as s 
                     JOIN  M_Parties as p ON s.Party_id = p.id   
                     WHERE s.StockDate BETWEEN %s AND %s AND s.party_id=%s AND s.IsStockAdjustment = 0
                     GROUP BY s.Party_Id, s.StockDate
                     
                     UNION
 
-                    SELECT 1 as id, s.StockDate, p.Name as PartyName, s.Party FROM SweetPOS.T_SPOSStock as s  
+                    SELECT 1 as id, s.StockDate, p.Name as PartyName, s.Party, s.ClientID FROM SweetPOS.T_SPOSStock as s  
                     JOIN  M_Parties as p ON s.Party = p.id   
                     WHERE s.StockDate BETWEEN %s AND %s AND s.Party=%s AND s.IsStockAdjustment = 0
-                    GROUP BY s.Party, s.StockDate
+                    GROUP BY s.Party, s.StockDate, s.ClientID
                 '''
                 StockDataQuery = T_Stock.objects.raw(query, [FromDate, ToDate, Party, FromDate, ToDate, Party])
 
