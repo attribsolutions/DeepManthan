@@ -96,7 +96,7 @@ class TallyDataListView(CreateAPIView):
                                                              
                                                              UNION 
                                                              
-                                                             SELECT T_DeletedInvoices.Invoice, T_DeletedInvoices.InvoiceNumber, T_DeletedInvoices.InvoiceDate, M_Parties.id AS PartyCode,
+                                                             SELECT T_DeletedInvoices.Invoice id , T_DeletedInvoices.InvoiceNumber, T_DeletedInvoices.InvoiceDate, M_Parties.id AS PartyCode,
                                                                 M_Parties.Name AS PartyName,
                                                                 M_Items.id AS ItemCode, M_Items.Name AS ItemName, M_GSTHSNCode.HSNCode, TI.Rate,
                                                                 TI.Quantity,  M_Units.Name as UnitName, TI.DiscountType, TI.Discount AS DiscountPercentage,
