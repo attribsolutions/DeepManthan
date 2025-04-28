@@ -162,13 +162,23 @@ class MachineTypeListView(CreateAPIView):
         try:
             with transaction.atomic():
                 Party = MachineType_Data['Party']
-                query = M_SweetPOSMachine.objects.raw('''Select A.id, A.Party, A.MacID, ifnull(A.MachineType,'') MachineType ,  B.Name MachineTypeName, A.IsServer, A.ClientID,A.IsAutoUpdate,A.IsGiveUpdate,A.IsService,IFNULL(A.MachineName, '') AS MachineName,A.ServerSequence,A.UploadSaleRecordCount,A.Validity,IFNULL(A.Version,'') AS Version, A.SeverName, A.ServerHost, A.ServerUser, A.ServerPassWord, A.ServerDatabase, A.Invoiceprefix
+                query = M_SweetPOSMachine.objects.raw('''Select A.id, A.Party, A.MacID, ifnull(A.MachineType,'') MachineType ,  B.Name MachineTypeName, A.IsServer, A.ClientID,A.IsAutoUpdate,A.IsGiveUpdate,A.IsService,IFNULL(A.MachineName, '') AS MachineName,A.ServerSequence,A.UploadSaleRecordCount,A.Validity,IFNULL(A.Version,'') AS Version, A.SeverName, A.ServerHost, A.ServerUser, A.ServerPassWord, A.ServerDatabase, A.Invoiceprefix,A.PrimaryUser
                         From SweetPOS.M_SweetPOSMachine A
                         left JOIN  FoodERP.M_GeneralMaster B on B.id = A.MachineType
                         WHERE A.Party = %s''',[Party])
               
                 MachineTypeList= list()
                 for a in query:
+                    
+                    PrimaryUserID = a.PrimaryUser
+                    PrimaryUserName = None
+
+                    if PrimaryUserID:
+                        user_data = M_Users.objects.filter(id=PrimaryUserID).values('id', 'LoginName').first()
+                        if user_data:
+                            PrimaryUserName = user_data['LoginName']
+
+                    
                     MachineTypeIDs = a.MachineType.split(',') if a.MachineType else []
                     MachineTypeDetails = []
                     RoleIDs = []
@@ -225,7 +235,9 @@ class MachineTypeListView(CreateAPIView):
                                 "ServerUser": a.ServerUser,
                                 "ServerPassWord": a.ServerPassWord,
                                 "ServerDatabase": a.ServerDatabase,
-                                "Invoiceprefix": a.Invoiceprefix
+                                "Invoiceprefix": a.Invoiceprefix,
+                                "PrimaryUserID": PrimaryUserID,
+                                "PrimaryUserName": PrimaryUserName
                                 })
                 log_entry = create_transaction_logNew(request, MachineType_Data, Party, '', 417, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data' :MachineTypeList})
