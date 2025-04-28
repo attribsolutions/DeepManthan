@@ -624,24 +624,42 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                 
                 Itemquery = M_Items.objects.filter(id=ItemID).values("id","Name")
                 Item =Itemquery[0]["id"]
-                Unitquery = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0,UnitID_id=1).values("id")
-                
-                
+                # Unitquery = MC_ItemUnits.objects.filter(Item_id=Item,IsDeleted=0,UnitID_id=1).values("id")
+                # print(Unitquery.query)
+                CssCompanyID=M_Settings.objects.filter(id=61).values("DefaultValue")
+                CssCompany=str(CssCompanyID[0]['DefaultValue'])                        
+                if int(CssCompany)==4:                            
+                    with connection.cursor() as cursor:
+                        cursor.execute(f'''
+                            SELECT ROUND(GetTodaysDateRate({ItemID}, CURDATE(), {PartyID}, 0, 2), 2) AS VRate
+                        ''')
+                        row = cursor.fetchone() 
+                    Rate=row[0] if row else None                           
+                    filter_unit = {"Item_id": ItemID, "IsDeleted": 0,"IsBase":1}                         
+                else:
+                    Rate = ""       
+                    filter_unit = {"Item_id": ItemID, "IsDeleted": 0, "UnitID_id": 1}
+
+                Unitquery = MC_ItemUnits.objects.filter(**filter_unit).values("id","UnitID__Name") 
+                # print(Unitquery.query)                
                 # MRPquery = M_MRPMaster.objects.filter(Item_id=Item ).order_by('-id')
                 # if not MRPquery:
                 #     MRPquery = M_MRPMaster.objects.filter(Item_id=Item ).order_by('-id')
                 
                 MRPquery=MRPListFun(Item,CustomerID,0)
                 # print(MRPquery)
-                if MRPquery.exists():
+                if MRPquery.exists():                    
                     # MRPdata = ItemMRPSerializerSecond(MRPquery, many=True).data
                     ItemMRPDetails = list()
                     unique_MRPs = set()
                     for d in MRPquery:
                         MRPs = d['MRP']
                         # print(MRPs)
-                        CalculatedRateusingMRPMargin1=M_Items.objects.raw(f'''select 1 as id,RateCalculationFunction1(0, {Item}, {CustomerID}, 1, 0, 0, {MRPs}, 0)RatewithoutGST''')
-                       
+                        if int(CssCompany)!=4:
+                           CalculatedRateusingMRPMargin1=M_Items.objects.raw(f'''select 1 as id,RateCalculationFunction1(0, {Item}, {CustomerID}, 1, 0, 0, {MRPs}, 0)RatewithoutGST''')
+                           Rate=round(CalculatedRateusingMRPMargin1[0].RatewithoutGST,2)
+                        else:
+                            Rate=Rate
                         
                         # CalculatedRateusingMRPMargin=RateCalculationFunction(0,Item,CustomerID,0,1,0,0,MRPs).RateWithGST()
                         # Rate=CalculatedRateusingMRPMargin[0]["NoRatewithOutGST"]
@@ -650,10 +668,10 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                                 "MRP": d['id'],
                                 "MRPValue": MRPs,
                                 # "Rate" : round(Rate,2),
-                                "Rate" : round(CalculatedRateusingMRPMargin1[0].RatewithoutGST,2)
+                                "Rate" : Rate
                             })
-                            unique_MRPs.add(MRPs)
-
+                            unique_MRPs.add(MRPs)     
+                        
                     # for d in MRPdata:
                     #     CalculatedRateusingMRPMargin=RateCalculationFunction(0,Item,CustomerID,0,1,0,0,d['MRP']).RateWithGST()
                     #     Rate=CalculatedRateusingMRPMargin[0]["NoRatewithOutGST"]
@@ -716,8 +734,7 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
 
                 if BatchCode != "":
 
-                    query = TC_GRNItems.objects.filter(Item=ItemID,BatchCode=BatchCode).order_by('id')[:1]
-                    
+                    query = TC_GRNItems.objects.filter(Item=ItemID,BatchCode=BatchCode).order_by('id')[:1]                    
                     if query:
                         GRNItemsdata = TC_GRNItemsSerializerSecond(query, many=True).data
                         Rate=RateCalculationFunction(0,Itemquery[0]["id"],CustomerID,0,1,0,0).RateWithGST()
@@ -730,42 +747,47 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                             BatchCode= a['BatchCode']
                             BatchDate= a['BatchDate']
                             Unit = Unitquery[0]["id"]
-                            UnitName = "No"
+                            UnitName = Unitquery[0]["UnitID__Name"]
                     else:  
                         log_entry = create_transaction_logNew(request, PurchaseReturndata, 0, 'BatchCode is Not Available',57,0)
                         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message' : 'Batch Code is Not Available', 'Data': []})      
 
                 else: 
-
+                    
+                                 
+                        
                         MRP = ""
-                        MRPValue= ""
-                        Rate= ""
+                        MRPValue= ""                                                
                         GST= ""
                         GSTPercentage= ""
                         BatchCode= ""
                         BatchDate= ""
                         Unit = Unitquery[0]["id"]
-                        UnitName = "No"
+                        UnitName = Unitquery[0]["UnitID__Name"]
+                       
 
 
-                GRMItems = list()
-                GRMItems.append({
+                
+                GRMItem={
                         "Item": Itemquery[0]["id"],
                         "ItemName": Itemquery[0]["Name"],
                         "MRP": MRP,
                         "MRPValue": MRPValue,
-                        "Rate": Rate,
+                        "Rate": Rate,                
                         "GST": GST,
                         "GSTPercentage": GSTPercentage,
                         "BatchCode": BatchCode,
                         "BatchDate": BatchDate,
                         "Unit" : Unitquery[0]["id"],
-                        "UnitName" : "No",
+                        "UnitName" : Unitquery[0]["UnitID__Name"],                        
                         # "ItemUnitDetails": ItemUnitDetails, 
                         "ItemMRPDetails":ItemMRPDetails,
                         "ItemGSTDetails":ItemGSTDetails,
-                        "StockDetails":StockDatalist 
-                })   
+                        "StockDetails":StockDatalist                         
+                }                 
+
+                GRMItems = list()
+                GRMItems.append(GRMItem)                  
                 log_entry = create_transaction_logNew(request, PurchaseReturndata,0,'',58,0,0,0,CustomerID)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRMItems})
         except M_Items.DoesNotExist:

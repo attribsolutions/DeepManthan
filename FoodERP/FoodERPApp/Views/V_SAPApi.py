@@ -257,6 +257,7 @@ class SAPOrderView(CreateAPIView):
                 join M_Units on M_Units.id=M_Items.SAPUnitID
                 {ItemsGroupJoinsandOrderby[1]}
                 where IsDeleted = 0 AND T_Orders.id=%s {ItemsGroupJoinsandOrderby[2]}''',[OrderID])                
+                print(query)
                 for row in query:
                     
                     date_obj = datetime.strptime(str(row.DocDate), '%Y-%m-%d')
@@ -317,15 +318,15 @@ class SAPOrderView(CreateAPIView):
                     # CustomPrint(jsonbody)
                     aa = T_Orders.objects.filter(id=OrderID).update(
                         SAPResponse=data_dict['entry']['content']['m:properties']['d:Stats'])
-                    log_entry = create_transaction_logNew(request, jsonbody, Customer, OrderID,321,0)
+                    log_entry = create_transaction_logNew(request, jsonbody, queryforcustomerID[0]['Customer'], OrderID,321,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Send Successfully ', 'Data': []})
                 else:
                     index = a.find('error')
                     if index != -1:
-                        log_entry = create_transaction_logNew(request, jsonbody, Customer, 'SAPOrderSend:'+str(data_dict['error']['innererror']['errordetails']['errordetail'][0]['message']),322,0)
+                        log_entry = create_transaction_logNew(request, jsonbody,queryforcustomerID[0]['Customer'], 'SAPOrderSend:'+str(data_dict['error']['innererror']['errordetails']['errordetail'][0]['message']),322,0)
                         return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': data_dict['error']['innererror']['errordetails']['errordetail'][0]['message'], 'Data': []})
                     else:
-                        log_entry = create_transaction_logNew(request, jsonbody, Customer, '',323,0)
+                        log_entry = create_transaction_logNew(request, jsonbody, queryforcustomerID[0]['Customer'], '',323,0)
                         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Another exception raised from SAP', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'SAPOrderSend:'+str(Exception(e)),33,0)

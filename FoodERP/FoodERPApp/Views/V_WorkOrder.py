@@ -161,7 +161,9 @@ class WorkOrderView(CreateAPIView):
         try:
             with transaction.atomic():
                         
-                        MultipleWorkOrderData = JSONParser().parse(request)  
+                        MultipleWorkOrderData = JSONParser().parse(request) 
+                        a=MaxValueMaster(T_WorkOrder,'CommonID')
+                        jsondata=a.GetMaxValue()  
                         if not isinstance(MultipleWorkOrderData, list):
                             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Expected a list of items', 'Data': []})                      
                         # CustomPrint(MultipleWorkOrderData)
@@ -176,12 +178,13 @@ class WorkOrderView(CreateAPIView):
                             aa=index+a                            
                             WorkOrderData['WorkOrderNumber'] = aa
                             '''Get Order Prifix '''
-                            b = GetPrifix.GetWorkOrderPrifix(Party)
+                            b = GetPrifix.GetWorkOrderPrifix(Party)  
                             WorkOrderData['FullWorkOrderNumber'] = b+""+str(aa)                
                             #=====================================================
                             WorkOrderData['Status']=0
                             WorkOrderData['RemainNumberOfLot']=WorkOrderData['NumberOfLot']
                             WorkOrderData['RemaninQuantity']=WorkOrderData['Quantity'] 
+                            WorkOrderData['CommonID'] = jsondata
                             WorkOrders.append(WorkOrderData)
                             # CustomPrint(WorkOrders)
                         # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[WorkOrders] })

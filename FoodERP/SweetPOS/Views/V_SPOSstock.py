@@ -15,9 +15,14 @@ from django.db.models import *
 from FoodERPApp.Views.V_TransactionNumberfun import SystemBatchCodeGeneration
 from datetime import date
 from FoodERPApp.models import * 
+from rest_framework.authentication import BasicAuthentication, TokenAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 class StockView(CreateAPIView):
+    
     permission_classes = (IsAuthenticated,)
+    authentication_classes = [BasicAuthentication, TokenAuthentication, JWTAuthentication]
+    # authentication_class = JSONWebTokenAuthentication
     
     @transaction.atomic()
     def post(self, request):
@@ -30,8 +35,9 @@ class StockView(CreateAPIView):
                 Mode =  FranchiseStockdata['Mode']
                 IsStockAdjustment=FranchiseStockdata['IsStockAdjustment']
                 IsAllStockZero = FranchiseStockdata['IsAllStockZero']
+                # ClientID = FranchiseStockdata.get('ClientID', 0)
 
-                T_SPOS_StockEntryList = list()
+                T_SPOS_StockEntryList = []
               
                 for a in FranchiseStockdata['StockItems']:
                     BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], Party,0)
@@ -58,6 +64,11 @@ class StockView(CreateAPIView):
                         totalstock = float(query4['total'])
                     else:
                         totalstock = 0
+                        
+                    ClientID = a.get('ClientID', None)
+                        
+                    if ClientID:
+                        T_SPOSStock.objects.filter(Party=Party, ClientID=ClientID, Item=a['Item']).delete()
 
                     a['BatchCode'] = BatchCode
                     a['StockDate'] = date.today()
@@ -77,7 +88,9 @@ class StockView(CreateAPIView):
                     "BatchCodeID" : a['BatchCodeID'],
                     "IsSaleable" : 1,
                     "Difference" : round(round(BaseUnitQuantity,3)-totalstock,3),
-                    "IsStockAdjustment" : IsStockAdjustment
+                    "IsStockAdjustment" : IsStockAdjustment,
+                    "ClientID": ClientID if ClientID else 0
+
                     })
                 # print(T_SPOS_StockEntryList,round(BaseUnitQuantity,3),totalstock)    
                 StockEntrySerializer = SPOSstockSerializer(data=T_SPOS_StockEntryList, many=True)
