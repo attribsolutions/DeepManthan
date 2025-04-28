@@ -67,7 +67,8 @@ class M_StockEntryListSerializerSecond(serializers.Serializer):
     id =  serializers.IntegerField() 
     StockDate = serializers.DateField() 
     PartyName = serializers.CharField(max_length=500)
-    Party_id =  serializers.IntegerField()    
+    Party_id =  serializers.IntegerField() 
+    ClientID = serializers.IntegerField(allow_null=True, required=False)
     
 class M_StockEntryItemListSecond(serializers.Serializer): 
     id =  serializers.IntegerField() 
