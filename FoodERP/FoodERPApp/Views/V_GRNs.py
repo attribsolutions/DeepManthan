@@ -997,7 +997,7 @@ class DeleteAccountingGRNView(APIView):
             with transaction.atomic():
                 id=AccountDetails['GRNid']
                 # print(DeletedGRN_id)
-                GRN = T_GRNs.objects.filter(id=id).update(IsSave = 1,TotalExpenses = 0,AccountingGRNStatus = 1) 
+                GRN = T_GRNs.objects.filter(id=id).update(IsSave = 1,TotalExpenses = 0,AccountingGRNStatus = 1,RoundOffAmount=0) 
                 # print('kkjfdgfsvttf',GRN)
                 #GRN record update (ISSave=1, TotalExpenses=0)
                 # GRN.IsSave = 1
