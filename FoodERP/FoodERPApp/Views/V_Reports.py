@@ -2387,7 +2387,18 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                                             M_GiftVoucherCode.InvoiceDate,M_GiftVoucherCode.InvoiceNumber, M_GiftVoucherCode.InvoiceAmount, M_GiftVoucherCode.Party, 
                                             M_GiftVoucherCode.client, M_GiftVoucherCode.IsActive,M_Parties.Name,TC_InvoicesSchemes.scheme''')
                 
+                SchemeValue = None
+               
+                scheme1 = M_Scheme.objects.filter(id=1).first()
+                if scheme1:
+                    SchemeValue = scheme1.SchemeValue
+
                 for CouponCode in CouponCodeRedemptionQuery:
+                    if CouponCode.SchemeID == 1:
+                        DiscountAmount = SchemeValue
+                    else:
+                        DiscountAmount = CouponCode.DiscountAmount
+
                     CouponCodeRedemptionData.append({
                         "id": CouponCode.id,
                         "VoucherTypeID": CouponCode.VoucherType_id,
@@ -2399,9 +2410,10 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                         "PartyID": CouponCode.Party,
                         "PartyName": CouponCode.PartyName,
                         "client": CouponCode.client,
-                        "SchemeID": CouponCode.SchemeID, 
-                        "DiscountAmount": CouponCode.DiscountAmount
+                        "SchemeID": CouponCode.SchemeID,
+                        "DiscountAmount": DiscountAmount
                     })
+
                 if CouponCodeRedemptionData:
                     log_entry = create_transaction_logNew(request, CouponCodeData, 0, "", 443, 0, FromDate, ToDate, 0)
                     return JsonResponse({"StatusCode": 200, "Status": True, "Message": "CouponCodeRedemptionReport","Data": CouponCodeRedemptionData,})
