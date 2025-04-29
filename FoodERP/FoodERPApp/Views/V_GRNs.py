@@ -263,7 +263,7 @@ class T_GRNViewUpdate(APIView):
             with transaction.atomic():
                 GRNupdateByID = T_GRNs.objects.get(id=id)
                 gg = T_GRNs.objects.filter(id=id).values('AccountingGRNStatus')
-                print(gg[0]['AccountingGRNStatus'])
+                # print(gg[0]['AccountingGRNStatus'])
                 
                 if gg[0]['AccountingGRNStatus'] == 1:
                     # gg.update(AccountingGRNStatus=2)
@@ -271,19 +271,30 @@ class T_GRNViewUpdate(APIView):
                     
                 
                 for item in GRNupdatedata['GRNItems']:
-                    BaseUnitQuantity = UnitwiseQuantityConversion(
-                        item['Item'], item['Quantity'], item['Unit'], 0, 0, 0, 0).GetBaseUnitQuantity()
-                    item['BaseUnitQuantity'] = BaseUnitQuantity
-                    QtyInNo = UnitwiseQuantityConversion(
+                    if GRNupdatedata.get('IsSave') == 0:    
+                        QtyInNo = UnitwiseQuantityConversion(
                         item['Item'], item['Quantity'], item['Unit'], 0, 0, 1, 0).ConvertintoSelectedUnit()
-                    item['QtyInNo'] = QtyInNo
-                    QtyInKg = UnitwiseQuantityConversion(
-                        item['Item'], item['Quantity'], item['Unit'], 0, 0, 2, 0).ConvertintoSelectedUnit()
-                    item['QtyInKg'] = QtyInKg
-                    QtyInBox = UnitwiseQuantityConversion(
-                        item['Item'], item['Quantity'], item['Unit'], 0, 0, 4, 0).ConvertintoSelectedUnit()
-                    item['QtyInBox'] = QtyInBox
-                print(GRNupdatedata)
+                        item['QtyInNo'] = QtyInNo
+                        QtyInKg = UnitwiseQuantityConversion(
+                            item['Item'], item['Quantity'], item['Unit'], 0, 0, 2, 0).ConvertintoSelectedUnit()
+                        item['QtyInKg'] = QtyInKg
+                        QtyInBox = UnitwiseQuantityConversion(
+                            item['Item'], item['Quantity'], item['Unit'], 0, 0, 4, 0).ConvertintoSelectedUnit()
+                        item['QtyInBox'] = QtyInBox
+                    else:    
+                        BaseUnitQuantity = UnitwiseQuantityConversion(
+                            item['Item'], item['Quantity'], item['Unit'], 0, 0, 0, 0).GetBaseUnitQuantity()
+                        item['BaseUnitQuantity'] = BaseUnitQuantity
+                        QtyInNo = UnitwiseQuantityConversion(
+                            item['Item'], item['Quantity'], item['Unit'], 0, 0, 1, 0).ConvertintoSelectedUnit()
+                        item['QtyInNo'] = QtyInNo
+                        QtyInKg = UnitwiseQuantityConversion(
+                            item['Item'], item['Quantity'], item['Unit'], 0, 0, 2, 0).ConvertintoSelectedUnit()
+                        item['QtyInKg'] = QtyInKg
+                        QtyInBox = UnitwiseQuantityConversion(
+                            item['Item'], item['Quantity'], item['Unit'], 0, 0, 4, 0).ConvertintoSelectedUnit()
+                        item['QtyInBox'] = QtyInBox
+                # print(GRNupdatedata)
                 GRNupdate_Serializer = T_GRNSerializer(GRNupdateByID, data=GRNupdatedata)
                 if GRNupdate_Serializer.is_valid():
                     GRNupdate_Serializer.save()  
