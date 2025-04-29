@@ -81,7 +81,7 @@ class TallyDataListView(CreateAPIView):
                 elif Mode == "Sale":
                     tallyquery = T_Invoices.objects.raw(f'''select * from                                                    
                                                              
-                                                             (SELECT T_Invoices.id, T_Invoices.FullInvoiceNumber, T_Invoices.InvoiceDate, M_Parties.id AS PartyCode, M_Parties.Name AS PartyName,
+                                                             (SELECT T_Invoices.id, T_Invoices.FullInvoiceNumber InvoiceNumber, T_Invoices.InvoiceDate, M_Parties.id AS PartyCode, M_Parties.Name AS PartyName,
                                                                 M_Items.id AS ItemCode, M_Items.Name AS ItemName, M_GSTHSNCode.HSNCode, TI.Rate,
                                                                 TI.Quantity,  M_Units.Name as UnitName, TI.DiscountType, TI.Discount AS DiscountPercentage,
                                                                 TI.DiscountAmount, TI.BasicAmount AS TaxableValue, TI.CGSTPercentage, TI.CGST, TI.SGSTPercentage,
@@ -99,7 +99,7 @@ class TallyDataListView(CreateAPIView):
                                                              
                                                              UNION 
                                                              
-                                                             SELECT T_DeletedInvoices.Invoice id , T_DeletedInvoices.FullInvoiceNumber, T_DeletedInvoices.InvoiceDate, M_Parties.id AS PartyCode,
+                                                             SELECT T_DeletedInvoices.Invoice id , T_DeletedInvoices.FullInvoiceNumber InvoiceNumber, T_DeletedInvoices.InvoiceDate, M_Parties.id AS PartyCode,
                                                                 M_Parties.Name AS PartyName,
                                                                 M_Items.id AS ItemCode, M_Items.Name AS ItemName, M_GSTHSNCode.HSNCode, TI.Rate,
                                                                 TI.Quantity,  M_Units.Name as UnitName, TI.DiscountType, TI.Discount AS DiscountPercentage,
