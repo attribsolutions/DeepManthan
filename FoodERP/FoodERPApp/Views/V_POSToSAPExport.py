@@ -23,11 +23,11 @@ class SAPExportViewDetails(APIView):
     def post(self, request):
         SalesData = JSONParser().parse(request)        
         try:
-            Party = SalesData['Party'] 
+            Party = SalesData['Party']             
             InvoiceDate = SalesData['InvoiceDate'] 
             
             # Call the orchestrator method
-            self.File1(Party,InvoiceDate)
+            self.File1(Party,InvoiceDate)            
             self.File2(Party,InvoiceDate)            
             ss= self.File3(Party,InvoiceDate) 
             return JsonResponse(ss)
@@ -292,15 +292,18 @@ class SAPExportViewDetails(APIView):
         """Log operation details into m_sapposuploadlog."""
         try:
             print(f"Logging: file_type={file_type}, status={status}, message={message}, party={party}, sale_date={sale_date}")
-            M_SAPPOSUploadLog.objects.create(
-                UploadDate=datetime.now(),
-                UploadBy=party,  
-                Party=party,
-                SaleDate=sale_date,
-                UploadStatus=status,
-                Message=message,
-                File=file_type
-            )
+            party_ids = [int(p.strip()) for p in party.split(',') if p.strip().isdigit()]
+            for pid in party_ids:
+                M_SAPPOSUploadLog.objects.create(
+                    UploadDate=datetime.now(),
+                    UploadBy=pid,  
+                    Party=pid,
+                    SaleDate=sale_date,
+                    UploadStatus=status,
+                    Message=message,
+                    File=file_type
+                )
+            
         except Exception as e:
             print(f"Failed to insert log: {e}")
     
