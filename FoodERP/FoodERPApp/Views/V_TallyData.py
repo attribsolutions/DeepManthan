@@ -79,7 +79,9 @@ class TallyDataListView(CreateAPIView):
                     ID = "PurchaseID"
                 
                 elif Mode == "Sale":
-                    tallyquery = TC_InvoiceItems.objects.raw(f'''SELECT T_Invoices.id, T_Invoices.FullInvoiceNumber, T_Invoices.InvoiceDate, M_Parties.id AS PartyCode, M_Parties.Name AS PartyName,
+                    tallyquery = T_Invoices.objects.raw(f'''select * from                                                    
+                                                             
+                                                             (SELECT T_Invoices.id, T_Invoices.FullInvoiceNumber, T_Invoices.InvoiceDate, M_Parties.id AS PartyCode, M_Parties.Name AS PartyName,
                                                                 M_Items.id AS ItemCode, M_Items.Name AS ItemName, M_GSTHSNCode.HSNCode, TI.Rate,
                                                                 TI.Quantity,  M_Units.Name as UnitName, TI.DiscountType, TI.Discount AS DiscountPercentage,
                                                                 TI.DiscountAmount, TI.BasicAmount AS TaxableValue, TI.CGSTPercentage, TI.CGST, TI.SGSTPercentage,
@@ -93,7 +95,7 @@ class TallyDataListView(CreateAPIView):
                                                                 JOIN M_Items ON M_Items.id = TI.Item_id
                                                                 JOIN M_GSTHSNCode ON M_GSTHSNCode.id = TI.GST_id
                                                                 JOIN M_Users ON M_Users.id = T_Invoices.CreatedBy
-                                                                WHERE M_Parties.Company_id = 4 AND T_Invoices.IsTallySave=0 limit 50
+                                                                WHERE M_Parties.Company_id = 4 AND T_Invoices.IsTallySave=0 
                                                              
                                                              UNION 
                                                              
@@ -112,7 +114,7 @@ class TallyDataListView(CreateAPIView):
                                                                 JOIN M_Items ON M_Items.id = TI.Item
                                                                 JOIN M_GSTHSNCode ON M_GSTHSNCode.id = TI.GST
                                                                 JOIN M_Users ON M_Users.id = T_DeletedInvoices.CreatedBy
-                                                                WHERE M_Parties.Company_id = 4 AND T_DeletedInvoices.IsTallySave=0 limit 50''')
+                                                                WHERE M_Parties.Company_id = 4 AND T_DeletedInvoices.IsTallySave=0 )s order by id limit 100''')
                     ID = "SaleID"
                 else:
                     return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Invalid Mode', 'Data': []})

@@ -314,7 +314,8 @@ class StockOutReportView(CreateAPIView):
                 datetime_obj = datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
                 
                 StockOutReportQuery = T_SPOSStockOut.objects.raw(f'''SELECT A.id,A.Quantity , A.StockDate , A.Item ItemID, M_Items.Name, Groupss.Name "Group", subgroup.Name SubGroup, A.Party, M_Parties.Name PartyName, A.CreatedBy, A.CreatedOn StockoutTime
-                            FROM SweetPOS.T_SPOSStockOut A 
+                            M_Items.id ItemID,M_Items.SAPItemCode
+                                                                 FROM SweetPOS.T_SPOSStockOut A 
                             JOIN FoodERP.M_Items  ON M_Items.id = A.Item
                             JOIN FoodERP.M_Parties ON M_Parties.id = A.Party
                             {ItemsGroupJoinsandOrderby[1]}
@@ -334,7 +335,10 @@ class StockOutReportView(CreateAPIView):
                         "PartyName": a.PartyName,
                         "CreatedBy": a.CreatedBy,
                         "StockoutTime": a.StockoutTime,
-                        "Quantity" :a.Quantity
+                        "Quantity" :a.Quantity,
+                        "ItemID" : a.ItemID, 
+                        "SAPItemCode" : a.SAPItemCode,
+
 
                     })
                 log_entry = create_transaction_logNew(request, StockData, 0, f'StockoutReportfor :{Party} for time {datetime_obj.hour},', 419, 0)
