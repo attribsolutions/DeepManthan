@@ -91,7 +91,7 @@ class StockEntryPageView(CreateAPIView):
                     "BatchCode" : a['BatchCode'],
                     "BatchCodeID" : a['BatchCodeID'],
                     "IsSaleable" : 1,
-                    "Difference" : round(BaseUnitQuantity,3)-totalstock,
+                    "Difference" : round(BaseUnitQuantity,3)-round(totalstock,3),
                     "IsStockAdjustment" : IsStockAdjustment
                     })
                     
