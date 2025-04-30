@@ -271,29 +271,18 @@ class T_GRNViewUpdate(APIView):
                     
                 
                 for item in GRNupdatedata['GRNItems']:
-                    if GRNupdatedata.get('IsSave') == 0:    
-                        QtyInNo = UnitwiseQuantityConversion(
+                    BaseUnitQuantity = UnitwiseQuantityConversion(
+                        item['Item'], item['Quantity'], item['Unit'], 0, 0, 0, 0).GetBaseUnitQuantity()
+                    item['BaseUnitQuantity'] = BaseUnitQuantity
+                    QtyInNo = UnitwiseQuantityConversion(
                         item['Item'], item['Quantity'], item['Unit'], 0, 0, 1, 0).ConvertintoSelectedUnit()
-                        item['QtyInNo'] = QtyInNo
-                        QtyInKg = UnitwiseQuantityConversion(
-                            item['Item'], item['Quantity'], item['Unit'], 0, 0, 2, 0).ConvertintoSelectedUnit()
-                        item['QtyInKg'] = QtyInKg
-                        QtyInBox = UnitwiseQuantityConversion(
-                            item['Item'], item['Quantity'], item['Unit'], 0, 0, 4, 0).ConvertintoSelectedUnit()
-                        item['QtyInBox'] = QtyInBox
-                    else:    
-                        BaseUnitQuantity = UnitwiseQuantityConversion(
-                            item['Item'], item['Quantity'], item['Unit'], 0, 0, 0, 0).GetBaseUnitQuantity()
-                        item['BaseUnitQuantity'] = BaseUnitQuantity
-                        QtyInNo = UnitwiseQuantityConversion(
-                            item['Item'], item['Quantity'], item['Unit'], 0, 0, 1, 0).ConvertintoSelectedUnit()
-                        item['QtyInNo'] = QtyInNo
-                        QtyInKg = UnitwiseQuantityConversion(
-                            item['Item'], item['Quantity'], item['Unit'], 0, 0, 2, 0).ConvertintoSelectedUnit()
-                        item['QtyInKg'] = QtyInKg
-                        QtyInBox = UnitwiseQuantityConversion(
-                            item['Item'], item['Quantity'], item['Unit'], 0, 0, 4, 0).ConvertintoSelectedUnit()
-                        item['QtyInBox'] = QtyInBox
+                    item['QtyInNo'] = QtyInNo
+                    QtyInKg = UnitwiseQuantityConversion(
+                        item['Item'], item['Quantity'], item['Unit'], 0, 0, 2, 0).ConvertintoSelectedUnit()
+                    item['QtyInKg'] = QtyInKg
+                    QtyInBox = UnitwiseQuantityConversion(
+                        item['Item'], item['Quantity'], item['Unit'], 0, 0, 4, 0).ConvertintoSelectedUnit()
+                    item['QtyInBox'] = QtyInBox
                 # print(GRNupdatedata)
                 GRNupdate_Serializer = T_GRNSerializer(GRNupdateByID, data=GRNupdatedata)
                 if GRNupdate_Serializer.is_valid():
