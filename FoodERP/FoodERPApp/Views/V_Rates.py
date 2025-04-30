@@ -197,39 +197,74 @@ class M_RatesViewThird(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Rate used in another table', 'Data': []}) 
         log_entry = create_transaction_logNew(request, {'RateID':id}, 0,'RateID:'+str(id),369,0)
         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Rate Deleted Successfully','DeleteID':id,'Data':[]})
-           
-class RateAdjustmentView(CreateAPIView):
+        
+class BatchDetailsAdjustmentView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     @transaction.atomic()
     def post(self, request):
-        Ratedata = JSONParser().parse(request)
+        AdjustmentData = JSONParser().parse(request)
         updated_items = []
-        
+
         try:
             with transaction.atomic():
-                Party = Ratedata['PartyID']
+                Party = AdjustmentData['PartyID']
+                TypeID = AdjustmentData.get('TypeID')
 
-                for item in Ratedata['StockItems']:
+                if not TypeID:
+                    return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'TypeID is required.', 'Data': []})
+
+                Type = M_GeneralMaster.objects.filter(id=TypeID, IsActive=1).first()
+
+                if not Type:
+                    return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': f'Invalid TypeID: {TypeID}', 'Data': []})
+
+                for item in AdjustmentData['StockItems']:
                     BatchCode = item['BatchCode']
                     Rate = item.get('Rate')
+                    GST = item.get('GST')
+                    MRPValue = item.get('MRPValue')   
 
                     BatchDetails = O_LiveBatches.objects.filter(BatchCode=BatchCode).first()
 
                     if BatchDetails:
-                        if Rate is not None:
-                            BatchDetails.Rate = Rate
-                            BatchDetails.save()
-                            updated_items.append(BatchCode)  
+                        updated = False
+
+                        if Type.Name == 'Rate':
+                            if Rate is not None:
+                                BatchDetails.Rate = Rate
+                                updated = True
+                            else:
+                                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': f'Missing Rate for BatchCode: {BatchCode}', 'Data': []})
+
+                        elif Type.Name == 'GST':
+                            GSTInstance = M_GSTHSNCode.objects.filter(id=GST, IsDeleted=0).first()
+                            if GSTInstance:
+                                BatchDetails.GST_id = GSTInstance
+                                updated = True
+                            else:
+                                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': f'Invalid GST ID: {GST} for BatchCode: {BatchCode}', 'Data': []})
                             
+                        elif Type.Name == 'MRP':
+                            if MRPValue is not None:
+                                BatchDetails.MRPValue = MRPValue
+                                updated = True
+                            else:
+                                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': f'Missing MRP for BatchCode: {BatchCode}', 'Data': []})
+
+                        if updated:
+                            BatchDetails.save()
+                            updated_items.append(BatchCode)
+
                 if updated_items:
-                    log_entry = create_transaction_logNew(request, Ratedata, Party, 'Rates Updated Successfully', 455, 0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Rates Updated Successfully', 'Data': updated_items})
+                    log_entry = create_transaction_logNew(request, AdjustmentData, Party, 'Data Updated Successfully', 455, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Data Updated Successfully', 'Data': updated_items})
                 else:
-                    log_entry = create_transaction_logNew(request, 0, 0, "Invalid Rate Data", 455, 0)
-                    return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Invalid Rate Data', 'Data': []})
+                    log_entry = create_transaction_logNew(request, 0, 0, "No records updated", 455, 0)
+                    return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'No records updated', 'Data': []})
 
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Ratedata, 0, 'RateAdjustment: ' + str(e), 33, 0)
+            log_entry = create_transaction_logNew(request, AdjustmentData, 0, 'DataAdjustment: ' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+
 
