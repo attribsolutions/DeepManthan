@@ -50,7 +50,7 @@ class SAPExportViewDetails(APIView):
                 FROM SweetPOS.TC_SPOSInvoiceItems II 
                 join SweetPOS.T_SPOSInvoices  I on I.id=II.Invoice_id
                 WHERE I.InvoiceDate = %s
-                AND I.Party IN (%s) and I.IsDeleted=0    )TotalRevenue, 
+                AND I.Party IN ({Party}) and I.IsDeleted=0    )TotalRevenue, 
                 SUM(II.Quantity) AS Quantity, 
                 M_Units.SAPUnit UOM, 
                 MRPValue Rate,  
@@ -66,7 +66,7 @@ class SAPExportViewDetails(APIView):
                 JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.id = II.Unit 
                 JOIN FoodERP.M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
                 WHERE I.InvoiceDate = %s  
-                AND I.Party IN (%s)  and  I.IsDeleted=0
+                AND I.Party IN ({Party})  and  I.IsDeleted=0
 			    GROUP BY 
                 M_Items.SAPItemCode,
                 M_Parties.SapPartyCode, 
@@ -79,7 +79,7 @@ class SAPExportViewDetails(APIView):
             # print(raw_queryset.query)         
             # Generate file name
             # file_name = f"{datetime.now().strftime('%Y%m%d')}_{raw_queryset[0].Name.strip()}_File1.csv"
-            raw_queryset = list(T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate, Party, InvoiceDate, Party]))  
+            raw_queryset = list(T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate,  InvoiceDate]))  
             if not raw_queryset:  
                 raise Exception(f"No records found for Party {Party} on {InvoiceDate}")
             
@@ -130,7 +130,7 @@ class SAPExportViewDetails(APIView):
                 A.ClientID, InvoiceNumber BillNumber 
                 FROM SweetPOS.T_SPOSInvoices A
                 JOIN FoodERP.M_Parties ON A.Party = FoodERP.M_Parties.id
-                WHERE InvoiceDate = %s AND A.Party in (%s) and A.IsDeleted=0'''
+                WHERE InvoiceDate = %s AND A.Party in ({Party}) and A.IsDeleted=0'''
                 
 
                 # SELECT 1 id, DATE_FORMAT(InvoiceDate, '%%Y%%m%%d') SaleDate, FoodERP.M_Parties.SAPPartyCode Store,
@@ -144,7 +144,7 @@ class SAPExportViewDetails(APIView):
             
             # Generate file name
             # file_name = f"{datetime.now().strftime('%Y%m%d')}_{raw_queryset[0].Name.strip()}_File3.csv"
-            raw_queryset = list(T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate, Party]))  
+            raw_queryset = list(T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate]))  
             if not raw_queryset:  
                 raise Exception(f"No records found for Party {Party} on {InvoiceDate}")
             manual_date_obj = datetime.strptime(InvoiceDate, '%Y-%m-%d')
@@ -191,7 +191,7 @@ class SAPExportViewDetails(APIView):
             JOIN FoodERP.M_Parties ON M_Parties.id = II.Party
             JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.id = Unit
             JOIN FoodERP.M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
-            WHERE I.InvoiceDate = %s  AND  I.Party in (%s)  AND ifnull(M_Items.SAPItemCode,'')  != '' and I.IsDeleted=0 AND II.Item NOT IN  (%s)
+            WHERE I.InvoiceDate = %s  AND  I.Party in ({Party})  AND ifnull(M_Items.SAPItemCode,'')  != '' and I.IsDeleted=0 AND II.Item NOT IN  (%s)
             GROUP BY SapItemCode,M_Units.Name,M_Parties.SapPartyCode,I.InvoiceDate,M_Units.id
             
             
@@ -204,7 +204,7 @@ class SAPExportViewDetails(APIView):
             # file_name = f"{datetime.now().strftime('%Y%m%d')}_{raw_queryset[0].Name.strip()}_File2.csv"
             
             
-            raw_queryset = list(T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate, Party, DoNOtUseItemID]))  
+            raw_queryset = list(T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate, DoNOtUseItemID]))  
             if not raw_queryset:  
                 raise Exception(f"No records found for Party {Party} on {InvoiceDate}")
             manual_date_obj = datetime.strptime(InvoiceDate, '%Y-%m-%d')
@@ -266,7 +266,7 @@ class SAPExportViewDetails(APIView):
             # Upload the file
             with io.BytesIO(file_content) as file_stream:                        
                 ftp.storbinary(f"STOR {file_name}", file_stream)  # Upload the file
-            self.insert_pos_log(ftp_url, "Success", "File uploaded successfully", Party, InvoiceDate)
+            self.insert_pos_log(ftp_url, "Success", "File uploaded successfully" + str(Party), Party, InvoiceDate)
             # Verify the upload
             uploaded_files = []
             ftp.retrlines('NLST', uploaded_files.append)
@@ -279,9 +279,7 @@ class SAPExportViewDetails(APIView):
             print(f"FTP upload failed: {e}")
             raise
 
-    # def insert_pos_log(self, file_type, status, message):
-    #     """Log operation details."""
-    #     print(f"Log - FileType: {file_type}, Status: {status}, Message: {message}")  
+  
         
     def get_ftp_settings(self):
         """Fetches FTP credentials."""
@@ -292,17 +290,17 @@ class SAPExportViewDetails(APIView):
         """Log operation details into m_sapposuploadlog."""
         try:
             print(f"Logging: file_type={file_type}, status={status}, message={message}, party={party}, sale_date={sale_date}")
-            party_ids = [int(p.strip()) for p in party.split(',') if p.strip().isdigit()]
-            for pid in party_ids:
-                M_SAPPOSUploadLog.objects.create(
-                    UploadDate=datetime.now(),
-                    UploadBy=pid,  
-                    Party=pid,
-                    SaleDate=sale_date,
-                    UploadStatus=status,
-                    Message=message,
-                    File=file_type
-                )
+            # party_ids = [int(p.strip()) for p in party.split(',') if p.strip().isdigit()]
+            # for pid in party_ids:
+            M_SAPPOSUploadLog.objects.create(
+                UploadDate=datetime.now(),
+                UploadBy=int(party.split(',')[0]),  
+                Party=int(party.split(',')[0]),
+                SaleDate=sale_date,
+                UploadStatus=status,
+                Message=message,
+                File=file_type
+            )
             
         except Exception as e:
             print(f"Failed to insert log: {e}")
