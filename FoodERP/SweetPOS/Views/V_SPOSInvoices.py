@@ -18,6 +18,7 @@ from django.db.models import *
 from datetime import timedelta
 from SweetPOS.Views.SweetPOSCommonFunction import *
 from FoodERPApp.Views.V_TransactionNumberfun import *
+from django.db.models import Min, Max
 
 
 
@@ -609,7 +610,6 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                                                                     WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s AND SweetPOS.T_SPOSInvoices.IsDeleted=0
                                                                     GROUP BY SweetPOS.TC_SPOSInvoiceItems.Item, M_Items.Name, M_Units.Name
                                                                     ORDER BY TotalAmount DESC, TotalQuantity DESC LIMIT 5''', ([FromDate, ToDate, Party]))
- 
                     TopSaleItems_List = []
                     for item in TopSaleItems:
                         TopSaleItems_List.append({
@@ -619,6 +619,24 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                             "TotalQuantity": item.TotalQuantity,
                             "UnitName": item.UnitName
                         })
+
+                    InvoiceValues = T_SPOSInvoices.objects.filter(InvoiceDate__range=[FromDate, ToDate],Party=Party,IsDeleted=0).aggregate(MinInvoiceValue=Min('GrandTotal'), MaxInvoiceValue=Max('GrandTotal'))
+
+                    MinInvoiceValue = InvoiceValues['MinInvoiceValue'] or 0
+                    MaxInvoiceValue = InvoiceValues['MaxInvoiceValue'] or 0
+
+                    UPTData = TC_SPOSInvoiceItems.objects.raw('''SELECT 1 as id, AVG(ItemCount) as UnitPerTransaction FROM (SELECT COUNT(*) as ItemCount FROM SweetPOS.T_SPOSInvoices A JOIN SweetPOS.TC_SPOSInvoiceItems B ON A.id = B.Invoice_id WHERE A.InvoiceDate BETWEEN %s AND %s  AND A.Party = %s AND A.IsDeleted = 0 AND A.GrandTotal >= %s AND A.GrandTotal <= %s GROUP BY A.id) AS ItemCounts''', [FromDate, ToDate, Party, MinInvoiceValue, MaxInvoiceValue])
+                    
+                    UnitPerTransaction = 0
+                    for upt in UPTData:
+                        UnitPerTransaction = upt.UnitPerTransaction
+                        
+                    ATVData = T_SPOSInvoices.objects.raw('''SELECT 1 as id, AVG(GrandTotal) as AvgTransactionValue FROM SweetPOS.T_SPOSInvoices WHERE InvoiceDate BETWEEN %s AND %s AND Party = %s AND IsDeleted = 0 AND GrandTotal >= %s AND GrandTotal <= %s''', [FromDate, ToDate, Party, MinInvoiceValue, MaxInvoiceValue])
+
+                    AverageTransactionValue = 0
+                    for atv in ATVData:
+                        AverageTransactionValue = atv.AvgTransactionValue
+                        
                     Party_List.append({
                         "PartyId": party.id,
                         "PartyName": party.Name,
@@ -629,6 +647,8 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                         "LastBillTime": party.LastBillTime,
                         "LastInvoiceNumber": party.LastInvoiceNumber,
                         "LastInvoiceAmount": party.LastInvoiceAmount,
+                        "UnitPerTransaction": round(UnitPerTransaction, 2),
+                        "AverageTransactionValue": round(AverageTransactionValue, 2),
                         "TopSaleItems": TopSaleItems_List
                     })
                 if Party_List:
