@@ -66,7 +66,7 @@ class StockEntryPageView(CreateAPIView):
                     a['SystemBatchCode'] = BatchCode
                     a['SystemBatchDate'] = date.today()
                     a['BaseUnitQuantity'] = round(BaseUnitQuantity,3)
-                    
+                   
                     O_BatchWiseLiveStockList.append({
                     "Item": a['Item'],
                     "Quantity": a['Quantity'],
@@ -79,6 +79,7 @@ class StockEntryPageView(CreateAPIView):
                     
                     
                     })
+                    
                     
                     T_StockEntryList.append({
                     "StockDate":StockDate,    
@@ -93,7 +94,7 @@ class StockEntryPageView(CreateAPIView):
                     "BatchCode" : a['BatchCode'],
                     "BatchCodeID" : a['BatchCodeID'],
                     "IsSaleable" : 1,
-                    "Difference" : round(BaseUnitQuantity,3)-totalstock,
+                    "Difference" : round(BaseUnitQuantity-totalstock,3),
                     "IsStockAdjustment" : IsStockAdjustment
                     })
                     

@@ -23,11 +23,11 @@ class SAPExportViewDetails(APIView):
     def post(self, request):
         SalesData = JSONParser().parse(request)        
         try:
-            Party = SalesData['Party'] 
+            Party = SalesData['Party']             
             InvoiceDate = SalesData['InvoiceDate'] 
             
             # Call the orchestrator method
-            self.File1(Party,InvoiceDate)
+            self.File1(Party,InvoiceDate)            
             self.File2(Party,InvoiceDate)            
             ss= self.File3(Party,InvoiceDate) 
             return JsonResponse(ss)
@@ -266,7 +266,7 @@ class SAPExportViewDetails(APIView):
             # Upload the file
             with io.BytesIO(file_content) as file_stream:                        
                 ftp.storbinary(f"STOR {file_name}", file_stream)  # Upload the file
-            self.insert_pos_log(ftp_url, "Success", "File uploaded successfully", Party, InvoiceDate)
+            self.insert_pos_log(ftp_url, "Success", "File uploaded successfully" + str(Party), Party, InvoiceDate)
             # Verify the upload
             uploaded_files = []
             ftp.retrlines('NLST', uploaded_files.append)
@@ -279,9 +279,7 @@ class SAPExportViewDetails(APIView):
             print(f"FTP upload failed: {e}")
             raise
 
-    # def insert_pos_log(self, file_type, status, message):
-    #     """Log operation details."""
-    #     print(f"Log - FileType: {file_type}, Status: {status}, Message: {message}")  
+  
         
     def get_ftp_settings(self):
         """Fetches FTP credentials."""
@@ -292,15 +290,18 @@ class SAPExportViewDetails(APIView):
         """Log operation details into m_sapposuploadlog."""
         try:
             print(f"Logging: file_type={file_type}, status={status}, message={message}, party={party}, sale_date={sale_date}")
+            # party_ids = [int(p.strip()) for p in party.split(',') if p.strip().isdigit()]
+            # for pid in party_ids:
             M_SAPPOSUploadLog.objects.create(
                 UploadDate=datetime.now(),
-                UploadBy=party,  
-                Party=party,
+                UploadBy=int(party.split(',')[0]),  
+                Party=int(party.split(',')[0]),
                 SaleDate=sale_date,
                 UploadStatus=status,
                 Message=message,
                 File=file_type
             )
+            
         except Exception as e:
             print(f"Failed to insert log: {e}")
     
