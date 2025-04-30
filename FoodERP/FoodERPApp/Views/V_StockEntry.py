@@ -535,7 +535,10 @@ class M_GetStockEntryList(CreateAPIView):
 #  -------------------- Get Stock Entry Item List ----------------------
 
 class M_GetStockEntryItemList(CreateAPIView):
+    
     permission_classes = (IsAuthenticated,)
+    authentication_classes = [BasicAuthentication, TokenAuthentication, JWTAuthentication]
+    # authentication_class = JSONWebTokenAuthentication
     
     @transaction.atomic()
     def post(self, request):
@@ -544,8 +547,11 @@ class M_GetStockEntryItemList(CreateAPIView):
             with transaction.atomic():  
                 PartyID = Stockdata['PartyID']
                 StockDate = Stockdata['StockDate']
+                ClientID = Stockdata.get('ClientID', None) 
                 
                 ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(PartyID,0).split('!')
+         
+                ClientFilter = f"AND s.ClientID = {ClientID}" if ClientID else ""
 
                 if PartyID is None:
                     return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Party ID not provided', 'Data': []})
@@ -561,6 +567,7 @@ class M_GetStockEntryItemList(CreateAPIView):
                         INNER JOIN M_Units as u ON u.id = iu.UnitID_id
                         {ItemsGroupJoinsandOrderby[1]}
                         WHERE s.Party = %s AND s.StockDate = %s AND s.IsStockAdjustment = 0  
+                        {ClientFilter}
                         {ItemsGroupJoinsandOrderby[2]} 
                     ) AS OrderedSPOSStock 
                     UNION  
