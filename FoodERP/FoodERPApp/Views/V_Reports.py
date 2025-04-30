@@ -574,7 +574,7 @@ class StockReportView(CreateAPIView):
                 PartyIDs = [int(p) for p in Orderdata['Party'].split(',')]
                 
                 
-
+                StockData = []
                 for Party in PartyIDs:
                     PartyNameQ = M_Parties.objects.filter(id=Party).values("Name")
                     if not PartyNameQ.exists():
@@ -687,7 +687,7 @@ class StockReportView(CreateAPIView):
                     # serializer = StockReportSerializer(StockreportQuery, many=True).data
                     # print(serializer )
                     # StockData = list()
-                    StockData = []
+                    
                     StockDetails =list()
                     if StockreportQuery:
                     
