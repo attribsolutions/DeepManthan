@@ -22,8 +22,7 @@ class TallyDataListView(CreateAPIView):
         TallyData = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                # FromDate = TallyData['FromDate']
-                # ToDate = TallyData['ToDate'] 
+                 
                 Mode = TallyData['Mode']  
                 
                 TallyDetails = []
@@ -51,7 +50,8 @@ class TallyDataListView(CreateAPIView):
                     JOIN M_Users U2 ON GRN.CreatedBy = U2.id  
                     WHERE P.Company_id = 4 AND GRN.IsTallySave = 0 
                     AND ((IsSave=0 and AccountingGRNStatus=0) OR (IsSave=1 and AccountingGRNStatus=1) OR (IsSave=0 and AccountingGRNStatus=2))
-                    UNION ALL
+                    
+                           UNION ALL
 
                     SELECT GRN.id ,
                     GRN.InvoiceNumber,GRN.InvoiceDate,P.id AS PartyCode,P.Name AS PartyName,NULL AS ItemCode,L.Name AS ItemName,
@@ -73,12 +73,15 @@ class TallyDataListView(CreateAPIView):
                     JOIN M_Users U2 ON GRN.CreatedBy = U2.id
                     WHERE P.Company_id = 4 AND GRN.IsTallySave = 0 
                     AND ((IsSave=0 and AccountingGRNStatus=0) OR (IsSave=1 and AccountingGRNStatus=1) OR (IsSave=0 and AccountingGRNStatus=2))
-                    )B Order by B.id''')
+                    
+                           )B Order by B.id limit 100''')
                     tallyquery = TC_GRNItems.objects.raw(query)
                     ID = "PurchaseID"
                 
                 elif Mode == "Sale":
-                    tallyquery = TC_InvoiceItems.objects.raw(f'''SELECT T_Invoices.id, T_Invoices.InvoiceNumber, T_Invoices.InvoiceDate, M_Parties.id AS PartyCode, M_Parties.Name AS PartyName,
+                    tallyquery = T_Invoices.objects.raw(f'''select * from                                                    
+                                                             
+                                                             (SELECT T_Invoices.id, T_Invoices.FullInvoiceNumber InvoiceNumber, T_Invoices.InvoiceDate, M_Parties.id AS PartyCode, M_Parties.Name AS PartyName,
                                                                 M_Items.id AS ItemCode, M_Items.Name AS ItemName, M_GSTHSNCode.HSNCode, TI.Rate,
                                                                 TI.Quantity,  M_Units.Name as UnitName, TI.DiscountType, TI.Discount AS DiscountPercentage,
                                                                 TI.DiscountAmount, TI.BasicAmount AS TaxableValue, TI.CGSTPercentage, TI.CGST, TI.SGSTPercentage,
@@ -92,11 +95,11 @@ class TallyDataListView(CreateAPIView):
                                                                 JOIN M_Items ON M_Items.id = TI.Item_id
                                                                 JOIN M_GSTHSNCode ON M_GSTHSNCode.id = TI.GST_id
                                                                 JOIN M_Users ON M_Users.id = T_Invoices.CreatedBy
-                                                                WHERE M_Parties.Company_id = 4 AND T_Invoices.IsTallySave=0
+                                                                WHERE M_Parties.Company_id = 4 AND T_Invoices.IsTallySave=0 
                                                              
                                                              UNION 
                                                              
-                                                             SELECT T_DeletedInvoices.Invoice id , T_DeletedInvoices.InvoiceNumber, T_DeletedInvoices.InvoiceDate, M_Parties.id AS PartyCode,
+                                                             SELECT T_DeletedInvoices.Invoice id , T_DeletedInvoices.FullInvoiceNumber InvoiceNumber, T_DeletedInvoices.InvoiceDate, M_Parties.id AS PartyCode,
                                                                 M_Parties.Name AS PartyName,
                                                                 M_Items.id AS ItemCode, M_Items.Name AS ItemName, M_GSTHSNCode.HSNCode, TI.Rate,
                                                                 TI.Quantity,  M_Units.Name as UnitName, TI.DiscountType, TI.Discount AS DiscountPercentage,
@@ -111,7 +114,7 @@ class TallyDataListView(CreateAPIView):
                                                                 JOIN M_Items ON M_Items.id = TI.Item
                                                                 JOIN M_GSTHSNCode ON M_GSTHSNCode.id = TI.GST
                                                                 JOIN M_Users ON M_Users.id = T_DeletedInvoices.CreatedBy
-                                                                WHERE M_Parties.Company_id = 4 AND T_DeletedInvoices.IsTallySave=0''')
+                                                                WHERE M_Parties.Company_id = 4 AND T_DeletedInvoices.IsTallySave=0 )s order by id limit 100''')
                     ID = "SaleID"
                 else:
                     return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Invalid Mode', 'Data': []})
