@@ -5,7 +5,6 @@ from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from rest_framework.parsers import JSONParser
 from django.db import connection
-
 from ..Views.V_TransactionNumberfun import GetYear
 from ..Serializer.S_Orders import Mc_ItemUnitSerializerThird
 from ..Serializer.S_StockAdjustment import *
@@ -16,15 +15,14 @@ from ..Views.V_CommFunction import *
 from datetime import datetime
 
 
- 
 class ShowBatchesForItemView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     @transaction.atomic()
-    def get(self, request, id=0,Party=0):
+    def get(self, request, id=0, Party=0):
         try:
             with transaction.atomic():
-                query=O_BatchWiseLiveStock.objects.raw('''SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,M_Items.Name ItemName,
+                query = O_BatchWiseLiveStock.objects.raw('''SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,M_Items.Name ItemName,
                                                        OriginalBaseUnitQuantity,BaseUnitQuantity,O_LiveBatches.BatchDate,O_LiveBatches.BatchCode,
                                                        O_LiveBatches.SystemBatchDate,O_LiveBatches.SystemBatchCode,O_LiveBatches.MRPValue,
                                                        O_LiveBatches.MRP_id MRPID,M_MRPMaster.MRP,O_LiveBatches.GST_id,
@@ -36,52 +34,62 @@ class ShowBatchesForItemView(CreateAPIView):
                                                        JOIN M_Items ON M_Items.id =O_BatchWiseLiveStock.Item_id 
                                                        JOIN M_Units ON M_Units.id = M_Items.BaseUnitID_id
                                                        WHERE O_BatchWiseLiveStock.Item_id=%s AND O_BatchWiseLiveStock.Party_id=%s 
-                                                       AND IsDamagePieces =0 order by id desc limit 50''',([id],[Party]))
-               
+                                                       AND IsDamagePieces =0 order by id desc limit 50''', ([id], [Party]))
+
                 if query:
-                    BatchCodelist = list()
+                    BatchCodelist = []
                     Obatchwise_serializer = OBatchWiseLiveStockAdjustmentSerializer(query, many=True).data
                     for a in Obatchwise_serializer:
-                        Unitquery = MC_ItemUnits.objects.filter(Item_id=a['Item_id'],IsDeleted=0)
+                        Unitquery = MC_ItemUnits.objects.filter(Item_id=a['Item_id'], IsDeleted=0)
+                        ItemUnitDetails = []
                         if Unitquery.exists():
                             Unitdata = Mc_ItemUnitSerializerThird(Unitquery, many=True).data
-                            ItemUnitDetails = list()
                             for c in Unitdata:
                                 ItemUnitDetails.append({
-                                "Unit": c['id'],
-                                "BaseUnitQuantity": c['BaseUnitQuantity'],
-                                "IsBase": c['IsBase'],
-                                "UnitName": c['BaseUnitConversion'],
-                            })
+                                    "Unit": c['id'],
+                                    "BaseUnitQuantity": c['BaseUnitQuantity'],
+                                    "IsBase": c['IsBase'],
+                                    "UnitName": c['BaseUnitConversion'],
+                                })
+                        
+                        GSTquery = M_GSTHSNCode.objects.raw('''SELECT id, Item_id, GSTPercentage, EffectiveDate FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY GSTPercentage ORDER BY EffectiveDate DESC) AS rn
+                                                            FROM M_GSTHSNCode WHERE Item_id = %s AND IsDeleted = 0) AS sub WHERE rn = 1 ORDER BY EffectiveDate DESC LIMIT 3 ''', [a['Item_id']])
+                        ItemGSTDetails = GSTDetailsSerializer(GSTquery, many=True).data
+
                         BatchCodelist.append({
-                            'id':  a['id'],
-                            'Item':  a['Item_id'],
-                            'ItemName':  a['ItemName'],
+                            'id': a['id'],
+                            'Item': a['Item_id'],
+                            'ItemName': a['ItemName'],
                             'OriginalBaseUnitQuantity': a['OriginalBaseUnitQuantity'],
-                            'BaseUnitQuantity':  a['BaseUnitQuantity'],
-                            'BatchDate':  a['BatchDate'],
-                            'BatchCode':  a['BatchCode'],
-                            'SystemBatchDate':  a['SystemBatchDate'],
-                            'SystemBatchCode':  a['SystemBatchCode'],
-                            'MRPValue':  a['MRPValue'],
-                            'MRPID':  a['MRPID'],
-                            'MRP':  a['MRP'],
-                            'GSTID':  a['GST_id'],
-                            'GSTPercentage':  a['GSTPercentage'],
-                            'UnitID':  a['UnitID'],
-                            'UnitName':  a['UnitName'],
+                            'BaseUnitQuantity': a['BaseUnitQuantity'],
+                            'BatchDate': a['BatchDate'],
+                            'BatchCode': a['BatchCode'],
+                            'SystemBatchDate': a['SystemBatchDate'],
+                            'SystemBatchCode': a['SystemBatchCode'],
+                            'MRPValue': a['MRPValue'],
+                            'MRPID': a['MRPID'],
+                            'MRP': a['MRP'],
+                            'GSTID': a['GST_id'],
+                            'GSTPercentage': a['GSTPercentage'],
+                            'UnitID': a['UnitID'],
+                            'UnitName': a['UnitName'],
                             'Rate': a['Rate'],
-                            'UnitOptions' : ItemUnitDetails
+                            'UnitOptions': ItemUnitDetails,
+                            'GSTOptions': ItemGSTDetails
                         })
-                    log_entry = create_transaction_logNew(request,0, 0,'',272,0)
+
+                    log_entry = create_transaction_logNew(request, 0, 0, '', 272, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BatchCodelist})
-                log_entry = create_transaction_logNew(request,0, 0,'Stock Not available',272,0)
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Stock Not available ', 'Data': []})
+
+                log_entry = create_transaction_logNew(request, 0, 0, 'Stock Not available', 272, 0)
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Stock Not available', 'Data': []})
+
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'GETBatchesForItemInStockAdjustment:'+str(Exception),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0, 0, 'GETBatchesForItemInStockAdjustment:' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
 
+ 
 class GetStockCountForPartyView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     
