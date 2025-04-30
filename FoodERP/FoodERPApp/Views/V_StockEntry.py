@@ -15,6 +15,8 @@ from ..Serializer.S_StockEntry import *
 from ..Serializer.S_PartyItems import *
 from ..models import *
 from django.db.models import *
+from rest_framework.authentication import BasicAuthentication, TokenAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 class StockEntryPageView(CreateAPIView):
@@ -484,7 +486,9 @@ class StockEntryItemsView(CreateAPIView):
           
 class M_GetStockEntryList(CreateAPIView):
         
-    permission_classes = (IsAuthenticated,) 
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = [BasicAuthentication, TokenAuthentication, JWTAuthentication]
+    # authentication_class = JSONWebTokenAuthentication
     
     @transaction.atomic()
     def post(self, request):
