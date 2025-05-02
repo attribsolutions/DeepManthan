@@ -37,7 +37,6 @@ class ReadFTPFileView(View):
 
             # Get list of CSV files in source folder
             files = ftp.nlst(source_folder)
-            print("Files found:", files)
 
             if not files:
                 ftp.quit()

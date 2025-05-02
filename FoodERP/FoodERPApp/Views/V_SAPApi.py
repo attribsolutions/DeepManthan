@@ -345,21 +345,43 @@ class SAPLedgerView(CreateAPIView):
                 FromDate = SapLedgerdata['FromDate']
                 ToDate = SapLedgerdata['ToDate']
                 SAPCode = SapLedgerdata['SAPCode']
-             
-                queryset = M_SAPCustomerLedger.objects.filter(FileDate__range=[FromDate, ToDate],CustomerCode=SAPCode).values('CompanyCode', 
-                                                            'DocumentNo', 'FiscalYear', 'DocumentType','PostingDate', 'DocumentDesc', 'CustomerCode',
-                                                            'CustomerName','DebitCredit', 'Amount', 'ItemText', 'FileDate').order_by('PostingDate')
+
+                queryset = M_SAPCustomerLedger.objects.filter(FileDate__range=[FromDate, ToDate],CustomerCode=SAPCode).values('CompanyCode', 'DocumentDesc', 'CustomerCode', 'CustomerName', 'DocumentNo','FiscalYear', 'DebitCredit', 'Amount', 'DocumentType', 'PostingDate', 'ItemText').order_by('PostingDate')
+
                 if queryset.exists():
-                    response_data = list(queryset)
-                    log_entry = create_transaction_logNew(request, SapLedgerdata, SAPCode,f'SAPCode: {SAPCode}',324, 0, FromDate, ToDate, 0)
-                    return JsonResponse({'StatusCode': 200,'Status': True,'Message': '','Data': response_data})
+                    ledger_data = []
+                    for row in queryset:
+                        ledger_data.append({
+                            "CompanyCode": row['CompanyCode'],
+                            "DocumentDesc": row['DocumentDesc'],
+                            "CustomerNumber": row['CustomerCode'],
+                            "CustomerName": row['CustomerName'],
+                            "DocumentNo": row['DocumentNo'],
+                            "Fiscalyear": row['FiscalYear'],
+                            "DebitCredit": row['DebitCredit'],
+                            "Amount": str(round(row['Amount'], 2)),
+                            "DocumentType": row['DocumentType'],
+                            "PostingDate": row['PostingDate'].strftime('%d/%m/%Y %I:%M:%S %p'),
+                            "ItemText": row['ItemText'],
+                            "Debit": 0.0,
+                            "Credit": 0.0
+                        })
+
+                    count = len(ledger_data)
+
+                    opening_balance = M_SAPCustomerLedger.objects.filter(FileDate__lt=FromDate,CustomerCode=SAPCode).aggregate(total=models.Sum('Amount'))['total'] or 0.0
+                    closing_balance = M_SAPCustomerLedger.objects.filter(FileDate__lte=ToDate,CustomerCode=SAPCode).aggregate(total=models.Sum('Amount'))['total'] or 0.0
+
+                    log_entry = create_transaction_logNew(request, SapLedgerdata, SAPCode, f'SAPCode: {SAPCode}', 324, 0, FromDate, ToDate, 0)
+                    return JsonResponse({"StatusCode": 200,"Status": True,"Message": "","Data": {"status": True,"status_code": 200,"count": count,"OpeingBal": round(opening_balance, 2),"ClosingBal": round(closing_balance, 2),"data": ledger_data}})
+
                 else:
-                    log_entry = create_transaction_logNew(request, SapLedgerdata, SAPCode,'SAPLedger: SAPLedger Data Not Found',324, 0)
-                    return JsonResponse({'StatusCode': 204,'Status': True,'Message': 'Record Not Found','Data': []})
+                    log_entry = create_transaction_logNew(request, SapLedgerdata, SAPCode, 'SAPLedger: Data Not Found', 324, 0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
 
         except Exception as e:
-            log_entry = create_transaction_logNew(request, SapLedgerdata, 0,'SAPLedger: ' + str(e),33, 0)
-            return JsonResponse({'StatusCode': 400,'Status': True,'Message': str(e),'Data': [] })
+            log_entry = create_transaction_logNew(request, SapLedgerdata, 0, 'SAPLedger: ' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
 
 
 
