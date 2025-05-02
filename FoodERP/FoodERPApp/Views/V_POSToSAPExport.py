@@ -46,11 +46,7 @@ class SAPExportViewDetails(APIView):
             upload_invoices_query = f'''
                 SELECT  1 id,	M_Items.SAPItemCode AS Material, 
                 M_Parties.SapPartyCode AS Store, 
-                (SELECT SUM(BasicAmount+CGST+SGST) AS TotalRevenue 
-                FROM SweetPOS.TC_SPOSInvoiceItems II 
-                join SweetPOS.T_SPOSInvoices  I on I.id=II.Invoice_id
-                WHERE I.InvoiceDate = %s
-                AND I.Party IN ({Party}) and I.IsDeleted=0    )TotalRevenue, 
+                 TR.TotalRevenue,
                 SUM(II.Quantity) AS Quantity, 
                 M_Units.SAPUnit UOM, 
                 MRPValue Rate,  
@@ -65,6 +61,13 @@ class SAPExportViewDetails(APIView):
                 JOIN FoodERP.M_Parties ON M_Parties.id = II.Party 
                 JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.id = II.Unit 
                 JOIN FoodERP.M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
+                
+                JOIN (SELECT SUM(BasicAmount+CGST+SGST) AS TotalRevenue,I.Party as PartyID
+                FROM SweetPOS.TC_SPOSInvoiceItems II 
+                join SweetPOS.T_SPOSInvoices  I on I.id=II.Invoice_id
+                WHERE I.InvoiceDate =%s
+                AND I.Party IN ({Party}) and I.IsDeleted=0  GROUP BY I.Party  )TR ON TR.PartyID = I.Party
+                
                 WHERE I.InvoiceDate = %s  
                 AND I.Party IN ({Party})  and  I.IsDeleted=0
 			    GROUP BY 
