@@ -15,6 +15,8 @@ from ..Serializer.S_StockEntry import *
 from ..Serializer.S_PartyItems import *
 from ..models import *
 from django.db.models import *
+from rest_framework.authentication import BasicAuthentication, TokenAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 class StockEntryPageView(CreateAPIView):
@@ -485,7 +487,9 @@ class StockEntryItemsView(CreateAPIView):
           
 class M_GetStockEntryList(CreateAPIView):
         
-    permission_classes = (IsAuthenticated,) 
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = [BasicAuthentication, TokenAuthentication, JWTAuthentication]
+    # authentication_class = JSONWebTokenAuthentication
     
     @transaction.atomic()
     def post(self, request):
@@ -531,7 +535,10 @@ class M_GetStockEntryList(CreateAPIView):
 #  -------------------- Get Stock Entry Item List ----------------------
 
 class M_GetStockEntryItemList(CreateAPIView):
+    
     permission_classes = (IsAuthenticated,)
+    authentication_classes = [BasicAuthentication, TokenAuthentication, JWTAuthentication]
+    # authentication_class = JSONWebTokenAuthentication
     
     @transaction.atomic()
     def post(self, request):
@@ -540,8 +547,13 @@ class M_GetStockEntryItemList(CreateAPIView):
             with transaction.atomic():  
                 PartyID = Stockdata['PartyID']
                 StockDate = Stockdata['StockDate']
+                ClientID = Stockdata.get('ClientID', None) 
                 
                 ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(PartyID,0).split('!')
+                
+                GSTJoin = f'''LEFT JOIN (SELECT Item_id, GSTPercentage FROM M_GSTHSNCode gst WHERE gst.IsDeleted = 0 AND gst.EffectiveDate = (SELECT MAX(EffectiveDate) FROM M_GSTHSNCode WHERE IsDeleted = 0 AND Item_id = gst.Item_id AND EffectiveDate <= '{StockDate}')) AS gst ON gst.Item_id = M_Items.id'''
+                
+                ClientFilter = f"AND s.ClientID = {ClientID}" if ClientID else ""
 
                 if PartyID is None:
                     return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Party ID not provided', 'Data': []})
@@ -549,24 +561,27 @@ class M_GetStockEntryItemList(CreateAPIView):
                     return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Stock Date not provided', 'Data': []})
                 
                 StockDataQuery = M_Items.objects.raw(f'''SELECT * FROM  (
-                        SELECT 1 as id, M_Items.Name, s.Quantity, s.MRPValue, u.Name as Unit,
+                        SELECT 1 as id, M_Items.id as ItemID, M_Items.Name, s.Quantity, s.MRPValue, u.Name as Unit, gst.GSTPercentage,
                         {ItemsGroupJoinsandOrderby[0]}
                         FROM M_Items 
                         RIGHT JOIN SweetPOS.T_SPOSStock as s ON M_Items.id = s.Item
                         INNER JOIN MC_ItemUnits as iu ON iu.id = s.Unit
                         INNER JOIN M_Units as u ON u.id = iu.UnitID_id
+                        {GSTJoin}
                         {ItemsGroupJoinsandOrderby[1]}
                         WHERE s.Party = %s AND s.StockDate = %s AND s.IsStockAdjustment = 0  
+                        {ClientFilter}
                         {ItemsGroupJoinsandOrderby[2]} 
                     ) AS OrderedSPOSStock 
                     UNION  
                     SELECT * FROM (
-                        SELECT 1 as id, M_Items.Name, s.Quantity, s.MRPValue, u.Name as Unit,
+                        SELECT 1 as id, M_Items.id as ItemID, M_Items.Name, s.Quantity, s.MRPValue, u.Name as Unit, gst.GSTPercentage,
                         {ItemsGroupJoinsandOrderby[0]}
                         FROM M_Items
                         RIGHT JOIN T_Stock as s ON M_Items.id = s.Item_id 
                         INNER JOIN MC_ItemUnits as iu ON iu.id = s.Unit_id
                         INNER JOIN M_Units as u ON u.id = iu.UnitID_id
+                        {GSTJoin}
                         {ItemsGroupJoinsandOrderby[1]}
                         WHERE s.Party_id = %s AND s.StockDate = %s AND s.IsStockAdjustment = 0  
                         {ItemsGroupJoinsandOrderby[2]} 
