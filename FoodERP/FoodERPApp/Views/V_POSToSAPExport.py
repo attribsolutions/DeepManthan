@@ -62,9 +62,8 @@ class SAPExportViewDetails(APIView):
                 JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.id = II.Unit 
                 JOIN FoodERP.M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
                 
-                JOIN (SELECT SUM(BasicAmount+CGST+SGST) AS TotalRevenue,I.Party as PartyID
-                FROM SweetPOS.TC_SPOSInvoiceItems II 
-                join SweetPOS.T_SPOSInvoices  I on I.id=II.Invoice_id
+                JOIN (SELECT SUM(GrandTotal) AS TotalRevenue,I.Party as PartyID
+                FROM   SweetPOS.T_SPOSInvoices I               
                 WHERE I.InvoiceDate =%s
                 AND I.Party IN ({Party}) and I.IsDeleted=0  GROUP BY I.Party  )TR ON TR.PartyID = I.Party
                 
