@@ -338,38 +338,90 @@ class SAPLedgerView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        SapLedgerdata = request.data
+        SapLedgerdata['UserID'] = request.data.get('UserID', 0) 
         try:
             with transaction.atomic():
-                SapLedgerdata = JSONParser().parse(request)
                 FromDate = SapLedgerdata['FromDate']
                 ToDate = SapLedgerdata['ToDate']
                 SAPCode = SapLedgerdata['SAPCode']
 
-                payload = ""
+                queryset = M_SAPCustomerLedger.objects.filter(FileDate__range=[FromDate, ToDate],CustomerCode=SAPCode).values('CompanyCode', 'DocumentDesc', 'CustomerCode', 'CustomerName', 'DocumentNo','FiscalYear', 'DebitCredit', 'Amount', 'DocumentType', 'PostingDate', 'ItemText').order_by('PostingDate')
 
-                url = f'http://web.chitalebandhu.in:8080/FoodERPWebAPIPOS/api/SAPDataSendToSCM/GetSAPCustomerLedgerList?FromDate={FromDate}&ToDate={ToDate}&SAPCode={SAPCode}'
+                if queryset.exists():
+                    ledger_data = []
+                    for row in queryset:
+                        ledger_data.append({
+                            "CompanyCode": row['CompanyCode'],
+                            "DocumentDesc": row['DocumentDesc'],
+                            "CustomerNumber": row['CustomerCode'],
+                            "CustomerName": row['CustomerName'],
+                            "DocumentNo": row['DocumentNo'],
+                            "Fiscalyear": row['FiscalYear'],
+                            "DebitCredit": row['DebitCredit'],
+                            "Amount": str(round(row['Amount'], 2)),
+                            "DocumentType": row['DocumentType'],
+                            "PostingDate": row['PostingDate'].strftime('%d/%m/%Y %I:%M:%S %p'),
+                            "ItemText": row['ItemText'],
+                            "Debit": 0.0,
+                            "Credit": 0.0
+                        })
 
-                headers = {}
+                    count = len(ledger_data)
 
-                response = requests.request(
-                    "GET", url, headers=headers, data=payload)
-                response_json = json.loads(response.text)
-                # Convert XML to OrderedDict
-                # data_dict = xmltodict.parse(response.text)
-                # Convert OrderedDict to JSON string
-                # json_data = json.dumps(data_dict)
-                # # Convert JSON string to Python dictionary
-                # data_dict = json.loads(json_data)
-  
-                if response_json:
-                    log_entry = create_transaction_logNew(request, SapLedgerdata, 0,'From:'+str(FromDate)+','+'To:'+str(ToDate)+','+'SAPCode:'+str(SAPCode),324,0,FromDate,ToDate,0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': response_json})       
+                    opening_balance = M_SAPCustomerLedger.objects.filter(FileDate__lt=FromDate,CustomerCode=SAPCode).aggregate(total=models.Sum('Amount'))['total'] or 0.0
+                    closing_balance = M_SAPCustomerLedger.objects.filter(FileDate__lte=ToDate,CustomerCode=SAPCode).aggregate(total=models.Sum('Amount'))['total'] or 0.0
+
+                    log_entry = create_transaction_logNew(request, SapLedgerdata, SAPCode, f'SAPCode: {SAPCode}', 324, 0, FromDate, ToDate, 0)
+                    return JsonResponse({"StatusCode": 200,"Status": True,"Message": "","Data": {"status": True,"status_code": 200,"count": count,"OpeingBal": round(opening_balance, 2),"ClosingBal": round(closing_balance, 2),"data": ledger_data}})
+
                 else:
-                    log_entry = create_transaction_logNew(request, SapLedgerdata, 0, 'SAPLedger:'+'SAPLedger Data Not Found',324,0)
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})               
+                    log_entry = create_transaction_logNew(request, SapLedgerdata, SAPCode, 'SAPLedger: Data Not Found', 324, 0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0, 'SAPLedger:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, SapLedgerdata, 0, 'SAPLedger: ' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+
+
+
+# class SAPLedgerView(CreateAPIView):
+#     permission_classes = ()
+
+#     @transaction.atomic()
+#     def post(self, request):
+#         try:
+#             with transaction.atomic():
+#                 SapLedgerdata = JSONParser().parse(request)
+#                 FromDate = SapLedgerdata['FromDate']
+#                 ToDate = SapLedgerdata['ToDate']
+#                 SAPCode = SapLedgerdata['SAPCode']
+
+#                 payload = ""
+
+#                 url = f'http://web.chitalebandhu.in:8080/FoodERPWebAPIPOS/api/SAPDataSendToSCM/GetSAPCustomerLedgerList?FromDate={FromDate}&ToDate={ToDate}&SAPCode={SAPCode}'
+
+#                 headers = {}
+
+#                 response = requests.request(
+#                     "GET", url, headers=headers, data=payload)
+#                 response_json = json.loads(response.text)
+#                 # Convert XML to OrderedDict
+#                 # data_dict = xmltodict.parse(response.text)
+#                 # Convert OrderedDict to JSON string
+#                 # json_data = json.dumps(data_dict)
+#                 # # Convert JSON string to Python dictionary
+#                 # data_dict = json.loads(json_data)
+  
+#                 if response_json:
+#                     log_entry = create_transaction_logNew(request, SapLedgerdata, 0,'From:'+str(FromDate)+','+'To:'+str(ToDate)+','+'SAPCode:'+str(SAPCode),324,0,FromDate,ToDate,0)
+#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': response_json})       
+#                 else:
+#                     log_entry = create_transaction_logNew(request, SapLedgerdata, 0, 'SAPLedger:'+'SAPLedger Data Not Found',324,0)
+#                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})               
+#         except Exception as e:
+#             log_entry = create_transaction_logNew(request, 0, 0, 'SAPLedger:'+str(Exception(e)),33,0)
+#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
         
         
 class InvoiceToSCMView(CreateAPIView):

@@ -24,7 +24,7 @@ class LedgerListView(CreateAPIView):
             with transaction.atomic():
                 Ledger_data = M_Ledger.objects.all()
                 Ledger_data_serializer = TallyLedgerSerializer(Ledger_data,many=True)                
-                log_entry = create_transaction_logNew(request, Ledger_data_serializer,0,'',457,0)
+                log_entry = create_transaction_logNew(request, Ledger_data_serializer,0,'',458,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': Ledger_data_serializer.data})        
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,str(e),33,0)

@@ -173,7 +173,7 @@ from .Views.V_TallyData import *
 from .Views.V_CommonMaster import GetNewPageEntry
 
 from .Views.V_TallyLedger import *
-# from .Views.V_FTP import *
+from .Views.V_FTP import *
 
 
 urlpatterns = [
@@ -794,7 +794,7 @@ urlpatterns = [
 #Logs
               url(r'LogTransaction$',LogTransactionView.as_view()),   
               url(r'DeleteDuplicateStockEntry$',DeleteDuplicateStockEntryPageView.as_view()),        
-            #   url(r'ReadFTPFile$',ReadFTPFileView.as_view()), 
+              url(r'ReadFTPFile$',ReadFTPFileView.as_view()), 
              
 #ItemSupplier
               url(r'ItemSupplier$',ItemSupplierView.as_view()), 
