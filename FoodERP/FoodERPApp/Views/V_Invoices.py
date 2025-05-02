@@ -1442,9 +1442,9 @@ class InvoiceItemWiseProduction(CreateAPIView):
                                 "BaseUnitQuantity":d.BaseUnitQuantity,  
                            
                         })
-                    log_entry = create_transaction_logNew( request, BatchDetails, Party, '', 458, 0,0,0,0)
+                    log_entry = create_transaction_logNew( request, BatchDetails, Party, '', 459, 0,0,0,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': BatchDetails})
-                log_entry = create_transaction_logNew( request, BatchDetails, Party, 'Data Not Found', 458, 0,0,0,0)           
+                log_entry = create_transaction_logNew( request, BatchDetails, Party, 'Data Not Found', 459, 0,0,0,0)           
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
 
         except Exception as e:
