@@ -163,7 +163,7 @@ WHERE InvoiceDate >= DATE_SUB(CURDATE(), INTERVAL 100 DAY) AND Party_id NOT IN (
                     start_date_str = yesterday
                     end_date_str = today
                     excluded_ids = [56605, 71368, 53532, 60722, 65261, 35115]
-                    Partys = M_Parties.objects.filter(PartyType=19,IsActive=1).exclude(id__in=excluded_ids).values('id')
+                    Partys = M_Parties.objects.filter(PartyType=19,isActive=1).exclude(id__in=excluded_ids).values('id')
                     # Partys = M_Parties.objects.filter(PartyType = 19).values('id')
 
                     # print(Partys)                    
