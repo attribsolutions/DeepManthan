@@ -157,13 +157,13 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
                         updateIsStockProcessItem= M_Items.objects.raw(''' update M_Items set IsStockProcessItem =1 where id in(  
 
 SELECT DISTINCT Item_id FROM T_Invoices JOIN TC_InvoiceItems ON Invoice_id = T_Invoices.id 
-WHERE InvoiceDate >= DATE_SUB(CURDATE(), INTERVAL 100 DAY) AND Party_id NOT IN (SELECT DefaultValue FROM M_Settings WHERE id=55))''')
+WHERE InvoiceDate >= DATE_SUB(CURDATE(), INTERVAL 100 DAY) AND Party_id NOT IN (SELECT DefaultValue FROM M_Settings WHERE id=56))''')
                         yesterday = today.replace(day=1)    
                     
                     start_date_str = yesterday
                     end_date_str = today
                     excluded_ids = [56605, 71368, 53532, 60722, 65261, 35115]
-                    Partys = M_Parties.objects.filter(PartyType=19).exclude(id__in=excluded_ids).values('id')
+                    Partys = M_Parties.objects.filter(PartyType=19,IsActive=1).exclude(id__in=excluded_ids).values('id')
                     # Partys = M_Parties.objects.filter(PartyType = 19).values('id')
 
                     # print(Partys)                    
