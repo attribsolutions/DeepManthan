@@ -7,9 +7,7 @@ from rest_framework.authentication import BasicAuthentication, TokenAuthenticati
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.db.models import Sum
 from django.utils import timezone
-
 import datetime
-
 from FoodERPApp.Views.V_CommFunction import *
 from FoodERPApp.Views.V_TransactionNumberfun import SystemBatchCodeGeneration
 from FoodERPApp.models import *
@@ -77,7 +75,7 @@ class StockView(CreateAPIView):
                     else:
                         base_unit = MC_ItemUnits.objects.filter(Item=a['Item'],IsBase=True,IsDeleted=False).first()
                         if base_unit:
-                            Unit = base_unit.UnitID.id
+                            Unit = base_unit.id
                         else:
                             Unit = a['Unit']
                     
