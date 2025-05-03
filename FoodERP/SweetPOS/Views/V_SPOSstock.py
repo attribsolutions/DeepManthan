@@ -1,22 +1,22 @@
 from django.http import JsonResponse
-from datetime import timedelta
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from rest_framework.parsers import JSONParser
-from rest_framework.authentication import BasicAuthentication
-from FoodERPApp.Views.V_CommFunction import *
-from FoodERPApp.models import *
-from FoodERPApp.Serializer.S_PartyItems import *
-from FoodERPApp.Serializer.S_Orders import *
-from ..models import  *
-from SweetPOS.Serializer.S_SPOSstock import *
-from django.db.models import *
-from FoodERPApp.Views.V_TransactionNumberfun import SystemBatchCodeGeneration
-from datetime import date
-from FoodERPApp.models import * 
 from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.db.models import Sum
+from django.utils import timezone
+
+import datetime
+
+from FoodERPApp.Views.V_CommFunction import *
+from FoodERPApp.Views.V_TransactionNumberfun import SystemBatchCodeGeneration
+from FoodERPApp.models import *
+from SweetPOS.Serializer.S_SPOSstock import *
+from FoodERPApp.Serializer.S_Orders import *
+from FoodERPApp.Serializer.S_PartyItems import *
+
 
 class StockView(CreateAPIView):
     
@@ -36,11 +36,16 @@ class StockView(CreateAPIView):
                 IsStockAdjustment=FranchiseStockdata['IsStockAdjustment']
                 IsAllStockZero = FranchiseStockdata['IsAllStockZero']
                 # ClientID = FranchiseStockdata.get('ClientID', 0)
-
+                
                 T_SPOS_StockEntryList = []
               
                 for a in FranchiseStockdata['StockItems']:
-                    BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], Party,0)
+                    if a.get('BatchCode') is None:
+                        BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], Party, 0)
+                    else:
+                        BatchCode = a['BatchCode']
+
+                    BatchCodeID = 0 if a.get('BatchCodeID') is None else a['BatchCodeID']
                     
                     query3 = None
                     query4 = None
@@ -65,7 +70,32 @@ class StockView(CreateAPIView):
                     else:
                         totalstock = 0
                         
-                    ClientID = a.get('ClientID', None)
+                    ClientID = a.get('ClientID', 0)
+                
+                    if ClientID == 0:
+                        Unit = a['Unit']
+                    else:
+                        base_unit = MC_ItemUnits.objects.filter(Item=a['Item'],IsBase=True,IsDeleted=False).first()
+                        if base_unit:
+                            Unit = base_unit.UnitID.id
+                        else:
+                            Unit = a['Unit']
+                    
+                    if ClientID:  
+                        mrp = M_MRPMaster.objects.filter(Item=Item, Party=ClientID,IsDeleted=False,EffectiveDate__lte=timezone.now().date()).order_by('-EffectiveDate').first()
+                        if mrp:
+                            a['MRP'] = float(mrp.MRP)
+                        else:
+                            a['MRP'] = 0  
+
+                        gst = M_GSTHSNCode.objects.filter(Item=Item, IsDeleted=False,EffectiveDate__lte=timezone.now().date()).order_by('-EffectiveDate').first()
+
+                        if gst:
+                            a['GSTPercentage'] = float(gst.GSTPercentage)
+                        else:
+                            a['GSTPercentage'] = 0
+                    else:
+                        pass               
                         
                     if ClientID:
                         T_SPOSStock.objects.filter(Party=Party, ClientID=ClientID, Item=a['Item']).delete()
@@ -78,14 +108,14 @@ class StockView(CreateAPIView):
                     "StockDate":StockDate,    
                     "Item": a['Item'],
                     "Quantity": a['Quantity'],
-                    "Unit": a['Unit'],
+                    "Unit": Unit,
                     "BaseUnitQuantity": round(BaseUnitQuantity,3),
                     "MRPValue" :a["MRPValue"],
                     "MRP": a['MRP'],
                     "Party": Party,
                     "CreatedBy":CreatedBy,
-                    "BatchCode" : a['BatchCode'],
-                    "BatchCodeID" : a['BatchCodeID'],
+                    "BatchCode" : BatchCode,
+                    "BatchCodeID" : BatchCodeID,
                     "IsSaleable" : 1,
                     "Difference" : round(round(BaseUnitQuantity,3)-totalstock,3),
                     "IsStockAdjustment" : IsStockAdjustment,
