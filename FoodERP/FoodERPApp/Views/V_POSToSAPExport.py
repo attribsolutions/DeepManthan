@@ -46,11 +46,7 @@ class SAPExportViewDetails(APIView):
             upload_invoices_query = f'''
                 SELECT  1 id,	M_Items.SAPItemCode AS Material, 
                 M_Parties.SapPartyCode AS Store, 
-                (SELECT SUM(BasicAmount+CGST+SGST) AS TotalRevenue 
-                FROM SweetPOS.TC_SPOSInvoiceItems II 
-                join SweetPOS.T_SPOSInvoices  I on I.id=II.Invoice_id
-                WHERE I.InvoiceDate = %s
-                AND I.Party IN (%s) and I.IsDeleted=0    )TotalRevenue, 
+                 TR.TotalRevenue,
                 SUM(II.Quantity) AS Quantity, 
                 M_Units.SAPUnit UOM, 
                 MRPValue Rate,  
@@ -65,8 +61,14 @@ class SAPExportViewDetails(APIView):
                 JOIN FoodERP.M_Parties ON M_Parties.id = II.Party 
                 JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.id = II.Unit 
                 JOIN FoodERP.M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
+                
+                JOIN (SELECT SUM(GrandTotal) AS TotalRevenue,I.Party as PartyID
+                FROM   SweetPOS.T_SPOSInvoices I               
+                WHERE I.InvoiceDate =%s
+                AND I.Party IN ({Party}) and I.IsDeleted=0  GROUP BY I.Party  )TR ON TR.PartyID = I.Party
+                
                 WHERE I.InvoiceDate = %s  
-                AND I.Party IN (%s)  and  I.IsDeleted=0
+                AND I.Party IN ({Party})  and  I.IsDeleted=0
 			    GROUP BY 
                 M_Items.SAPItemCode,
                 M_Parties.SapPartyCode, 
@@ -79,7 +81,7 @@ class SAPExportViewDetails(APIView):
             # print(raw_queryset.query)         
             # Generate file name
             # file_name = f"{datetime.now().strftime('%Y%m%d')}_{raw_queryset[0].Name.strip()}_File1.csv"
-            raw_queryset = list(T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate, Party, InvoiceDate, Party]))  
+            raw_queryset = list(T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate,  InvoiceDate]))  
             if not raw_queryset:  
                 raise Exception(f"No records found for Party {Party} on {InvoiceDate}")
             
@@ -130,7 +132,7 @@ class SAPExportViewDetails(APIView):
                 A.ClientID, InvoiceNumber BillNumber 
                 FROM SweetPOS.T_SPOSInvoices A
                 JOIN FoodERP.M_Parties ON A.Party = FoodERP.M_Parties.id
-                WHERE InvoiceDate = %s AND A.Party in (%s) and A.IsDeleted=0'''
+                WHERE InvoiceDate = %s AND A.Party in ({Party}) and A.IsDeleted=0'''
                 
 
                 # SELECT 1 id, DATE_FORMAT(InvoiceDate, '%%Y%%m%%d') SaleDate, FoodERP.M_Parties.SAPPartyCode Store,
@@ -144,7 +146,7 @@ class SAPExportViewDetails(APIView):
             
             # Generate file name
             # file_name = f"{datetime.now().strftime('%Y%m%d')}_{raw_queryset[0].Name.strip()}_File3.csv"
-            raw_queryset = list(T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate, Party]))  
+            raw_queryset = list(T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate]))  
             if not raw_queryset:  
                 raise Exception(f"No records found for Party {Party} on {InvoiceDate}")
             manual_date_obj = datetime.strptime(InvoiceDate, '%Y-%m-%d')
@@ -191,7 +193,7 @@ class SAPExportViewDetails(APIView):
             JOIN FoodERP.M_Parties ON M_Parties.id = II.Party
             JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.id = Unit
             JOIN FoodERP.M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
-            WHERE I.InvoiceDate = %s  AND  I.Party in (%s)  AND ifnull(M_Items.SAPItemCode,'')  != '' and I.IsDeleted=0 AND II.Item NOT IN  (%s)
+            WHERE I.InvoiceDate = %s  AND  I.Party in ({Party})  AND ifnull(M_Items.SAPItemCode,'')  != '' and I.IsDeleted=0 AND II.Item NOT IN  (%s)
             GROUP BY SapItemCode,M_Units.Name,M_Parties.SapPartyCode,I.InvoiceDate,M_Units.id
             
             
@@ -204,7 +206,7 @@ class SAPExportViewDetails(APIView):
             # file_name = f"{datetime.now().strftime('%Y%m%d')}_{raw_queryset[0].Name.strip()}_File2.csv"
             
             
-            raw_queryset = list(T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate, Party, DoNOtUseItemID]))  
+            raw_queryset = list(T_SPOSInvoices.objects.raw(upload_invoices_query, [InvoiceDate, DoNOtUseItemID]))  
             if not raw_queryset:  
                 raise Exception(f"No records found for Party {Party} on {InvoiceDate}")
             manual_date_obj = datetime.strptime(InvoiceDate, '%Y-%m-%d')
