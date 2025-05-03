@@ -102,7 +102,7 @@ select E.GRN_id,NULL AS ItemCode,L.Name AS ItemName,
                                                                 JOIN M_Items ON M_Items.id = TI.Item
                                                                 JOIN M_GSTHSNCode ON M_GSTHSNCode.id = TI.GST
                                                                 JOIN M_Users ON M_Users.id = T_DeletedInvoices.CreatedBy
-                                                                WHERE M_Parties.Company_id = 4 AND T_DeletedInvoices.IsTallySave=0 )s order by id limit 100''')
+                                                                WHERE M_Parties.Company_id = 4 AND T_DeletedInvoices.IsTallySave=0 )s order by id limit 200''')
                     ID = "SaleID"
                 else:
                     return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Invalid Mode', 'Data': []})
