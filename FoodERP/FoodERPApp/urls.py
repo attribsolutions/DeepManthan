@@ -173,7 +173,7 @@ from .Views.V_TallyData import *
 from .Views.V_CommonMaster import GetNewPageEntry
 
 from .Views.V_TallyLedger import *
-# from .Views.V_FTP import *
+from .Views.V_FTP import *
 
 
 urlpatterns = [
@@ -591,7 +591,7 @@ urlpatterns = [
             url(r'GetRate',GETRateDetails.as_view()),
             url(r'DeleteRate/([0-9]+)$',M_RatesViewSecond.as_view()),
             url(r'DeleteRateOnList/([0-9]+)$',M_RatesViewThird.as_view()),
-            url(r'RateAdjustment$',RateAdjustmentView.as_view()),
+            url(r'BatchDetailsAdjustment$',BatchDetailsAdjustmentView.as_view()),
             
 # BankMaster
             url(r'Bank/([0-9]+)$', BankView.as_view()),
@@ -794,7 +794,7 @@ urlpatterns = [
 #Logs
               url(r'LogTransaction$',LogTransactionView.as_view()),   
               url(r'DeleteDuplicateStockEntry$',DeleteDuplicateStockEntryPageView.as_view()),        
-            #   url(r'ReadFTPFile$',ReadFTPFileView.as_view()), 
+              url(r'ReadFTPFile$',ReadFTPFileView.as_view()), 
              
 #ItemSupplier
               url(r'ItemSupplier$',ItemSupplierView.as_view()), 
@@ -817,6 +817,7 @@ urlpatterns = [
 #Scheme Details:
               url(r'SchemeDetails$',SchemeView.as_view()), 
               url(r'SchemeList$',SchemeListView.as_view()), 
+            #   url(r'SaveScheme$',SaveSchemeView.as_view()), 
               
 
 #SAPExport:

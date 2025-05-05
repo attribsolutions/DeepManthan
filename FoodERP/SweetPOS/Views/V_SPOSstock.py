@@ -1,23 +1,26 @@
 from django.http import JsonResponse
-from datetime import timedelta
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from rest_framework.parsers import JSONParser
-from rest_framework.authentication import BasicAuthentication
+from rest_framework.authentication import BasicAuthentication, TokenAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.db.models import Sum
+from django.utils import timezone
+import datetime
 from FoodERPApp.Views.V_CommFunction import *
-from FoodERPApp.models import *
-from FoodERPApp.Serializer.S_PartyItems import *
-from FoodERPApp.Serializer.S_Orders import *
-from ..models import  *
-from SweetPOS.Serializer.S_SPOSstock import *
-from django.db.models import *
 from FoodERPApp.Views.V_TransactionNumberfun import SystemBatchCodeGeneration
-from datetime import date
-from FoodERPApp.models import * 
+from FoodERPApp.models import *
+from SweetPOS.Serializer.S_SPOSstock import *
+from FoodERPApp.Serializer.S_Orders import *
+from FoodERPApp.Serializer.S_PartyItems import *
+
 
 class StockView(CreateAPIView):
+    
     permission_classes = (IsAuthenticated,)
+    authentication_classes = [BasicAuthentication, TokenAuthentication, JWTAuthentication]
+    # authentication_class = JSONWebTokenAuthentication
     
     @transaction.atomic()
     def post(self, request):
@@ -30,11 +33,17 @@ class StockView(CreateAPIView):
                 Mode =  FranchiseStockdata['Mode']
                 IsStockAdjustment=FranchiseStockdata['IsStockAdjustment']
                 IsAllStockZero = FranchiseStockdata['IsAllStockZero']
-
-                T_SPOS_StockEntryList = list()
+                # ClientID = FranchiseStockdata.get('ClientID', 0)
+                
+                T_SPOS_StockEntryList = []
               
                 for a in FranchiseStockdata['StockItems']:
-                    BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], Party,0)
+                    if a.get('BatchCode') is None:
+                        BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], Party, 0)
+                    else:
+                        BatchCode = a['BatchCode']
+
+                    BatchCodeID = 0 if a.get('BatchCodeID') is None else a['BatchCodeID']
                     
                     query3 = None
                     query4 = None
@@ -58,6 +67,36 @@ class StockView(CreateAPIView):
                         totalstock = float(query4['total'])
                     else:
                         totalstock = 0
+                        
+                    ClientID = a.get('ClientID', 0)
+                
+                    if ClientID == 0:
+                        Unit = a['Unit']
+                    else:
+                        base_unit = MC_ItemUnits.objects.filter(Item=a['Item'],IsBase=True,IsDeleted=False).first()
+                        if base_unit:
+                            Unit = base_unit.id
+                        else:
+                            Unit = a['Unit']
+                    
+                    if ClientID:  
+                        mrp = M_MRPMaster.objects.filter(Item=Item, Party=ClientID,IsDeleted=False,EffectiveDate__lte=timezone.now().date()).order_by('-EffectiveDate').first()
+                        if mrp:
+                            a['MRP'] = float(mrp.MRP)
+                        else:
+                            a['MRP'] = 0  
+
+                        gst = M_GSTHSNCode.objects.filter(Item=Item, IsDeleted=False,EffectiveDate__lte=timezone.now().date()).order_by('-EffectiveDate').first()
+
+                        if gst:
+                            a['GSTPercentage'] = float(gst.GSTPercentage)
+                        else:
+                            a['GSTPercentage'] = 0
+                    else:
+                        pass               
+                        
+                    if ClientID:
+                        T_SPOSStock.objects.filter(Party=Party, ClientID=ClientID, Item=a['Item']).delete()
 
                     a['BatchCode'] = BatchCode
                     a['StockDate'] = date.today()
@@ -67,17 +106,19 @@ class StockView(CreateAPIView):
                     "StockDate":StockDate,    
                     "Item": a['Item'],
                     "Quantity": a['Quantity'],
-                    "Unit": a['Unit'],
+                    "Unit": Unit,
                     "BaseUnitQuantity": round(BaseUnitQuantity,3),
                     "MRPValue" :a["MRPValue"],
                     "MRP": a['MRP'],
                     "Party": Party,
                     "CreatedBy":CreatedBy,
-                    "BatchCode" : a['BatchCode'],
-                    "BatchCodeID" : a['BatchCodeID'],
+                    "BatchCode" : BatchCode,
+                    "BatchCodeID" : BatchCodeID,
                     "IsSaleable" : 1,
                     "Difference" : round(round(BaseUnitQuantity,3)-totalstock,3),
-                    "IsStockAdjustment" : IsStockAdjustment
+                    "IsStockAdjustment" : IsStockAdjustment,
+                    "ClientID": ClientID if ClientID else 0
+
                     })
                 # print(T_SPOS_StockEntryList,round(BaseUnitQuantity,3),totalstock)    
                 StockEntrySerializer = SPOSstockSerializer(data=T_SPOS_StockEntryList, many=True)
@@ -301,7 +342,8 @@ class StockOutReportView(CreateAPIView):
                 datetime_obj = datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
                 
                 StockOutReportQuery = T_SPOSStockOut.objects.raw(f'''SELECT A.id,A.Quantity , A.StockDate , A.Item ItemID, M_Items.Name, Groupss.Name "Group", subgroup.Name SubGroup, A.Party, M_Parties.Name PartyName, A.CreatedBy, A.CreatedOn StockoutTime
-                            FROM SweetPOS.T_SPOSStockOut A 
+                            ,M_Items.SAPItemCode
+                                                                 FROM SweetPOS.T_SPOSStockOut A 
                             JOIN FoodERP.M_Items  ON M_Items.id = A.Item
                             JOIN FoodERP.M_Parties ON M_Parties.id = A.Party
                             {ItemsGroupJoinsandOrderby[1]}
@@ -321,7 +363,9 @@ class StockOutReportView(CreateAPIView):
                         "PartyName": a.PartyName,
                         "CreatedBy": a.CreatedBy,
                         "StockoutTime": a.StockoutTime,
-                        "Quantity" :a.Quantity
+                        "Quantity" :a.Quantity,
+                        "SAPItemCode" : a.SAPItemCode,
+
 
                     })
                 log_entry = create_transaction_logNew(request, StockData, 0, f'StockoutReportfor :{Party} for time {datetime_obj.hour},', 419, 0)
