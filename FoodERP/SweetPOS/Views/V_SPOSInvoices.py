@@ -629,13 +629,13 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                     
                     UnitPerTransaction = 0
                     for upt in UPTData:
-                        UnitPerTransaction = upt.UnitPerTransaction
+                        UnitPerTransaction = upt.UnitPerTransaction or 0
                         
                     ATVData = T_SPOSInvoices.objects.raw('''SELECT 1 as id, AVG(GrandTotal) as AvgTransactionValue FROM SweetPOS.T_SPOSInvoices WHERE InvoiceDate BETWEEN %s AND %s AND Party = %s AND IsDeleted = 0 AND GrandTotal >= %s AND GrandTotal <= %s''', [FromDate, ToDate, Party, MinInvoiceValue, MaxInvoiceValue])
 
                     AverageTransactionValue = 0
                     for atv in ATVData:
-                        AverageTransactionValue = atv.AvgTransactionValue
+                        AverageTransactionValue = atv.AvgTransactionValue or 0
                         
                     Party_List.append({
                         "PartyId": party.id,
