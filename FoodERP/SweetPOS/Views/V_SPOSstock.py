@@ -78,22 +78,26 @@ class StockView(CreateAPIView):
                             Unit = base_unit.id
                         else:
                             Unit = a['Unit']
-                    
-                    if ClientID:  
-                        mrp = M_MRPMaster.objects.filter(Item=Item, Party=ClientID,IsDeleted=False,EffectiveDate__lte=timezone.now().date()).order_by('-EffectiveDate').first()
-                        if mrp:
-                            a['MRP'] = float(mrp.MRP)
+                            
+                    if ClientID == 0:
+                        MRP = a['MRP'] if a.get('MRP') is not None else 0
+                    else:
+                        if a.get('MRP') is not None:
+                            MRP = a['MRP']
                         else:
-                            a['MRP'] = 0  
-
+                            mrp = M_MRPMaster.objects.filter(Item=a['Item'], IsDeleted=False,EffectiveDate__lte=timezone.now().date() ).order_by('-EffectiveDate').first()
+                            if mrp:
+                                MRP = mrp.id
+                            else:
+                                MRP = 0
+                            
+                    if ClientID:  
                         gst = M_GSTHSNCode.objects.filter(Item=Item, IsDeleted=False,EffectiveDate__lte=timezone.now().date()).order_by('-EffectiveDate').first()
 
                         if gst:
                             a['GSTPercentage'] = float(gst.GSTPercentage)
                         else:
-                            a['GSTPercentage'] = 0
-                    else:
-                        pass               
+                            a['GSTPercentage'] = 0            
                         
                     if ClientID:
                         T_SPOSStock.objects.filter(Party=Party, ClientID=ClientID, Item=a['Item']).delete()
@@ -109,7 +113,7 @@ class StockView(CreateAPIView):
                     "Unit": Unit,
                     "BaseUnitQuantity": round(BaseUnitQuantity,3),
                     "MRPValue" :a["MRPValue"],
-                    "MRP": a['MRP'],
+                    "MRP": MRP,
                     "Party": Party,
                     "CreatedBy":CreatedBy,
                     "BatchCode" : BatchCode,
