@@ -274,7 +274,7 @@ class SAPOrderView(CreateAPIView):
                 join M_Units on M_Units.id=M_Items.SAPUnitID
                 {ItemsGroupJoinsandOrderby[1]}
                 where IsDeleted = 0 AND T_Orders.id=%s {ItemsGroupJoinsandOrderby[2]}''',[OrderID])                
-                print(query)
+                # print(query)
                 for row in query:
                     
                     date_obj = datetime.strptime(str(row.DocDate), '%Y-%m-%d')
