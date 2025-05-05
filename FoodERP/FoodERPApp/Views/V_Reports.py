@@ -2436,7 +2436,7 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                 JOIN FoodERP.M_Parties ON FoodERP.M_Parties.id=Party
                 JOIN FoodERP.MC_SchemeParties ON FoodERP.MC_SchemeParties.PartyID_id=FoodERP.M_Parties.id
                 JOIN FoodERP.M_Scheme ON FoodERP.M_Scheme.id=FoodERP.MC_SchemeParties.SchemeID_id
-                where InvoiceDate between '{FromDate}' and '{ToDate}' and VoucherCode !=''
+                where InvoiceDate between '{FromDate}' and '{ToDate}' and VoucherCode !='' and VoucherCode like 'CBM%'
                 and SchemeID_id=1  and Party in ({Party}) group by M_GiftVoucherCode.Party,M_Scheme.id,id ''')
 
 
