@@ -53,7 +53,7 @@ class GETMarginDetails(CreateAPIView):
                 PartyID = request.data['Party']
                 EffectiveDate = request.data['EffectiveDate']
                 # query = M_Items.objects.all().filter(IsFranchisesItem=0)
-                query = M_Items.objects.all(Company_id=2)  
+                query = M_Items.objects.filter(Company_id=2)  
                 if not query:
                     log_entry = create_transaction_logNew(request, 0, 0, "Margin Details Not available",116,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
