@@ -193,7 +193,7 @@ class SAPExportViewDetails(APIView):
             JOIN FoodERP.M_Parties ON M_Parties.id = II.Party
             JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.id = Unit
             JOIN FoodERP.M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
-            WHERE I.InvoiceDate = %s  AND  I.Party in ({Party})  AND ifnull(M_Items.SAPItemCode,'')  != '' and I.IsDeleted=0 AND II.Item NOT IN  (%s)
+            WHERE I.InvoiceDate = %s  AND  I.Party in ({Party})   and I.IsDeleted=0 AND II.Item NOT IN  (%s)
             GROUP BY SapItemCode,M_Units.Name,M_Parties.SapPartyCode,I.InvoiceDate,M_Units.id
             
             
