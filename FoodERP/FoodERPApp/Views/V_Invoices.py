@@ -46,6 +46,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                                     TC_OrderItems.IGSTPercentage,TC_OrderItems.Amount,M_Parties.Name CustomerName,M_Parties.PAN,MC_PartySubParty.IsTCSParty,
                                     T_Orders.OrderDate,T_Orders.AdvanceAmount,M_Parties.id CustomerID,M_Parties.GSTIN,T_Orders.FullOrderNumber,(select BaseUnitQuantity from MC_ItemUnits where IsDeleted=0  and UnitID_id=2 and Item_id=ItemID)Weightage,
                                     (Select PartyType_id from M_Parties where M_Parties.id={Party})PartyTypeID
+                                    ,TC_OrderItems.Discount,TC_OrderItems.DiscountType
                                     FROM TC_OrderItems
                                     join T_Orders on T_Orders.id=TC_OrderItems.Order_id
                                     join M_Parties on M_Parties.id=T_Orders.Customer_id
@@ -136,10 +137,15 @@ class OrderDetailsForInvoice(CreateAPIView):
                             # =====================Current Discount================================================
                             TodaysDiscount = DiscountMaster(
                                 b.ItemID, Party, date.today(),Customer).GetTodaysDateDiscount()
-
-                            DiscountType = TodaysDiscount[0]['DiscountType']
-                            Discount = TodaysDiscount[0]['TodaysDiscount']
                             
+                            if TodaysDiscount[0]['TodaysDiscount'] !='':
+                                DiscountType = TodaysDiscount[0]['DiscountType']
+                                Discount = TodaysDiscount[0]['TodaysDiscount']
+                                
+                            else:
+                                DiscountType = b.DiscountType
+                                Discount = b.Discount
+                                
                             OrderItemDetails.append({
                                 
                                 "id": b.id,
