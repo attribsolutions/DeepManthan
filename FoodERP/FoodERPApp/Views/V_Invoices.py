@@ -138,7 +138,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                             TodaysDiscount = DiscountMaster(
                                 b.ItemID, Party, date.today(),Customer).GetTodaysDateDiscount()
                             
-                            if TodaysDiscount[0]['TodaysDiscount'] !='':
+                            if TodaysDiscount and TodaysDiscount[0].get('TodaysDiscount') not in [None, '']:
                                 DiscountType = TodaysDiscount[0]['DiscountType']
                                 Discount = TodaysDiscount[0]['TodaysDiscount']
                                 
