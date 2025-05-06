@@ -362,7 +362,7 @@ FROM
         M_Settings.IsActive = 1) a
       
       LEFT  JOIN 
-      (SELECT SettingID_id SettingID,MC_SettingsDetails.Value FROM MC_SettingsDetails WHERE MC_SettingsDetails.Company_id=%s)b
+      (SELECT SettingID_id SettingID,MC_SettingsDetails.Value FROM MC_SettingsDetails WHERE MC_SettingsDetails.Company_id=%s and IsDeleted=0)b
       ON a.Setting = b.SettingID
             
       LEFT JOIN
