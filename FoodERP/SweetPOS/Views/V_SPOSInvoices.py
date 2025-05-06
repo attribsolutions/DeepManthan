@@ -78,22 +78,6 @@ class SPOSInvoiceView(CreateAPIView):
                             Invoicedata['VoucherCode'] = Invoicedata['VoucherCode']
                         else:
                             Invoicedata['VoucherCode'] = None
-                           
-                        if Invoicedata['VoucherCode']:
-                            voucher = M_GiftVoucherCode.objects.filter(VoucherCode=Invoicedata['VoucherCode']).first()
-
-                            if voucher:
-                                if voucher.IsActive:
-                                    voucher.IsActive = False
-                                    voucher.InvoiceDate = Invoicedata.get('InvoiceDate')
-                                    voucher.InvoiceNumber = Invoicedata.get('InvoiceNumber')
-                                    voucher.InvoiceAmount = Invoicedata.get('GrandTotal')
-                                    voucher.Party = Invoicedata.get('Party')
-                                    voucher.save()
-                                else:
-                                    return JsonResponse({'Status': False, 'Message': 'Voucher already used.'}, status=400)
-                            else:
-                                return JsonResponse({'Status': False, 'Message': 'Voucher not found.'}, status=400)
                                                 
                         if Invoicedata['CustomerID'] == 0:
                             Invoicedata['Customer'] = 43194
