@@ -180,109 +180,82 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                 Group = StockReportdata['Group']
                 SubGroup = StockReportdata['SubGroup']
                 IsRateWise=StockReportdata['IsRateWise']
-                today = date.today()                 
+                today = date.today()
+                                
                 if Party == "":
                     
                     PartyID=0;
                     ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(0,1).split('!')
-                    # print(ItemsGroupJoinsandOrderby) 
+                    
                     if Employee > 0:
-                        # print("Shruti")
+                        
                         EmpPartys=MC_EmployeeParties.objects.raw('''select EmployeeParties(%s) id''',[Employee])
                         for row in EmpPartys:
                             p=row.id
                         PartyIDs = p.split(",")
-                        # print("PartyIDs")
-                    where_clause = ""
-                    p1 = (today,PartyIDs)
-                    if Cluster:
-                        where_clause += " AND M_Cluster.id = %s"
-                        p1 += (Cluster,)
-                      
-                    if SubCluster:
-                        where_clause += " AND M_SubCluster.id = %s "
-                        p1 += (SubCluster,)
-            
-                    if Group:
-                        where_clause += " AND Groupss.id = %s"
-                        p1 += (Group,)
-                        
-                    if SubGroup:
-                        where_clause += " AND subgroup.id = %s "
-                        p1 += (SubGroup,)
-                        
-                    
-                    Stockquery=(f'''SELECT A.id DistributorID,A.name DistributorName,
-                                {ItemsGroupJoinsandOrderby[0]}, M_Items.id,M_Items.Name,O_BatchWiseLiveStock.Party_id,
-sum(O_BatchWiseLiveStock.BaseUnitQuantity)Qty ,M_Items.BaseUnitID_id,
-ifnull(sum(case when IsDamagePieces=0 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)SaleableStock,
-ifnull(sum(case when IsDamagePieces=1 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)UnSaleableStock,
-O_LiveBatches.MRPValue ,
-0 BatchCode,0 SystemBatchCode,round(GSTHsnCodeMaster(M_Items.id,%s,2,0,0),2)GSTPercentage,0 Rate, M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster,SAPItemCode
-                
-                FROM M_Items 
-join MC_PartyItems on M_Items.id=MC_PartyItems.Item_id and MC_PartyItems.Party_id in %s
-{ItemsGroupJoinsandOrderby[1]}
-join O_BatchWiseLiveStock on M_Items.id=O_BatchWiseLiveStock.Item_id and O_BatchWiseLiveStock.Party_id= MC_PartyItems.Party_id
-JOIN O_LiveBatches ON O_LiveBatches.id=O_BatchWiseLiveStock.LiveBatche_id
-join M_Parties A on A.id =MC_PartyItems.Party_id
-LEFT JOIN M_PartyDetails on  A.id=M_PartyDetails.Party_id AND M_PartyDetails.Group_id is null
-LEFT JOIN M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id 
-LEFT JOIN M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id
-WHERE O_BatchWiseLiveStock.BaseUnitQuantity >0 {where_clause}
-group by A.id, GroupType.id, Groupss.id,subgroup.id, M_Items.id , GSTPercentage,MRPValue,M_Cluster.id,M_SubCluster.id
-{ItemsGroupJoinsandOrderby[2]}''')
-                    
-                    Itemquery = MC_PartyItems.objects.raw(Stockquery, p1)
-                    # print(Itemquery.query)
                 else : 
                     
                     PartyID=Party;
                     PartyIDs= Party 
                     
-                    ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(PartyID,0).split('!') 
+                ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(PartyID,0).split('!') 
 
-                    where_clause = ""
-                    Condition=""
+                where_clause = ""
+                Condition=""
+                
+                
+                if IsRateWise == 2:
                     
-                    # p2 = (today, Unit, [PartyIDs]) 
-                    if IsRateWise == 2:
-                       
-                        # Condition += "ifnull(Round(GetTodaysDateRate(M_Items.id, curdate(),MC_PartyItems.Party_id,0,2),2),0)Rate"
-                        # p2 = (today, [PartyIDs])   
-                        Condition += "ifnull(Round(O_LiveBatches.Rate,2),0)Rate" 
-                        p2 = (today,[PartyIDs])  
-                    else:   
-                       
-                        Condition += "ifnull(RateCalculationFunction1(0, M_Items.id, MC_PartyItems.Party_id, M_Items.BaseUnitID_id, 0, 0, O_LiveBatches.MRPValue, 0),0)Rate"                  
-                        p2 = (today,  [PartyIDs]) 
-                        
-                        
-                    if Cluster:
-                        where_clause += " AND M_Cluster.id = %s "
-                        p2 += (Cluster,)
                     
-                    if SubCluster:
-                        where_clause += " AND M_SubCluster.id = %s "
-                        p2 += (SubCluster,)
+                    Condition += f'''ifnull(Round(O_LiveBatches.Rate,2),0)RatewithoutGST,
+                                     (ifnull(Round(O_LiveBatches.Rate,2),0) * (1+(round(GSTHsnCodeMaster(M_Items.id,%s,2,{Party},0),2)/100 ))  )RatewithGST'''
+                    p2 = (today,today,[PartyIDs])  
+                else:   
                     
-                    if Group:
-                        where_clause += " AND Groupss.id = %s"
-                        p2 += (Group,)
+                    Condition += f'''ifnull(RateCalculationFunction1(0, M_Items.id, MC_PartyItems.Party_id, {Unit}, 0, 0, O_LiveBatches.MRPValue, 0),0)RatewithoutGST,
+                                     ifnull(RateCalculationFunction1(0, M_Items.id, MC_PartyItems.Party_id, {Unit}, 0, 0, O_LiveBatches.MRPValue, 1),0)RatewithGST'''                  
+                    p2 = (today,  [PartyIDs]) 
                     
-                    if SubGroup:
-                        where_clause += " AND subgroup.id = %s "
-                        p2 += (SubGroup,)
                     
-                    Stockquery=(f'''SELECT A.id DistributorID,A.name DistributorName,
+                if Cluster:
+                    where_clause += f" AND M_Cluster.id = {Cluster} "
+                    # p2 += (Cluster,)
+                
+                if SubCluster:
+                    where_clause += f" AND M_SubCluster.id = {SubCluster} "
+                    # p2 += (SubCluster,)
+                
+                if Group:
+                    where_clause += f" AND Groupss.id = {Group}"
+                    # p2 += (Group,)
+                
+                if SubGroup:
+                    where_clause += f" AND subgroup.id = {SubGroup} "
+                    # p2 += (SubGroup,)
+                
+                if int(Unit)==0:
+                    UnitIDD="M_Items.BaseUnitID_id"
+                else:
+                    UnitIDD = int(Unit)        
+                
+                
+                Stockquery=(f'''select aa.*,round((aa.SaleableStock * aa.RatewithoutGST),2)SaleableStockTaxValue,
+                                            round((aa.SaleableStock * aa.RatewithGST),2)SaleableStockValue ,
+                                            round((aa.UnSaleableStock * aa.RatewithoutGST),2)UnSaleableStockStockTaxValue,
+                                            round((aa.UnSaleableStock * aa.RatewithGST),2)UnSaleableStockStockValue 
+                            
+                            
+                            from (SELECT A.id DistributorID,A.name DistributorName,
                                 {ItemsGroupJoinsandOrderby[0]}, M_Items.id,M_Items.Name,O_BatchWiseLiveStock.Party_id,
     O_BatchWiseLiveStock.BaseUnitQuantity Qty ,M_Items.BaseUnitID_id,
-    ifnull((case when IsDamagePieces=0 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)SaleableStock,
-    ifnull((case when IsDamagePieces=1 then O_BatchWiseLiveStock.BaseUnitQuantity end),0)UnSaleableStock,
+    ifnull((case when IsDamagePieces=0 then UnitwiseQuantityConversion(M_Items.id,O_BatchWiseLiveStock.BaseUnitQuantity,0,M_Items.BaseUnitID_id,0,{UnitIDD} ,0) end),0)SaleableStock,
+    ifnull((case when IsDamagePieces=1 then UnitwiseQuantityConversion(M_Items.id,O_BatchWiseLiveStock.BaseUnitQuantity,0,M_Items.BaseUnitID_id,0,{UnitIDD} ,0) end),0)UnSaleableStock,
+    
     O_LiveBatches.MRPValue ,
     O_LiveBatches.BatchCode,O_LiveBatches.SystemBatchCode,round(GSTHsnCodeMaster(M_Items.id,%s,2,{Party},0),2)GSTPercentage,
-    {Condition},  M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster,SAPItemCode
+    {Condition},  M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster,SAPItemCode,M_Units.Name StockUnit
     FROM M_Items 
+    join M_Units on M_Units.id={UnitIDD}
     join MC_PartyItems on M_Items.id=MC_PartyItems.Item_id and MC_PartyItems.Party_id in %s
     {ItemsGroupJoinsandOrderby[1]}
     join O_BatchWiseLiveStock on M_Items.id=O_BatchWiseLiveStock.Item_id and O_BatchWiseLiveStock.Party_id= MC_PartyItems.Party_id
@@ -292,37 +265,22 @@ group by A.id, GroupType.id, Groupss.id,subgroup.id, M_Items.id , GSTPercentage,
     LEFT JOIN M_Cluster On M_PartyDetails.Cluster_id=M_Cluster.id 
     LEFT JOIN M_SubCluster on M_PartyDetails.SubCluster_id=M_SubCluster.Id
     WHERE O_BatchWiseLiveStock.BaseUnitQuantity >0 {where_clause}
-    {ItemsGroupJoinsandOrderby[2]}''')
-                    
-                    Itemquery = MC_PartyItems.objects.raw(Stockquery, p2)
-              
+    {ItemsGroupJoinsandOrderby[2]})aa''')
+                
+                Itemquery = M_Items.objects.raw(Stockquery, p2)
+                
+                
+                
                 if not Itemquery:
+                   
                     log_entry = create_transaction_logNew(request, StockReportdata, Party, "BatchWiseLiveStock Not available",88,0) 
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
                 else:
+                    print('ffffffffff')
                     ItemList = list()
                     for row in Itemquery:
-                        if int(Unit)==0:
-                            Unit=row.BaseUnitID_id   
-                        if int(Unit) == 1:
-                            SaleableStockActualQty=UnitwiseQuantityConversion(row.id,row.SaleableStock,0,0,0,1,0).ConvertintoSelectedUnit()
-                            UnSaleableStockActualQty=UnitwiseQuantityConversion(row.id,row.UnSaleableStock,0,0,0,1,0).ConvertintoSelectedUnit()
-                            StockUnit = 'No'
-                        if int(Unit) == 2:
-                            SaleableStockActualQty=UnitwiseQuantityConversion(row.id,row.SaleableStock,0,0,0,2,0).ConvertintoSelectedUnit()
-                            UnSaleableStockActualQty=UnitwiseQuantityConversion(row.id,row.UnSaleableStock,0,0,0,2,0).ConvertintoSelectedUnit()
-                            StockUnit = 'Kg'
+                        print(row)
                         
-                        if int(Unit) == 4:
-                            SaleableStockActualQty=UnitwiseQuantityConversion(row.id,row.SaleableStock,0,0,0,4,0).ConvertintoSelectedUnit()
-                            UnSaleableStockActualQty=UnitwiseQuantityConversion(row.id,row.UnSaleableStock,0,0,0,4,0).ConvertintoSelectedUnit()
-                            StockUnit = 'Box'
-                        
-                       
-                        SaleableStockValue = round((float(SaleableStockActualQty) * float(row.Rate)),2)
-                        SaleableStockTaxValue =round((float(SaleableStockValue)*(float(row.GSTPercentage)/100)),2)
-                        UnSaleableStockValue = round((float(UnSaleableStockActualQty) * float(row.Rate)),2)
-                        UnSaleableStockTaxValue =round((float(UnSaleableStockValue)*(float(row.GSTPercentage)/100)),2)
                         
                         ItemList.append({
                             "DistributorCode" : row.DistributorID,
@@ -337,16 +295,16 @@ group by A.id, GroupType.id, Groupss.id,subgroup.id, M_Items.id , GSTPercentage,
                             "MRP":row.MRPValue,
                             "Rate":row.Rate,
                             "PurchaseRate" : round(row.Rate,2),
-                            "SaleableStock":round(SaleableStockActualQty,3),
-                            "UnSaleableStock":round(UnSaleableStockActualQty,3),
-                            "SaleableStockValue" : SaleableStockValue,
-                            "SaleableStockTaxValue" :SaleableStockTaxValue,
-                            "UnSaleableStockValue" : UnSaleableStockValue,
-                            "UnSaleableStockTaxValue" : UnSaleableStockTaxValue,
-                            "TotalStockValue" : SaleableStockValue+UnSaleableStockValue,
-                            "TaxValue" : SaleableStockTaxValue+UnSaleableStockTaxValue,
-                            "Stockvaluewithtax" : SaleableStockValue+SaleableStockTaxValue+UnSaleableStockValue+UnSaleableStockTaxValue,
-                            "Unit":StockUnit,
+                            "SaleableStock":round(row.SaleableStock,3),
+                            "UnSaleableStock":round(row.UnSaleableStock,3),
+                            "SaleableStockValue" : row.SaleableStockValue,
+                            "SaleableStockTaxValue" :row.SaleableStockTaxValue,
+                            "UnSaleableStockValue" : row.UnSaleableStockValue,
+                            "UnSaleableStockTaxValue" : row.UnSaleableStockTaxValue,
+                            "TotalStockValue" : row.SaleableStockValue+row.UnSaleableStockValue,
+                            "TaxValue" : row.SaleableStockTaxValue+row.UnSaleableStockTaxValue,
+                            "Stockvaluewithtax" : row.SaleableStockValue+row.SaleableStockTaxValue+row.UnSaleableStockValue+row.UnSaleableStockTaxValue,
+                            "Unit":row.StockUnit,
                             "GST" : row.GSTPercentage,
                             "Cluster" : row.Cluster,
                             "SubCluster": row.SubCluster,
