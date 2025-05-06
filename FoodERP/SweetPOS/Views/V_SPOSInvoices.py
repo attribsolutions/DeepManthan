@@ -483,6 +483,9 @@ class DeleteInvoiceView(CreateAPIView):
                     InvoiceIDs=list()
                     for DeleteInvoicedata in DeleteInvoicedatas:
                         InvoiceDeleteUpdate = T_SPOSInvoices.objects.using('sweetpos_db').filter(ClientID=DeleteInvoicedata['ClientID'],ClientSaleID=DeleteInvoicedata['ClientSaleID'],Party=DeleteInvoicedata['PartyID'],InvoiceDate=DeleteInvoicedata['InvoiceDate']).values('id')
+                         
+                        if not InvoiceDeleteUpdate:
+                            continue  
                         
                         if 'VoucherCode' in DeleteInvoicedata and DeleteInvoicedata['VoucherCode']:
                             queryforvouchercode = M_GiftVoucherCode.objects.filter(VoucherCode=DeleteInvoicedata['VoucherCode']).update(InvoiceDate=None,InvoiceNumber=None,InvoiceAmount=None,Party=0,client=0, IsActive=1)
