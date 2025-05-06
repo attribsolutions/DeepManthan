@@ -15,7 +15,7 @@ class InvoiceSendToFTPForSAP(APIView):
     @transaction.atomic
     def post(self, request):
         InvoiceData = JSONParser().parse(request) 
-        print('sssssssssss')       
+        # print('sssssssssss')       
         try:
             InvoiceID = InvoiceData['InvoiceID'] 
             
