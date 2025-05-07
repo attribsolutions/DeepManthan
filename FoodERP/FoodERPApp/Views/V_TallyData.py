@@ -13,6 +13,7 @@ from datetime import datetime
 
 
 
+
 class TallyDataListView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [BasicAuthentication]
@@ -29,7 +30,10 @@ class TallyDataListView(CreateAPIView):
                 
                 if Mode == "Purchase":
                     query=(f''' select * from  
-(SELECT GRN.id ,GRN.InvoiceNumber,GRN.InvoiceDate,P.id AS PartyCode,P.Name AS PartyName,CASE AccountingGRNStatus
+
+(SELECT GRN.id , CONCAT(GRN.InvoiceNumber, ' (', COALESCE(GRN.FullGRNNumber, ''), ')') AS InvoiceNumber,
+                           GRN.InvoiceDate,P.id AS PartyCode,P.Name AS PartyName,CASE AccountingGRNStatus
+
                         WHEN 0 THEN 'Created'
                         WHEN 1 THEN 'Canceled'
                         ELSE 'Edited'END AS Statuss,U2.LoginName AS User, 
@@ -85,7 +89,7 @@ select E.GRN_id,NULL AS ItemCode,L.Name AS ItemName,
                                                                 JOIN M_Users ON M_Users.id = T_Invoices.CreatedBy
                                                                 WHERE M_Parties.Company_id = 4 AND T_Invoices.IsTallySave=0 
                                                              
-                                                             UNION ALL 
+                                                             UNION ALL
                                                              
                                                              SELECT T_DeletedInvoices.Invoice id , T_DeletedInvoices.FullInvoiceNumber InvoiceNumber, T_DeletedInvoices.InvoiceDate, M_Parties.id AS PartyCode,
                                                                 M_Parties.Name AS PartyName,
