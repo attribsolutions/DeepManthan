@@ -97,7 +97,7 @@ class TallyDataListView(CreateAPIView):
                                                                 JOIN M_Users ON M_Users.id = T_Invoices.CreatedBy
                                                                 WHERE M_Parties.Company_id = 4 AND T_Invoices.IsTallySave=0 
                                                              
-                                                             UNION 
+                                                             UNION ALL 
                                                              
                                                              SELECT T_DeletedInvoices.Invoice id , T_DeletedInvoices.FullInvoiceNumber InvoiceNumber, T_DeletedInvoices.InvoiceDate, M_Parties.id AS PartyCode,
                                                                 M_Parties.Name AS PartyName,
