@@ -2379,30 +2379,22 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                                                     M_GiftVoucherCode.VoucherCode, M_GiftVoucherCode.UpdatedOn, M_GiftVoucherCode.InvoiceDate, 
                                                     M_GiftVoucherCode.InvoiceNumber, M_GiftVoucherCode.InvoiceAmount, M_GiftVoucherCode.Party, 
                                                     M_GiftVoucherCode.client, M_GiftVoucherCode.IsActive, 
-                                                    M_Parties.Name as PartyName, 
-                                                    TC_InvoicesSchemes.scheme AS SchemeID,
-                                                    SUM(TC_SPOSInvoiceItems.DiscountAmount) AS DiscountAmount
+                                                    M_Parties.Name as PartyName
+                                                    
                                                 FROM M_GiftVoucherCode
                                                 JOIN M_Parties ON M_GiftVoucherCode.Party = M_Parties.id
-                                                left JOIN SweetPOS.T_SPOSInvoices 
-                                                    ON M_GiftVoucherCode.ClientSaleID = T_SPOSInvoices.ClientSaleID 
-                                                    AND M_GiftVoucherCode.client = T_SPOSInvoices.ClientID
-                                                    AND M_GiftVoucherCode.Party = T_SPOSInvoices.Party
-                                                left JOIN SweetPOS.TC_InvoicesSchemes 
-                                                    ON T_SPOSInvoices.id = TC_InvoicesSchemes.Invoice_id
-                                                left JOIN SweetPOS.TC_SPOSInvoiceItems 
-                                                    ON T_SPOSInvoices.id = TC_SPOSInvoiceItems.Invoice_id
+                                                
                                                 WHERE {where_clause}
-                                                GROUP BY M_GiftVoucherCode.id, VoucherType_id, M_GiftVoucherCode.VoucherCode,M_GiftVoucherCode.UpdatedOn, M_GiftVoucherCode.InvoiceDate, M_GiftVoucherCode.InvoiceNumber, M_GiftVoucherCode.InvoiceAmount,  M_GiftVoucherCode.Party, M_GiftVoucherCode.client, M_GiftVoucherCode.IsActive, M_Parties.Name, TC_InvoicesSchemes.scheme''')
-
-                scheme1 = M_Scheme.objects.filter(id=1).first()
-                SchemeValue = scheme1.SchemeValue if scheme1 else 0
+                                                GROUP BY M_GiftVoucherCode.id, VoucherType_id, M_GiftVoucherCode.VoucherCode,M_GiftVoucherCode.UpdatedOn, M_GiftVoucherCode.InvoiceDate, M_GiftVoucherCode.InvoiceNumber, M_GiftVoucherCode.InvoiceAmount,  M_GiftVoucherCode.Party, M_GiftVoucherCode.client, M_GiftVoucherCode.IsActive, M_Parties.Name''')
+                # print(CouponCodeRedemptionQuery)
+                # scheme1 = M_Scheme.objects.filter(id=1).first()
+                # SchemeValue = scheme1.SchemeValue if scheme1 else 0
 
                 for CouponCode in CouponCodeRedemptionQuery:
-                    if CouponCode.SchemeID == 1:
-                        DiscountAmount = SchemeValue
-                    else:
-                        DiscountAmount = CouponCode.DiscountAmount
+                #     if CouponCode.SchemeID == 1:
+                #         DiscountAmount = SchemeValue
+                #     else:
+                #         DiscountAmount = CouponCode.DiscountAmount
 
                     CouponCodeRedemptionData.append({
                         "id": CouponCode.id,
@@ -2415,8 +2407,9 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                         "PartyID": CouponCode.Party,
                         "PartyName": CouponCode.PartyName,
                         "client": CouponCode.client,
-                        "SchemeID": CouponCode.SchemeID,
-                        "DiscountAmount": DiscountAmount
+                        # "SchemeID": CouponCode.SchemeID,
+                        "SchemeID": 0,
+                        "DiscountAmount": 0
                     })
 
                 if CouponCodeRedemptionData:
@@ -2451,7 +2444,7 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                 JOIN FoodERP.M_Parties ON FoodERP.M_Parties.id=Party
                 JOIN FoodERP.MC_SchemeParties ON FoodERP.MC_SchemeParties.PartyID_id=FoodERP.M_Parties.id
                 JOIN FoodERP.M_Scheme ON FoodERP.M_Scheme.id=FoodERP.MC_SchemeParties.SchemeID_id
-                where InvoiceDate between '{FromDate}' and '{ToDate}' and VoucherCode !=''
+                where InvoiceDate between '{FromDate}' and '{ToDate}' and VoucherCode !='' and VoucherCode like 'CBM%%'
                 and SchemeID_id=1  and Party in ({Party}) group by M_GiftVoucherCode.Party,M_Scheme.id,id ''')
 
 

@@ -1,5 +1,3 @@
-
-
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
@@ -17,99 +15,90 @@ class InvoiceSendToFTPForSAP(APIView):
     @transaction.atomic
     def post(self, request):
         InvoiceData = JSONParser().parse(request) 
-               
+        # print('sssssssssss')       
         try:
             InvoiceID = InvoiceData['InvoiceID'] 
             
-            ss=self.Upload_InvoiceToSAP(InvoiceID)
+            settings_map = self.get_ftp_settings()
+            user_name = settings_map.get(50)  # Username
+            password = settings_map.get(51)  # Password
+            FTPFilePath = settings_map.get(52)  # FTPFilePath       
+                
+            ItemSAPCode=f'''SELECT 1 id ,  
+            'IN60' AS Vendor,
+            M_Parties.SAPPartyCode AS Plant,
+            T_Invoices.Party_id PartyID,
+            T_Invoices.InvoiceDate ,
+            DATE_FORMAT(T_Invoices.InvoiceDate, '%%d.%%m.%%Y') DocumentDate,
+            0 AS DeliveryNote,
+            '' AS BillofLading,
+            '' AS HeaderText,
+            T_Invoices.FullInvoiceNumber AS VenderInvoiceNumber,
+            T_Invoices.GrandTotal AS InvoiceheaderAmountwithGST,
+            M_Items.SAPItemCode AS Material,
+            TC_InvoiceItems.Quantity,
+            O_LiveBatches.BatchCode,
             
-            return JsonResponse(ss)
-        except Exception as e:
-            return JsonResponse({'error': Exception(e)}, status=500) 
-
-    def Upload_InvoiceToSAP(self, InvoiceID):
-            try:
-                    # Fetch FTP credentials from M_Settings
-                    settings_map = self.get_ftp_settings()
-                    user_name = settings_map.get(50)  # Username
-                    password = settings_map.get(51)  # Password
-                    FTPFilePath = settings_map.get(52)  # FTPFilePath       
-                      
-                    ItemSAPCode=f'''SELECT 1 id ,  
-                    'IN60' AS Vendor,
-                    M_Parties.SAPPartyCode AS Plant,
-                    T_Invoices.Party_id PartyID,
-                    T_Invoices.InvoiceDate ,
-                    DATE_FORMAT(T_Invoices.InvoiceDate, '%%d.%%m.%%Y') DocumentDate,
-                    0 AS DeliveryNote,
-                    '' AS BillofLading,
-                    '' AS HeaderText,
-                    T_Invoices.FullInvoiceNumber AS VenderInvoiceNumber,
-                    T_Invoices.GrandTotal AS InvoiceheaderAmountwithGST,
-                    M_Items.SAPItemCode AS Material,
-                    TC_InvoiceItems.Quantity,
-                    O_LiveBatches.BatchCode,
+            DATE_FORMAT(O_LiveBatches.BatchDate, '%%d.%%m.%%Y') ProdnDate,
+            DATE_FORMAT(O_LiveBatches.ItemExpiryDate, '%%d.%%m.%%Y') sled
+            FROM T_Invoices 
+            JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_ID = T_Invoices.ID 
+            JOIN M_Items ON M_Items.ID = TC_InvoiceItems.Item_ID
+            JOIN M_Parties ON M_Parties.ID = T_Invoices.Customer_id
+            JOIN O_LiveBatches ON O_LiveBatches.id = TC_InvoiceItems.LiveBatch_id
+            JOIN O_BatchWiseLiveStock ON O_BatchWiseLiveStock.LiveBatche_id = O_LiveBatches.id
+            WHERE T_Invoices.ID = %s '''                   
+             
+            raw_queryset = T_Invoices.objects.raw(ItemSAPCode, [InvoiceID])   
+            shedshortname =M_Settings.objects.filter(id=64).values('DefaultValue')
+            dd=shedshortname[0]['DefaultValue']
+            
+            for i in raw_queryset:
+                shortname=dd.split(',')
+                for j in shortname:
+                    ss=j.split('-')
+                    if int(i.PartyID) == int(ss[0]):
+                        N=ss[1]
+                
+                InvoiceDate = i.InvoiceDate
+                Plant = i.Plant
+                InvNo =i.VenderInvoiceNumber 
+                PartyID=i.PartyID      
+             
+            file_name = f"{InvoiceDate.strftime('%Y%m%d')}_{Plant}_IN60_{N}_{InvNo}.csv"
+            # print(file_name)
+            ftp_file_path = f"{FTPFilePath}/inbound/GRN_MIR7/source/{file_name}"
+            # print(ftp_file_path)
+            headers = [
+                "Vendor", "Plant", "DocumentDate","DeliveryNote","BillofLading",
+                "HeaderText","VenderInvoiceNumber","InvoiceheaderAmountwithGST","Material","Quantity",
+                "BatchCode","ProdnDate","sled"
+            ]
+            rows = [
+                [
+                    item.Vendor, item.Plant, item.DocumentDate,item.DeliveryNote,item.BillofLading,item.HeaderText,
+                    item.VenderInvoiceNumber,item.InvoiceheaderAmountwithGST,item.Material,item.Quantity,
+                    item.BatchCode,item.ProdnDate,item.sled                            
                     
-                    DATE_FORMAT(O_LiveBatches.BatchDate, '%%d.%%m.%%Y') ProdnDate,
-                    DATE_FORMAT(O_LiveBatches.ItemExpiryDate, '%%d.%%m.%%Y') sled
-                    FROM T_Invoices 
-                    JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_ID = T_Invoices.ID 
-                    JOIN M_Items ON M_Items.ID = TC_InvoiceItems.Item_ID
-                    JOIN M_Parties ON M_Parties.ID = T_Invoices.Customer_id
-                    JOIN O_LiveBatches ON O_LiveBatches.id = TC_InvoiceItems.LiveBatch_id
-                    JOIN O_BatchWiseLiveStock ON O_BatchWiseLiveStock.LiveBatche_id = O_LiveBatches.id
-                    WHERE T_Invoices.ID = %s '''                   
+                ]
+                for item in raw_queryset
+            ]
+            
+            csv_content = self.generate_csv(headers, rows)
+            
+
+            # Upload to FTP
+            self.upload_to_ftp(ftp_file_path, user_name, password, csv_content) 
                        
-                    raw_queryset = T_Invoices.objects.raw(ItemSAPCode, [InvoiceID])   
-                    shedshortname =M_Settings.objects.filter(id=64).values('DefaultValue')
-                    dd=shedshortname[0]['DefaultValue']
-                   
-                    for i in raw_queryset:
-                        shortname=dd.split(',')
-                        for j in shortname:
-                            ss=j.split('-')
-                            if int(i.PartyID) == int(ss[0]):
-                                N=ss[1]
-                          
-                        InvoiceDate = i.InvoiceDate
-                        Plant = i.Plant
-                        InvNo =i.VenderInvoiceNumber       
+            sapupdatequery = T_Invoices.objects.filter(id=InvoiceID).update(IsSendToFTPSAP=1)
+            log_entry = create_transaction_logNew(request,InvoiceID, PartyID,f'File uploaded successfully: {file_name}',456,0)
+            return JsonResponse ({'StatusCode': 200, 'Status': True,'Message': file_name +' File uploaded successfully ', 'Data': []})
+            
                     
-                    file_name = f"{InvoiceDate.strftime('%Y%m%d')}_{Plant}_IN60_{N}_{InvNo}.csv"
-                    # print(file_name)
-                    ftp_file_path = f"{FTPFilePath}/inbound/GRN_MIR7/source/{file_name}"
-                    # print(ftp_file_path)
-                    headers = [
-                        "Vendor", "Plant", "DocumentDate","DeliveryNote","BillofLading",
-                        "HeaderText","VenderInvoiceNumber","InvoiceheaderAmountwithGST","Material","Quantity",
-                        "BatchCode","ProdnDate","sled"
-                    ]
-                    rows = [
-                        [
-                            item.Vendor, item.Plant, item.DocumentDate,item.DeliveryNote,item.BillofLading,item.HeaderText,
-                            item.VenderInvoiceNumber,item.InvoiceheaderAmountwithGST,item.Material,item.Quantity,
-                            item.BatchCode,item.ProdnDate,item.sled                            
-                            
-                        ]
-                        for item in raw_queryset
-                    ]
-                    
-                    csv_content = self.generate_csv(headers, rows)
-                    
-
-                    # Upload to FTP
-                    self.upload_to_ftp(ftp_file_path, user_name, password, csv_content) 
-                    # print("HHHHHH")           
-                    sapupdatequery = T_Invoices.objects.filter(id=InvoiceID).update(IsSendToFTPSAP=1)
-                    # log_entry = create_transaction_logNew(0,settings_map, user_name,f'File uploaded successfully: {file_name}',456,0)
-                    return ({'StatusCode': 200, 'Status': True,'Message': file_name +' File uploaded successfully ', 'Data': []})
-                    # return JsonResponse({'message': 'File uploaded successfully', 'file_name': file_name})
-                        
-            except Exception as exc:
-                # Log and return the error
-                # self.insert_pos_log(1, "Failed", str(exc))
-                # log_entry = create_transaction_logNew(0,settings_map, 0,'FileUploadedError:'+str(exc),33,0)
-                return ({'StatusCode': 400, 'Status': True, 'Message':  str(exc), 'Data':[]})
+        except Exception as exc:
+            
+            log_entry = create_transaction_logNew(request,InvoiceID, 0,'FileUploadedError:'+str(exc),33,0)
+            return JsonResponse ({'StatusCode': 400, 'Status': True, 'Message':  Exception(exc), 'Data':[]})
                 
                 
     def upload_to_ftp(self, ftp_url, username, password, file_content):

@@ -74,11 +74,21 @@ class SPOSInvoiceView(CreateAPIView):
                         Invoicedata['Driver'] = 0
                         Invoicedata['SaleID'] =0
                         Invoicedata['MobileNo'] =Invoicedata['Mobile']
-                        if 'VoucherCode' in Invoicedata:
-                            Invoicedata['VoucherCode'] = Invoicedata['VoucherCode']
-                        else:
-                            Invoicedata['VoucherCode'] = None
                         
+                        if 'VoucherCode' not in Invoicedata:
+                            Invoicedata['VoucherCode'] = None
+                            
+                        if Invoicedata['VoucherCode']:
+                            voucher = M_GiftVoucherCode.objects.filter(VoucherCode=Invoicedata['VoucherCode']).first()
+
+                            if voucher.IsActive == 1:
+                                voucher.IsActive = 0
+                                voucher.InvoiceDate = Invoicedata.get('InvoiceDate')
+                                voucher.InvoiceNumber = Invoicedata.get('InvoiceNumber')
+                                voucher.InvoiceAmount = Invoicedata.get('GrandTotal')
+                                voucher.Party = Invoicedata.get('Party')
+                                voucher.save()
+                                           
                         if Invoicedata['CustomerID'] == 0:
                             Invoicedata['Customer'] = 43194
                         else:
@@ -467,6 +477,9 @@ class DeleteInvoiceView(CreateAPIView):
                     InvoiceIDs=list()
                     for DeleteInvoicedata in DeleteInvoicedatas:
                         InvoiceDeleteUpdate = T_SPOSInvoices.objects.using('sweetpos_db').filter(ClientID=DeleteInvoicedata['ClientID'],ClientSaleID=DeleteInvoicedata['ClientSaleID'],Party=DeleteInvoicedata['PartyID'],InvoiceDate=DeleteInvoicedata['InvoiceDate']).values('id')
+                         
+                        if not InvoiceDeleteUpdate:
+                            continue  
                         
                         if 'VoucherCode' in DeleteInvoicedata and DeleteInvoicedata['VoucherCode']:
                             queryforvouchercode = M_GiftVoucherCode.objects.filter(VoucherCode=DeleteInvoicedata['VoucherCode']).update(InvoiceDate=None,InvoiceNumber=None,InvoiceAmount=None,Party=0,client=0, IsActive=1)
@@ -629,13 +642,13 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                     
                     UnitPerTransaction = 0
                     for upt in UPTData:
-                        UnitPerTransaction = upt.UnitPerTransaction
+                        UnitPerTransaction = upt.UnitPerTransaction or 0
                         
                     ATVData = T_SPOSInvoices.objects.raw('''SELECT 1 as id, AVG(GrandTotal) as AvgTransactionValue FROM SweetPOS.T_SPOSInvoices WHERE InvoiceDate BETWEEN %s AND %s AND Party = %s AND IsDeleted = 0 AND GrandTotal >= %s AND GrandTotal <= %s''', [FromDate, ToDate, Party, MinInvoiceValue, MaxInvoiceValue])
 
                     AverageTransactionValue = 0
                     for atv in ATVData:
-                        AverageTransactionValue = atv.AvgTransactionValue
+                        AverageTransactionValue = atv.AvgTransactionValue or 0
                         
                     Party_List.append({
                         "PartyId": party.id,

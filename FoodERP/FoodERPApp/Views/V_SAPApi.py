@@ -243,6 +243,23 @@ class SAPOrderView(CreateAPIView):
                 
                 ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(queryforcustomerID[0]['Customer'],0).split('!')              
                 
+            # ===================================This code sends Deccan and Bajirao orders to SAP. The plantId should be replaced according to the Settings =============
+                PlantID='0'
+                cssOrdersendtosapcondition=M_Settings.objects.filter(id=67).values('DefaultValue') 
+                SettingValues=cssOrdersendtosapcondition[0]['DefaultValue'].split(',')
+                # b = SettingValues.split(',')
+                for i in SettingValues:
+                   c=i.split('-')
+                   
+                   if int(c[0]) == int(queryforcustomerID[0]['Customer']):
+                        D=M_Parties.objects.filter(id=c[1]).values('SAPPartyCode')
+                        PlantID=D[0]['SAPPartyCode']
+                   
+            #============================= 
+                
+                
+                
+                
                 query=T_Orders.objects.raw(f'''select (5000000+T_Orders.id)id ,C.SAPPartyCode CustomerID,T_Orders.OrderDate DocDate,
                                            M_PartyType.SAPIndicator Indicator,
                 TC_OrderItems.id ItemNo,M_Items.SAPItemCode Material,S.SAPPartyCode Plant,M_Units.SAPUnit Unit,
@@ -257,7 +274,7 @@ class SAPOrderView(CreateAPIView):
                 join M_Units on M_Units.id=M_Items.SAPUnitID
                 {ItemsGroupJoinsandOrderby[1]}
                 where IsDeleted = 0 AND T_Orders.id=%s {ItemsGroupJoinsandOrderby[2]}''',[OrderID])                
-                print(query)
+                # print(query)
                 for row in query:
                     
                     date_obj = datetime.strptime(str(row.DocDate), '%Y-%m-%d')
@@ -272,7 +289,7 @@ class SAPOrderView(CreateAPIView):
                                             "Material": str(row.Material),
                                             "Quantity": str(round(row.Quantity,3)),
                                             "Unit": str(row.Unit),
-                                            "Plant": str(row.Plant),
+                                            "Plant": str(PlantID) if str(PlantID) > '0' else str(row.Plant),
                                             "Batch": ""                                        
                                         })
                 
