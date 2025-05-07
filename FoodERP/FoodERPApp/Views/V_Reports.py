@@ -474,11 +474,7 @@ IFNULL(IBPurchaseQuantity,0)IBPurchaseQuantity,
 IFNULL(MaterialIssueQuantity,0)MaterialIssueQuantity
 from
 
-(Select MC_PartyItems.Item_id,MC_ItemUnits.id UnitID
- from MC_PartyItems 
- join M_Items on M_Items.id=MC_PartyItems.Item_id 
- JOIN MC_ItemUnits  ON MC_ItemUnits.UnitID_Id=M_Items.BaseUnitID_id and MC_ItemUnits.Item_id=M_Items.id
- where Party_id=%s AND IsDeleted=0 )I
+(Select Item_id,M_Items.BaseUnitID_id UnitID  from MC_PartyItems join M_Items on M_Items.id=MC_PartyItems.Item_id where Party_id=%s )I
 
 left join (SELECT IFNULL(Item_id,0) ItemID, sum(ClosingBalance)ClosingBalance FROM O_DateWiseLiveStock WHERE StockDate = DATE_SUB(  %s, INTERVAL 1 
 					DAY ) AND Party_id =%s GROUP BY ItemID)CB
