@@ -74,11 +74,21 @@ class SPOSInvoiceView(CreateAPIView):
                         Invoicedata['Driver'] = 0
                         Invoicedata['SaleID'] =0
                         Invoicedata['MobileNo'] =Invoicedata['Mobile']
-                        if 'VoucherCode' in Invoicedata:
-                            Invoicedata['VoucherCode'] = Invoicedata['VoucherCode']
-                        else:
+                        
+                        if 'VoucherCode' not in Invoicedata:
                             Invoicedata['VoucherCode'] = None
-                                                
+                            
+                        if Invoicedata['VoucherCode']:
+                            voucher = M_GiftVoucherCode.objects.filter(VoucherCode=Invoicedata['VoucherCode']).first()
+
+                            if voucher.IsActive == 1:
+                                voucher.IsActive = 0
+                                voucher.InvoiceDate = Invoicedata.get('InvoiceDate')
+                                voucher.InvoiceNumber = Invoicedata.get('InvoiceNumber')
+                                voucher.InvoiceAmount = Invoicedata.get('GrandTotal')
+                                voucher.Party = Invoicedata.get('Party')
+                                voucher.save()
+                                           
                         if Invoicedata['CustomerID'] == 0:
                             Invoicedata['Customer'] = 43194
                         else:
