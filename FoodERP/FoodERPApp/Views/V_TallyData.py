@@ -30,8 +30,10 @@ class TallyDataListView(CreateAPIView):
                 
                 if Mode == "Purchase":
                     query=(f''' select * from  
+
 (SELECT GRN.id , CONCAT(GRN.InvoiceNumber, ' (', COALESCE(GRN.FullGRNNumber, ''), ')') AS InvoiceNumber,
                            GRN.InvoiceDate,P.id AS PartyCode,P.Name AS PartyName,CASE AccountingGRNStatus
+
                         WHEN 0 THEN 'Created'
                         WHEN 1 THEN 'Canceled'
                         ELSE 'Edited'END AS Statuss,U2.LoginName AS User, 

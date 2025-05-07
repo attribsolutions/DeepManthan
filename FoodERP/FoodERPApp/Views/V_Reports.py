@@ -474,7 +474,7 @@ IFNULL(IBPurchaseQuantity,0)IBPurchaseQuantity,
 IFNULL(MaterialIssueQuantity,0)MaterialIssueQuantity
 from
 
-(Select Item_id,M_Items.BaseUnitID_id UnitID  from MC_PartyItems join M_Items on M_Items.id=MC_PartyItems.Item_id where Party_id=%s)I
+(Select Item_id,M_Items.BaseUnitID_id UnitID  from MC_PartyItems join M_Items on M_Items.id=MC_PartyItems.Item_id where Party_id=%s )I
 
 left join (SELECT IFNULL(Item_id,0) ItemID, sum(ClosingBalance)ClosingBalance FROM O_DateWiseLiveStock WHERE StockDate = DATE_SUB(  %s, INTERVAL 1 
 					DAY ) AND Party_id =%s GROUP BY ItemID)CB
@@ -543,11 +543,15 @@ OpeningBalance!=0 OR GRN!=0 OR Sale!=0 OR PurchaseReturn != 0 OR SalesReturn !=0
                     serializer = StockProcessingReportSerializer(
                         StockProcessQuery, many=True).data
                     # CustomPrint(serializer)
-                    for a in serializer:
-
+                    for a in serializer: 
+                        # print(a)     
+                        # print("ItemID:", a["ItemID"], "UnitID:", a["UnitID"])                  
                         stock = O_DateWiseLiveStock(StockDate=Date, OpeningBalance=a["OpeningBalance"], GRN=a["GRN"],Production=a['Production'],MaterialIssue=a["MaterialIssue"],IBSale=a['IBSale'],IBPurchase=a['IBPurchase'], Sale=a["Sale"], PurchaseReturn=a["PurchaseReturn"], SalesReturn=a["SalesReturn"], ClosingBalance=a[
                                                     "ClosingBalance"], ActualStock=a["ActualStock"], StockAdjustment=a["StockAdjustment"], Item_id=a["ItemID"], Unit_id=a["UnitID"], Party_id=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
+                        # print("Saving stock:", stock.__dict__)
+                        
                         stock.save()
+                        
                     current_date += timedelta(days=1)
                 log_entry = create_transaction_logNew(request, Orderdata, Party, 'Stock Process Successfully', 209, 0, start_date_str, end_date_str, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Stock Process Successfully', 'Data': []})
@@ -2371,30 +2375,22 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                                                     M_GiftVoucherCode.VoucherCode, M_GiftVoucherCode.UpdatedOn, M_GiftVoucherCode.InvoiceDate, 
                                                     M_GiftVoucherCode.InvoiceNumber, M_GiftVoucherCode.InvoiceAmount, M_GiftVoucherCode.Party, 
                                                     M_GiftVoucherCode.client, M_GiftVoucherCode.IsActive, 
-                                                    M_Parties.Name as PartyName, 
-                                                    TC_InvoicesSchemes.scheme AS SchemeID,
-                                                    SUM(TC_SPOSInvoiceItems.DiscountAmount) AS DiscountAmount
+                                                    M_Parties.Name as PartyName
+                                                    
                                                 FROM M_GiftVoucherCode
                                                 JOIN M_Parties ON M_GiftVoucherCode.Party = M_Parties.id
-                                                left JOIN SweetPOS.T_SPOSInvoices 
-                                                    ON M_GiftVoucherCode.ClientSaleID = T_SPOSInvoices.ClientSaleID 
-                                                    AND M_GiftVoucherCode.client = T_SPOSInvoices.ClientID
-                                                    AND M_GiftVoucherCode.Party = T_SPOSInvoices.Party
-                                                left JOIN SweetPOS.TC_InvoicesSchemes 
-                                                    ON T_SPOSInvoices.id = TC_InvoicesSchemes.Invoice_id
-                                                left JOIN SweetPOS.TC_SPOSInvoiceItems 
-                                                    ON T_SPOSInvoices.id = TC_SPOSInvoiceItems.Invoice_id
+                                                
                                                 WHERE {where_clause}
-                                                GROUP BY M_GiftVoucherCode.id, VoucherType_id, M_GiftVoucherCode.VoucherCode,M_GiftVoucherCode.UpdatedOn, M_GiftVoucherCode.InvoiceDate, M_GiftVoucherCode.InvoiceNumber, M_GiftVoucherCode.InvoiceAmount,  M_GiftVoucherCode.Party, M_GiftVoucherCode.client, M_GiftVoucherCode.IsActive, M_Parties.Name, TC_InvoicesSchemes.scheme''')
-
-                scheme1 = M_Scheme.objects.filter(id=1).first()
-                SchemeValue = scheme1.SchemeValue if scheme1 else 0
+                                                GROUP BY M_GiftVoucherCode.id, VoucherType_id, M_GiftVoucherCode.VoucherCode,M_GiftVoucherCode.UpdatedOn, M_GiftVoucherCode.InvoiceDate, M_GiftVoucherCode.InvoiceNumber, M_GiftVoucherCode.InvoiceAmount,  M_GiftVoucherCode.Party, M_GiftVoucherCode.client, M_GiftVoucherCode.IsActive, M_Parties.Name''')
+                # print(CouponCodeRedemptionQuery)
+                # scheme1 = M_Scheme.objects.filter(id=1).first()
+                # SchemeValue = scheme1.SchemeValue if scheme1 else 0
 
                 for CouponCode in CouponCodeRedemptionQuery:
-                    if CouponCode.SchemeID == 1:
-                        DiscountAmount = SchemeValue
-                    else:
-                        DiscountAmount = CouponCode.DiscountAmount
+                #     if CouponCode.SchemeID == 1:
+                #         DiscountAmount = SchemeValue
+                #     else:
+                #         DiscountAmount = CouponCode.DiscountAmount
 
                     CouponCodeRedemptionData.append({
                         "id": CouponCode.id,
@@ -2407,8 +2403,9 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                         "PartyID": CouponCode.Party,
                         "PartyName": CouponCode.PartyName,
                         "client": CouponCode.client,
-                        "SchemeID": CouponCode.SchemeID,
-                        "DiscountAmount": DiscountAmount
+                        # "SchemeID": CouponCode.SchemeID,
+                        "SchemeID": 0,
+                        "DiscountAmount": 0
                     })
 
                 if CouponCodeRedemptionData:
@@ -2443,7 +2440,7 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                 JOIN FoodERP.M_Parties ON FoodERP.M_Parties.id=Party
                 JOIN FoodERP.MC_SchemeParties ON FoodERP.MC_SchemeParties.PartyID_id=FoodERP.M_Parties.id
                 JOIN FoodERP.M_Scheme ON FoodERP.M_Scheme.id=FoodERP.MC_SchemeParties.SchemeID_id
-                where InvoiceDate between '{FromDate}' and '{ToDate}' and VoucherCode !=''
+                where InvoiceDate between '{FromDate}' and '{ToDate}' and VoucherCode !='' and VoucherCode like 'CBM%%'
                 and SchemeID_id=1  and Party in ({Party}) group by M_GiftVoucherCode.Party,M_Scheme.id,id ''')
 
 

@@ -139,6 +139,7 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
     def post(self, request, id=0):
         Orderdata = JSONParser().parse(request)
         try:
+            # print("stock processsing started.")
             with transaction.atomic():
                 
                 user = BasicAuthenticationfunction(request)
@@ -154,23 +155,21 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
                         yesterday = today - timedelta(days=1)
                     else:
                         # If no records were found for today, set yesterday to be the first day of the current month
-                        updateIsStockProcessItem= M_Items.objects.raw(''' update M_Items set IsStockProcessItem =1 where id in(  
-
-SELECT DISTINCT Item_id FROM T_Invoices JOIN TC_InvoiceItems ON Invoice_id = T_Invoices.id 
-WHERE InvoiceDate >= DATE_SUB(CURDATE(), INTERVAL 100 DAY) AND Party_id NOT IN (SELECT DefaultValue FROM M_Settings WHERE id=55))''')
+#                         updateIsStockProcessItem= M_Items.objects.raw(''' update M_Items set IsStockProcessItem =1 where id in(  
+# SELECT DISTINCT Item_id FROM T_Invoices JOIN TC_InvoiceItems ON Invoice_id = T_Invoices.id 
+# WHERE InvoiceDate >= DATE_SUB(CURDATE(), INTERVAL 100 DAY) AND Party_id NOT IN (SELECT DefaultValue FROM M_Settings WHERE id=56))''')
                         yesterday = today.replace(day=1)    
                     
                     start_date_str = yesterday
                     end_date_str = today
-                    excluded_ids = [56605, 71368, 53532, 60722, 65261, 35115]
-                    Partys = M_Parties.objects.filter(PartyType=19).exclude(id__in=excluded_ids).values('id')
+                    Partys = M_Parties.objects.filter(PartyType=19,isActive=1).values('id')
                     # Partys = M_Parties.objects.filter(PartyType = 19).values('id')
 
                     # print(Partys)                    
 
                     log_entry = create_transaction_logNew(request, Orderdata, 0, 'Stock Process start', 209, 0, start_date_str, end_date_str, 0)
                     for Party in Partys:
-                        # print(Party['id'])
+                        print(Party['id'] ,"start time  : ",datetime.now())
                         # start_date = start_date_str.strptime( "%Y-%m-%d")
                         # end_date = end_date_str.strptime( "%Y-%m-%d")
                         Party=Party['id']
@@ -259,24 +258,51 @@ WHERE InvoiceDate >= DATE_SUB(CURDATE(), INTERVAL 100 DAY) AND Party_id NOT IN (
         # where
         # OpeningBalance!=0 OR GRN!=0 OR Sale!=0 OR PurchaseReturn != 0 OR SalesReturn !=0 OR StockAdjustment!=0
                         
-                            # serializer = StockProcessingReportSerializer(StockProcessQuery, many=True).data
+                            #  serializer = StockProcessingReportSerializer(StockProcessQuery, many=True).data
                             # CustomPrint(serializer)
-                            # print(StockProcessQuery)
-                            for a in StockProcessQuery:
                             
-                                if(a.OpeningBalance!=0 or a.GRN!=0 or a.Sale!=0 or a.PurchaseReturn != 0 or a.SalesReturn !=0 or a.StockAdjustment!=0):
-                                    # print('kkkkkkkkkkkkkkkkkkkkkkkkkk')
-                                    stock = O_SPOSDateWiseLiveStock(StockDate=Date, OpeningBalance=a.OpeningBalance, GRN=a.GRN, Sale=a.Sale, PurchaseReturn=a.PurchaseReturn, SalesReturn=a.SalesReturn, ClosingBalance=a.ClosingBalance, ActualStock=a.ActualStock, StockAdjustment=a.StockAdjustment, Item=a.ItemID, Unit=a.UnitID, Party=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
-                                    stock.save()
-                                
-                                if query0 > 0 :
-                                    processingdate =datetime.strptime(Date, '%Y-%m-%d').date()
+                            # print(StockProcessQuery)
+                            # print(" mid : ",datetime.now())
+
+                            stocks_to_create = []
+                            stockouts_to_create = []
+                            for a in StockProcessQuery:
+                                if any([a.OpeningBalance, a.GRN, a.Sale, a.PurchaseReturn, a.SalesReturn, a.StockAdjustment]):
+                                    stock = O_SPOSDateWiseLiveStock(
+                                        StockDate=Date, OpeningBalance=a.OpeningBalance, GRN=a.GRN, Sale=a.Sale,
+                                        PurchaseReturn=a.PurchaseReturn, SalesReturn=a.SalesReturn, ClosingBalance=a.ClosingBalance,
+                                        ActualStock=a.ActualStock, StockAdjustment=a.StockAdjustment, Item=a.ItemID,
+                                        Unit=a.UnitID, Party=Party, CreatedBy=0, IsAdjusted=0, MRPValue=0
+                                    )
+                                    stocks_to_create.append(stock)
+
+                                if query0 > 0:
+                                    processingdate = datetime.strptime(Date, '%Y-%m-%d').date()
                                     if a.ClosingBalance <= 0 and date.today() == processingdate:
-                                        if ((datetime.now()).hour ) > 8 and ((datetime.now()).hour ) < 22 :
-                                            stockout = T_SPOSStockOut(StockDate=Date, Item=a.ItemID, Party=Party, CreatedBy=0,Quantity=a.ClosingBalance)
-                                            stockout.save()    
+                                        if 8 < datetime.now().hour < 22:
+                                            stockout = T_SPOSStockOut(
+                                                StockDate=Date, Item=a.ItemID, Party=Party, CreatedBy=0, Quantity=a.ClosingBalance
+                                            )
+                                            stockouts_to_create.append(stockout)
+                            # for a in StockProcessQuery:
+                            #     # print("Insert start time  : ",datetime.now())
+                            #     if(a.OpeningBalance!=0 or a.GRN!=0 or a.Sale!=0 or a.PurchaseReturn != 0 or a.SalesReturn !=0 or a.StockAdjustment!=0):
+                            #         # print('kkkkkkkkkkkkkkkkkkkkkkkkkk')
+                            #         stock = O_SPOSDateWiseLiveStock(StockDate=Date, OpeningBalance=a.OpeningBalance, GRN=a.GRN, Sale=a.Sale, PurchaseReturn=a.PurchaseReturn, SalesReturn=a.SalesReturn, ClosingBalance=a.ClosingBalance, ActualStock=a.ActualStock, StockAdjustment=a.StockAdjustment, Item=a.ItemID, Unit=a.UnitID, Party=Party, CreatedBy=0,  IsAdjusted=0, MRPValue=0)
+                            #         stock.save()
+                                
+                            #     if query0 > 0 :
+                            #         processingdate =datetime.strptime(Date, '%Y-%m-%d').date()
+                            #         if a.ClosingBalance <= 0 and date.today() == processingdate:
+                            #             if ((datetime.now()).hour ) > 8 and ((datetime.now()).hour ) < 22 :
+                            #                 stockout = T_SPOSStockOut(StockDate=Date, Item=a.ItemID, Party=Party, CreatedBy=0,Quantity=a.ClosingBalance)
+                            #                 stockout.save()    
+                                
+                            O_SPOSDateWiseLiveStock.objects.bulk_create(stocks_to_create)
+                            T_SPOSStockOut.objects.bulk_create(stockouts_to_create)
                             
                             current_date += timedelta(days=1)
+                        # print(" end time  : ",datetime.now())
                         log_entry = create_transaction_logNew(request, Orderdata, Party, 'Stock Process Successfully', 209, 0, start_date_str, end_date_str, 0)
                             
                         
