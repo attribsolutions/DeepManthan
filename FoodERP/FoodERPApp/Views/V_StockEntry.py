@@ -316,7 +316,7 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message':'', 'Data': ItemList})     
         except Exception as e:
             log_entry = create_transaction_logNew(request, StockReportdata, PartyID,'PartyLiveStock:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})      
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})      
 
 
 
