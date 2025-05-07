@@ -13,6 +13,7 @@ from datetime import datetime
 
 
 
+
 class TallyDataListView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [BasicAuthentication]
@@ -28,53 +29,42 @@ class TallyDataListView(CreateAPIView):
                 TallyDetails = []
                 
                 if Mode == "Purchase":
-                    query=(f''' SELECT * FROM (SELECT GRN.id ,GRN.InvoiceNumber,
-                    GRN.InvoiceDate,
-                    P.id AS PartyCode,P.Name AS PartyName,I.id AS ItemCode,I.Name AS ItemName,H.HSNCode,
-                    GI.Rate ,GI.Quantity,U.Name AS UnitName,GI.DiscountType,GI.Discount AS DiscountPercentage,
-                    GI.DiscountAmount,GI.BasicAmount AS TaxableValue,GI.CGSTPercentage,GI.CGST,GI.SGSTPercentage,GI.SGST,
-                    GI.IGSTPercentage,GI.IGST,GI.GSTPercentage,GI.GSTAmount,GI.Amount AS TotalValue,0 AS TCSTaxAmount,
-                    GRN.GrandTotal,
-                    CASE AccountingGRNStatus
+                    query=(f''' select * from  
+(SELECT GRN.id , CONCAT(GRN.InvoiceNumber, ' (', COALESCE(GRN.FullGRNNumber, ''), ')') AS InvoiceNumber,
+                           GRN.InvoiceDate,P.id AS PartyCode,P.Name AS PartyName,CASE AccountingGRNStatus
                         WHEN 0 THEN 'Created'
                         WHEN 1 THEN 'Canceled'
                         ELSE 'Edited'END AS Statuss,U2.LoginName AS User, 
-                    GRN.RoundOffAmount RoundOff,GRN.TotalExpenses
-                    FROM T_GRNs GRN
-                    JOIN TC_GRNItems GI ON GRN.id = GI.GRN_id 
-                    JOIN M_Parties P ON GRN.Party_id = P.id
-                    JOIN M_Items I ON GI.Item_id = I.id 
+                        GRN.RoundOffAmount RoundOff,GRN.TotalExpenses ,
+                        GRN.GrandTotal
+                        FROM T_GRNs GRN
+						JOIN M_Users U2 ON GRN.CreatedBy = U2.id
+                        JOIN M_Parties P ON GRN.Party_id = P.id
+                        WHERE P.Company_id = 4 AND GRN.IsTallySave = 0 
+                        AND ((IsSave=0 and AccountingGRNStatus=0) OR (IsSave=1 and AccountingGRNStatus=1) OR (IsSave=0 and AccountingGRNStatus=2))limit 200)a
+left join 
+(select GI.GRN_id,I.id AS ItemCode,I.Name AS ItemName,H.HSNCode,
+                    GI.Rate ,GI.Quantity,U.Name AS UnitName,GI.DiscountType,GI.Discount AS DiscountPercentage,
+                    GI.DiscountAmount,GI.BasicAmount AS TaxableValue,GI.CGSTPercentage,GI.CGST,GI.SGSTPercentage,GI.SGST,
+                    GI.IGSTPercentage,GI.IGST,GI.GSTPercentage,GI.GSTAmount,GI.Amount AS TotalValue,0 AS TCSTaxAmount
+                    
+                    FROM TC_GRNItems GI  
+					JOIN M_Items I ON GI.Item_id = I.id 
                     JOIN M_GSTHSNCode H ON GI.GST_id = H.id
                     JOIN MC_ItemUnits IU ON GI.Unit_id = IU.id 
                     JOIN M_Units U ON IU.UnitID_id = U.id
-                    JOIN M_Users U2 ON GRN.CreatedBy = U2.id  
-                    WHERE P.Company_id = 4 AND GRN.IsTallySave = 0 
-                    AND ((IsSave=0 and AccountingGRNStatus=0) OR (IsSave=1 and AccountingGRNStatus=1) OR (IsSave=0 and AccountingGRNStatus=2))
                     
-                           UNION ALL
-
-                    SELECT GRN.id ,
-                    GRN.InvoiceNumber,GRN.InvoiceDate,P.id AS PartyCode,P.Name AS PartyName,NULL AS ItemCode,L.Name AS ItemName,
+union all
+select E.GRN_id,NULL AS ItemCode,L.Name AS ItemName,
                     L.HSN AS HSNCode,NULL AS Rate,NULL AS Quantity,NULL AS UnitName,
                     NULL AS DiscountType,NULL AS DiscountPercentage, NULL AS DiscountAmount,
                     E.BasicAmount AS TaxableValue,"" CGSTPercentage,E.CGST AS CGST,
                     "" SGSTPercentage,E.SGST AS SGST,""IGSTPercentage,E.IGST AS IGST,E.GSTPercentage AS GSTPercentage,
-                    0 as GSTAmount,E.Amount AS TotalValue,0 AS TCSTaxAmount,GRN.GrandTotal,
-                    CASE AccountingGRNStatus
-                        WHEN 0 THEN 'Created'
-                        WHEN 1 THEN 'Canceled'
-                        ELSE 'Edited'END AS Statuss,
-                    U2.LoginName AS User,GRN.RoundOffAmount RoundOff,GRN.TotalExpenses
-                    FROM T_GRNs GRN
-                    JOIN TC_GRNExpenses E ON GRN.id = E.GRN_id
+                    0 as GSTAmount,E.Amount AS TotalValue,0 AS TCSTaxAmount
+                    FROM TC_GRNExpenses E 
                     JOIN M_Ledger L ON E.Ledger_id = L.id
-                    LEFT JOIN M_AccountGroupType AGT ON L.AccountGroupType_id = AGT.id
-                    JOIN M_Parties P ON GRN.Party_id = P.id
-                    JOIN M_Users U2 ON GRN.CreatedBy = U2.id
-                    WHERE P.Company_id = 4 AND GRN.IsTallySave = 0 
-                    AND ((IsSave=0 and AccountingGRNStatus=0) OR (IsSave=1 and AccountingGRNStatus=1) OR (IsSave=0 and AccountingGRNStatus=2))
-                    
-                           )B Order by B.id limit 100''')
+                    LEFT JOIN M_AccountGroupType AGT ON L.AccountGroupType_id = AGT.id  )b
+                    on a.id=b.GRN_id ''')
                     tallyquery = TC_GRNItems.objects.raw(query)
                     ID = "PurchaseID"
                 
@@ -97,7 +87,7 @@ class TallyDataListView(CreateAPIView):
                                                                 JOIN M_Users ON M_Users.id = T_Invoices.CreatedBy
                                                                 WHERE M_Parties.Company_id = 4 AND T_Invoices.IsTallySave=0 
                                                              
-                                                             UNION ALL 
+                                                             UNION ALL
                                                              
                                                              SELECT T_DeletedInvoices.Invoice id , T_DeletedInvoices.FullInvoiceNumber InvoiceNumber, T_DeletedInvoices.InvoiceDate, M_Parties.id AS PartyCode,
                                                                 M_Parties.Name AS PartyName,
@@ -114,7 +104,7 @@ class TallyDataListView(CreateAPIView):
                                                                 JOIN M_Items ON M_Items.id = TI.Item
                                                                 JOIN M_GSTHSNCode ON M_GSTHSNCode.id = TI.GST
                                                                 JOIN M_Users ON M_Users.id = T_DeletedInvoices.CreatedBy
-                                                                WHERE M_Parties.Company_id = 4 AND T_DeletedInvoices.IsTallySave=0 )s order by id limit 100''')
+                                                                WHERE M_Parties.Company_id = 4 AND T_DeletedInvoices.IsTallySave=0 )s order by id ''')
                     ID = "SaleID"
                 else:
                     return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Invalid Mode', 'Data': []})
