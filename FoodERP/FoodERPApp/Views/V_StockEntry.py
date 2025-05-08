@@ -17,7 +17,7 @@ from ..models import *
 from django.db.models import *
 from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
-
+from decimal import Decimal
 
 class StockEntryPageView(CreateAPIView):
     
@@ -269,17 +269,17 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                 
                 Itemquery = M_Items.objects.raw(Stockquery, p2)
                 
-                
+                # print(Itemquery)
                 
                 if not Itemquery:
                    
                     log_entry = create_transaction_logNew(request, StockReportdata, Party, "BatchWiseLiveStock Not available",88,0) 
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Items Not available', 'Data': []})
                 else:
-                    print('ffffffffff')
+                    # print('ffffffffff')
                     ItemList = list()
                     for row in Itemquery:
-                        print(row)
+                        # print(row.Rate)
                         
                         
                         ItemList.append({
@@ -293,17 +293,17 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                             "BatchCode" : row.BatchCode ,
                             "SystemBatchCode" : row.SystemBatchCode ,
                             "MRP":row.MRPValue,
-                            "Rate":row.Rate,
-                            "PurchaseRate" : round(row.Rate,2),
+                            "Rate":row.RatewithoutGST,
+                            "PurchaseRate" : round(row.RatewithoutGST,2),
                             "SaleableStock":round(row.SaleableStock,3),
-                            "UnSaleableStock":round(row.UnSaleableStock,3),
+                            "UnSaleableStock":round(row.UnSaleableStockStockValue,3),
                             "SaleableStockValue" : row.SaleableStockValue,
                             "SaleableStockTaxValue" :row.SaleableStockTaxValue,
-                            "UnSaleableStockValue" : row.UnSaleableStockValue,
-                            "UnSaleableStockTaxValue" : row.UnSaleableStockTaxValue,
-                            "TotalStockValue" : row.SaleableStockValue+row.UnSaleableStockValue,
-                            "TaxValue" : row.SaleableStockTaxValue+row.UnSaleableStockTaxValue,
-                            "Stockvaluewithtax" : row.SaleableStockValue+row.SaleableStockTaxValue+row.UnSaleableStockValue+row.UnSaleableStockTaxValue,
+                            "UnSaleableStockValue" : row.UnSaleableStockStockValue,
+                            "UnSaleableStockTaxValue" : row.UnSaleableStockStockTaxValue,
+                            "TotalStockValue" : row.SaleableStockValue+row.UnSaleableStockStockValue,
+                            "TaxValue" : row.SaleableStockTaxValue+row.UnSaleableStockStockTaxValue,
+                            "Stockvaluewithtax" : float(Decimal(row.SaleableStockValue)+Decimal(row.SaleableStockTaxValue)+Decimal(row.UnSaleableStockStockValue)+Decimal(row.UnSaleableStockStockTaxValue)),
                             "Unit":row.StockUnit,
                             "GST" : row.GSTPercentage,
                             "Cluster" : row.Cluster,
@@ -311,12 +311,12 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                             "SAPItemCode":row.SAPItemCode
                         })
                         
-                    
+                    print(ItemList)
                     log_entry = create_transaction_logNew(request, StockReportdata, PartyID , 'From:'+FromDate+','+'To:'+ToDate,88,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message':'', 'Data': ItemList})     
         except Exception as e:
             log_entry = create_transaction_logNew(request, StockReportdata, PartyID,'PartyLiveStock:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})      
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})      
 
 
 
