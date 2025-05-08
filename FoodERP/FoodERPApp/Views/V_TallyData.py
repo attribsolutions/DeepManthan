@@ -43,7 +43,7 @@ class TallyDataListView(CreateAPIView):
 						JOIN M_Users U2 ON GRN.CreatedBy = U2.id
                         JOIN M_Parties P ON GRN.Party_id = P.id
                         WHERE P.Company_id = 4 AND GRN.IsTallySave = 0 
-                        AND ((IsSave=0 and AccountingGRNStatus=0) OR (IsSave=1 and AccountingGRNStatus=1) OR (IsSave=0 and AccountingGRNStatus=2))limit 200)a
+                        AND ((IsSave=0 and AccountingGRNStatus=0) OR (IsSave=1 and AccountingGRNStatus=1) OR (IsSave=0 and AccountingGRNStatus=2))limit 1000)a
 left join 
 (select GI.GRN_id,I.id AS ItemCode,I.Name AS ItemName,H.HSNCode,
                     GI.Rate ,GI.Quantity,U.Name AS UnitName,GI.DiscountType,GI.Discount AS DiscountPercentage,
