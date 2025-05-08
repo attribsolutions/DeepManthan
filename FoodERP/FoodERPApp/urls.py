@@ -174,6 +174,7 @@ from .Views.V_CommonMaster import GetNewPageEntry
 
 from .Views.V_TallyLedger import *
 from .Views.V_FTP import *
+from .Views.V_PhonePay import*
 
 
 urlpatterns = [
@@ -835,7 +836,9 @@ urlpatterns = [
               
 #TallyLedger
               url(r'TallyLedger$',LedgerListView.as_view()), 
-
+              
+#PhonePay 
+              url(r'PhonePayResponse$',PhonePayReceiveMsg.as_view()), 
 
               
            
