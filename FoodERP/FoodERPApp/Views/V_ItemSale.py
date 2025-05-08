@@ -24,11 +24,15 @@ class ItemSaleReportView(CreateAPIView):
                 Party = Reportdata['Party']
                 EmployeeID = Reportdata['Employee']
                 ItemID = Reportdata['ItemID']
+                CustomerID=Reportdata.get('CustomerID','')
+                DivisionID=Reportdata.get('DivisionID','')
                 
+                if DivisionID !='':
+                        DivisionID=f'AND Sup.id in({DivisionID})'
+                if CustomerID !='':
+                        CustomerID=f'AND Cust.id in ({CustomerID})'
                 
-
-                
-                Invoicequery = '''SELECT T_Invoices.id, T_Invoices.InvoiceDate, SupPartyType.Name SaleMadeFrom, CustPartyType.Name SaleMadeTo, 
+                Invoicequery = f'''SELECT T_Invoices.id, T_Invoices.InvoiceDate, SupPartyType.Name SaleMadeFrom, CustPartyType.Name SaleMadeTo, 
                                 FullInvoiceNumber,Sup.Name SupplierName,Sup.ShortName SupShortName, M_Routes.Name RouteName, Cust.Name CustomerName,Cust.ShortName CustShortName, M_Group.Name GroupName,
                                 MC_SubGroup.Name SubGroupName, M_Items.Name ItemName,  QtyInKg, QtyInNo, QtyInBox, Rate, BasicAmount, 
                                 DiscountAmount, GSTPercentage, GSTAmount, Amount, T_Invoices.GrandTotal, T_Invoices.RoundOffAmount, TCSAmount, 
@@ -54,8 +58,8 @@ class ItemSaleReportView(CreateAPIView):
                                 LEFT JOIN TC_GRNReferences ON TC_GRNReferences.Invoice_id = T_Invoices.id 
                                 LEFT JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.Item_id = M_Items.id AND MC_ItemUnits.IsBase = 1
                                 JOIN FoodERP.M_Units ON MC_ItemUnits.UnitID_id = M_Units.id
-                                LEFT JOIN T_GRNs ON GRN_id = T_GRNs.ID WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s'''
-                            
+                                LEFT JOIN T_GRNs ON GRN_id = T_GRNs.ID WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s {DivisionID}{CustomerID}'''
+                print(Invoicequery)            
                 SPOSInvoicequery='''SELECT A.id, A.InvoiceDate, SupPartyType.Name SaleMadeFrom, CustPartyType.Name SaleMadeTo, 
                                 A.FullInvoiceNumber, Sup.Name SupplierName,Sup.ShortName SupShortName, M_Routes.Name RouteName, Cust.Name CustomerName, Cust.ShortName CustShortName,
                                 M_Group.Name GroupName, MC_SubGroup.Name SubGroupName, M_Items.Name ItemName, B.QtyInKg, B.QtyInNo, B.QtyInBox,
