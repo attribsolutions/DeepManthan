@@ -722,7 +722,9 @@ urlpatterns = [
 #ItemSaleReport
             url(r'ItemSaleReport$', ItemSaleReportView.as_view()),
             url(r'ItemSaleSupplier/([0-9]+)/([0-9]+)$',ItemSaleSupplierDropdownView.as_view()),
-            url(r'ItemSaleItemList$',ItemSaleItemDropdownView.as_view()),            
+            url(r'ItemSaleItemList$',ItemSaleItemDropdownView.as_view()),  
+            url(r'CSSItemSaleReport$',ItemSaleReportForCSS.as_view()),  
+                      
                 
 # Claim 
             
