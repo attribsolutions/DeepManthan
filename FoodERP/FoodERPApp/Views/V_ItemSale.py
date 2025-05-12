@@ -256,13 +256,15 @@ class ItemSaleReportForCSS(CreateAPIView):
             with transaction.atomic():
                 FromDate = Reportdata['FromDate']
                 ToDate = Reportdata['ToDate']                
-                CustomerID=Reportdata.get('CustomerID')
-                DivisionID=Reportdata.get('DivsionID')  
-                
+                CustomerID=Reportdata['CustomerID']
+                DivisionID=Reportdata['DivisionID']  
+               
+                Customer=""
+                Division=""
                 if CustomerID !="":
-                    CustomerID = f"AND P1.id IN ({CustomerID})"
+                    Customer = f" AND P1.id IN ({CustomerID}) "                
                 if DivisionID !="":
-                    DivisionID = f"AND P2.id IN ({DivisionID})" 
+                    Division = f" AND P2.id IN ({DivisionID}) "                 
                 saleData=list()
               
                 query =T_Invoices.objects.raw(f'''SELECT T_Invoices.id, M_Group.Name GroupName, MC_SubGroup.Name SubGroupName, P2.id Sup_id,P2.Name SupplierName, 
@@ -276,9 +278,9 @@ JOIN M_Units ON BaseUnitID_id = M_Units.id
 JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id AND GroupType_id = 1
 JOIN M_Group ON Group_id = M_Group.id
 JOIN MC_SubGroup ON SubGroup_id = MC_SubGroup.id
-WHERE InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}' {CustomerID} {DivisionID}
+WHERE InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}' {Customer} {Division}
 Group By M_Group.Name, MC_SubGroup.Name, P2.Name, P1.Name, M_Items.Name, M_Units.Name, GSTPercentage ,P2.id,P1.id''')
-                # print(query)
+                
                 if query:                     
                     for a in query:                       
                         saleData.append({
