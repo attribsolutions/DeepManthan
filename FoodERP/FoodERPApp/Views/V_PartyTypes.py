@@ -62,7 +62,7 @@ class PartyTypeListView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': data})   
         except Exception as e:
                 log_entry = create_transaction_logNew(request,0,0,'PartyTypeList:'+str(e),33,0)
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class PartyTypeView(CreateAPIView):

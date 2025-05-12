@@ -330,9 +330,9 @@ class UploadFileList(APIView):
                             "File":row.File,
                             "UploadStatus":row.UploadStatus,
                         })
-                    log_entry = create_transaction_logNew( request, 0, 0, '', 441, 0,0,0,0)
+                    log_entry = create_transaction_logNew( request, 0, 0, '', 466, 0,0,0,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': 'Data Upload Successfully', 'Data': POSSAPDetails})
-                log_entry = create_transaction_logNew( request, POSSAPDetails, 0, 'Data Not Found', 441, 0,0,0,0)           
+                log_entry = create_transaction_logNew( request, POSSAPDetails, 0, 'Data Not Found', 466, 0,0,0,0)           
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
 
         except Exception as e:

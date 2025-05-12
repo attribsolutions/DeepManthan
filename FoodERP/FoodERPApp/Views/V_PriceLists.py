@@ -86,8 +86,8 @@ class CompanywisePriceListView(CreateAPIView):
                     log_entry = create_transaction_logNew(request,PriceList_Serializer, 0,'Company:'+str(a['Company']['id']),248,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PriceListData})
         except Exception as e:
-                log_entry = create_transaction_logNew(request,0, 0,'CompanywisePriceLists:'+str(Exception(e)),33,0)
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                log_entry = create_transaction_logNew(request,0, 0,'CompanywisePriceLists:'+str(e),33,0)
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 class PriceListView(CreateAPIView):
 
@@ -112,8 +112,8 @@ class PriceListView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  PriceListdata_Serializer.errors, 'Data': []})
         except Exception as e:
-                log_entry = create_transaction_logNew(request,0, 0,'PriceListSave:'+str(Exception(e)),33,0)
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                log_entry = create_transaction_logNew(request,0, 0,'PriceListSave:'+str(e),33,0)
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
     @transaction.atomic()
@@ -164,8 +164,8 @@ class PriceListViewSecond(CreateAPIView):
                 log_entry = create_transaction_logNew(request,PriceList_Serializer, 0,'TransactionID:'+str(id),250,id)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PriceListData})
         except Exception as e:
-                log_entry = create_transaction_logNew(request,0, 0,'SinglePriceList'+str(Exception(e)),33,0)
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                log_entry = create_transaction_logNew(request,0, 0,'SinglePriceList'+str(e),33,0)
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -184,8 +184,8 @@ class PriceListViewSecond(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PriceListdata_Serializer.errors, 'Data': []})
         except Exception as e:
-                log_entry = create_transaction_logNew(request,0, 0,'PriceListEdit:'+str(Exception(e)),33,0)
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                log_entry = create_transaction_logNew(request,0, 0,'PriceListEdit:'+str(e),33,0)
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
     @transaction.atomic()
     def delete(self, request, id=0):

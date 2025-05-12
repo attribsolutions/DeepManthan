@@ -754,7 +754,7 @@ where Invoice_id={Invoice.id}''')
                         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'E-WayBill Upload:'+str((e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})        
 
 
 class Cancel_EwayBill(CreateAPIView):
@@ -822,7 +822,7 @@ class Cancel_EwayBill(CreateAPIView):
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'E-WayBill Cancel:'+str((e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class Cancel_EInvoice(CreateAPIView):
@@ -889,7 +889,7 @@ class Cancel_EInvoice(CreateAPIView):
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'E-Invoice Cancel:'+str((e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 
@@ -1122,7 +1122,7 @@ where CRDRNote_id=%s group by id,ItemName,HSNCode,M_Units.EwayBillUnit,TC_Credit
                     
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 #==========================================================================================================================
 class Cancel_CreditDebitNotes_EInvoice(CreateAPIView):
@@ -1177,4 +1177,4 @@ class Cancel_CreditDebitNotes_EInvoice(CreateAPIView):
                 else:
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})            
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})            

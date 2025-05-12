@@ -112,7 +112,7 @@ class GetStockCountForPartyView(CreateAPIView):
 
         except Exception as e:
             log_entry = create_transaction_logNew(request,0, 0,'StockData:'+str((e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
         
 class CheckStockEntryForFYFirstTransactionView(CreateAPIView):

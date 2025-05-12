@@ -44,7 +44,7 @@ class ImportFieldListView(CreateAPIView):
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'ImportField not available', 'Data' : []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, ImportField_data, 0,"ImportFieldList:"+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
         
 class ImportFieldSaveView(CreateAPIView):
 
@@ -68,7 +68,7 @@ class ImportFieldSaveView(CreateAPIView):
             return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': ImportField_serializer.errors, 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, ImportField_data, 0, "ImportFieldSave:"+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
     @transaction.atomic()
     def get(self, request, id=0):
@@ -99,7 +99,7 @@ class ImportFieldSaveView(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'ImportField  Not available', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, "Get single ImportField:"+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -119,7 +119,7 @@ class ImportFieldSaveView(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': ImportField_serializer.errors, 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, ImportField_data, 0, "ImportFieldUpdate:"+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -168,7 +168,7 @@ class PartyImportFieldFilterView(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'No Record Found', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, PartyImportField_data, 0, "Party ImportField List:"+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class PartyImportFieldView(CreateAPIView):
@@ -217,7 +217,7 @@ class ImportExcelTypeView(CreateAPIView):
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': ImportExcelType_Serializer.errors, 'Data': []})
         except Exception as e:
             # log_entry = create_transaction_logNew(request, ImportExcelType_Data, 0, "ImportExcelType Save:"+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
 
 class ImportExcelTypeListView(CreateAPIView):
@@ -238,4 +238,4 @@ class ImportExcelTypeListView(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'ImportExcelType Not available ', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,"ImportExcelType List:"+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
