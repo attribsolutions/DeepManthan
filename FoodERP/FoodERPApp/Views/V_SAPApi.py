@@ -346,8 +346,8 @@ class SAPOrderView(CreateAPIView):
                         log_entry = create_transaction_logNew(request, jsonbody, queryforcustomerID[0]['Customer'], '',323,0)
                         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Another exception raised from SAP', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0, 'SAPOrderSend:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0, 0, 'SAPOrderSend:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class SAPLedgerView(CreateAPIView):
@@ -437,8 +437,8 @@ class SAPLedgerView(CreateAPIView):
 #                     log_entry = create_transaction_logNew(request, SapLedgerdata, 0, 'SAPLedger:'+'SAPLedger Data Not Found',324,0)
 #                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})               
 #         except Exception as e:
-#             log_entry = create_transaction_logNew(request, 0, 0, 'SAPLedger:'+str(Exception(e)),33,0)
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+#             log_entry = create_transaction_logNew(request, 0, 0, 'SAPLedger:'+str(e),33,0)
+#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
         
 class InvoiceToSCMView(CreateAPIView):

@@ -323,7 +323,7 @@ class ChallanView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': BranchInvoiceData[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Branch Invoice Data Not available ', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})                  
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})                  
 
 
 
@@ -669,10 +669,10 @@ class BOMItemList(CreateAPIView):
                             'ItemID': item.id, 
                             'ItemName': item.ItemName
                         })                    
-                    log_entry = create_transaction_logNew( request, {}, 0, '', 441, 0,0,0,0)
+                    log_entry = create_transaction_logNew( request, {}, 0, '', 465, 0,0,0,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemDetails})
                
-                log_entry = create_transaction_logNew( request, {}, 0, 'Data Not Found', 441, 0,0,0,0)           
+                log_entry = create_transaction_logNew( request, {}, 0, 'Data Not Found', 465, 0,0,0,0)           
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
 
         except Exception as e:

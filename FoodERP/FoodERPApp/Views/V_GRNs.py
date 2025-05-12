@@ -132,7 +132,7 @@ where GRNDate between %s and %s and G.Customer_id= %s and IsGRNType={IsGRNType} 
                 
         except Exception as e:
             log_entry = create_transaction_logNew(request, GRNdata, 0,'GRNList:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 # GRN Save  API
 
@@ -321,7 +321,7 @@ class T_GRNViewUpdate(APIView):
                 return JsonResponse({'StatusCode': 406, 'Status': False, 'Message': GRNupdate_Serializer.errors, 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, GRNupdatedata, 0, 'GRNEdit:' + str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
         
         
 
@@ -424,7 +424,7 @@ class T_GRNViewSecond(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData})
         except Exception as e:
             log_entry = create_transaction_logNew(request,{'GRNID':id}, 0,'SingleGRN:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
  
 # GRN DELETE API 
     @transaction.atomic()
@@ -983,9 +983,6 @@ class GRNSaveforCSSView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
 
 
-
-
-
 class DeleteAccountingGRNView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -1016,4 +1013,4 @@ class DeleteAccountingGRNView(APIView):
             return JsonResponse({'StatusCode': 204,'Status': False,'Message': 'GRN not found.','Data': []})
         except Exception as e:
             log_entry =create_transaction_logNew(request, {'GRNID':id}, 0, 'Error updating GRN: ' + str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400,'Status': False,'Message': Exception(e),'Data': [] })
+            return JsonResponse({'StatusCode': 400,'Status': False,'Message': str(e),'Data': [] })

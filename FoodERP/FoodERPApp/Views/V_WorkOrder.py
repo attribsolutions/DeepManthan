@@ -149,7 +149,7 @@ class WorkOrderList(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': WorkOrderListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class WorkOrderView(CreateAPIView):
@@ -197,7 +197,7 @@ class WorkOrderView(CreateAPIView):
                             transaction.set_rollback(True)
                             return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': WorkOrder_Serializer.errors, 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class WorkOrderViewSecond(RetrieveAPIView):
@@ -309,7 +309,7 @@ class WorkOrderViewSecond(RetrieveAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': WorkOrder_Serializer.errors, 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
     @transaction.atomic()
     def delete(self, request, id=0, Company=0):

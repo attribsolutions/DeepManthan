@@ -74,7 +74,7 @@ class BranchInvoiceDetailsView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': BranchInvoiceData[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Branch Invoice Data Not available ', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
     
 
 class InterBranchInwardListFilterView(CreateAPIView):
@@ -120,7 +120,7 @@ class InterBranchInwardListFilterView(CreateAPIView):
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InwardListData})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
         
         
@@ -208,7 +208,7 @@ class InterBranchInwardView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'InterBranch Inward Save Successfully', 'Data': []})
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Inward_serializer.errors, 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})        
 
 class InterBranchInwardViewSecond(CreateAPIView):
     permission_classes = (IsAuthenticated,)
