@@ -239,13 +239,7 @@ class ItemSaleItemDropdownView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, Itemdata, 0,'ItemSaleItemDropdown:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})  
-        
-        
-
-        
-        
-        
-        
+               
         
 class ItemSaleReportForCSS(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -302,12 +296,12 @@ Group By M_Group.Name, MC_SubGroup.Name, P2.Name, P1.Name, M_Items.Name, M_Units
                                                        
                                               
                       
-                log_entry = create_transaction_logNew(request, Reportdata, 0, '', 457, 0, FromDate, ToDate, 0)
+                log_entry = create_transaction_logNew(request, Reportdata, 0, '', 464, 0, FromDate, ToDate, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': saleData})  
-            log_entry = create_transaction_logNew(request, Reportdata, 0, "Data Not Available", 457, 0, FromDate, ToDate, 0)
+            log_entry = create_transaction_logNew(request, Reportdata, 0, "Data Not Available", 464, 0, FromDate, ToDate, 0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Data Not Available', 'Data': []}) 
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Reportdata, 0, 'BillBookingReport:'+str(e), 33, 0)
+            log_entry = create_transaction_logNew(request, Reportdata, 0, 'ItemSaleReportForCSS:'+str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})      
         
         

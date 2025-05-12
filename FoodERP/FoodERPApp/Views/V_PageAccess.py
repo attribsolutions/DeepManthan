@@ -31,6 +31,6 @@ class H_PageAccessView(CreateAPIView):
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Page Access Not available', 'Data': []})
       
         except Exception as e:
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
                 
                

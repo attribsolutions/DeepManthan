@@ -204,7 +204,7 @@ class InterBranchDivisionView(CreateAPIView):
 
 #                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': FinalResult})
 #         except Exception as e:
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})    
+#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})    
     
     
 
@@ -279,7 +279,7 @@ class DemandListFilterView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': DemandListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class DemandView(CreateAPIView):
@@ -313,7 +313,7 @@ class DemandView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'IB Purchase Order Save Successfully', 'Data': []})
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Demand_serializer.errors, 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class DemandViewSecond(CreateAPIView):

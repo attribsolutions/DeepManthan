@@ -39,7 +39,7 @@ class M_MarginsView(CreateAPIView):
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Margins_Serializer.errors,'Data' :[]})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'MarginSave:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class GETMarginDetails(CreateAPIView): 
@@ -79,7 +79,7 @@ class GETMarginDetails(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':ItemList})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0,0,'MarginDetails:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 ''' MRP Master List Delete Api Depend on ID '''
 
@@ -156,7 +156,7 @@ class M_MarginsListView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Margindata_Serializer})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'MarginList:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})   
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})   
         
 
 class GetMarginListDetailsView(CreateAPIView):

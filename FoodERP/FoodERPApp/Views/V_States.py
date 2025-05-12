@@ -93,8 +93,8 @@ class M_CitiesView(CreateAPIView):
                     log_entry = create_transaction_logNew(request, Cities_data, 0,'CitySave:'+str(Cities_serializer.errors),34,0)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Cities_serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'CitySave:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0, 0,'CitySave:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 
