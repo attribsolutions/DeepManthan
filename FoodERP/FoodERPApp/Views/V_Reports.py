@@ -2570,3 +2570,59 @@ class PeriodicGRNReportView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, PeriodicGRNData, PartyID, "PeriodicGRNReport: " + str(e), 33, 0)
             return JsonResponse({"StatusCode": 400, "Status": False, "Message": str(e), "Data": []})
+        
+       
+class ManagerSummaryReportView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic
+    def post(self, request):
+        Data = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                FromDate = Data['FromDate']
+                ToDate = Data['ToDate']
+                Party = Data.get('Party', 0)
+                OrderData = []
+                InvoiceData = []
+                
+                order_condition = f"AND Supplier_id = {Party}" if Party != 0 else ""
+                
+                OrderDetailsQuery = T_Orders.objects.raw(f'''SELECT T_Orders.id, FullOrderNumber, AdvanceAmount, OrderAmount
+                                                            FROM T_Orders
+                                                            WHERE AdvanceAmount > 0 AND T_Orders.OrderDate BETWEEN '{FromDate}' AND '{ToDate}'
+                                                            {order_condition}''')
+
+                for order in OrderDetailsQuery:
+                    OrderData.append({
+                        "id": order.id,
+                        "FullOrderNumber": order.FullOrderNumber,
+                        "AdvanceAmount": str(order.AdvanceAmount),
+                        "OrderAmount": str(order.OrderAmount)
+                    })
+
+                invoice_condition = f"AND inv.Party_id = {Party}" if Party != 0 else ""
+                
+                InvoicesDetailsQuery = T_Invoices.objects.raw(f'''SELECT inv.id, inv.FullInvoiceNumber, inv.GrandTotal, ord.AdvanceAmount
+                                                                FROM T_Invoices inv
+                                                                LEFT JOIN TC_InvoicesReferences ref ON inv.id = ref.Invoice_id
+                                                                LEFT JOIN T_Orders ord ON ref.Order_id = ord.id
+                                                                WHERE inv.InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}'
+                                                                {invoice_condition}''')
+
+                for invoice in InvoicesDetailsQuery:
+                    InvoiceData.append({
+                        "id": invoice.id,
+                        "FullInvoiceNumber": invoice.FullInvoiceNumber,
+                        "GrandTotal": str(invoice.GrandTotal),
+                        "AdvanceAmount": str(invoice.AdvanceAmount) if invoice.AdvanceAmount is not None else "0.00"
+                    })
+
+                if OrderData or InvoiceData:
+                    return JsonResponse({ "StatusCode": 200,"Status": True, "Message": "","Data": {"FromDate": FromDate,"ToDate": ToDate,"Party": Party,"OrderData": OrderData,"InvoiceData": InvoiceData }})
+
+                return JsonResponse({"StatusCode": 204,"Status": True,"Message": "No ManagerSummary data found.", "Data": []})
+
+        except Exception as e:
+            return JsonResponse({"StatusCode": 400,"Status": False,"Message": str(e),"Data": []})
+

@@ -294,10 +294,6 @@ urlpatterns = [
             url(r'POType$',POTypeView.as_view()),
             url(r'OrderEdit$',EditOrderView.as_view()),
             url(r'OrderConfirms$',ConfirmOrderView.as_view()),
-            # url(r'TodaysOrdersList$',TodaysOrdersListView.as_view()),
-            # url(r'SyncTodayOrdersToCSS$',SyncTodayOrdersToCSSView.as_view()),
-            
-            
             
 
 # InterBranch Order All APIs
@@ -711,12 +707,7 @@ urlpatterns = [
             url(r'CouponCodeRedemptionReport$',CouponCodeRedemptionReportView.as_view()),
             url(r'MATAVoucherRedeemptionClaimTotalList$',MATAVoucherRedeemptionClaimView.as_view()),
             url(r'PeriodicGRNReport$',PeriodicGRNReportView.as_view()),
-             
-            
-              
-            
-            
-            
+            url(r'ManagerSummaryReport$',ManagerSummaryReportView.as_view()),      
             
             
 #ItemSaleReport
