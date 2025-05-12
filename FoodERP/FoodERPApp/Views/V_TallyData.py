@@ -178,10 +178,10 @@ class UpdateIsTallySaveView(CreateAPIView):
                 updated_count = T_GRNs.objects.filter(id__in=GRNID_list, IsTallySave=0).update(IsTallySave=1)
                 
                 if updated_count == 0:
-                    log_entry = create_transaction_logNew(request, Data, 0, 'No TallyData updated', 452, 0)
+                    log_entry = create_transaction_logNew(request, Data, 0, 'No TallyData updated', 463, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'No Data Updated', 'Data': []})
                 
-                log_entry = create_transaction_logNew(request, Data, 0, f'PurchaseTallyData Updated successfully IDs are: {",".join(map(str, GRNID_list))}', 452, 0)
+                log_entry = create_transaction_logNew(request, Data, 0, f'PurchaseTallyData Updated successfully IDs are: {",".join(map(str, GRNID_list))}', 463, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Data Updated Successfully', 'Data': updated_count})
 
             elif mode == "Sale":
@@ -199,10 +199,10 @@ class UpdateIsTallySaveView(CreateAPIView):
                         
                         updated_count =T_DeletedInvoices.objects.filter(Invoice=Billid).update(IsTallySave=1)
                 if updated_count == 0:
-                    log_entry = create_transaction_logNew(request, Data, 0, 'No TallyData updated', 452, 0)
+                    log_entry = create_transaction_logNew(request, Data, 0, 'No TallyData updated', 463, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'No Data Updated', 'Data': []})
                 
-                log_entry = create_transaction_logNew(request, Data, 0, f'SaleTallyData Updated successfully IDs are: {",".join(map(str, InvoiceID_list))}', 452, 0)
+                log_entry = create_transaction_logNew(request, Data, 0, f'SaleTallyData Updated successfully IDs are: {",".join(map(str, InvoiceID_list))}', 463, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Data Updated Successfully', 'Data': updated_count})
 
             else:
