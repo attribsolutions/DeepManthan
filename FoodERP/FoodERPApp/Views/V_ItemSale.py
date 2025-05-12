@@ -279,7 +279,7 @@ JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id AND GroupTy
 JOIN M_Group ON Group_id = M_Group.id
 JOIN MC_SubGroup ON SubGroup_id = MC_SubGroup.id
 WHERE InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}' {Customer} {Division}
-Group By M_Group.Name, MC_SubGroup.Name, P2.Name, P1.Name, M_Items.Name, M_Units.Name, GSTPercentage ,P2.id,P1.id''')
+Group By M_Group.Name, MC_SubGroup.Name, P2.Name, P1.Name, M_Items.Name, M_Units.Name, GSTPercentage''')
                 
                 if query:                     
                     for a in query:                       
