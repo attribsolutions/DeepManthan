@@ -20,7 +20,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 
                 B2Bquery = T_Invoices.objects.raw('''SELECT T_Invoices.id, M_Parties.GSTIN AS GSTIN_UINOfRecipient,
                                                   M_Parties.Name AS ReceiverName, T_Invoices.FullInvoiceNumber AS InvoiceNumber,'Regular' AS InvoiceType,
-                    T_Invoices.InvoiceDate AS InvoiceDate, (T_Invoices.GrandTotal) AS InvoiceValue,
+                    T_Invoices.InvoiceDate AS InvoiceDate, Sum(TC_InvoiceItems.BasicAmount+TC_InvoiceItems.IGST+TC_InvoiceItems.CGST+TC_InvoiceItems.SGST) AS InvoiceValue,
                     concat(M_States.StateCode, '-', M_States.Name) AS PlaceOfSupply, 'N' AS ReverseCharge,
                     TC_InvoiceItems.GSTPercentage  AS ApplicableOfTaxRate,  
                      SUM(TC_InvoiceItems.BasicAmount) AS TaxableValue,SUM(TC_InvoiceItems.IGST) AS IGST,SUM(TC_InvoiceItems.CGST) AS CGST,
@@ -37,7 +37,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     UNION
                     SELECT X.id, M_Parties.GSTIN AS GSTIN_UINOfRecipient,
                                                   M_Parties.Name AS ReceiverName, X.FullInvoiceNumber AS InvoiceNumber,'Regular' AS InvoiceType, 
-                    X.InvoiceDate AS InvoiceDate, (X.GrandTotal ) AS InvoiceValue,
+                    X.InvoiceDate AS InvoiceDate, Sum(Y.BasicAmount+Y.IGST+Y.CGST+Y.SGST ) AS InvoiceValue,
                     concat(M_States.StateCode, '-', M_States.Name) AS PlaceOfSupply, 'N' AS ReverseCharge,
                     Y.GSTPercentage AS ApplicableOfTaxRate, 
                      SUM(Y.BasicAmount) AS TaxableValue,SUM(Y.IGST)AS IGST,SUM(Y.CGST)AS CGST, SUM(Y.SGST)AS SGST,COALESCE(TC_SPOSInvoiceUploads.Irn,'') AS IRN ,COALESCE(TC_SPOSInvoiceUploads.EInvoiceCreatedOn,'') AS IRNDate,
@@ -545,7 +545,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         Group by  Y.HSNCode,Y.GSTPercentage,M_Units.id''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
                 
                 HSN2 = HSNSerializer1(HSNquery, many=True).data
-                
+                print(HSNquery)
                 HSNquery2= T_Invoices.objects.raw('''SELECT 1 as id, COUNT(DISTINCT A.HSNCode) AS NoOfHSN,
                             SUM(A.TotalValue) AS TotalValue, SUM(A.TaxableValue) AS TotalTaxableValue,
                     SUM(A.IntegratedTaxAmount) AS TotalIntegratedTaxAmount, SUM(A.CentralTaxAmount) AS TotalCentralTaxAmount,
@@ -570,7 +570,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                                 JOIN M_Items ON M_Items.id = Y.Item
                             WHERE X.Party = %s AND X.InvoiceDate BETWEEN %s AND %s  AND X.IsDeleted=0
                             GROUP BY id, Y.HSNCode, M_Items.Name) A''',([Party],[FromDate],[ToDate], [Party],[FromDate],[ToDate]))
-                                    
+                # print(HSNquery2)                   
                 HSN1 = HSN2Serializer2(HSNquery2, many=True).data  
                 
                 if not HSN1:
@@ -599,15 +599,15 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                             }]
                 
                 # Example data for the eight sheet Docs  
-                Docsquery = T_Invoices.objects.raw('''SELECT 1 as id, NatureOfDocument, MIN(Sr_No_From) as Sr_No_From,
-                            MAX(Sr_No_To) as Sr_No_To, COUNT(*) as TotalNumber, SUM(Cancelled) as Cancelled, b
-                            FROM (SELECT 'Invoices for outward supply' as NatureOfDocument, MIN(InvoiceNumber) as Sr_No_From,
-                            MAX(InvoiceNumber) as Sr_No_To, COUNT(*) as TotalNumber, 0 as Cancelled, '1' as b
+                Docsquery = T_Invoices.objects.raw(f'''SELECT 1 as id, NatureOfDocument, Sr_No_From,
+                            Sr_No_To, TotalNumber,Cancelled, b
+                            FROM (SELECT 'Invoices for outward supply' as NatureOfDocument, (SELECT FullInvoiceNumber FROM T_Invoices T WHERE T.InvoiceNumber = MIN(T_Invoices.InvoiceNumber) AND Party_id = {Party} LIMIT 1) AS Sr_No_From,
+(SELECT FullInvoiceNumber FROM T_Invoices T WHERE T.InvoiceNumber = MAX(T_Invoices.InvoiceNumber) AND Party_id = {Party} LIMIT 1) AS Sr_No_To, COUNT(*) as TotalNumber, (SELECT COUNT(*) FROM T_DeletedInvoices WHERE Party = {Party} AND T_DeletedInvoices.InvoiceDate BETWEEN '{FromDate}' AND'{FromDate}') as Cancelled, '1' as b
                             FROM T_Invoices  
                             WHERE Party_id = %s AND InvoiceDate BETWEEN %s AND %s
                             UNION ALL
-                            SELECT 'Invoices for outward supply' as NatureOfDocument, MIN(X.InvoiceNumber) as Sr_No_From,
-                            MAX(X.InvoiceNumber) as Sr_No_To, COUNT(*) as TotalNumber, 0 as Cancelled, '1' as b
+                            SELECT 'Invoices for outward supply' as NatureOfDocument, (SELECT FullInvoiceNumber FROM SweetPOS.T_SPOSInvoices TS WHERE TS.InvoiceNumber = MIN(X.InvoiceNumber) AND Party = {Party} LIMIT 1) AS Sr_No_From,
+(SELECT FullInvoiceNumber FROM SweetPOS.T_SPOSInvoices TS WHERE TS.InvoiceNumber = MAX(X.InvoiceNumber) AND Party = {Party} LIMIT 1) AS Sr_No_To, COUNT(*) as TotalNumber,(SELECT COUNT(*) FROM SweetPOS.T_SPOSDeletedInvoices WHERE Party = {Party} AND T_SPOSDeletedInvoices.InvoiceDate BETWEEN '{FromDate}' AND'{ToDate}') as Cancelled, '1' as b
                             FROM SweetPOS.T_SPOSInvoices X 
                             JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id = X.id
                             JOIN M_GSTHSNCode ON M_GSTHSNCode.id = Y.HSNCode
@@ -624,7 +624,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                             FROM T_CreditDebitNotes  
                             WHERE T_CreditDebitNotes.NoteType_id = 38 AND Party_id = %s AND T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s) AS subquery 
                             GROUP BY NatureOfDocument, b''', [Party, FromDate, ToDate, Party, FromDate, ToDate, Party, FromDate, ToDate, Party, FromDate, ToDate])
-                                                        
+                # print(Docsquery)                                         
                 Docs2 = DocsSerializer(Docsquery, many=True).data
             
                 Docsquery2 = T_Invoices.objects.raw('''SELECT 1 as id, '' AA, '' bb, '' cc, SUM(A.cnt) AS TotalNumbers, SUM(A.TotalCancelled) AS TotalCancelled
@@ -645,10 +645,10 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                                     WHERE T_CreditDebitNotes.NoteType_id = 38 AND Party_id = %s AND T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s
                                     UNION
                                     SELECT 1 as id, 'Invoices for outward supply' AS a, MIN(X.InvoiceNumber) AS MINID, MAX(X.InvoiceNumber) AS MAXID,
-                                        COUNT(*) AS cnt, (SELECT COUNT(*) FROM T_DeletedInvoices WHERE T_DeletedInvoices.Party = %s AND T_DeletedInvoices.InvoiceDate BETWEEN %s AND %s) AS TotalCancelled, '4' AS b
+                                        COUNT(*) AS cnt, (SELECT COUNT(*) FROM SweetPOS.T_SPOSDeletedInvoices WHERE Party = %s AND T_SPOSDeletedInvoices.InvoiceDate BETWEEN %s AND %s) AS TotalCancelled, '4' AS b
                                     FROM SweetPOS.T_SPOSInvoices X
                                     WHERE X.Party = %s AND X.InvoiceDate BETWEEN %s AND %s) A''', [Party, FromDate, ToDate, Party, FromDate, ToDate, Party, FromDate, ToDate, Party, FromDate, ToDate, Party, FromDate, ToDate, Party, FromDate, ToDate])
-                           
+                # print(Docsquery2)          
                 Docs1 = Docs2Serializer2(Docsquery2, many=True).data
                 
                 if not Docs1:
@@ -764,6 +764,90 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                             'Integrated Tax Amount': None,                            
                             'State UT Tax Amount': None,
                             }]
+                #HSN with Description 
+                HSNquery5 = T_Invoices.objects.raw('''SELECT 1 as id, M_GSTHSNCode.HSNCode AS HSN,M_Items.Name Description, M_Units.EwayBillUnit AS UQC,
+
+                       sum(UnitwiseQuantityConversion(TC_InvoiceItems.item_id,TC_InvoiceItems.QtyInNo,0,1,0,M_Units.id ,0)) TotalQuantity,sum(TC_InvoiceItems.Amount)TotalValue,
+                        sum(TC_InvoiceItems.BasicAmount) TaxableValue, sum(TC_InvoiceItems.IGST)IntegratedTaxAmount,
+                        sum(TC_InvoiceItems.CGST)CentralTaxAmount,
+                        sum(TC_InvoiceItems.SGST)StateUTTaxAmount, '' CessAmount,TC_InvoiceItems.GSTPercentage Rate
+                        FROM T_Invoices 
+                        JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
+                        JOIN M_GSTHSNCode ON M_GSTHSNCode.id=TC_InvoiceItems.GST_id
+                        JOIN MC_ItemUnits ON MC_ItemUnits.id=TC_InvoiceItems.Unit_id
+                        JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id
+                        JOIN M_Items ON M_Items.id =TC_InvoiceItems.Item_id
+                        WHERE Party_id= %s  and T_Invoices.InvoiceDate BETWEEN %s AND %s  
+                        Group by  M_GSTHSNCode.HSNCode,TC_InvoiceItems.GSTPercentage,M_Units.id,M_Items.id
+                        UNION
+
+
+                        SELECT 1 as id, Y.HSNCode AS HSN,M_Items.Name Description, M_Units.EwayBillUnit AS UQC,
+
+                        sum(UnitwiseQuantityConversion(Y.Item,Y.QtyInNo,0,1,0,M_Units.id,0)) TotalQuantity,sum(Y.Amount)TotalValue,sum(Y.BasicAmount) TaxableValue, 
+                        sum(Y.IGST)IntegratedTaxAmount,sum(Y.CGST)CentralTaxAmount,sum(Y.SGST)StateUTTaxAmount, 
+                        '' CessAmount,Y.GSTPercentage Rate
+                        FROM SweetPOS.T_SPOSInvoices X 
+                        JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id=X.id                          
+                        JOIN MC_ItemUnits ON MC_ItemUnits.id=Y.Unit
+                        JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id                      
+                        JOIN M_Items ON M_Items.id=SweetPOS.Y.Item
+                        WHERE X.Party= %s  and X.InvoiceDate BETWEEN %s AND %s AND X.IsDeleted=0 
+                        Group by  Y.HSNCode,Y.GSTPercentage,M_Units.id,M_Items.id''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
+                
+                HSN5 = HSNSerializerWithDescription(HSNquery5, many=True).data
+                
+                HSNquery6= T_Invoices.objects.raw('''SELECT 1 as id, COUNT(DISTINCT A.HSNCode) AS NoOfHSN,
+                            SUM(A.TotalValue) AS TotalValue, SUM(A.TaxableValue) AS TotalTaxableValue,
+                    SUM(A.IntegratedTaxAmount) AS TotalIntegratedTaxAmount, SUM(A.CentralTaxAmount) AS TotalCentralTaxAmount,
+                            SUM(A.StateUTTaxAmount) AS TotalStateUTTaxAmount, '' AS TotalCessAmount
+                        FROM (
+                            SELECT 1 as id, M_GSTHSNCode.HSNCode, M_Items.Name AS Description, 'NOS-NUMBERS' AS UQC,
+                            SUM(TC_InvoiceItems.QtyInNo) AS TotalQuantity, SUM(TC_InvoiceItems.Amount) AS TotalValue,
+                            SUM(TC_InvoiceItems.BasicAmount) AS TaxableValue, SUM(TC_InvoiceItems.IGST) AS IntegratedTaxAmount,
+                            SUM(TC_InvoiceItems.CGST) AS CentralTaxAmount, SUM(TC_InvoiceItems.SGST) AS StateUTTaxAmount, '' AS CessAmount
+                            FROM T_Invoices 
+                                JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id = T_Invoices.id
+                                JOIN M_GSTHSNCode ON M_GSTHSNCode.id = TC_InvoiceItems.GST_id
+                                JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id
+                            WHERE T_Invoices.Party_id = %s AND T_Invoices.InvoiceDate BETWEEN %s AND %s  
+                            GROUP BY id, M_GSTHSNCode.HSNCode, M_Items.Name
+                            UNION
+                            SELECT 1 as id, Y.HSNCode, M_Items.Name AS Description, 'NOS-NUMBERS' AS UQC,
+                            SUM(Y.QtyInNo) AS TotalQuantity, SUM(Y.Amount) AS TotalValue, SUM(Y.BasicAmount) AS TaxableValue,
+                            SUM(Y.IGST) AS IntegratedTaxAmount, SUM(Y.CGST) AS CentralTaxAmount, SUM(Y.SGST) AS StateUTTaxAmount, '' AS CessAmount
+                            FROM SweetPOS.T_SPOSInvoices X 
+                                JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id = X.id                               
+                                JOIN M_Items ON M_Items.id = Y.Item
+                            WHERE X.Party = %s AND X.InvoiceDate BETWEEN %s AND %s  AND X.IsDeleted=0
+                            GROUP BY id, Y.HSNCode, M_Items.Name) A''',([Party],[FromDate],[ToDate], [Party],[FromDate],[ToDate]))
+                # print(HSNquery2)                   
+                HSN6 = HSN2Serializer2(HSNquery6, many=True).data  
+                
+                if not HSN5:
+                    HSN5 = [{
+                             'No. Of HSN': None,                             
+                             'Total Value': None,
+                             'Total Invoice Value': None,
+                             'Total Integrated Tax Amount': None,
+                             'Total Central Tax Amount': None,
+                             'Total State UT Tax Amount': None,
+                             'Total Cess Amount': None,
+                             }]                   
+                
+                if not HSN6:
+                    HSN6 = [{
+                            'HSN': None, 
+                            'Description': None,
+                            'UQC': None, 
+                            'Total Quantity': None, 
+                            'Rate':None,
+                            'Total Value': None, 
+                            'Taxable Value': None, 
+                            'Integrated Tax Amount': None,
+                            'Central Tax Amount': None,
+                            'State UT Tax Amount': None,
+                            }]
                 
                 response_data = {                    
                     
@@ -777,6 +861,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     "WithGSTIN": HSN3  ,
                     "WithOutGSTIN": HSN4,
                     "Docs": Docs1 + Docs2, 
+                    "HSN With Discription" :HSN5  + HSN6,
                     
                 }
                 
