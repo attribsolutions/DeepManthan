@@ -145,15 +145,14 @@ select E.GRN_id,NULL AS ItemCode,L.Name AS ItemName,
                             "Status": row.Statuss,
                             "User": row.User
                         })
-                    
-                    log_entry = create_transaction_logNew(request, 0, 0, 'TallyDetails', 451, 0)
+                    log_entry = create_transaction_logNew(request, {"RequestData": TallyData, "ResponseData": TallyDetails}, 0, 'TallyDetails Available In TransactionLogDetails', 451, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TallyDetails})  
             
-            log_entry = create_transaction_logNew(request, 0, 0, "Data Not Available", 451, 0, 0, 0, 0)
+            log_entry = create_transaction_logNew(request, TallyData, 0, "Data Not Available", 451, 0, 0, 0, 0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Data Not Available', 'Data': []}) 
         
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0, 'TallyData:' + str(e), 33, 0)
+            log_entry = create_transaction_logNew(request, TallyData, 0, 'TallyData:' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
 
