@@ -68,7 +68,7 @@ class GeneralMasterFilterView(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Record Not Found','Data': []})
         except Exception as e:
                 log_entry = create_transaction_logNew(request,GeneralMasterdata, 0,'GeneralMasterList:'+str(e),33,0)
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
             
 
 
@@ -108,7 +108,7 @@ class GeneralMasterTypeView(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': GeneralMaster_SerializerList})
         except Exception as e:
                 log_entry = create_transaction_logNew(request,GeneralMasterdata, 0,'GeneralMasterType:'+str(e),33,0)
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})              
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})              
 
 
 #Get General Master Type -Post API             
@@ -136,7 +136,7 @@ class GeneralMasterSubTypeView(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': GeneralMaster_SerializerList})
         except Exception as e:
                 log_entry = create_transaction_logNew(request,GeneralMasterdata, 0,'GeneralMasterSubType:'+str(e),33,0)
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
     
     
 #Post API - Save API 
@@ -269,7 +269,7 @@ class GeneralMasterBrandName(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ListData})   
         except Exception as e:
             log_entry = create_transaction_logNew(request,BrandDetailsdata, 0,'GeneralMasterBrandName:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []}) 
         
         
         

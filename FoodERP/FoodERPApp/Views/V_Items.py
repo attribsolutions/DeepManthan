@@ -46,7 +46,7 @@ class M_ItemTag(CreateAPIView):
         except Exception as e:
             # print('ItemTag API EndTime: ',datetime.now())
             log_entry = create_transaction_logNew(request,0, 0,'ItemTagList:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
 class MCUnitDetailsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -240,7 +240,7 @@ class M_ItemsView(CreateAPIView):
         except Exception as e:
             # print("ItemSaveAPI EndTime : ",datetime.now())
             log_entry = create_transaction_logNew(request, Itemsdata, 0,'ItemSave:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
 # Get and Update M_Items
 class M_ItemsViewSecond(CreateAPIView):
@@ -454,7 +454,7 @@ class M_ItemsViewSecond(CreateAPIView):
             
             # print("ItemSingleGETAPI EndTime : ",datetime.now())
             log_entry = create_transaction_logNew(request,0, 0,'Item SingleGETmethod :'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
 # update M_Items 
     @transaction.atomic()
@@ -492,7 +492,7 @@ class M_ItemsViewSecond(CreateAPIView):
                 
         except Exception as e:
             log_entry = create_transaction_logNew(request, M_Itemsdata, 0,'ItemEdit:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
     @transaction.atomic()
     def delete(self, request, id=0):

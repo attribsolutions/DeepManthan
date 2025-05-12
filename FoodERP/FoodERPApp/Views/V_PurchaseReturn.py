@@ -121,8 +121,8 @@ where TC_ReceiptInvoices.Return_id=%s and T_CreditDebitNotes.IsDeleted=0 ''' ,[a
                 log_entry = create_transaction_logNew(request, Returndata, x, 'Return List Not Found',51,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'PuchaseReturnList:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0, 0,'PuchaseReturnList:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 def primarySourceNAme(ID,returnID):
     if ID is None:
@@ -445,8 +445,8 @@ class PurchaseReturnView(CreateAPIView):
             log_entry = create_transaction_logNew(request, {'PurchaseReturnID':id}, 0, 'PurchaseReturnID:'+str(id),8,0)
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'PurchaseReturnDelete:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
+            log_entry = create_transaction_logNew(request, 0, 0,'PurchaseReturnDelete:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []}) 
     
     #Purchase Return Delete API code Date Working code  Date 24/07/2023
     
@@ -498,7 +498,7 @@ class PurchaseReturnView(CreateAPIView):
     #     except IntegrityError:
     #         return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
     #     except Exception as e:
-    #         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})                 
+    #         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})                 
         
 ##################### Purchase Return Item View ###########################################        
         
@@ -602,8 +602,8 @@ class ReturnItemAddView(CreateAPIView):
             log_entry = create_transaction_logNew(request, {'PurchaseReturnID':id}, 0, 'ReturnItemList Not available',56,0) 
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'ReturnItemAdd:'+str(Exception(e)),33,0) 
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+            log_entry = create_transaction_logNew(request,0, 0,'ReturnItemAdd:'+str(e),33,0) 
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})        
 
 
 
@@ -794,8 +794,8 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
             log_entry = create_transaction_logNew(request, PurchaseReturndata, 0, 'ReturnItemBatchCode Not Available',58,0)
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'ReturnItemBatchCode:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})      
+            log_entry = create_transaction_logNew(request, 0, 0,'ReturnItemBatchCode:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})      
 
 
 class SalesReturnconsolidatePurchaseReturnView(CreateAPIView):

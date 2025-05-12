@@ -273,7 +273,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
         except Exception as e:
                 log_entry = create_transaction_logNew(request, 0,0,'GetVendorSupplierCustomer:'+str(Exception(e)),33,0)
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
                 
         
 class RetailerandSSDDView(CreateAPIView):

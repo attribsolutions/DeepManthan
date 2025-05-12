@@ -114,7 +114,7 @@ where M_Employees.Company_id=%s {Clause}''', [CompanyID])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': EmployeesData})
         except Exception as e:
             log_entry = create_transaction_logNew(request,Logindata,0,'EmployeeList:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class M_EmployeesView(CreateAPIView):
@@ -146,7 +146,7 @@ class M_EmployeesView(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Employees_Serializer.errors, 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request,0,0,'EmplyoeeSave:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class M_EmployeesViewSecond(RetrieveAPIView):
@@ -254,7 +254,7 @@ where M_Employees.id= %s''', [id])
                     return JsonResponse({"StatusCode": 200, "Status": True, "Message": " ", "Data": GetAllData[0]})
         except Exception as e:
             log_entry = create_transaction_logNew(request,0,0,'SingleGETEmplyoees:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
     @transaction.atomic()
     def put(self, request, id=0):
@@ -316,7 +316,7 @@ class ManagementEmployeeViewList(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Employee Not Available', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request,0,0,'ManagementEmployeeList:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class ManagementEmployeePartiesFilterView(CreateAPIView):
@@ -414,7 +414,7 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': ManagementEmployeesParties_Serializer.errors, 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request,0,0,'ManagementEmpPartiesSave:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
     @transaction.atomic()
     def get(self, request, id=0):
@@ -447,7 +447,7 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Partylist})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Parties Not available ', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
 
 
@@ -591,4 +591,4 @@ where M_Employees.id={EmployeeID} and M_GeneralMaster.Name in('ASM','GM','MT','N
                 
         except Exception as e:
             # log_entry = create_transaction_logNew(request,0,0,'ManagementEmpPartiesSave:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
