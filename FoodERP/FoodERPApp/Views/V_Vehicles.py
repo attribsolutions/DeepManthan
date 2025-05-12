@@ -44,8 +44,8 @@ class VehicleViewList(CreateAPIView):
                 log_entry = create_transaction_logNew(request, Vehicledata,Party,"List Not Available",147,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Vehicle Not Available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'VehicleList:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0,0,'VehicleList:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class VehicleView(CreateAPIView):

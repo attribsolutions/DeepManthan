@@ -49,7 +49,7 @@ class AbcView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': file_serializer.errors, 'Data': []})
         except Exception as e:
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
 
     @transaction.atomic()
     def get(self, request ):
@@ -121,7 +121,7 @@ class AbcView(CreateAPIView):
             
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': data_dict['entry']['content']['m:properties']['d:Stats'], 'Data':data_dict})    
         except Exception as e:
-            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})    
+            raise JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})    
    
    
    
@@ -178,7 +178,7 @@ class AbcView(CreateAPIView):
     #                     Receipt_serializer.save()
     #             return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Receipt Save Successfully', 'Data': []})    
     #     except Exception as e:
-    #         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []}) 
+    #         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []}) 
                 
         # JSON BODY Above Code    
         # {
@@ -262,5 +262,5 @@ class AbcView(CreateAPIView):
     #                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Receipt Save Successfully', 'Data': []})
     #                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Receipt_serializer.errors, 'Data': []})
     #         except Exception as e:
-    #             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})              
+    #             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})              
          

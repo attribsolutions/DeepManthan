@@ -42,8 +42,8 @@ class M_RatesView(CreateAPIView):
                     log_entry = create_transaction_logNew(request, Ratedata_Serializer, 0,'',371,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Ratedata_Serializer})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'SingleGET Rate:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request,0, 0,'SingleGET Rate:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
     
     @transaction.atomic()
     def post(self, request):
@@ -84,8 +84,8 @@ class M_RatesView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Rates_Serializer.errors,'Data' :[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'MRPSave:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0, 0,'MRPSave:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
   
            
@@ -142,8 +142,8 @@ class GETRateDetails(CreateAPIView):
                     log_entry = create_transaction_logNew(request,ItemList, 0,'',367,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':ItemList })
         except Exception as e:
-            log_entry = create_transaction_logNew(request,ItemList, 0,'GetRatemethod:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request,ItemList, 0,'GetRatemethod:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 ''' Rate Master List Delete Api Depend on ID '''
 class M_RatesViewSecond(CreateAPIView):

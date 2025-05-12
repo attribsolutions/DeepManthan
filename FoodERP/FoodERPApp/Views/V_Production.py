@@ -25,7 +25,7 @@ class MaterialIssueDetailsView(CreateAPIView):
                 MaterialIssue_Serializer=H_ProductionSerializer2(query1,many=True).data
                 return JsonResponse({'StatusCode':200, 'Status': True, 'Message': '', 'Data':MaterialIssue_Serializer})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
 
 class ProductionList(CreateAPIView):
@@ -46,7 +46,7 @@ class ProductionList(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Production_Serializer})  
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Record Not Found','Data': []})
         except Exception as e:
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})        
             
 
 class ProductionView(CreateAPIView):

@@ -13,6 +13,7 @@ from datetime import datetime
 
 
 
+
 class TallyDataListView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [BasicAuthentication]
@@ -29,7 +30,10 @@ class TallyDataListView(CreateAPIView):
                 
                 if Mode == "Purchase":
                     query=(f''' select * from  
-(SELECT GRN.id ,GRN.InvoiceNumber,GRN.InvoiceDate,P.id AS PartyCode,P.Name AS PartyName,CASE AccountingGRNStatus
+
+(SELECT GRN.id , CONCAT(GRN.InvoiceNumber, ' (', COALESCE(GRN.FullGRNNumber, ''), ')') AS InvoiceNumber,
+                           GRN.InvoiceDate,P.id AS PartyCode,P.Name AS PartyName,CASE AccountingGRNStatus
+
                         WHEN 0 THEN 'Created'
                         WHEN 1 THEN 'Canceled'
                         ELSE 'Edited'END AS Statuss,U2.LoginName AS User, 
@@ -39,7 +43,7 @@ class TallyDataListView(CreateAPIView):
 						JOIN M_Users U2 ON GRN.CreatedBy = U2.id
                         JOIN M_Parties P ON GRN.Party_id = P.id
                         WHERE P.Company_id = 4 AND GRN.IsTallySave = 0 
-                        AND ((IsSave=0 and AccountingGRNStatus=0) OR (IsSave=1 and AccountingGRNStatus=1) OR (IsSave=0 and AccountingGRNStatus=2))limit 200)a
+                        AND ((IsSave=0 and AccountingGRNStatus=0) OR (IsSave=1 and AccountingGRNStatus=1) OR (IsSave=0 and AccountingGRNStatus=2))limit 1000)a
 left join 
 (select GI.GRN_id,I.id AS ItemCode,I.Name AS ItemName,H.HSNCode,
                     GI.Rate ,GI.Quantity,U.Name AS UnitName,GI.DiscountType,GI.Discount AS DiscountPercentage,
@@ -85,7 +89,7 @@ select E.GRN_id,NULL AS ItemCode,L.Name AS ItemName,
                                                                 JOIN M_Users ON M_Users.id = T_Invoices.CreatedBy
                                                                 WHERE M_Parties.Company_id = 4 AND T_Invoices.IsTallySave=0 
                                                              
-                                                             UNION 
+                                                             UNION ALL
                                                              
                                                              SELECT T_DeletedInvoices.Invoice id , T_DeletedInvoices.FullInvoiceNumber InvoiceNumber, T_DeletedInvoices.InvoiceDate, M_Parties.id AS PartyCode,
                                                                 M_Parties.Name AS PartyName,
@@ -141,15 +145,14 @@ select E.GRN_id,NULL AS ItemCode,L.Name AS ItemName,
                             "Status": row.Statuss,
                             "User": row.User
                         })
-                    
-                    log_entry = create_transaction_logNew(request, 0, 0, 'TallyDetails', 451, 0)
+                    log_entry = create_transaction_logNew(request, {"RequestData": TallyData, "ResponseData": TallyDetails}, 0, 'TallyDetails Available In TransactionLogDetails', 451, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TallyDetails})  
             
-            log_entry = create_transaction_logNew(request, 0, 0, "Data Not Available", 451, 0, 0, 0, 0)
+            log_entry = create_transaction_logNew(request, TallyData, 0, "Data Not Available", 451, 0, 0, 0, 0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Data Not Available', 'Data': []}) 
         
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0, 'TallyData:' + str(e), 33, 0)
+            log_entry = create_transaction_logNew(request, TallyData, 0, 'TallyData:' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
 
@@ -175,10 +178,10 @@ class UpdateIsTallySaveView(CreateAPIView):
                 updated_count = T_GRNs.objects.filter(id__in=GRNID_list, IsTallySave=0).update(IsTallySave=1)
                 
                 if updated_count == 0:
-                    log_entry = create_transaction_logNew(request, Data, 0, 'No TallyData updated', 452, 0)
+                    log_entry = create_transaction_logNew(request, Data, 0, 'No TallyData updated', 463, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'No Data Updated', 'Data': []})
                 
-                log_entry = create_transaction_logNew(request, Data, 0, f'PurchaseTallyData Updated successfully IDs are: {",".join(map(str, GRNID_list))}', 452, 0)
+                log_entry = create_transaction_logNew(request, Data, 0, f'PurchaseTallyData Updated successfully IDs are: {",".join(map(str, GRNID_list))}', 463, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Data Updated Successfully', 'Data': updated_count})
 
             elif mode == "Sale":
@@ -196,10 +199,10 @@ class UpdateIsTallySaveView(CreateAPIView):
                         
                         updated_count =T_DeletedInvoices.objects.filter(Invoice=Billid).update(IsTallySave=1)
                 if updated_count == 0:
-                    log_entry = create_transaction_logNew(request, Data, 0, 'No TallyData updated', 452, 0)
+                    log_entry = create_transaction_logNew(request, Data, 0, 'No TallyData updated', 463, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'No Data Updated', 'Data': []})
                 
-                log_entry = create_transaction_logNew(request, Data, 0, f'SaleTallyData Updated successfully IDs are: {",".join(map(str, InvoiceID_list))}', 452, 0)
+                log_entry = create_transaction_logNew(request, Data, 0, f'SaleTallyData Updated successfully IDs are: {",".join(map(str, InvoiceID_list))}', 463, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Data Updated Successfully', 'Data': updated_count})
 
             else:

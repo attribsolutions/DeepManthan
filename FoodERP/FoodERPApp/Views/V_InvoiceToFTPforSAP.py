@@ -98,7 +98,7 @@ class InvoiceSendToFTPForSAP(APIView):
         except Exception as exc:
             
             log_entry = create_transaction_logNew(request,InvoiceID, 0,'FileUploadedError:'+str(exc),33,0)
-            return JsonResponse ({'StatusCode': 400, 'Status': True, 'Message':  Exception(exc), 'Data':[]})
+            return JsonResponse ({'StatusCode': 400, 'Status': True, 'Message':  str(exc), 'Data':[]})
                 
                 
     def upload_to_ftp(self, ftp_url, username, password, file_content):
