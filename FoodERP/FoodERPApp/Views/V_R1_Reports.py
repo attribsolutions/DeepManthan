@@ -545,7 +545,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         Group by  Y.HSNCode,Y.GSTPercentage,M_Units.id''',([Party],[FromDate],[ToDate],[Party],[FromDate],[ToDate]))
                 
                 HSN2 = HSNSerializer1(HSNquery, many=True).data
-                print(HSNquery)
+                # print(HSNquery)
                 HSNquery2= T_Invoices.objects.raw('''SELECT 1 as id, COUNT(DISTINCT A.HSNCode) AS NoOfHSN,
                             SUM(A.TotalValue) AS TotalValue, SUM(A.TaxableValue) AS TotalTaxableValue,
                     SUM(A.IntegratedTaxAmount) AS TotalIntegratedTaxAmount, SUM(A.CentralTaxAmount) AS TotalCentralTaxAmount,
@@ -602,7 +602,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 Docsquery = T_Invoices.objects.raw(f'''SELECT 1 as id, NatureOfDocument, Sr_No_From,
                             Sr_No_To, TotalNumber,Cancelled, b
                             FROM (SELECT 'Invoices for outward supply' as NatureOfDocument, (SELECT FullInvoiceNumber FROM T_Invoices T WHERE T.InvoiceNumber = MIN(T_Invoices.InvoiceNumber) AND Party_id = {Party} LIMIT 1) AS Sr_No_From,
-(SELECT FullInvoiceNumber FROM T_Invoices T WHERE T.InvoiceNumber = MAX(T_Invoices.InvoiceNumber) AND Party_id = {Party} LIMIT 1) AS Sr_No_To, COUNT(*) as TotalNumber, (SELECT COUNT(*) FROM T_DeletedInvoices WHERE Party = {Party} AND T_DeletedInvoices.InvoiceDate BETWEEN '{FromDate}' AND'{FromDate}') as Cancelled, '1' as b
+(SELECT FullInvoiceNumber FROM T_Invoices T WHERE T.InvoiceNumber = MAX(T_Invoices.InvoiceNumber) AND Party_id = {Party} LIMIT 1) AS Sr_No_To, COUNT(*) as TotalNumber, (SELECT COUNT(*) FROM T_DeletedInvoices WHERE Party = {Party} AND T_DeletedInvoices.InvoiceDate BETWEEN '{FromDate}' AND'{ToDate}') as Cancelled, '1' as b
                             FROM T_Invoices  
                             WHERE Party_id = %s AND InvoiceDate BETWEEN %s AND %s
                             UNION ALL
@@ -869,5 +869,5 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': response_data})
         
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
              
