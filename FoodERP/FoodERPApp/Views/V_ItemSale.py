@@ -24,13 +24,16 @@ class ItemSaleReportView(CreateAPIView):
                 Party = Reportdata['Party']
                 EmployeeID = Reportdata['Employee']
                 ItemID = Reportdata['ItemID']
-                CustomerID=Reportdata.get('CustomerID','')
-                DivisionID=Reportdata.get('DivisionID','')
+                # CustomerID=Reportdata.get('CustomerID','')
+                # DivisionID=Reportdata.get('DivisionID','')
                 
-                if DivisionID !='':
-                        DivisionID=f'AND Sup.id in({DivisionID})'
-                if CustomerID !='':
-                        CustomerID=f'AND Cust.id in ({CustomerID})'
+                # if DivisionID !='':
+                #         DivisionID=f'AND Sup.id in({DivisionID})'
+                
+                        
+                # if CustomerID !='':
+                #         CustomerID=f'AND Cust.id in ({CustomerID})'
+                
                 
                 Invoicequery = f'''SELECT T_Invoices.id, T_Invoices.InvoiceDate, SupPartyType.Name SaleMadeFrom, CustPartyType.Name SaleMadeTo, 
                                 FullInvoiceNumber,Sup.Name SupplierName,Sup.ShortName SupShortName, M_Routes.Name RouteName, Cust.Name CustomerName,Cust.ShortName CustShortName, M_Group.Name GroupName,
@@ -58,8 +61,8 @@ class ItemSaleReportView(CreateAPIView):
                                 LEFT JOIN TC_GRNReferences ON TC_GRNReferences.Invoice_id = T_Invoices.id 
                                 LEFT JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.Item_id = M_Items.id AND MC_ItemUnits.IsBase = 1
                                 JOIN FoodERP.M_Units ON MC_ItemUnits.UnitID_id = M_Units.id
-                                LEFT JOIN T_GRNs ON GRN_id = T_GRNs.ID WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s {DivisionID}{CustomerID}'''
-                print(Invoicequery)            
+                                LEFT JOIN T_GRNs ON GRN_id = T_GRNs.ID WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s '''
+                # print(Invoicequery)            
                 SPOSInvoicequery='''SELECT A.id, A.InvoiceDate, SupPartyType.Name SaleMadeFrom, CustPartyType.Name SaleMadeTo, 
                                 A.FullInvoiceNumber, Sup.Name SupplierName,Sup.ShortName SupShortName, M_Routes.Name RouteName, Cust.Name CustomerName, Cust.ShortName CustShortName,
                                 M_Group.Name GroupName, MC_SubGroup.Name SubGroupName, M_Items.Name ItemName, B.QtyInKg, B.QtyInNo, B.QtyInBox,
@@ -235,7 +238,77 @@ class ItemSaleItemDropdownView(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, Itemdata, 0,'ItemSaleItemDropdown:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})  
+        
+        
+
+        
+        
+        
+        
+        
+class ItemSaleReportForCSS(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    @transaction.atomic()
+    def post(self, request):
+        Reportdata = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                FromDate = Reportdata['FromDate']
+                ToDate = Reportdata['ToDate']                
+                CustomerID=Reportdata['CustomerID']
+                DivisionID=Reportdata['DivisionID']  
+               
+                Customer=""
+                Division=""
+                if CustomerID !="":
+                    Customer = f" AND P1.id IN ({CustomerID}) "                
+                if DivisionID !="":
+                    Division = f" AND P2.id IN ({DivisionID}) "                 
+                saleData=list()
+              
+                query =T_Invoices.objects.raw(f'''SELECT T_Invoices.id, M_Group.Name GroupName, MC_SubGroup.Name SubGroupName, P2.id Sup_id,P2.Name SupplierName, 
+                P1.id Cust_id, P1.Name CustomerName, M_Items.Name ItemName, SUM(Quantity) Quantity, M_Units.Name UnitName,  
+SUM(BasicAmount) BasicAmount, GSTPercentage, SUM(CGST) CGST, SUM(SGST) SGST, SUM(IGST) IGST, SUM(Amount) GrandTotal, avg(Rate) AvgRate
+FROM T_Invoices JOIN TC_InvoiceItems ON Invoice_id = T_Invoices.id
+JOIN M_Parties P1 ON Customer_id = P1.id
+JOIN M_Parties P2 ON Party_id = P2.id
+JOIN M_Items ON Item_id = M_Items.id
+JOIN M_Units ON BaseUnitID_id = M_Units.id
+JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id AND GroupType_id = 1
+JOIN M_Group ON Group_id = M_Group.id
+JOIN MC_SubGroup ON SubGroup_id = MC_SubGroup.id
+WHERE InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}' {Customer} {Division}
+Group By M_Group.Name, MC_SubGroup.Name, P2.Name, P1.Name, M_Items.Name, M_Units.Name, GSTPercentage ,P2.id,P1.id''')
+                
+                if query:                     
+                    for a in query:                       
+                        saleData.append({
+                                            "id":a.id,
+                                            "GroupName":a.GroupName,
+                                            "SubGroupName":a.SubGroupName,
+                                            "SupplierName":a.SupplierName,
+                                            "CustomerName":a.CustomerName,
+                                            "ItemName":a.ItemName,
+                                            "Quantity":a.Quantity,
+                                            "UnitName":a.UnitName,
+                                            "BasicAmount":a.BasicAmount,
+                                            "GSTPercentage":a.GSTPercentage,
+                                            "CGST":a.CGST,
+                                            "SGST":a.SGST,
+                                            "GrandTotal":a.GrandTotal,
+                                            "AvgRate":a.AvgRate  
+                                        })
+                                                       
+                                              
+                      
+                log_entry = create_transaction_logNew(request, Reportdata, 0, '', 457, 0, FromDate, ToDate, 0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': saleData})  
+            log_entry = create_transaction_logNew(request, Reportdata, 0, "Data Not Available", 457, 0, FromDate, ToDate, 0)
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Data Not Available', 'Data': []}) 
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, Reportdata, 0, 'BillBookingReport:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})      
         
         
         
