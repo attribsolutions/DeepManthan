@@ -2619,10 +2619,55 @@ class ManagerSummaryReportView(CreateAPIView):
                     })
 
                 if OrderData or InvoiceData:
+                    log_entry = create_transaction_logNew(request, Data, Party, "ManagerSummaryReport", 461, 0, FromDate, ToDate, 0)
                     return JsonResponse({ "StatusCode": 200,"Status": True, "Message": "","Data": {"FromDate": FromDate,"ToDate": ToDate,"Party": Party,"OrderData": OrderData,"InvoiceData": InvoiceData }})
-
+                log_entry = create_transaction_logNew(request, Data, Party, "No ManagerSummaryReport found", 461, 0, FromDate, ToDate, 0)
                 return JsonResponse({"StatusCode": 204,"Status": True,"Message": "No ManagerSummary data found.", "Data": []})
 
         except Exception as e:
+            log_entry = create_transaction_logNew(request, Data, Party, "ManagerSummaryReport: " + str(e), 33, 0)
             return JsonResponse({"StatusCode": 400,"Status": False,"Message": str(e),"Data": []})
 
+
+class BillDeletedSummaryReportView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic
+    def post(self, request):
+        BillData = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                FromDate = BillData['FromDate']
+                ToDate = BillData['ToDate']
+                Party = BillData['Party']
+                BillDeletedSummaryData = []                            
+       
+                query = f'''SELECT SweetPOS.T_SPOSInvoices.id, InvoiceDate, FullInvoiceNumber, GrandTotal, FoodERP.M_Users.LoginName AS UserName 
+                            FROM SweetPOS.T_SPOSInvoices
+                            LEFT JOIN FoodERP.M_Users ON T_SPOSInvoices.CreatedBy = M_Users.id
+                            WHERE IsDeleted = 1 AND InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}' '''
+
+                if Party > 0:
+                    query += f' AND Party = {Party}'
+
+                BillDeletedSummaryQuery = T_SPOSInvoices.objects.raw(query)  
+        
+                for bill in BillDeletedSummaryQuery:
+                   
+                    BillDeletedSummaryData.append({
+                        "id": bill.id,
+                        "InvoiceDate": bill.InvoiceDate,
+                        "FullInvoiceNumber": bill.FullInvoiceNumber,
+                        "GrandTotal": bill.GrandTotal,
+                        "UserName":bill.UserName                       
+                    })
+                if BillDeletedSummaryData:
+                    log_entry = create_transaction_logNew(request, BillData, Party, "BillDeletedSummaryReport", 462, 0, FromDate, ToDate, 0)
+                    return JsonResponse({"StatusCode": 200, "Status": True, "Message": "BillDeletedSummaryReport","Data": BillDeletedSummaryData,})
+
+                log_entry = create_transaction_logNew(request, BillData, Party, "No BillDeletedSummaryReport found", 462, 0, FromDate, ToDate, 0)
+                return JsonResponse({"StatusCode": 204, "Status": True,"Message": "No BillDeletedSummaryReport found.","Data": [], })
+
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, BillData, Party, "BillDeletedSummaryReport: " + str(e), 33, 0)
+            return JsonResponse({"StatusCode": 400,"Status": False,"Message": str(e), "Data": [],})
