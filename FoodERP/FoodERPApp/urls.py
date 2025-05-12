@@ -707,7 +707,8 @@ urlpatterns = [
             url(r'CouponCodeRedemptionReport$',CouponCodeRedemptionReportView.as_view()),
             url(r'MATAVoucherRedeemptionClaimTotalList$',MATAVoucherRedeemptionClaimView.as_view()),
             url(r'PeriodicGRNReport$',PeriodicGRNReportView.as_view()),
-            url(r'ManagerSummaryReport$',ManagerSummaryReportView.as_view()),      
+            url(r'ManagerSummaryReport$',ManagerSummaryReportView.as_view()),
+            url(r'BillDeletedSummaryReport$',BillDeletedSummaryReportView.as_view()),     
             
             
 #ItemSaleReport
