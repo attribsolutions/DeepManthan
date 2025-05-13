@@ -1061,7 +1061,7 @@ class SummaryReportView(CreateAPIView):
                 left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1
                 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
                 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
-                where  OrderDate between %s and %s''' 
+                where  OrderDate between %s and %s and TC_OrderItems.Isdeleted=0''' 
 
                 if OrderType == 1:
                     if Party == "":
@@ -1105,7 +1105,7 @@ class SummaryReportView(CreateAPIView):
                 else:
                         # OrderQueryresults = T_Orders.objects.raw(OrderQuery, [FromDate,ToDate,pricelist])  
                         OrderQueryresults = T_Orders.objects.raw(OrderQuery, [FromDate,ToDate])   
-                # CustomPrint(OrderQueryresults.query)
+                # print(OrderQueryresults.query)
                 if OrderQuery:
                     OrderItemDetails = list()
                     for row in OrderQueryresults:
