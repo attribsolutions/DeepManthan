@@ -10,7 +10,8 @@ from ..Serializer.S_Parties import M_PartiesSerializerSecond
 from ..Views.V_CommFunction import *
 from ..Views.V_CommFunction import GetOpeningBalance, UnitwiseQuantityConversion, RateCalculationFunction
 from ..Serializer.S_Invoices import InvoiceSerializerSecond
-
+from collections import defaultdict
+from django.db import connection
 from ..Serializer.S_Reports import *
 from ..models import *
 from datetime import datetime, timedelta
@@ -1770,7 +1771,7 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id in (%s
                         ItemMargins = list()
                         RateList = list()
                         ItemImage = list()
-                        
+                        PartyTypeMRP =list()
                         for x in pricelistquery:
                             
                             query2 = M_MarginMaster.objects.raw('''select 1 as id, GetTodaysDateMargin(%s,%s,%s,0,0)Margin,RateCalculationFunction1(0, %s, 0, 1, 0, %s, 0, 0)RatewithoutGST,RateCalculationFunction1(0, %s, 0, 1, 0, %s, 0, 1)RatewithGST,RateCalculationFunction1(0, %s, 0, %s, 0, %s, 0, 0)BaseUnitRatewithoutGST''', (
@@ -1791,8 +1792,27 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id in (%s
                                     "PriceListID" : x.id
 
                                 })
-
-                        ww = ItemMargins+RateList
+                           
+                        MRPQuery = M_MRPMaster.objects.raw(f'''
+                            SELECT mm.id, mm.MRP,  pt.Name AS PartyTypeName
+                            FROM M_MRPMaster mm
+                            JOIN M_PartyType pt ON pt.id = mm.PartyType_id
+                            JOIN (
+                                SELECT Item_id, PartyType_id, MAX(EffectiveDate) AS MaxDate
+                                FROM M_MRPMaster
+                                WHERE Item_id IN ({row.id}) AND IsDeleted = 0
+                                GROUP BY Item_id, PartyType_id
+                            ) latest ON latest.Item_id = mm.Item_id 
+                                    AND latest.PartyType_id = mm.PartyType_id 
+                                    AND latest.MaxDate = mm.EffectiveDate
+                            WHERE mm.IsDeleted = 0''')
+                        if MRPQuery:
+                            for row1 in MRPQuery:               
+                                    key_name = f"{row1.PartyTypeName}MRP"  
+                                    PartyTypeMRP.append({
+                                        key_name: float(row1.MRP)
+                                    })   
+                        ww = ItemMargins+RateList+PartyTypeMRP
                         query3 = MC_ItemImages.objects.raw(
                             '''select %s as id,M_ImageTypes.name ImageTypeName,M_ImageTypes.id ImageTypeid,ifnull(MC_ItemImages.Item_pic,' ')Item_pic from MC_ItemImages right join M_ImageTypes on M_ImageTypes.id=MC_ItemImages.ImageType_id and MC_ItemImages.Item_id=%s''', (row.id, row.id))
                         for b in query3:
