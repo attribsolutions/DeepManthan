@@ -2606,7 +2606,7 @@ class ManagerSummaryReportView(CreateAPIView):
                 InvoicesDetailsQuery = T_Invoices.objects.raw(f'''SELECT inv.id, inv.FullInvoiceNumber, inv.GrandTotal, inv.AdvanceAmount
                                                                 FROM SweetPOS.T_SPOSInvoices inv
                                                                 JOIN SweetPOS.TC_SPOSInvoicesReferences ref ON inv.id = ref.Invoice_id
-                                                                WHERE inv.InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}'
+                                                                WHERE inv.InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}' AND inv.IsDeleted=0
                                                                 {invoice_condition}''')
 
                 for invoice in InvoicesDetailsQuery:
