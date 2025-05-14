@@ -2601,12 +2601,12 @@ class ManagerSummaryReportView(CreateAPIView):
                         "OrderAmount": str(order.OrderAmount)
                     })
 
-                invoice_condition = f"AND inv.Party_id = {Party}" if Party != 0 else ""
+                invoice_condition = f"AND inv.Party = {Party}" if Party != 0 else ""
                 
                 InvoicesDetailsQuery = T_Invoices.objects.raw(f'''SELECT inv.id, inv.FullInvoiceNumber, inv.GrandTotal, ord.AdvanceAmount
-                                                                FROM T_Invoices inv
-                                                                LEFT JOIN TC_InvoicesReferences ref ON inv.id = ref.Invoice_id
-                                                                LEFT JOIN T_Orders ord ON ref.Order_id = ord.id
+                                                                FROM SweetPOS.T_SPOSInvoices inv
+                                                                LEFT JOIN SweetPOS.TC_SPOSInvoicesReferences ref ON inv.id = ref.Invoice_id
+                                                                LEFT JOIN FoodERP.T_Orders ord ON ref.Order = ord.id
                                                                 WHERE inv.InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}'
                                                                 {invoice_condition}''')
 
@@ -2620,7 +2620,8 @@ class ManagerSummaryReportView(CreateAPIView):
 
                 if OrderData or InvoiceData:
                     log_entry = create_transaction_logNew(request, Data, Party, "ManagerSummaryReport", 461, 0, FromDate, ToDate, 0)
-                    return JsonResponse({ "StatusCode": 200,"Status": True, "Message": "","Data": {"FromDate": FromDate,"ToDate": ToDate,"Party": Party,"OrderData": OrderData,"InvoiceData": InvoiceData }})
+                    return JsonResponse({"StatusCode": 200,"Status": True,"Message": "","Data": [{"OrderData": OrderData,"InvoiceData": InvoiceData}]})
+
                 log_entry = create_transaction_logNew(request, Data, Party, "No ManagerSummaryReport found", 461, 0, FromDate, ToDate, 0)
                 return JsonResponse({"StatusCode": 204,"Status": True,"Message": "No ManagerSummary data found.", "Data": []})
 
