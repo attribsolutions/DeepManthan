@@ -65,6 +65,8 @@ class T_MobileAppOrdersView(CreateAPIView):
                             # log_entry = create_transaction_logNew(request, data, Supplier, '',149,0,0,0,Customer)
 
                             for aa in data['OrderItem']:
+                                
+                                Item=aa['FoodERPItemID']
                                 # Check Item Is Exist
                                 ItemCheck = M_Items.objects.filter(id=aa['FoodERPItemID']).exists()
                                 if not ItemCheck:
@@ -74,9 +76,14 @@ class T_MobileAppOrdersView(CreateAPIView):
                                 
                                 unit=MC_ItemUnits.objects.filter(UnitID_id=1,Item_id=aa['FoodERPItemID'],IsDeleted=0).values('id')
                                 
-                                Gst = GSTHsnCodeMaster(aa['FoodERPItemID'], OrderDate).GetTodaysGstHsnCode()
+                                # Gst = GSTHsnCodeMaster(aa['FoodERPItemID'], OrderDate).GetTodaysGstHsnCode()
+                                Gst = M_GSTHSNCode.objects.raw(f'''select 1 as id, GSTHsnCodeMaster({Item},%s,1,0,0)GSTID,
+                                                                             GSTHsnCodeMaster({Item},%s,2,0,0)GSTPercentage ''',[OrderDate,OrderDate])
+                                
+                                
+                                print(Gst[0].GSTPercentage)
                                 BasicAmount=round(float(aa['RatewithoutGST'])*float(aa['QuantityinPieces']),2)
-                                CGST= round(BasicAmount*(float(Gst[0]['GST'])/100),2)
+                                CGST= round(BasicAmount*(float(Gst[0].GSTPercentage)/100),2)
                                 BaseUnitQuantity = UnitwiseQuantityConversion(
                                     aa['FoodERPItemID'], aa['QuantityinPieces'], unit[0]['id'], 0, 0, 0, 0).GetBaseUnitQuantity()
                                 QtyInNo = UnitwiseQuantityConversion(
@@ -96,13 +103,13 @@ class T_MobileAppOrdersView(CreateAPIView):
                                         "Unit": unit[0]['id'],
                                         "BaseUnitQuantity": BaseUnitQuantity,
                                         "Margin": "",
-                                        "GST": Gst[0]['Gstid'],
+                                        "GST": Gst[0].GSTID,
                                         "CGST": CGST,
                                         "SGST": CGST,
                                         "IGST": 0,
-                                        "GSTPercentage": float(Gst[0]['GST']),
-                                        "CGSTPercentage": float(Gst[0]['GST'])/2,
-                                        "SGSTPercentage": float(Gst[0]['GST'])/2,
+                                        "GSTPercentage": float(Gst[0].GSTPercentage),
+                                        "CGSTPercentage": float(Gst[0].GSTPercentage)/2,
+                                        "SGSTPercentage": float(Gst[0].GSTPercentage)/2,
                                         "IGSTPercentage": "0.00",
                                         "BasicAmount": BasicAmount,
                                         "GSTAmount": round(CGST+CGST,2),
@@ -167,7 +174,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                                 OrderID = Order_serializer.data['id']
                                 PartyID = Order_serializer.data['Customer']
                                 
-                                log_entry = create_transaction_logNew(request, str(data)+','+str(Orderdata[0]), Supplier, 'MobileAppOrder Save Successfully',149,OrderID,0,0,Customer)
+                                log_entry = create_transaction_logNew(request, {"RequestBody": str(data), "ResponseData": str(Orderdata[0]) }, Supplier,'MobileAppOrder Save Successfully',149,OrderID,0,0,Customer)
                                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully', 'FoodERPOrderID': OrderID})
                             log_entry = create_transaction_logNew(request, data, Supplier,  Order_serializer.errors,161,OrderID,0,0,Customer)
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
