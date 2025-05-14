@@ -108,14 +108,23 @@ class giftvouchervalidityCheck(CreateAPIView):
                     
                     log_entry = create_transaction_logNew(request, giftvoucherData, Party, '', 435, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': False, 'Message': message,'Data': []})
-                voucher_details.IsActive = 0
-                voucher_details.InvoiceDate = InvoiceDate
-                voucher_details.InvoiceNumber = InvoiceNumber
-                voucher_details.InvoiceAmount = InvoiceAmount
-                voucher_details.Party = Party
-                voucher_details.client = client
-                voucher_details.ClientSaleID = ClientSaleID
-                voucher_details.save()
+                
+                if VoucherCode == 'SSCCBM2025' :
+                    
+                    aa=M_GiftVoucherCode.objects.filter(VoucherCode=VoucherCode).values('InvoiceAmount')
+                    
+                    voucher_details.InvoiceAmount = float(aa[0]['InvoiceAmount'])+float(1)
+                    voucher_details.save()
+                else :
+                    
+                    voucher_details.IsActive = 0
+                    voucher_details.InvoiceDate = InvoiceDate
+                    voucher_details.InvoiceNumber = InvoiceNumber
+                    voucher_details.InvoiceAmount = InvoiceAmount
+                    voucher_details.Party = Party
+                    voucher_details.client = client
+                    voucher_details.ClientSaleID = ClientSaleID
+                    voucher_details.save()
 
                 log_entry = create_transaction_logNew(request, giftvoucherData, Party, '', 435, 0)
                 return JsonResponse({'StatusCode': 200,'Status': True,'Message': 'Successfully Marked Gift Voucher Code as Used', 'Data': []})
