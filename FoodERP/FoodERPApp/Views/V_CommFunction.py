@@ -124,9 +124,11 @@ def GSTListFun(Item,Party,PartyType):
         GSTquery =M_GSTHSNCode.objects.filter(Item_id=Item,PartyType__isnull=True).values('GSTPercentage','id','HSNCode').order_by('-id')[:3]
     # print(GSTquery.query)
     return GSTquery
-def UnitDropdown(ItemID, PartyForRate, BatchID=0):   
+def UnitDropdown(ItemID, PartyForRate, BatchID=0):
+    print(ItemID)   
     UnitDetails = list()
     ItemUnitquery = MC_ItemUnits.objects.filter(Item=ItemID, IsDeleted=0,IsShowUnit=1).select_related('UnitID').values('id','BaseUnitQuantity','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion','UnitID__id')
+    print(ItemUnitquery.query)
     # Same Base Unit Quantity then show Only BaseUnit
     # ItemUnitquery2 = MC_ItemUnits.objects.filter(Item=ItemID, IsDeleted=0 ,IsBase=1).select_related('UnitID').values('id','BaseUnitQuantity','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion','UnitID__id')
     # BaseUnitQuantity=ItemUnitquery2[0]['BaseUnitQuantity']    
@@ -926,3 +928,4 @@ def BasicAuthenticationfunction(request):
                 
         user = authenticate(request, username=username, password=password)
     return user
+
