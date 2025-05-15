@@ -110,7 +110,6 @@ def MRPListFun(Item,Party,PartyType):
         MRPquery = M_MRPMaster.objects.filter(Item_id=Item,Party__isnull=True,PartyType=PartyTypeID,IsDeleted=0).values('MRP','id').order_by('-id')
         if not MRPquery:
             MRPquery = M_MRPMaster.objects.filter(Item_id=Item,Party__isnull=True,PartyType__isnull=True,IsDeleted=0).values('MRP','id').order_by('-id')
-    # print(MRPquery.query)
     return MRPquery
 
 def GSTListFun(Item,Party,PartyType):
@@ -122,30 +121,27 @@ def GSTListFun(Item,Party,PartyType):
     GSTquery =M_GSTHSNCode.objects.filter(Item_id=Item,PartyType=PartyTypeID).values('GSTPercentage','id','HSNCode').order_by('-id')[:3]
     if not GSTquery:
         GSTquery =M_GSTHSNCode.objects.filter(Item_id=Item,PartyType__isnull=True).values('GSTPercentage','id','HSNCode').order_by('-id')[:3]
-    # print(GSTquery.query)
+    
     return GSTquery
-def UnitDropdown(ItemID, PartyForRate, BatchID=0):
-    print(ItemID)   
+def UnitDropdown(ItemID, PartyForRate, BatchID=0):   
     UnitDetails = list()
     ItemUnitquery = MC_ItemUnits.objects.filter(Item=ItemID, IsDeleted=0,IsShowUnit=1).select_related('UnitID').values('id','BaseUnitQuantity','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion','UnitID__id')
-    print(ItemUnitquery.query)
     # Same Base Unit Quantity then show Only BaseUnit
     # ItemUnitquery2 = MC_ItemUnits.objects.filter(Item=ItemID, IsDeleted=0 ,IsBase=1).select_related('UnitID').values('id','BaseUnitQuantity','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion','UnitID__id')
     # BaseUnitQuantity=ItemUnitquery2[0]['BaseUnitQuantity']    
     # UnitID_List=[]
     # for unit in ItemUnitquery:
     #     UnitQuantity=unit['BaseUnitQuantity']
-    #     CustomPrint(UnitQuantity)
+ 
     #     Base=unit['IsBase']         
     #     if  Base==False:               
     #         if(BaseUnitQuantity ==UnitQuantity):
     #             UnitID_List.append(str(unit['id']))  
     # ItemUnitquery = MC_ItemUnits.objects.filter(Item=ItemID, IsDeleted=0 ).exclude(
     # id__in=UnitID_List).select_related('UnitID').values('id','BaseUnitQuantity','IsBase','PODefaultUnit','SODefaultUnit','BaseUnitConversion','UnitID__id')
-    # CustomPrint(ItemUnitquery.query)   
+ 
     
     
-    # CustomPrint(ItemID)
     q1 = M_Parties.objects.filter(id=PartyForRate ).values("PartyType_id")
     PartyTypeID=q1[0]['PartyType_id']
     
@@ -154,7 +150,7 @@ def UnitDropdown(ItemID, PartyForRate, BatchID=0):
     PartyTypeID1_list = [int(x) for x in PartyTypeID1.split(",")]
     
     for d in ItemUnitquery:
-        # print(d['PODefaultUnit'])
+       
         # if (d['PODefaultUnit'] == True):
         RateMcItemUnit = d['id']
         
@@ -179,7 +175,7 @@ def UnitDropdown(ItemID, PartyForRate, BatchID=0):
 
         q0 = MC_ItemUnits.objects.filter(
             Item=ItemID, UnitID=1, IsDeleted=0).values("BaseUnitQuantity")
-        # CustomPrint(q0)
+     
         UnitDetails.append({
             "UnitID": d['id'],
             "UnitName": d['BaseUnitConversion'],
@@ -193,7 +189,6 @@ def UnitDropdown(ItemID, PartyForRate, BatchID=0):
             "IsBase" : d['IsBase']
 
         })
-        # CustomPrint(UnitDetails)
     return UnitDetails
 
 
@@ -226,7 +221,7 @@ def GetOpeningBalance(Party, Customer, Date):
     SELECT 4 as id ,T_CreditDebitNotes.CRDRNoteDate AS TransactionDate,(CASE WHEN T_CreditDebitNotes.NoteType_id in (38,40) THEN T_CreditDebitNotes.GrandTotal else 0 End) AS InvoiceAmount ,
     (CASE WHEN T_CreditDebitNotes.NoteType_id in (37,39) THEN T_CreditDebitNotes.GrandTotal else 0 End) ReceiptAmount FROM T_CreditDebitNotes WHERE T_CreditDebitNotes.Party_id=%s AND T_CreditDebitNotes.Customer_id = %s  AND T_CreditDebitNotes.CRDRNoteDate <= %s and IsDeleted=0 ) A   Order By TransactionDate ''', ([
                                     Party], [Customer], [Date],[Party], [Customer], [Date], [Party], [Customer], [Date], [Party], [Customer], [Date]))
-    # CustomPrint(str(query2.query))
+   
     query2_serializer = OpeningBalanceSerializer(query2, many=True).data
     OpeningBalance = 0.000
     InvoiceAmount = 0.000
@@ -316,7 +311,7 @@ class MRPMaster:
 
         TodayDateItemMRPdata = M_MRPMaster.objects.filter(P & D).filter(
             Item_id=self.ItemID, EffectiveDate__lte=self.today, IsDeleted=0).order_by('-EffectiveDate', '-id')[:1]
-        # CustomPrint(str(TodayDateItemMRPdata.query))
+       
 
         if TodayDateItemMRPdata.exists():
             MRP_Serializer = M_MRPsSerializer(
@@ -353,7 +348,7 @@ class MRPMaster:
 
         EffectiveDateItemMRPdata = M_MRPMaster.objects.filter(P & D).filter(
             Item_id=self.ItemID, EffectiveDate=self.EffectiveDate, IsDeleted=0).order_by('-EffectiveDate', '-id')[:1]
-        # CustomPrint(str(EffectiveDateItemMRPdata.query))
+      
 
         if EffectiveDateItemMRPdata.exists():
             MRP_Serializer = M_MRPsSerializer(
@@ -414,7 +409,7 @@ class DiscountMaster:
             ToDate__gte=self.EffectiveDate)
         ItemDiscountdata = M_DiscountMaster.objects.filter(Item_id=self.ItemID, PriceList_id=self.PriceListID, Party=self.PartyID).filter(
             D).filter(P).values("DiscountType", "Discount").order_by('-id')[:1]
-        # CustomPrint(ItemDiscountdata.query)
+    
         if not ItemDiscountdata:
 
             ItemDiscountdata = M_DiscountMaster.objects.filter(Item_id=self.ItemID, PriceList_id=self.PriceListID, Party=self.PartyID, Customer_id__isnull=True).filter(
@@ -459,13 +454,13 @@ class MarginMaster:
 
         ItemMargindata = M_MarginMaster.objects.filter(P).filter(
             Item_id=self.ItemID, PriceList_id=self.PriceListID, EffectiveDate__lte=self.today, IsDeleted=0).order_by('-EffectiveDate', '-id')[:1]
-        # CustomPrint(str(ItemMargindata.query))
+      
         if ItemMargindata.exists:
 
             P = Q(Party_id__isnull=True)
             ItemMargindata = M_MarginMaster.objects.filter(P).filter(
                 Item_id=self.ItemID, PriceList_id=self.PriceListID, EffectiveDate__lte=self.today, IsDeleted=0).order_by('-EffectiveDate', '-id')[:1]
-            # CustomPrint(ItemMargindata.query)
+           
 
         if ItemMargindata.exists():
             Margin_Serializer = M_MarginsSerializer(
@@ -496,7 +491,7 @@ class MarginMaster:
 
         ItemMargindata = M_MarginMaster.objects.filter(P).filter(
             Item_id=self.ItemID, PriceList_id=self.PriceListID, EffectiveDate=self.EffectiveDate, IsDeleted=0).order_by('-EffectiveDate', '-id')[:1]
-        # CustomPrint(str(ItemMargindata.query))
+       
         # if ItemMargindata.count() == 0:
         if ItemMargindata.exists():
             Margin_Serializer = M_MarginsSerializer(
@@ -516,7 +511,7 @@ class MarginMaster:
 
         ItemMargindata = M_MarginMaster.objects.filter(P).filter(
             Item_id=self.ItemID, PriceList_id=self.PriceListID, EffectiveDate=self.EffectiveDate, IsDeleted=0).order_by('-EffectiveDate', '-id')[:1]
-        # CustomPrint(str(ItemMargindata.query))
+     
 
         if ItemMargindata.exists():
             Margin_Serializer = M_MarginsSerializer(
@@ -540,7 +535,6 @@ class GSTHsnCodeMaster:
 
         TodayDateGstHsncodedata = M_GSTHSNCode.objects.filter(
             Item_id=self.ItemID, EffectiveDate__lte=self.today, IsDeleted=0).order_by('-EffectiveDate', '-id')[:1]
-        # CustomPrint(str(TodayDateGstHsncodedata.query))
         if TodayDateGstHsncodedata.exists():
             GSTHsnCode_Serializer = M_GstHsnCodeSerializer(
                 TodayDateGstHsncodedata, many=True).data
@@ -756,9 +750,8 @@ class RateCalculationFunction:
             query = M_Parties.objects.filter(id=PartyID).values('PriceList')
             PriceList = query[0]['PriceList']
 
-        query1 = M_PriceList.objects.filter(
-            id=PriceList).values('CalculationPath')
-        # CustomPrint(query1.query)
+        query1 = M_PriceList.objects.filter(id=PriceList).values('CalculationPath')
+ 
         self.calculationPath = str(query1[0]['CalculationPath']).split(',')
         self.BaseUnitQantityofselectedunit = q3SelectedUnit[0]['BaseUnitQuantity']
         self.BaseUnitQantityofNoUnit = q3NoUnit[0]['BaseUnitQuantity']
@@ -831,12 +824,10 @@ def ValidationFunForStockTransactions(PartyID, ItemID, TransactionDate):
     for row in q:
         StockAdjustmentDate = row.StockAdjustmentDate
 
-    # CustomPrint(StockAdjustmentDate, TransactionDate)
+   
     if StockAdjustmentDate >= TransactionDate:
-        # CustomPrint('55555')
         return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Transaction not allowed', 'Data': []})
     else:
-        # CustomPrint('6666')
         pass
 
 

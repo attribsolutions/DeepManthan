@@ -45,7 +45,6 @@ class T_MobileAppOrdersView(CreateAPIView):
                     InvoiceItems = list()
                     
                     if user is not None:
-                        # CustomPrint('aaaaaaaaaaaa')
                         Supplier = data['FoodERPSupplierID']
                         Customer = data['FoodERPRetailerID']
                         OrderDate = data['OrderDate']
@@ -81,7 +80,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                                                                              GSTHsnCodeMaster({Item},%s,2,0,0)GSTPercentage ''',[OrderDate,OrderDate])
                                 
                                 
-                                print(Gst[0].GSTPercentage)
+                            
                                 BasicAmount=round(float(aa['RatewithoutGST'])*float(aa['QuantityinPieces']),2)
                                 CGST= round(BasicAmount*(float(Gst[0].GSTPercentage)/100),2)
                                 BaseUnitQuantity = UnitwiseQuantityConversion(
