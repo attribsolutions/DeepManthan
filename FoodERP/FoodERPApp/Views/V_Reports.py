@@ -1827,7 +1827,7 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id in (%s
                                             f'{party_type.Name}MRP': float(rec.MRP),
                                             f'{party_type.Name}GST': float(rec.GST)
                                         })
-                        ww = ItemMargins+RateList+PartyTypeMRP
+                        ww = ItemMargins+RateList
                         query3 = MC_ItemImages.objects.raw(
                             '''select %s as id,M_ImageTypes.name ImageTypeName,M_ImageTypes.id ImageTypeid,ifnull(MC_ItemImages.Item_pic,' ')Item_pic from MC_ItemImages right join M_ImageTypes on M_ImageTypes.id=MC_ItemImages.ImageType_id and MC_ItemImages.Item_id=%s''', (row.id, row.id))
                         for b in query3:
@@ -1859,6 +1859,7 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id in (%s
                             "PcsInNo": row.PcsInNo,
                             "ProductID" : row.ProductID,
                             "SubProductID" :row.SubProductID,
+                            "MRP&GST":PartyTypeMRP,
                             "ItemMargins": ww,
                             "ItemImage": ItemImage
 
