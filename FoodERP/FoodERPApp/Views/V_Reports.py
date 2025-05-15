@@ -1825,7 +1825,7 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id in (%s
                                         rec = MRPQuery[0]
                                         PartyTypeMRP.append({
                                             f'{party_type.Name}MRP': float(rec.MRP),
-                                            f'{party_type.Name}GST': float(rec.GST)
+                                            f'{party_type.Name}GST%': f"{float(rec.GST)}%"
                                         })
                         ww =PartyTypeMRP+ItemMargins+RateList
                         query3 = MC_ItemImages.objects.raw(
