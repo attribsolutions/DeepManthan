@@ -168,8 +168,10 @@ class InterBranchInwardView(CreateAPIView):
                     BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item'], Inwarddata['Customer'], b)
                     UnitwiseQuantityConversionobject=UnitwiseQuantityConversion(a['Item'],a['Quantity'],a['Unit'],0,0,0,1)
                     BaseUnitQuantity=UnitwiseQuantityConversionobject.GetBaseUnitQuantity()
-                    Gst = GSTHsnCodeMaster(a['Item'], IBInwardDate).GetTodaysGstHsnCode()
-                    GSTID = Gst[0]['Gstid']
+                    # Gst = GSTHsnCodeMaster(a['Item'], IBInwardDate).GetTodaysGstHsnCode()
+                    Gst = M_GSTHSNCode.objects.raw(f'''select 1 as id, GSTHsnCodeMaster({a['Item']},%s,1,0,0)GSTID,
+                                                        GSTHsnCodeMaster({a['Item']},%s,2,0,0)GSTPercentage ''',[IBInwardDate,IBInwardDate])
+                    # GSTID = Gst[0].GSTID
                     a['SystemBatchCode'] = BatchCode
                     a['SystemBatchDate'] = date.today()
                     a['BaseUnitQuantity'] = BaseUnitQuantity
@@ -189,7 +191,7 @@ class InterBranchInwardView(CreateAPIView):
                     "ItemExpiryDate":date.today()+ datetime.timedelta(days = query2[0]['Days']),
                     "MRP": a['MRP'],
                     "Rate": a['Rate'],
-                    "GST": GSTID,
+                    "GST": Gst[0].GSTID,
                     "SystemBatchDate": a['SystemBatchDate'],
                     "SystemBatchCode": a['SystemBatchCode'],
                     "BatchDate": a['BatchDate'],
