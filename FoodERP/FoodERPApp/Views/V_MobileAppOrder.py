@@ -818,6 +818,7 @@ class RetailerAddFromMobileAppview(CreateAPIView):
                                     "PriceList": 3,
                                     "PartyType": 11,
                                     "Company": 3,
+                                    "SAPPartyCode": a.get('SAPPartyCode', None),
                                     "PAN": a['PANNumber'],
                                     "Email":a['EmailAddress'],
                                     "MobileNo": a['MobileNumber'],

@@ -30,6 +30,7 @@ class RetailerAddFromMobileAppSerializer(serializers.ModelSerializer):
         PartyAddress_data = validated_data.pop('PartyAddress')
         PartyPrefix_data = validated_data.pop('PartyPrefix')
         PartySubPartys=validated_data.pop('PartySubParty')
+        validated_data.setdefault('SAPPartyCode', None)
         PartyID= M_Parties.objects.create(**validated_data)
         
         for PartyAddress in PartyAddress_data:
