@@ -816,7 +816,8 @@ class SalesReturnconsolidatePurchaseReturnView(CreateAPIView):
                     # PuchaseReturnList=list()
                     PurchaseReturnItemList=list()
                     for b in PurchaseReturnSerializer:
-                        Rate=RateCalculationFunction(0,b['Item']['id'],Party,0,1,0,0,b['MRPValue']).RateWithGST()
+                        #  Rate=RateCalculationFunction(0,b['Item']['id'],Party,0,1,0,0,b['MRPValue']).RateWithGST()
+                        Rate =  M_Items.objects.raw(f'''select 1 as id, FoodERP.RateCalculationFunction1(0, {b['Item']['id']}, {Party}, 1, 0, 0, {b['MRPValue']}, 0)Rate''')
                         Imagequery = TC_PurchaseReturnItemImages.objects.filter(PurchaseReturnItem_id=b['id'])
                         # CustomPrint(query.query)
                         ReturnItemImages = list()
@@ -835,7 +836,7 @@ class SalesReturnconsolidatePurchaseReturnView(CreateAPIView):
                             "ApprovedQuantity" : b["ApprovedQuantity"],
                             "BaseUnitQuantity":b['BaseUnitQuantity'],
                             "MRPValue":b['MRPValue'],
-                            "Rate":round(float(Rate[0]["NoRatewithOutGST"]),2),
+                            "Rate":round(float(Rate[0].Rate),2),
                             "BasicAmount":b['BasicAmount'],
                             "TaxType":b['TaxType'],
                             "GSTPercentage":b['GSTPercentage'],

@@ -72,9 +72,11 @@ class ProductionView(CreateAPIView):
                 
                 BaseUnitQuantity=UnitwiseQuantityConversion(Item,Productiondata['ActualQuantity'],Productiondata['Unit'],0,0,0,1).GetBaseUnitQuantity()
                 
-                Gst = GSTHsnCodeMaster(Item, Productiondata['ProductionDate']).GetTodaysGstHsnCode()                
-                GSTID = Gst[0]['Gstid']
-                GSTValue=Gst[0]['GST']                
+                # Gst = GSTHsnCodeMaster(Item, Productiondata['ProductionDate']).GetTodaysGstHsnCode()                
+                Gst = M_GSTHSNCode.objects.raw(f'''select 1 as id, GSTHsnCodeMaster({Item},%s,1,0,0)GSTID,
+                                                GSTHsnCodeMaster({Item},%s,2,0,0)GSTPercentage ''',[Productiondata['ProductionDate'],Productiondata['ProductionDate']])
+                GSTID = Gst[0].GSTID
+                GSTValue=Gst[0].GSTPercentage          
                 
             
                 CssCustomerPriceList=M_Settings.objects.filter(id=62).values("DefaultValue")

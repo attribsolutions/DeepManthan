@@ -163,9 +163,7 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
                     start_date_str = yesterday
                     end_date_str = today
                     Partys = M_Parties.objects.filter(PartyType=19,isActive=1).values('id')
-                    # Partys = M_Parties.objects.filter(PartyType = 19).values('id')
-
-                    # print(Partys)                    
+                                        
 
                     log_entry = create_transaction_logNew(request, Orderdata, 0, 'Stock Process start', 209, 0, start_date_str, end_date_str, 0)
                     for Party in Partys:
@@ -181,8 +179,7 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
                             Date = current_date.strftime("%Y-%m-%d")
                             # print(Date)
                             
-                            StockDeleteQuery = O_SPOSDateWiseLiveStock.objects.filter(
-                                Party=Party, StockDate=Date)
+                            StockDeleteQuery = O_SPOSDateWiseLiveStock.objects.filter(Party=Party, StockDate=Date)
                             StockDeleteQuery.delete()
                             # CustomPrint(StockDeleteQuery.query)
                             StockProcessQuery = O_SPOSDateWiseLiveStock.objects.raw('''select id,ItemID,UnitID,
