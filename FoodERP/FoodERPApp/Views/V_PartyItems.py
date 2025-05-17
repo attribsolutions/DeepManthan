@@ -103,8 +103,10 @@ class PartyItemsFilterView(CreateAPIView):
                     for a in Items_Serializer:
                         # GST_HSNCodeMaster = GSTHsnCodeMaster(ItemID=a['id'], EffectiveDate=date.today())
                         # GST = GST_HSNCodeMaster.GetTodaysGstHsnCode()
-                        Gst = M_GSTHSNCode.objects.raw(f'''select 1 as id, GSTHsnCodeMaster({a['id']},%s,1,0,0)GSTID,
-                                                           GSTHsnCodeMaster({a['id']},%s,2,0,0)GSTPercentage ''',[date.today(),date.today()])
+                        Gst = M_GSTHSNCode.objects.raw(f'''select 1 as id,
+                                                       GSTHsnCodeMaster({a['id']},%s,1,0,0)GSTID,
+                                                       GSTHsnCodeMaster({a['id']},%s,2,0,0)GSTPercentage 
+                                                           ''',[date.today(),date.today()])
 
                         query=O_BatchWiseLiveStock.objects.filter(Item=a['id'],Party=PartyID,BaseUnitQuantity__gt=0)
                         if query.exists():
@@ -122,8 +124,8 @@ class PartyItemsFilterView(CreateAPIView):
                             "SubGroupName": a['SubGroupName'],
                             "InStock":InStock,
                             "MapItem": a['MapItem'],
-                            "GST": Gst[0].GSTID, 
-                            "GSTID":Gst[0].GSTPercentage
+                            "GST": int(Gst[0].GSTID) if Gst[0].GSTID is not None else 0, 
+                            "GSTID": int(Gst[0].GSTPercentage) if Gst[0].GSTPercentage is not None else 0
                         })
                     log_entry = create_transaction_logNew(request,Logindata,PartyID,'',181,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
