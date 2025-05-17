@@ -27,12 +27,12 @@ class FileDownloadView(View):
 
         model_class, field_name = table_config.get(int(table), (None, None))
         if not model_class:
-            log_entry = create_transaction_logNew(request, 0, id, 'Invalid table selection in FileDownloadView', 467, 0)
+            log_entry = create_transaction_logNew(request, {}, id, 'Invalid table selection in FileDownloadView', 467, 0)
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Invalid table selection.', 'Data': []}, status=400)
 
         query = model_class.objects.filter(id=id).values(field_name)
         if not query.exists():
-            log_entry = create_transaction_logNew(request, 0, id, 'Image not found for given ID in FileDownloadView', 467, 0)
+            log_entry = create_transaction_logNew(request, {}, id, 'Image not found for given ID in FileDownloadView', 467, 0)
             return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'No image found for the given ID.', 'Data': []}, status=404)
 
         image_path = query[0][field_name]
@@ -42,23 +42,20 @@ class FileDownloadView(View):
             response = requests.get(image_url, verify=False)
             response.raise_for_status()
 
-            log_entry = create_transaction_logNew(request, 0, id, 'FileDownloadView image download successful', 467, 0)
+            log_entry = create_transaction_logNew(request, {}, id, 'FileDownloadView image download successful', 467, 0)
 
         except requests.exceptions.HTTPError as e:
-            log_entry = create_transaction_logNew(request, 0, id, f'FileDownloadView HTTPError: {str(e)}', 33, 0)
+            log_entry = create_transaction_logNew(request, {}, id, f'FileDownloadView HTTPError: {str(e)}', 33, 0)
             return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'Image not found on remote server.', 'Data': []}, status=404)
         except requests.exceptions.ConnectionError as e:
-            log_entry = create_transaction_logNew(request, 0, id, f'FileDownloadView ConnectionError: {str(e)}', 33, 0)
+            log_entry = create_transaction_logNew(request, {}, id, f'FileDownloadView ConnectionError: {str(e)}', 33, 0)
             return JsonResponse({'StatusCode': 502, 'Status': False, 'Message': 'Connection error while fetching image.', 'Data': []}, status=502)
-        except requests.exceptions.Timeout as e:
-            log_entry = create_transaction_logNew(request, 0, id, f'FileDownloadView Timeout: {str(e)}', 33, 0)
-            return JsonResponse({'StatusCode': 504, 'Status': False, 'Message': 'Request to fetch image timed out.', 'Data': []}, status=504)
         except requests.exceptions.RequestException as e:
-            log_entry = create_transaction_logNew(request, 0, id, f'FileDownloadView RequestException: {str(e)}', 33, 0)
-            return JsonResponse({'StatusCode': 500, 'Status': False, 'Message': 'An error occurred while fetching image.', 'Data': []}, status=500)
+            log_entry = create_transaction_logNew(request, {}, id, f'FileDownloadView RequestException: {str(e)}', 33, 0)
+            return JsonResponse({'StatusCode': 500, 'Status': False, 'Message':  str(e), 'Data': []}, status=500)
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, id, f'FileDownloadView Unexpected Exception: {str(e)}', 33, 0)
-            return JsonResponse({'StatusCode': 500, 'Status': False, 'Message': 'Unexpected error while fetching image.', 'Data': []}, status=500)
+            log_entry = create_transaction_logNew(request, {}, id, f'FileDownloadView Unexpected Exception: {str(e)}', 33, 0)
+            return JsonResponse({'StatusCode': 500, 'Status': False, 'Message':  Exception(e),  'Data': []}, status=500)
 
         content_type = response.headers.get('Content-Type', 'application/octet-stream')
         filename = os.path.basename(image_url)
