@@ -124,8 +124,8 @@ class PartyItemsFilterView(CreateAPIView):
                             "SubGroupName": a['SubGroupName'],
                             "InStock":InStock,
                             "MapItem": a['MapItem'],
-                            "GST": int(Gst[0].GSTID) if Gst[0].GSTID is not None else 0, 
-                            "GSTID": int(Gst[0].GSTPercentage) if Gst[0].GSTPercentage is not None else 0
+                            "GST": float(Gst[0].GSTPercentage) if Gst[0].GSTPercentage is not None else 0, 
+                            "GSTID": int(Gst[0].GSTID) if Gst[0].GSTPercentage is not None else 0 
                         })
                     log_entry = create_transaction_logNew(request,Logindata,PartyID,'',181,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
