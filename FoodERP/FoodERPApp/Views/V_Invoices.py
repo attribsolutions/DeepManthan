@@ -201,8 +201,8 @@ class OrderDetailsForInvoice(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderdataList})
                 
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Orderdata, 0,'OrderDetailsForInvoice:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, Orderdata, 0,'OrderDetailsForInvoice:'+safe_exception_message(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  safe_exception_message(e), 'Data': []})
         
 def safe_exception_message(ex):
     try:
