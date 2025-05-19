@@ -205,7 +205,10 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
         from
 
 
-        (Select Item_id,M_Items.BaseUnitID_id UnitID  from FoodERP.MC_PartyItems join FoodERP.M_Items on M_Items.id=MC_PartyItems.Item_id and M_Items.IsStockProcessItem=1  where Party_id=%s)I
+        (Select Item_id,MC_ItemUnits.id UnitID  from FoodERP.MC_PartyItems 
+        join FoodERP.M_Items on M_Items.id=MC_PartyItems.Item_id and M_Items.IsStockProcessItem=1 
+        JOIN MC_ItemUnits  ON MC_ItemUnits.UnitID_Id=M_Items.BaseUnitID_id and MC_ItemUnits.Item_id=M_Items.id 
+        where Party_id=%s)I
 
 
         left join (SELECT IFNULL(Item,0) ItemID, sum(ClosingBalance)ClosingBalance FROM SweetPOS.O_SPOSDateWiseLiveStock WHERE StockDate = DATE_SUB(  %s, 
