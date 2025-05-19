@@ -156,6 +156,7 @@ class SPOSStockReportView(CreateAPIView):
         Orderdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
+               
                 FromDate = Orderdata['FromDate']
                 ToDate = Orderdata['ToDate']
                 Unit = Orderdata['Unit']
@@ -170,7 +171,7 @@ class SPOSStockReportView(CreateAPIView):
                         continue                         
                     ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Party,5).split('!')
 
-                    CustomPrint(PartyNameQ)
+                    # print(PartyNameQ)
                     if(Unit!=0):
                         UnitName = M_Units.objects.filter(id=Unit).values("Name")
                         unitname = UnitName[0]['Name']                    
@@ -182,6 +183,7 @@ class SPOSStockReportView(CreateAPIView):
                     else:
                         unitcondi=Unit  
                     CustomPrint(Unit)  
+                   
                     StockreportQuery = O_SPOSDateWiseLiveStock.objects.raw(f'''
                     SELECT 1 as id,A.Item_id,A.Unit,
                     FoodERP.UnitwiseQuantityConversion(A.Item_id,ifnull(OpeningBalance,0),0,A.Unit,0,{unitcondi},0)OpeningBalance,
@@ -198,12 +200,13 @@ class SPOSStockReportView(CreateAPIView):
                     CASE WHEN {Unit} = 0 THEN UnitName else '{unitname}' END UnitName,               
                     (FoodERP.RateCalculationFunction1(0, A.Item_id, {Party}, A.Unit, 0, 0, 0, 1) * FoodERP.UnitwiseQuantityConversion(A.Item_id,ClosingBalance,0,A.Unit,0,A.Unit,0))ClosingAmount
                     FROM
-                    ( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit,M_Units.Name UnitName ,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
+                    ( SELECT M_Items.id Item_id, M_Items.Name ItemName ,M_Units.id Unit,M_Units.Name UnitName ,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
                         {ItemsGroupJoinsandOrderby[0]}
                         FROM O_SPOSDateWiseLiveStock
 
-                    JOIN FoodERP.M_Items ON M_Items.id=O_SPOSDateWiseLiveStock.Item
-                    join FoodERP.M_Units on M_Units.id= O_SPOSDateWiseLiveStock.Unit
+                    JOIN FoodERP.M_Items ON M_Items.id=O_SPOSDateWiseLiveStock.Item                  
+                    join FoodERP.MC_ItemUnits on MC_ItemUnits.id= O_SPOSDateWiseLiveStock.Unit
+                    JOIN FoodERP.M_Units ON M_Units.id=MC_ItemUnits.UnitID_id
                     {ItemsGroupJoinsandOrderby[1]}
                     WHERE StockDate BETWEEN %s AND %s AND Party=%s GROUP BY Item,Unit,GroupType.id,Groupss.id,subgroup.id
                     {ItemsGroupJoinsandOrderby[2]}) A
@@ -219,7 +222,7 @@ class SPOSStockReportView(CreateAPIView):
                     WHERE Party =%s AND StockDate BETWEEN %s AND %s
                     GROUP BY Item) D
                     ON A.Item_id = D.Item ''', ( [FromDate], [ToDate], [Party], [FromDate], [Party], [ToDate], [Party], [Party], [FromDate], [ToDate]))
-                    
+                    # print(StockreportQuery)
                     serializer = SPOSStockReportSerializer(StockreportQuery, many=True).data                
                     # StockData = list()
                     if serializer:
