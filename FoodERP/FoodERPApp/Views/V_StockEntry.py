@@ -182,6 +182,11 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                 IsRateWise=StockReportdata['IsRateWise']
                 today = date.today()
                                 
+                if int(Unit) == 0:
+                    UnitIDD="M_Items.BaseUnitID_id"
+                else:
+                    UnitIDD = int(Unit) 
+                
                 if Party == "":
                     
                     PartyID=0;
@@ -212,8 +217,8 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                     p2 = (today,today,[PartyIDs])  
                 else:   
                     
-                    Condition += f'''ifnull(RateCalculationFunction1(0, M_Items.id, MC_PartyItems.Party_id, {Unit}, 0, 0, O_LiveBatches.MRPValue, 0),0)RatewithoutGST,
-                                     ifnull(RateCalculationFunction1(0, M_Items.id, MC_PartyItems.Party_id, {Unit}, 0, 0, O_LiveBatches.MRPValue, 1),0)RatewithGST'''                  
+                    Condition += f'''ifnull(RateCalculationFunction1(0, M_Items.id, MC_PartyItems.Party_id, {UnitIDD}, 0, 0, O_LiveBatches.MRPValue, 0),0)RatewithoutGST,
+                                     ifnull(RateCalculationFunction1(0, M_Items.id, MC_PartyItems.Party_id, {UnitIDD}, 0, 0, O_LiveBatches.MRPValue, 1),0)RatewithGST'''                  
                     p2 = (today,  [PartyIDs]) 
                     
                     
@@ -233,10 +238,7 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                     where_clause += f" AND subgroup.id = {SubGroup} "
                     # p2 += (SubGroup,)
                 
-                if int(Unit)==0:
-                    UnitIDD="M_Items.BaseUnitID_id"
-                else:
-                    UnitIDD = int(Unit)        
+                       
                 
                 
                 Stockquery=(f'''select aa.*,round((aa.SaleableStock * aa.RatewithoutGST),2)SaleableStockTaxValue,
@@ -311,7 +313,7 @@ class ShowOBatchWiseLiveStockView(CreateAPIView):
                             "SAPItemCode":row.SAPItemCode
                         })
                         
-                    print(ItemList)
+                    # print(ItemList)
                     log_entry = create_transaction_logNew(request, StockReportdata, PartyID , 'From:'+FromDate+','+'To:'+ToDate,88,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message':'', 'Data': ItemList})     
         except Exception as e:
