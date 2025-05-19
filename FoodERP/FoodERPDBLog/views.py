@@ -27,7 +27,8 @@ def create_transaction_logNew2(request, data, PartyID, TransactionDetails, Trans
     if aa[0]['DefaultValue'] == '1':
         
         if not User:
-            User = data['UserID']
+            User = data.get('UserID', 0)
+            # User = data['UserID']
         else:
             pass
         

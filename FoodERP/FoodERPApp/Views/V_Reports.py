@@ -2631,25 +2631,24 @@ class ManagerSummaryReportView(CreateAPIView):
                     OrderData.append({
                         "id": order.id,
                         "FullOrderNumber": order.FullOrderNumber,
-                        "AdvanceAmount": str(order.AdvanceAmount),
-                        "OrderAmount": str(order.OrderAmount)
+                        "AdvanceAmount": float(order.AdvanceAmount),
+                        "OrderAmount": float(order.OrderAmount)
                     })
 
                 invoice_condition = f"AND inv.Party = {Party}" if Party != 0 else ""
                 
-                InvoicesDetailsQuery = T_Invoices.objects.raw(f'''SELECT inv.id, inv.FullInvoiceNumber, inv.GrandTotal, ord.AdvanceAmount
+                InvoicesDetailsQuery = T_Invoices.objects.raw(f'''SELECT inv.id, inv.FullInvoiceNumber, inv.GrandTotal, inv.AdvanceAmount
                                                                 FROM SweetPOS.T_SPOSInvoices inv
-                                                                LEFT JOIN SweetPOS.TC_SPOSInvoicesReferences ref ON inv.id = ref.Invoice_id
-                                                                LEFT JOIN FoodERP.T_Orders ord ON ref.Order = ord.id
-                                                                WHERE inv.InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}'
+                                                                JOIN SweetPOS.TC_SPOSInvoicesReferences ref ON inv.id = ref.Invoice_id
+                                                                WHERE inv.InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}' AND inv.IsDeleted=0
                                                                 {invoice_condition}''')
 
                 for invoice in InvoicesDetailsQuery:
                     InvoiceData.append({
                         "id": invoice.id,
                         "FullInvoiceNumber": invoice.FullInvoiceNumber,
-                        "GrandTotal": str(invoice.GrandTotal),
-                        "AdvanceAmount": str(invoice.AdvanceAmount) if invoice.AdvanceAmount is not None else "0.00"
+                        "GrandTotal": float(invoice.GrandTotal-invoice.AdvanceAmount),
+                        "AdvanceAmount": float(invoice.AdvanceAmount) if invoice.AdvanceAmount is not None else "0.00"
                     })
 
                 if OrderData or InvoiceData:

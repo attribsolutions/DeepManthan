@@ -81,7 +81,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                                                                              GSTHsnCodeMaster({Item},%s,2,0,0)GSTPercentage ''',[OrderDate,OrderDate])
                                 
                                 
-                                print(Gst[0].GSTPercentage)
+                                
                                 BasicAmount=round(float(aa['RatewithoutGST'])*float(aa['QuantityinPieces']),2)
                                 CGST= round(BasicAmount*(float(Gst[0].GSTPercentage)/100),2)
                                 BaseUnitQuantity = UnitwiseQuantityConversion(
@@ -231,9 +231,11 @@ class T_MobileAppOrdersView(CreateAPIView):
                         for aa in data['OrderItem']:
                             # CustomPrint(aa['FoodERPItemID'])
                             unit=MC_ItemUnits.objects.filter(UnitID_id=1,Item_id=aa['FoodERPItemID'],IsDeleted=0).values('id')
-                            Gst = GSTHsnCodeMaster(aa['FoodERPItemID'], OrderDate).GetTodaysGstHsnCode()
+                            # Gst = GSTHsnCodeMaster(aa['FoodERPItemID'], OrderDate).GetTodaysGstHsnCode()
+                            Gst = M_GSTHSNCode.objects.raw(f'''select 1 as id, GSTHsnCodeMaster({aa['FoodERPItemID']},%s,1,0,0)GSTID,
+                                                                             GSTHsnCodeMaster({aa['FoodERPItemID']},%s,2,0,0)GSTPercentage ''',[OrderDate,OrderDate])
                             BasicAmount=round(float(aa['RatewithoutGST'])*float(aa['QuantityinPieces']),2)
-                            CGST= round(BasicAmount*(float(Gst[0]['GST'])/100),2)
+                            CGST= round(BasicAmount*(float(Gst[0].GSTPercentage)/100),2)
                             BaseUnitQuantity = UnitwiseQuantityConversion(
                                 aa['FoodERPItemID'], aa['QuantityinPieces'], unit[0]['id'], 0, 0, 0, 0).GetBaseUnitQuantity()
                             QtyInNo = UnitwiseQuantityConversion(
@@ -253,13 +255,13 @@ class T_MobileAppOrdersView(CreateAPIView):
                                     "Unit": unit[0]['id'],
                                     "BaseUnitQuantity": BaseUnitQuantity,
                                     "Margin": "",
-                                    "GST": Gst[0]['Gstid'],
+                                    "GST": Gst[0].GSTID,
                                     "CGST": CGST,
                                     "SGST": CGST,
                                     "IGST": 0,
-                                    "GSTPercentage": float(Gst[0]['GST']),
-                                    "CGSTPercentage": float(Gst[0]['GST'])/2,
-                                    "SGSTPercentage": float(Gst[0]['GST'])/2,
+                                    "GSTPercentage": float(Gst[0].GSTPercentage),
+                                    "CGSTPercentage": float(Gst[0].GSTPercentage)/2,
+                                    "SGSTPercentage": float(Gst[0].GSTPercentage)/2,
                                     "IGSTPercentage": "0.00",
                                     "BasicAmount": BasicAmount,
                                     "GSTAmount": round(CGST+CGST,2),
@@ -819,6 +821,7 @@ class RetailerAddFromMobileAppview(CreateAPIView):
                                     "PriceList": 3,
                                     "PartyType": 11,
                                     "Company": 3,
+                                    "SAPPartyCode": a.get('SAPPartyCode', None),
                                     "PAN": a['PANNumber'],
                                     "Email":a['EmailAddress'],
                                     "MobileNo": a['MobileNumber'],
