@@ -202,9 +202,13 @@ class OrderDetailsForInvoice(CreateAPIView):
                 
         except Exception as e:
             log_entry = create_transaction_logNew(request, Orderdata, 0,'OrderDetailsForInvoice:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
-
+def safe_exception_message(ex):
+    try:
+        return str(ex)
+    except Exception:
+        return f"Exception of type {type(ex)._name_} occurred"
         
 class InvoiceListFilterView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
