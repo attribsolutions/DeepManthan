@@ -96,6 +96,9 @@ class SPOSInvoiceView(CreateAPIView):
                             Invoicedata['Customer'] = 43194
                         else:
                             Invoicedata['Customer'] = Invoicedata['CustomerID']
+                        customer = M_Parties.objects.filter(id=Invoicedata['Customer']).values('GSTIN').first()
+                        Invoicedata['CustomerGSTIN'] = customer['GSTIN'] if customer else None
+
                             
                         if 'Vehicle' in Invoicedata and Invoicedata['Vehicle'] == "":
                             Invoicedata['Vehicle'] = None
