@@ -75,8 +75,10 @@ class ProductionView(CreateAPIView):
                 # Gst = GSTHsnCodeMaster(Item, Productiondata['ProductionDate']).GetTodaysGstHsnCode()                
                 Gst = M_GSTHSNCode.objects.raw(f'''select 1 as id, GSTHsnCodeMaster({Item},%s,1,0,0)GSTID,
                                                 GSTHsnCodeMaster({Item},%s,2,0,0)GSTPercentage ''',[Productiondata['ProductionDate'],Productiondata['ProductionDate']])
+                
                 GSTID = Gst[0].GSTID
-                GSTValue=Gst[0].GSTPercentage          
+                
+                GSTValue=round(float(Gst[0].GSTPercentage),2)          
                 
             
                 CssCustomerPriceList=M_Settings.objects.filter(id=62).values("DefaultValue")
@@ -157,7 +159,7 @@ class ProductionView(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Production_Serializer.errors, 'Data': []})
         except Exception as e:
                 log_entry = create_transaction_logNew(request, 0, 0, 'DemandDetailsForChallan:' + str(e), 33, 0)
-                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})       
+                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': Exception(e), 'Data': []})       
 
 class ProductionViewSecond(RetrieveAPIView):
     
