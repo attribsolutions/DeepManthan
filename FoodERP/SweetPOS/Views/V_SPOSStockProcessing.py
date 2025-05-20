@@ -60,7 +60,7 @@ IFNULL(ActualStock,0)ActualStock
 
 from
 
-(Select Item_id,IU.id UnitID  from FoodERP.MC_PartyItems 
+(Select MC_PartyItems.Item_id,IU.id UnitID  from FoodERP.MC_PartyItems 
         join FoodERP.M_Items on M_Items.id=MC_PartyItems.Item_id and M_Items.IsStockProcessItem=1 
         JOIN FoodERP.MC_ItemUnits IU  ON IU.UnitID_Id=M_Items.BaseUnitID_id and IU.Item_id=M_Items.id 
         where Party_id=%s)I
@@ -208,7 +208,7 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
         from
 
 
-        (Select Item_id,IU.id UnitID  from FoodERP.MC_PartyItems 
+        (Select MC_PartyItems.Item_id,IU.id UnitID  from FoodERP.MC_PartyItems 
         join FoodERP.M_Items on M_Items.id=MC_PartyItems.Item_id and M_Items.IsStockProcessItem=1 
         JOIN FoodERP.MC_ItemUnits IU  ON IU.UnitID_Id=M_Items.BaseUnitID_id and IU.Item_id=M_Items.id 
         where Party_id=%s)I
