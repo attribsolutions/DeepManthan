@@ -2474,28 +2474,67 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                 Party = MATAData['Party']
                 CodeRedemptionData = []                            
                 
-                MATACodeRedemptionQuery = M_GiftVoucherCode.objects.raw(f'''Select 1 as id, FoodERP.M_Parties.Name FranchiseName,count(*) VoucherCodeCount,M_Scheme.SchemeValue ClaimPerVoucher,
-                (M_Scheme.SchemeValue*Count(*))TotalClaimAmount 
-                From  M_GiftVoucherCode
-                JOIN FoodERP.M_Parties ON FoodERP.M_Parties.id=Party
-                JOIN FoodERP.MC_SchemeParties ON FoodERP.MC_SchemeParties.PartyID_id=FoodERP.M_Parties.id
-                JOIN FoodERP.M_Scheme ON FoodERP.M_Scheme.id=FoodERP.MC_SchemeParties.SchemeID_id
-                where InvoiceDate between '{FromDate}' and '{ToDate}' and VoucherCode !='' and VoucherCode like 'CBM%%'
-                and SchemeID_id=1  and Party in ({Party}) group by M_GiftVoucherCode.Party,M_Scheme.id,id ''')
-
+                
+                # MATACodeRedemptionQuery = M_GiftVoucherCode.objects.raw(f'''Select 1 as id, FoodERP.M_Parties.Name FranchiseName,count(*) VoucherCodeCount,M_Scheme.SchemeValue ClaimPerVoucher,
+                # (M_Scheme.SchemeValue*Count(*))TotalClaimAmount 
+                # From  M_GiftVoucherCode
+                # JOIN FoodERP.M_Parties ON FoodERP.M_Parties.id=Party
+                # JOIN FoodERP.MC_SchemeParties ON FoodERP.MC_SchemeParties.PartyID_id=FoodERP.M_Parties.id
+                # JOIN FoodERP.M_Scheme ON FoodERP.M_Scheme.id=FoodERP.MC_SchemeParties.SchemeID_id
+                # where InvoiceDate between '{FromDate}' and '{ToDate}' and VoucherCode !='' 
+                # and Party in ({Party}) group by M_GiftVoucherCode.Party,M_Scheme.id,id ''')                
+                # for Code in MATACodeRedemptionQuery:    
+                #     CodeRedemptionData.append({
+                #         "id": Code.id,
+                #         "FranchiseName": Code.FranchiseName,
+                #         "VoucherCodeCount": Code.VoucherCodeCount,
+                #         "ClaimPerVoucher": Code.ClaimPerVoucher,
+                #         "TotalClaimAmount":Code.TotalClaimAmount                       
+                #     })
+                
+                
+                with connection.cursor() as cursor:
+                    cursor.execute(f'''SELECT  Distinct s.id, s.QRPrefix
+                        FROM MC_SchemeParties sp
+                        JOIN M_Scheme s ON s.id = sp.SchemeID_id
+                        WHERE sp.PartyID_id in ({Party})''')
+                    schemes = cursor.fetchall()  
 
                 
-                for Code in MATACodeRedemptionQuery:
-                   
-
-
-                    CodeRedemptionData.append({
-                        "id": Code.id,
-                        "FranchiseName": Code.FranchiseName,
-                        "VoucherCodeCount": Code.VoucherCodeCount,
-                        "ClaimPerVoucher": Code.ClaimPerVoucher,
-                        "TotalClaimAmount":Code.TotalClaimAmount                       
-                    })
+                for scheme_id, prefix in schemes:
+                    with connection.cursor() as cursor:
+                        cursor.execute(f'''
+                            SELECT 
+                                s.id,
+                                p.Name AS FranchiseName,
+                                s.SchemeName,
+                                COUNT(*) AS VoucherCodeCount,
+                                s.SchemeValue AS ClaimPerVoucher,
+                                (s.SchemeValue * COUNT(*)) AS TotalClaimAmount
+                            FROM M_GiftVoucherCode gv
+                            JOIN FoodERP.M_Parties p ON p.id = gv.Party
+                            JOIN FoodERP.MC_SchemeParties sp ON sp.PartyID_id = p.id
+                            JOIN FoodERP.M_Scheme s ON s.id = sp.SchemeID_id
+                            WHERE 
+                                gv.InvoiceDate BETWEEN %s AND %s
+                                AND gv.IsActive = 0 
+                                AND gv.VoucherCode != ''
+                                AND gv.VoucherCode LIKE %s
+                                AND s.SchemeValue > 0 
+                                AND gv.Party in ({Party})
+                                AND s.id = %s
+                            GROUP BY gv.Party, s.id, p.Name, s.SchemeValue, s.SchemeName
+                        ''', [FromDate, ToDate, f"{prefix}%",  scheme_id])                        
+                        rows = cursor.fetchall()                       
+                    for row in rows:
+                        CodeRedemptionData.append({
+                            "id": row[0],
+                            "FranchiseName": row[1],
+                            "SchemeName": row[2],            
+                            "VoucherCodeCount": row[3],
+                            "ClaimPerVoucher": row[4],
+                            "TotalClaimAmount": row[5],
+                        })  
                 if CodeRedemptionData:
                     log_entry = create_transaction_logNew(request, MATAData, 0, "", 448, 0, FromDate, ToDate, 0)
                     return JsonResponse({"StatusCode": 200, "Status": True, "Message": "CodeRedemptionReport","Data": CodeRedemptionData,})
