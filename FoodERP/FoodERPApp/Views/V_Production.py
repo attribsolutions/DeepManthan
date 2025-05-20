@@ -159,7 +159,7 @@ class ProductionView(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Production_Serializer.errors, 'Data': []})
         except Exception as e:
                 log_entry = create_transaction_logNew(request, 0, 0, 'DemandDetailsForChallan:' + str(e), 33, 0)
-                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': Exception(e), 'Data': []})       
+                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})       
 
 class ProductionViewSecond(RetrieveAPIView):
     
