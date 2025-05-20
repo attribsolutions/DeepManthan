@@ -475,7 +475,11 @@ IFNULL(IBPurchaseQuantity,0)IBPurchaseQuantity,
 IFNULL(MaterialIssueQuantity,0)MaterialIssueQuantity
 from
 
-(Select Item_id,M_Items.BaseUnitID_id UnitID  from MC_PartyItems join M_Items on M_Items.id=MC_PartyItems.Item_id where Party_id=%s )I
+(Select MC_PartyItems.Item_id,MC_ItemUnits.id UnitID
+ from MC_PartyItems 
+ join M_Items on M_Items.id=MC_PartyItems.Item_id 
+ JOIN MC_ItemUnits  ON MC_ItemUnits.UnitID_Id=M_Items.BaseUnitID_id and MC_ItemUnits.Item_id=M_Items.id
+ where Party_id=%s AND IsDeleted=0  )I
 
 left join (SELECT IFNULL(Item_id,0) ItemID, sum(ClosingBalance)ClosingBalance FROM O_DateWiseLiveStock WHERE StockDate = DATE_SUB(  %s, INTERVAL 1 
 					DAY ) AND Party_id =%s GROUP BY ItemID)CB
@@ -609,23 +613,24 @@ class StockReportView(CreateAPIView):
                     UnitwiseQuantityConversion(A.Item_id,MaterialIssue,0,A.Unit_id,0,{unitcondi},0)MaterialIssue,
                     UnitwiseQuantityConversion(A.Item_id,IBPurchase,0,A.Unit_id,0,{unitcondi},0)IBPurchase,
                     UnitwiseQuantityConversion(A.Item_id,Sale,0,A.Unit_id,0,{unitcondi},0)Sale, 
-                    UnitwiseQuantityConversion(A.Item_id,ClosingBalance,0,A.Unit_id,0,{unitcondi},0)ClosingBalance, 
-                    UnitwiseQuantityConversion(A.Item_id,ActualStock,0,A.Unit_id,0,{unitcondi},0)ActualStock,
+                    UnitwiseQuantityConversion(A.Item_id,ifnull(ClosingBalance,0),0,A.Unit_id,0,{unitcondi},0)ClosingBalance, 
+                    UnitwiseQuantityConversion(A.Item_id,ifnull(ActualStock,0),0,A.Unit_id,0,{unitcondi},0)ActualStock,
                     A.ItemName,
                     D.QuantityInBaseUnit,
                     UnitwiseQuantityConversion(A.Item_id,PurchaseReturn,0,A.Unit_id,0,{unitcondi},0)PurchaseReturn,
                     UnitwiseQuantityConversion(A.Item_id,SalesReturn,0,A.Unit_id,0,{unitcondi},0)SalesReturn,
                     UnitwiseQuantityConversion(A.Item_id,StockAdjustment,0,A.Unit_id,0,{unitcondi},0)StockAdjustment
                     ,GroupTypeName,GroupName,SubGroupName,CASE WHEN {Unit} = 0 THEN UnitName else '{unitname}' END UnitName
-                    ,(FoodERP.RateCalculationFunction1(0, A.Item_id, {Party}, A.Unit_id, 0, 0, 0, 1) * FoodERP.UnitwiseQuantityConversion(A.Item_id,ClosingBalance,0,A.Unit_id,0,{unitcondi},0))ClosingAmount
+                    ,(FoodERP.RateCalculationFunction1(0, A.Item_id, {Party}, A.Unit_id, 0, 0, 0, 1) * FoodERP.UnitwiseQuantityConversion(A.Item_id,ifnull(ClosingBalance,0),0,A.Unit_id,0,{unitcondi},0))ClosingAmount
                     FROM 
         
-        ( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit_id,M_Units.Name UnitName,sum(MaterialIssue)MaterialIssue, SUM(Production)Production,SUM(GRN) GRNInward, SUM(Sale) Sale,SUM(IBSale) IBSale,SUM(IBPurchase) IBPurchase, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
+        ( SELECT M_Items.id Item_id, M_Items.Name ItemName ,M_Units.id Unit_id,M_Units.Name UnitName,sum(MaterialIssue)MaterialIssue, SUM(Production)Production,SUM(GRN) GRNInward, SUM(Sale) Sale,SUM(IBSale) IBSale,SUM(IBPurchase) IBPurchase, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
         {ItemsGroupJoinsandOrderby[0]}
         FROM O_DateWiseLiveStock
         
             JOIN M_Items ON M_Items.id=O_DateWiseLiveStock.Item_id 
-            join M_Units on M_Units.id=O_DateWiseLiveStock.Unit_id
+            join MC_ItemUnits on MC_ItemUnits.id=O_DateWiseLiveStock.Unit_id
+            JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id
             {ItemsGroupJoinsandOrderby[1]} 
             
             WHERE StockDate BETWEEN %s AND %s AND Party_id=%s GROUP BY Item_id,Unit_id,GroupType.id,Groupss.id,subgroup.id
@@ -667,12 +672,13 @@ class StockReportView(CreateAPIView):
                     CASE WHEN {Unit} = 0 THEN UnitName else '{unitname}' END UnitName,               
                     (FoodERP.RateCalculationFunction1(0, A.Item_id, {Party}, A.Unit, 0, 0, 0, 1) * FoodERP.UnitwiseQuantityConversion(A.Item_id,ifnull(ClosingBalance,0),0,A.Unit,0,{unitcondiPOS},0))ClosingAmount
                     FROM                                                                           
-                    ( SELECT M_Items.id Item_id, M_Items.Name ItemName ,Unit,M_Units.Name UnitName,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
+                    ( SELECT M_Items.id Item_id, M_Items.Name ItemName ,M_Units.id Unit,M_Units.Name UnitName,SUM(GRN) GRNInward, SUM(Sale) Sale, SUM(PurchaseReturn)PurchaseReturn,SUM(SalesReturn)SalesReturn,SUM(StockAdjustment)StockAdjustment,
                         {ItemsGroupJoinsandOrderby[0]}
                         FROM SweetPOS.O_SPOSDateWiseLiveStock SPOSDatewise
 
                     JOIN FoodERP.M_Items ON M_Items.id=SPOSDatewise.Item
-                    join FoodERP.M_Units on M_Units.id= SPOSDatewise.Unit
+                    join FoodERP.MC_ItemUnits on MC_ItemUnits.id= SPOSDatewise.Unit
+                    JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id
                     {ItemsGroupJoinsandOrderby[1]}
                     WHERE StockDate BETWEEN %s AND %s AND Party=%s    GROUP BY Item,Unit,GroupType.id,Groupss.id,subgroup.id
                     {ItemsGroupJoinsandOrderby[2]}) A
@@ -930,7 +936,7 @@ class InvoiceDateExportReportView(CreateAPIView):
 
                         InvoiceQueryresults = T_Invoices.objects.raw(Invoicequery,[FromDate,ToDate,Party])      
                 else: 
-                    Invoicequery= '''SELECT TC_InvoiceItems.id,T_Invoices.Party_id AS SupplierID,A.Name SupplierName,T_Invoices.FullInvoiceNumber As InvoiceNumber,T_Invoices.InvoiceDate,T_Invoices.Customer_id As CustomerID,B.Name CustomerName,TC_InvoiceItems.Item_id AS FE2MaterialID,M_Items.Name As MaterialName,C_Companies.Name CompanyName,M_GSTHSNCode.HSNCode,TC_InvoiceItems.MRPValue AS MRP,TC_InvoiceItems.QtyInNo,TC_InvoiceItems.QtyInKg,TC_InvoiceItems.QtyInBox,TC_InvoiceItems.Rate AS BasicRate,(TC_InvoiceItems.Rate +((TC_InvoiceItems.Rate * TC_InvoiceItems.GSTPercentage)/100))WithGSTRate, M_Units.Name AS UnitName,TC_InvoiceItems.DiscountType, TC_InvoiceItems.Discount,TC_InvoiceItems.DiscountAmount,TC_InvoiceItems.BasicAmount As TaxableValue,TC_InvoiceItems.CGST,TC_InvoiceItems.CGSTPercentage,TC_InvoiceItems.SGST,TC_InvoiceItems.SGSTPercentage,TC_InvoiceItems.IGST,TC_InvoiceItems.IGSTPercentage,TC_InvoiceItems.GSTPercentage,TC_InvoiceItems.GSTAmount,TC_InvoiceItems.Amount AS TotalValue,T_Invoices.TCSAmount,T_Invoices.RoundOffAmount,T_Invoices.GrandTotal,'' AS RouteName,M_States.Name AS StateName,B.GSTIN,TC_InvoiceUploads.Irn, TC_InvoiceUploads.AckNo,TC_InvoiceUploads.EwayBillNo, M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName
+                    Invoicequery= f'''SELECT TC_InvoiceItems.id,T_Invoices.Party_id AS SupplierID,A.Name SupplierName,T_Invoices.FullInvoiceNumber As InvoiceNumber,T_Invoices.InvoiceDate,T_Invoices.Customer_id As CustomerID,B.Name CustomerName,TC_InvoiceItems.Item_id AS FE2MaterialID,M_Items.Name As MaterialName,C_Companies.Name CompanyName,GSTHsnCodeMaster(TC_InvoiceItems.Item_id,T_Invoices.InvoiceDate ,3,{Customer},0)HSNCode,TC_InvoiceItems.MRPValue AS MRP,TC_InvoiceItems.QtyInNo,TC_InvoiceItems.QtyInKg,TC_InvoiceItems.QtyInBox,TC_InvoiceItems.Rate AS BasicRate,(TC_InvoiceItems.Rate +((TC_InvoiceItems.Rate * TC_InvoiceItems.GSTPercentage)/100))WithGSTRate, M_Units.Name AS UnitName,TC_InvoiceItems.DiscountType, TC_InvoiceItems.Discount,TC_InvoiceItems.DiscountAmount,TC_InvoiceItems.BasicAmount As TaxableValue,TC_InvoiceItems.CGST,TC_InvoiceItems.CGSTPercentage,TC_InvoiceItems.SGST,TC_InvoiceItems.SGSTPercentage,TC_InvoiceItems.IGST,TC_InvoiceItems.IGSTPercentage,GSTHsnCodeMaster(TC_InvoiceItems.Item_id,T_Invoices.InvoiceDate ,2,{Customer},0)GSTPercentage,TC_InvoiceItems.GSTAmount,TC_InvoiceItems.Amount AS TotalValue,T_Invoices.TCSAmount,T_Invoices.RoundOffAmount,T_Invoices.GrandTotal,'' AS RouteName,M_States.Name AS StateName,B.GSTIN,TC_InvoiceUploads.Irn, TC_InvoiceUploads.AckNo,TC_InvoiceUploads.EwayBillNo, M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName
     FROM TC_InvoiceItems
     JOIN T_Invoices ON T_Invoices.id =TC_InvoiceItems.Invoice_id
     join TC_GRNReferences on TC_GRNReferences.Invoice_id = T_Invoices.id
@@ -940,8 +946,7 @@ class InvoiceDateExportReportView(CreateAPIView):
     JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id
     JOIN C_Companies ON C_Companies.id = M_Items.Company_id
     JOIN MC_ItemUnits ON MC_ItemUnits.id=TC_InvoiceItems.Unit_id
-    JOIN M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
-    JOIN M_GSTHSNCode ON M_GSTHSNCode.Item_id=TC_InvoiceItems.Item_id and M_GSTHSNCode.IsDeleted=0 and M_GSTHSNCode.PartyType_id is null
+    JOIN M_Units ON M_Units.id = MC_ItemUnits.UnitID_id    
     LEFT JOIN TC_InvoiceUploads on TC_InvoiceUploads.Invoice_id = T_Invoices.id
     left JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id and MC_ItemGroupDetails.GroupType_id=1
     LEFT JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
