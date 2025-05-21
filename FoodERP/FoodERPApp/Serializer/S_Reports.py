@@ -217,13 +217,19 @@ class GenericSaleReportSerializer(serializers.Serializer):
     SAPItemID = serializers.CharField(max_length=500)
     VoucherCode = serializers.CharField(max_length=500)
     CashierName = serializers.CharField(max_length=500)
+    CreatedOn = serializers.DateTimeField()
      
     def to_representation(self, instance):
         # Ensure proper rounding for specific fields
         representation = super().to_representation(instance)
-        representation['QtyInNo'] = Decimal(representation['QtyInNo']).quantize(Decimal('0.00'))
-        representation['QtyInKg'] = Decimal(representation['QtyInKg']).quantize(Decimal('0.00'))
-        representation['QtyInBox'] = Decimal(representation['QtyInBox']).quantize(Decimal('0.00'))
+        float_fields = ['QtyInNo', 'QtyInKg', 'QtyInBox','MRP', 'BasicRate', 'WithGSTRate','Discount', 'DiscountAmount','TaxableValue', 
+                        'CGST', 'CGSTPercentage','SGST', 'SGSTPercentage', 'IGST', 'IGSTPercentage','GSTPercentage', 'GSTAmount', 'TotalValue','TCSAmount', 'RoundOffAmount', 'GrandTotal']
+        
+        for field in float_fields:
+            value = representation.get(field)
+            if value is not None:
+                representation[field] = float(Decimal(value).quantize(Decimal('0.000')))
+    
         representation ['Data Upload / FE2 Billing'] = "Data Upload" if representation['ImportFromExcel'] else "FE2 Billing"
         return representation
      
