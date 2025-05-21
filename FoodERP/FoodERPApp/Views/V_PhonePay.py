@@ -23,7 +23,7 @@ class PhonePayReceiveMsg(APIView):
 
     @transaction.atomic
     def post(self, request):
-        test()
+        # test()
         # return JsonResponse({
         #         'StatusCode':200,
         #         'Status': True,
@@ -87,7 +87,7 @@ def phonepe_callback(request, body_data):
         else:
             print(f"Unknown status: {code}")
 
-        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': code})
+        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Payment callback processed.','Code': code})
 
     except Exception as e:
         import traceback
