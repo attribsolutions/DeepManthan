@@ -2477,36 +2477,44 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                 FromDate = MATAData['FromDate']
                 ToDate = MATAData['ToDate']
                 Party = MATAData['Party']
-                CodeRedemptionData = []                            
+                SchemeID=MATAData['SchemeID']
+                CodeRedemptionData = []    
                 
-                
-                # MATACodeRedemptionQuery = M_GiftVoucherCode.objects.raw(f'''Select 1 as id, FoodERP.M_Parties.Name FranchiseName,count(*) VoucherCodeCount,M_Scheme.SchemeValue ClaimPerVoucher,
-                # (M_Scheme.SchemeValue*Count(*))TotalClaimAmount 
-                # From  M_GiftVoucherCode
-                # JOIN FoodERP.M_Parties ON FoodERP.M_Parties.id=Party
-                # JOIN FoodERP.MC_SchemeParties ON FoodERP.MC_SchemeParties.PartyID_id=FoodERP.M_Parties.id
-                # JOIN FoodERP.M_Scheme ON FoodERP.M_Scheme.id=FoodERP.MC_SchemeParties.SchemeID_id
-                # where InvoiceDate between '{FromDate}' and '{ToDate}' and VoucherCode !='' 
-                # and Party in ({Party}) group by M_GiftVoucherCode.Party,M_Scheme.id,id ''')                
-                # for Code in MATACodeRedemptionQuery:    
-                #     CodeRedemptionData.append({
-                #         "id": Code.id,
-                #         "FranchiseName": Code.FranchiseName,
-                #         "VoucherCodeCount": Code.VoucherCodeCount,
-                #         "ClaimPerVoucher": Code.ClaimPerVoucher,
-                #         "TotalClaimAmount":Code.TotalClaimAmount                       
-                #     })
-                
+                party_condition = ""
+                scheme_condition = ""
+
+                if Party != "0":
+                    party_condition = f"sp.PartyID_id IN ({Party})"
+
+                if SchemeID != "0":
+                    scheme_condition = f"s.id IN ({SchemeID})"
+                    
+                where_clauses = []
+
+                if party_condition:
+                    where_clauses.append(party_condition)
+
+                if scheme_condition:
+                    where_clauses.append(scheme_condition)                
+                final_where = " AND ".join(where_clauses)
+                if final_where:
+                    final_where = "WHERE " + final_where
                 
                 with connection.cursor() as cursor:
                     cursor.execute(f'''SELECT  Distinct s.id, s.QRPrefix
                         FROM MC_SchemeParties sp
                         JOIN M_Scheme s ON s.id = sp.SchemeID_id
-                        WHERE sp.PartyID_id in ({Party})''')
+                        {final_where}''')
                     schemes = cursor.fetchall()  
-
+                PartyID=""
+                Scheme=""
+                if Party!="0":
+                    PartyID=f"AND gv.Party in ({Party})"             
                 
+                               
                 for scheme_id, prefix in schemes:
+                    if SchemeID !="0":
+                        Scheme=f"AND s.id in ({scheme_id})"
                     with connection.cursor() as cursor:
                         cursor.execute(f'''
                             SELECT 
@@ -2514,8 +2522,20 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                                 p.Name AS FranchiseName,
                                 s.SchemeName,
                                 COUNT(*) AS VoucherCodeCount,
-                                s.SchemeValue AS ClaimPerVoucher,
-                                (s.SchemeValue * COUNT(*)) AS TotalClaimAmount
+                              
+                           Sum( CASE
+                                WHEN s.ValueIn = 'Rs' THEN s.SchemeValue
+                                WHEN s.ValueIn = '%%' THEN 
+                                    ((gv.InvoiceAmount) * s.SchemeValue / 100)
+                                ELSE 0 
+                            END )AS ClaimPerVoucher,
+
+                            CASE
+                                WHEN s.ValueIn = 'Rs' THEN s.SchemeValue 
+                                WHEN s.ValueIn = '%%' THEN 
+                                    ((gv.InvoiceAmount) * s.SchemeValue / 100)
+                                ELSE 0 
+                            END AS TotalClaimAmount,Sum(InvoiceAmount)InvoiceAmount
                             FROM M_GiftVoucherCode gv
                             JOIN FoodERP.M_Parties p ON p.id = gv.Party
                             JOIN FoodERP.MC_SchemeParties sp ON sp.PartyID_id = p.id
@@ -2526,10 +2546,9 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                                 AND gv.VoucherCode != ''
                                 AND gv.VoucherCode LIKE %s
                                 AND s.SchemeValue > 0 
-                                AND gv.Party in ({Party})
-                                AND s.id = %s
-                            GROUP BY gv.Party, s.id, p.Name, s.SchemeValue, s.SchemeName
-                        ''', [FromDate, ToDate, f"{prefix}%",  scheme_id])                        
+                               {PartyID} {Scheme}                                
+                            GROUP BY s.id, s.SchemeName, s.ValueIn, s.SchemeValue,p.id
+                        ''', [FromDate, ToDate, f"{prefix}%"])                        
                         rows = cursor.fetchall()                       
                     for row in rows:
                         CodeRedemptionData.append({
@@ -2539,6 +2558,7 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                             "VoucherCodeCount": row[3],
                             "ClaimPerVoucher": row[4],
                             "TotalClaimAmount": row[5],
+                            "InvoiceAmount": row[6],
                         })  
                 if CodeRedemptionData:
                     log_entry = create_transaction_logNew(request, MATAData, 0, "", 448, 0, FromDate, ToDate, 0)
