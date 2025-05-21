@@ -267,7 +267,7 @@ M_Units.Name AS UnitName,TC_InvoiceItems.DiscountType,TC_InvoiceItems.Discount,T
 TC_InvoiceItems.BasicAmount AS TaxableValue,TC_InvoiceItems.CGST,TC_InvoiceItems.CGSTPercentage,TC_InvoiceItems.SGST,
 TC_InvoiceItems.SGSTPercentage,TC_InvoiceItems.IGST,TC_InvoiceItems.IGSTPercentage,TC_InvoiceItems.GSTPercentage,
 TC_InvoiceItems.GSTAmount,TC_InvoiceItems.Amount AS TotalValue,T_Orders.FullOrderNumber,T_Orders.OrderDate,T_Invoices.TCSAmount,
-T_Invoices.RoundOffAmount,T_Invoices.GrandTotal,M_Group.Name AS `Group`, MC_SubGroup.Name AS SubGroup, 
+T_Invoices.RoundOffAmount,T_Invoices.GrandTotal,M_Group.Name AS `Group`, MC_SubGroup.Name AS SubGroup, T_Invoices.CreatedOn,
 M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster, TC_InvoiceItems.BatchCode AS BatchNo , TC_InvoiceItems.BatchDate, M_Items.SAPItemCode SAPItemID ,'' VoucherCode,'' CashierName
 FROM FoodERP.TC_InvoiceItems 
 JOIN FoodERP.T_Invoices ON FoodERP.T_Invoices.id = FoodERP.TC_InvoiceItems.Invoice_id 
@@ -311,7 +311,7 @@ M_Units.Name AS UnitName,SweetPOS.TC_SPOSInvoiceItems.DiscountType,SweetPOS.TC_S
 SweetPOS.TC_SPOSInvoiceItems.BasicAmount AS TaxableValue,SweetPOS.TC_SPOSInvoiceItems.CGST,SweetPOS.TC_SPOSInvoiceItems.CGSTPercentage,SweetPOS.TC_SPOSInvoiceItems.SGST,
 SweetPOS.TC_SPOSInvoiceItems.SGSTPercentage,SweetPOS.TC_SPOSInvoiceItems.IGST,SweetPOS.TC_SPOSInvoiceItems.IGSTPercentage,SweetPOS.TC_SPOSInvoiceItems.GSTPercentage,
 SweetPOS.TC_SPOSInvoiceItems.GSTAmount,SweetPOS.TC_SPOSInvoiceItems.Amount AS TotalValue,T_Orders.FullOrderNumber,T_Orders.OrderDate,SweetPOS.T_SPOSInvoices.TCSAmount,
-SweetPOS.T_SPOSInvoices.RoundOffAmount,SweetPOS.T_SPOSInvoices.GrandTotal,M_Group.Name AS `Group`, MC_SubGroup.Name AS SubGroup,
+SweetPOS.T_SPOSInvoices.RoundOffAmount,SweetPOS.T_SPOSInvoices.GrandTotal,M_Group.Name AS `Group`, MC_SubGroup.Name AS SubGroup, T_SPOSInvoices.CreatedOn,
 M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster, SweetPOS.TC_SPOSInvoiceItems.BatchCode AS BatchNo , SweetPOS.TC_SPOSInvoiceItems.BatchDate, M_Items.SAPItemCode SAPItemID,VoucherCode,FoodERP.M_Users.LoginName CashierName
 FROM SweetPOS.TC_SPOSInvoiceItems
 JOIN SweetPOS.T_SPOSInvoices ON SweetPOS.T_SPOSInvoices.id = SweetPOS.TC_SPOSInvoiceItems.Invoice_id
@@ -2028,13 +2028,15 @@ class FranchiseSecondarySaleReportView(CreateAPIView):
                 SPOSInvoicequery ='''Select X.id, M_Parties.Name FranchiseName, M_Parties.SAPPartyCode SAPCode, M_Parties.Name SAPName, 
                                 X.InvoiceDate SaleDate, X.ClientID, M_Items.id CItemID, X.FullInvoiceNumber BillNumber, M_Items.Name ItemName, 
                                 Y.Quantity, M_Units.Name UnitName, Y.MRPValue Rate, Y.Amount, M_Items.IsCBMItem, X.MobileNo, 
-                                M_Items.SAPItemCode MaterialSAPCode,Y.QtyInNo,Y.QtyInKg, Y.GSTPercentage, Y.BasicAmount, Y.HSNCode,X.VoucherCode
+                                M_Items.SAPItemCode MaterialSAPCode,Y.QtyInNo,Y.QtyInKg, Y.GSTPercentage, Y.BasicAmount,
+                                Y.HSNCode,X.VoucherCode, X.CreatedOn, U.LoginName
                         from SweetPOS.T_SPOSInvoices X
                         join SweetPOS.TC_SPOSInvoiceItems Y on Y.Invoice_id = X.id 
                         join FoodERP.M_Parties on M_Parties.id = X.Party
                         join FoodERP.M_Items  on M_Items.id = Y.Item 
                         join FoodERP.MC_ItemUnits on MC_ItemUnits.id = Y.Unit
                         join FoodERP.M_Units on M_Units.id = MC_ItemUnits.UnitID_id
+                        LEFT JOIN FoodERP.M_Users U ON U.id = X.CreatedBy
                         where X.InvoiceDate between %s and %s and X.IsDeleted=0  '''
                 
                 parameters = [FromDate,ToDate]
@@ -2077,19 +2079,22 @@ class FranchiseSecondarySaleReportView(CreateAPIView):
                         "CItemID": a.CItemID,
                         "BillNumber": a.BillNumber,
                         "ItemName": a.ItemName,
-                        "Quantity": a.Quantity,
+                        "Quantity":round(float(a.Quantity),3),
                         "UnitName": a.UnitName,
                         "Rate": a.Rate,
                         "Amount": a.Amount,
+                        "Amount":round(float(a.Amount),2),
                         "IsCBMItem": aa,
                         "MobileNo": a.MobileNo,
                         "MaterialSAPCode": a.MaterialSAPCode,
-                        "QtyInNo":round(a.QtyInNo,3),
-                        "QtyInKg":round(a.QtyInKg,3),
+                        "QtyInNo":round(float(a.QtyInNo),3),
+                        "QtyInKg":round(float(a.QtyInKg),3),
                         "GSTPercentage":a.GSTPercentage,
-                        "BasicAmount":a.BasicAmount,
+                        "BasicAmount":round(float(a.BasicAmount),2),
                         "HSNCode" : a.HSNCode,
-                        "VoucherCode":a.VoucherCode
+                        "VoucherCode":a.VoucherCode,
+                        "CreatedOn" : a.CreatedOn,
+                        "CashierName": a.LoginName 
                         })
                     log_entry = create_transaction_logNew(request, Data, Party, '', 414, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReportdataList})  
@@ -2509,8 +2514,20 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                                 p.Name AS FranchiseName,
                                 s.SchemeName,
                                 COUNT(*) AS VoucherCodeCount,
-                                s.SchemeValue AS ClaimPerVoucher,
-                                (s.SchemeValue * COUNT(*)) AS TotalClaimAmount
+                              
+                           Sum( CASE
+                                WHEN s.ValueIn = 'Rs' THEN s.SchemeValue
+                                WHEN s.ValueIn = '%%' THEN 
+                                    ((gv.InvoiceAmount) * s.SchemeValue / 100)
+                                ELSE 0 
+                            END )AS ClaimPerVoucher,
+
+                            CASE
+                                WHEN s.ValueIn = 'Rs' THEN s.SchemeValue 
+                                WHEN s.ValueIn = '%%' THEN 
+                                    ((gv.InvoiceAmount) * s.SchemeValue / 100)
+                                ELSE 0 
+                            END AS TotalClaimAmount,Sum(InvoiceAmount)InvoiceAmount
                             FROM M_GiftVoucherCode gv
                             JOIN FoodERP.M_Parties p ON p.id = gv.Party
                             JOIN FoodERP.MC_SchemeParties sp ON sp.PartyID_id = p.id
@@ -2523,7 +2540,7 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                                 AND s.SchemeValue > 0 
                                 AND gv.Party in ({Party})
                                 AND s.id = %s
-                            GROUP BY gv.Party, s.id, p.Name, s.SchemeValue, s.SchemeName
+                            GROUP BY s.id, s.SchemeName, s.ValueIn, s.SchemeValue,p.id
                         ''', [FromDate, ToDate, f"{prefix}%",  scheme_id])                        
                         rows = cursor.fetchall()                       
                     for row in rows:
@@ -2534,6 +2551,7 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                             "VoucherCodeCount": row[3],
                             "ClaimPerVoucher": row[4],
                             "TotalClaimAmount": row[5],
+                            "InvoiceAmount": row[6],
                         })  
                 if CodeRedemptionData:
                     log_entry = create_transaction_logNew(request, MATAData, 0, "", 448, 0, FromDate, ToDate, 0)
