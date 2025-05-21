@@ -35,7 +35,7 @@ class ItemSaleReportView(CreateAPIView):
                 #         CustomerID=f'AND Cust.id in ({CustomerID})'
                 
                 
-                Invoicequery = f'''SELECT T_Invoices.id, T_Invoices.InvoiceDate, SupPartyType.Name SaleMadeFrom, CustPartyType.Name SaleMadeTo, 
+                Invoicequery = f'''SELECT T_Invoices.id, T_Invoices.InvoiceDate, SupPartyType.Name SaleMadeFrom, CustPartyType.Name SaleMadeTo, T_Invoices.CreatedOn, 
                                 FullInvoiceNumber,Sup.Name SupplierName,Sup.ShortName SupShortName, M_Routes.Name RouteName, Cust.Name CustomerName,Cust.ShortName CustShortName, M_Group.Name GroupName,
                                 MC_SubGroup.Name SubGroupName, M_Items.Name ItemName,  QtyInKg, QtyInNo, QtyInBox, Rate, BasicAmount, 
                                 DiscountAmount, GSTPercentage, GSTAmount, Amount, T_Invoices.GrandTotal, T_Invoices.RoundOffAmount, TCSAmount, 
@@ -63,7 +63,7 @@ class ItemSaleReportView(CreateAPIView):
                                 JOIN FoodERP.M_Units ON MC_ItemUnits.UnitID_id = M_Units.id
                                 LEFT JOIN T_GRNs ON GRN_id = T_GRNs.ID WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s '''
                 # print(Invoicequery)            
-                SPOSInvoicequery='''SELECT A.id, A.InvoiceDate, SupPartyType.Name SaleMadeFrom, CustPartyType.Name SaleMadeTo, 
+                SPOSInvoicequery='''SELECT A.id, A.InvoiceDate, SupPartyType.Name SaleMadeFrom, CustPartyType.Name SaleMadeTo, A.CreatedOn, 
                                 A.FullInvoiceNumber, Sup.Name SupplierName,Sup.ShortName SupShortName, M_Routes.Name RouteName, Cust.Name CustomerName, Cust.ShortName CustShortName,
                                 M_Group.Name GroupName, MC_SubGroup.Name SubGroupName, M_Items.Name ItemName, B.QtyInKg, B.QtyInNo, B.QtyInBox,
                                 B.Rate, B.BasicAmount, A.DiscountAmount, B.GSTPercentage, B.GSTAmount, B.Amount, A.GrandTotal, A.RoundOffAmount,
@@ -147,27 +147,27 @@ class ItemSaleReportView(CreateAPIView):
                                 "GroupName":a.GroupName,
                                 "SubGroupName":a.SubGroupName,
                                 "ItemName":a.ItemName,
-                                "QtyInKg":a.QtyInKg,
-                                "QtyInNo" :a.QtyInNo,
-                                "QtyInBox":a.QtyInBox,
-                                "Rate":a.Rate,
-                                "BasicAmount":a.BasicAmount,
-                                "DiscountAmount":a.DiscountAmount,
+                                "QtyInKg":round(float(a.QtyInKg),3),
+                                "QtyInNo" :round(float(a.QtyInNo),3),
+                                "QtyInBox":round(float(a.QtyInBox),3),
+                                "Rate":round(float(a.Rate),2),
+                                "BasicAmount":round(float(a.BasicAmount),2),
+                                "DiscountAmount":round(float(a.DiscountAmount),2),
                                 "GSTPercentage":a.GSTPercentage,
-                                "GSTAmount":a.GSTAmount,
-                                "Amount":a.Amount,
-                                "GrandTotal":a.GrandTotal,
-                                "RoundOffAmount":a.RoundOffAmount,
-                                "TCSAmount":a.TCSAmount,
+                                "GSTAmount":round(float(a.GSTAmount),2),
+                                "Amount":round(float(a.Amount),2),
+                                "GrandTotal":round(float(a.GrandTotal),2),
+                                "RoundOffAmount":round(float(a.RoundOffAmount),2),
+                                "TCSAmount":round(float(a.TCSAmount),2),
                                 "FullGRNNumber":a.FullGRNNumber,
-                                "MRPValue":a.MRPValue,
+                                "MRPValue":round(float(a.MRPValue),2),
                                 "MobileNo": a.MobileNo,
                                 "CashierName": a.CashierName,
-                                "BaseItemUnitQuantity": a.BaseUnitQuantity,
+                                "BaseItemUnitQuantity": round(float(a.BaseUnitQuantity),3),
                                 "BaseItemUnitName": a.BaseUnitName,
                                 "Sup_ShortName":a.SupShortName,
-                                "Cust_ShortName":a.CustShortName
-                              
+                                "Cust_ShortName":a.CustShortName,
+                                "CreatedOn": a.CreatedOn
                                 })
                         
                         
