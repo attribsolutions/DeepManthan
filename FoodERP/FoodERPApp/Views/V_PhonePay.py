@@ -23,6 +23,13 @@ class PhonePayReceiveMsg(APIView):
 
     @transaction.atomic
     def post(self, request):
+        test()
+        # return JsonResponse({
+        #         'StatusCode':200,
+        #         'Status': True,
+        #         'Message': "",
+        #         'Data': [],
+        #     })
         try:
             header = JSONParser().parse(request)
             return phonepe_callback(request, header)
@@ -39,12 +46,12 @@ class PhonePayReceiveMsg(APIView):
 # Callback Handler
 def phonepe_callback(request, body_data):
     try:
-        SALT_KEY = 'dummy_salt_key_for_testing'
+        SALT_KEY = '5b9db5b7-a553-45ed-a20c-ee04c4b1014f'
         SALT_INDEX = '1'
         # print('*****')
         x_verify_header = request.headers.get('x-verify')
         base64_response = body_data.get('response')
-        # print(base64_response)
+        print(base64_response)
         if not base64_response:
             return JsonResponse({'error': 'Missing response'}, status=400)
 
@@ -52,7 +59,9 @@ def phonepe_callback(request, body_data):
         computed_hash = hashlib.sha256((base64_response + SALT_KEY).encode()).hexdigest()
         # print(computed_hash)
         expected_x_verify = f"{computed_hash}###{SALT_INDEX}"
-        # print(expected_x_verify)
+        
+        print(expected_x_verify)
+        print(x_verify_header)
 
         if x_verify_header != expected_x_verify:
             return JsonResponse({'error': 'Invalid signature'}, status=403)
@@ -78,7 +87,7 @@ def phonepe_callback(request, body_data):
         else:
             print(f"Unknown status: {code}")
 
-        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Payment callback processed.'})
+        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': code})
 
     except Exception as e:
         import traceback
@@ -91,3 +100,36 @@ def phonepe_callback(request, body_data):
 
 
 
+import hashlib
+import base64
+import json
+
+def test():
+
+    # Step 1: Define your response payload
+    response_dict = {
+        "code": "PAYMENT_SUCCESS",
+        "data": {
+            "transactionId": "TESTTRX20240521",
+            "amount": 10000,
+            "paymentState": "SUCCESS"
+        }
+    }
+
+    # Step 2: Convert to JSON string and encode to Base64
+    json_str = json.dumps(response_dict, separators=(',', ':'))  # Minified JSON
+    base64_response = base64.b64encode(json_str.encode()).decode()
+
+    # Step 3: Generate x-verify header
+    salt_key = '5b9db5b7-a553-45ed-a20c-ee04c4b1014f'
+    salt_index = '1'
+
+    hash_string = base64_response + salt_key
+    sha = hashlib.sha256(hash_string.encode()).hexdigest()
+    x_verify = sha + '###' + salt_index
+
+    # Step 4: Print the results
+    print("Base64 Encoded Response:")
+    print(base64_response)
+    print("\nX-VERIFY Header Value:")
+    print(x_verify)
