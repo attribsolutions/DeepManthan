@@ -2089,7 +2089,7 @@ class FranchiseSecondarySaleReportView(CreateAPIView):
                         "MaterialSAPCode": a.MaterialSAPCode,
                         "QtyInNo":round(float(a.QtyInNo),3),
                         "QtyInKg":round(float(a.QtyInKg),3),
-                        "GSTPercentage":a.GSTPercentage,
+                        "GSTPercentage":round(float(a.GSTPercentage),2),
                         "BasicAmount":round(float(a.BasicAmount),2),
                         "HSNCode" : a.HSNCode,
                         "VoucherCode":a.VoucherCode,
