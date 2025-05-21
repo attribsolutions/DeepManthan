@@ -1220,7 +1220,7 @@ class MC_BillOfMaterialItems(models.Model):
     BOM = models.ForeignKey(M_BillOfMaterial, related_name='BOMItems', on_delete=models.CASCADE) 
     Item = models.ForeignKey(M_Items, on_delete=models.PROTECT) 
     Unit = models.ForeignKey(MC_ItemUnits, related_name='BOMItemUnitID', on_delete=models.PROTECT)
-    
+    IsReprocess = models.BooleanField(default=False)
     class Meta:
         db_table = "MC_BillOfMaterialItems"
 
@@ -1243,6 +1243,7 @@ class T_WorkOrder(models.Model):
     RemainNumberOfLot = models.DecimalField(max_digits=10, decimal_places=3)
     RemaninQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     CommonID = models.IntegerField(null=True,blank=True)
+    IsReprocess = models.BooleanField(default=False)
     class Meta:
         db_table = "T_WorkOrder"
 
@@ -1275,6 +1276,8 @@ class T_MaterialIssue(models.Model):
     RemainNumberOfLot = models.DecimalField(max_digits=10, decimal_places=3)
     RemaninLotQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     IsDelete = models.BooleanField(default=False)
+    IsReissue = models.BooleanField(default=False)
+    IsReprocess = models.BooleanField(default=False)
     class Meta:
         db_table = "T_MaterialIssue"
 
@@ -2555,9 +2558,9 @@ class M_Scheme(models.Model):
     Message = models.CharField(max_length=500, null=True, blank=True)
     OverLappingScheme = models.BooleanField(default=False)
     SchemeValueUpto  = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True) 
-    Column1 = models.CharField(max_length=500, null=True, blank=True)
-    Column2 = models.CharField(max_length=500, null=True, blank=True)
-    Column3 = models.CharField(max_length=500, null=True, blank=True)
+    Column1 = models.TextField(null=True, blank=True)
+    Column2 = models.TextField(null=True, blank=True)
+    Column3 = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "M_Scheme"
