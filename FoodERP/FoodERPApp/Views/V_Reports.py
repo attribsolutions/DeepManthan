@@ -2509,8 +2509,20 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                                 p.Name AS FranchiseName,
                                 s.SchemeName,
                                 COUNT(*) AS VoucherCodeCount,
-                                s.SchemeValue AS ClaimPerVoucher,
-                                (s.SchemeValue * COUNT(*)) AS TotalClaimAmount
+                              
+                           Sum( CASE
+                                WHEN s.ValueIn = 'Rs' THEN s.SchemeValue
+                                WHEN s.ValueIn = '%%' THEN 
+                                    ((gv.InvoiceAmount) * s.SchemeValue / 100)
+                                ELSE 0 
+                            END )AS ClaimPerVoucher,
+
+                            CASE
+                                WHEN s.ValueIn = 'Rs' THEN s.SchemeValue 
+                                WHEN s.ValueIn = '%%' THEN 
+                                    ((gv.InvoiceAmount) * s.SchemeValue / 100)
+                                ELSE 0 
+                            END AS TotalClaimAmount,Sum(InvoiceAmount)InvoiceAmount
                             FROM M_GiftVoucherCode gv
                             JOIN FoodERP.M_Parties p ON p.id = gv.Party
                             JOIN FoodERP.MC_SchemeParties sp ON sp.PartyID_id = p.id
@@ -2523,7 +2535,7 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                                 AND s.SchemeValue > 0 
                                 AND gv.Party in ({Party})
                                 AND s.id = %s
-                            GROUP BY gv.Party, s.id, p.Name, s.SchemeValue, s.SchemeName
+                            GROUP BY s.id, s.SchemeName, s.ValueIn, s.SchemeValue,p.id
                         ''', [FromDate, ToDate, f"{prefix}%",  scheme_id])                        
                         rows = cursor.fetchall()                       
                     for row in rows:
@@ -2534,6 +2546,7 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                             "VoucherCodeCount": row[3],
                             "ClaimPerVoucher": row[4],
                             "TotalClaimAmount": row[5],
+                            "InvoiceAmount": row[6],
                         })  
                 if CodeRedemptionData:
                     log_entry = create_transaction_logNew(request, MATAData, 0, "", 448, 0, FromDate, ToDate, 0)
