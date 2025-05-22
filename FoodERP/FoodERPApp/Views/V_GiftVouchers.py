@@ -194,7 +194,7 @@ class giftvouchervalidityCheck(CreateAPIView):
 
             status_code = 200 if valid_codes else 204 if used_codes else 404
            
-            log_entry = create_transaction_logNew(request, 0, 0, '', 437 if status_code == 200 else 0, 0)
+            log_entry = create_transaction_logNew(request, 0, 0, '', 468 if status_code == 200 else 0, 0)
 
             return JsonResponse({
                 "StatusCode": status_code,
