@@ -272,7 +272,7 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
                             for a in StockProcessQuery:
                                 if any([a.OpeningBalance, a.GRN, a.Sale, a.PurchaseReturn, a.SalesReturn, a.StockAdjustment]):
                                     stock = O_SPOSDateWiseLiveStock(
-                                        StockDate=Date, OpeningBalance=a.OpeningBalance, GRN=a.GRN, Sale=a.Sale,
+                                        StockDate=Date, OpeningBalance=round(a.OpeningBalance,3), GRN=a.GRN, Sale=a.Sale,
                                         PurchaseReturn=a.PurchaseReturn, SalesReturn=a.SalesReturn, ClosingBalance=a.ClosingBalance,
                                         ActualStock=a.ActualStock, StockAdjustment=a.StockAdjustment, Item=a.ItemID,
                                         Unit=a.UnitID, Party=Party, CreatedBy=0, IsAdjusted=0, MRPValue=0
