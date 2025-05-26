@@ -134,7 +134,7 @@ DATABASES = {
 }
 
 CRONJOBS = [
-    ('*/1 * * * *', 'FoodERPApp.cron.my_cron_job'),
+    # ('*/1 * * * *', 'FoodERPApp.cron.my_cron_job'),
     ('0 * * * *', 'FoodERPApp.AutoStockProcess.autostockprocess' ),
 ]
 
