@@ -2689,7 +2689,7 @@ class ManagerSummaryReportView(CreateAPIView):
                 
                 order_condition = f"AND Supplier_id = {Party}" if Party != 0 else ""
                 
-                OrderDetailsQuery = T_Orders.objects.raw(f'''SELECT T_Orders.id, FullOrderNumber, AdvanceAmount, OrderAmount
+                OrderDetailsQuery = T_Orders.objects.raw(f'''SELECT T_Orders.id, FullOrderNumber, AdvanceAmount, OrderAmount,CreatedOn
                                                             FROM T_Orders
                                                             WHERE AdvanceAmount > 0 AND T_Orders.OrderDate BETWEEN '{FromDate}' AND '{ToDate}'
                                                             {order_condition}''')
