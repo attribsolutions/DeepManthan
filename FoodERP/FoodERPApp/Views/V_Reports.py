@@ -2480,86 +2480,83 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                 SchemeID=MATAData['SchemeID']
                 CodeRedemptionData = []    
                 
-                party_condition = ""
-                scheme_condition = ""
-
+                # party_condition = ""
+                # scheme_condition = ""
+                where = [
+                            "gv.InvoiceDate BETWEEN %s AND %s",
+                            "gv.IsActive = 0",
+                            "gv.VoucherCode <> ''",
+                            "gv.VoucherCode LIKE CONCAT(s.QRPrefix, '%%')",
+                            "s.SchemeValue > 0",
+                        ]
+                params = [FromDate, ToDate]
                 if Party != "0":
-                    party_condition = f"sp.PartyID_id IN ({Party})"
+                    where.append(f"sp.PartyID_id IN ({Party})")
 
                 if SchemeID != "0":
-                    scheme_condition = f"s.id IN ({SchemeID})"
-                    
-                where_clauses = []
+                    where.append(f"s.id IN ({SchemeID})")
 
-                if party_condition:
-                    where_clauses.append(party_condition)
-
-                if scheme_condition:
-                    where_clauses.append(scheme_condition)                
-                final_where = " AND ".join(where_clauses)
-                if final_where:
-                    final_where = "WHERE " + final_where
+                where_clause = " AND ".join(where)             
                 
-                with connection.cursor() as cursor:
-                    cursor.execute(f'''SELECT  Distinct s.id, s.QRPrefix
-                        FROM MC_SchemeParties sp
-                        JOIN M_Scheme s ON s.id = sp.SchemeID_id
-                        {final_where}''')
-                    schemes = cursor.fetchall()  
-                PartyID=""
-                Scheme=""
-                if Party!="0":
-                    PartyID=f"AND gv.Party in ({Party})"             
+                # with connection.cursor() as cursor:
+                #     cursor.execute(f'''SELECT  Distinct s.id, s.QRPrefix
+                #         FROM MC_SchemeParties sp
+                #         JOIN M_Scheme s ON s.id = sp.SchemeID_id
+                #         {final_where}''')
+                #     schemes = cursor.fetchall()  
+                # PartyID=""
+                # Scheme=""
+                # if Party!="0":
+                #     PartyID=f"AND gv.Party in ({Party})"             
                 
                                
-                for scheme_id, prefix in schemes:
-                    if SchemeID !="0":
-                        Scheme=f"AND s.id in ({scheme_id})"
-                    with connection.cursor() as cursor:
-                        cursor.execute(f'''
-                            SELECT 
-                                s.id,
-                                p.Name AS FranchiseName,
-                                s.SchemeName,
-                                COUNT(*) AS VoucherCodeCount,
-                              
-                           Sum( CASE
-                                WHEN s.ValueIn = 'Rs' THEN s.SchemeValue
-                                WHEN s.ValueIn = '%%' THEN 
-                                    ((gv.InvoiceAmount) * s.SchemeValue / 100)
-                                ELSE 0 
-                            END )AS ClaimPerVoucher,
+                # for scheme_id, prefix in schemes:
+                #     if SchemeID !="0":
+                #         Scheme=f"AND s.id in ({scheme_id})"
+                #     with connection.cursor() as cursor:
+                #         cursor.execute(f'''
+                sql =f'''SELECT 
+                        s.id,
+                        p.Name AS FranchiseName,
+                        s.SchemeName,
+                        COUNT(*) AS VoucherCodeCount,
+                        
+                    Sum( CASE
+                        WHEN s.ValueIn = 'Rs' THEN s.SchemeValue
+                        WHEN s.ValueIn = '%%' THEN 
+                            ((gv.InvoiceAmount) * s.SchemeValue / 100)
+                        ELSE 0 
+                    END )AS ClaimPerVoucher,
 
-                            CASE
-                                WHEN s.ValueIn = 'Rs' THEN s.SchemeValue 
-                                WHEN s.ValueIn = '%%' THEN 
-                                    ((gv.InvoiceAmount) * s.SchemeValue / 100)
-                                ELSE 0 
-                            END AS TotalClaimAmount,Sum(InvoiceAmount)InvoiceAmount
-                            FROM M_GiftVoucherCode gv
-                            JOIN FoodERP.M_Parties p ON p.id = gv.Party
-                            JOIN FoodERP.MC_SchemeParties sp ON sp.PartyID_id = p.id
-                            JOIN FoodERP.M_Scheme s ON s.id = sp.SchemeID_id
-                            WHERE 
-                                gv.InvoiceDate BETWEEN %s AND %s
-                                AND gv.IsActive = 0 
-                                AND gv.VoucherCode != ''
-                                AND gv.VoucherCode LIKE %s
-                                AND s.SchemeValue > 0 
-                               {PartyID} {Scheme}                                
-                            GROUP BY s.id, s.SchemeName, s.ValueIn, s.SchemeValue,p.id
-                        ''', [FromDate, ToDate, f"{prefix}%"])                        
-                        rows = cursor.fetchall()                       
-                    for row in rows:
-                        CodeRedemptionData.append({
-                            "id": row[0],
-                            "FranchiseName": row[1],
-                            "SchemeName": row[2],            
-                            "VoucherCodeCount": row[3],
-                            "ClaimPerVoucher": row[4],
-                            "TotalClaimAmount": row[5],
-                            "InvoiceAmount": row[6],
-                        })  
+                    CASE
+                        WHEN s.ValueIn = 'Rs' THEN s.SchemeValue 
+                        WHEN s.ValueIn = '%%' THEN 
+                            ((gv.InvoiceAmount) * s.SchemeValue / 100)
+                        ELSE 0 
+                    END AS TotalClaimAmount,Sum(InvoiceAmount)InvoiceAmount
+                    FROM M_GiftVoucherCode gv
+                    JOIN FoodERP.M_Parties p ON p.id = gv.Party
+                    JOIN FoodERP.MC_SchemeParties sp ON sp.PartyID_id = p.id
+                    JOIN FoodERP.M_Scheme s ON s.id = sp.SchemeID_id
+                    WHERE {where_clause}                               
+                    GROUP BY s.id, s.SchemeName, s.ValueIn, s.SchemeValue,p.id ORDER BY p.Name, s.SchemeName
+                '''                        
+                with connection.cursor() as cur:
+                    cur.execute(sql, params)
+                    rows = cur.fetchall()
+
+                # --------- format output ---------------------
+                CodeRedemptionData = []                    
+                for row in rows:
+                    CodeRedemptionData.append({
+                        "id": row[0],
+                        "FranchiseName": row[1],
+                        "SchemeName": row[2],            
+                        "VoucherCodeCount": row[3],
+                        "ClaimPerVoucher": row[4],
+                        "TotalClaimAmount": row[5],
+                        "InvoiceAmount": row[6],
+                    })  
                 if CodeRedemptionData:
                     log_entry = create_transaction_logNew(request, MATAData, 0, "", 448, 0, FromDate, ToDate, 0)
                     return JsonResponse({"StatusCode": 200, "Status": True, "Message": "CodeRedemptionReport","Data": CodeRedemptionData,})
@@ -2692,7 +2689,7 @@ class ManagerSummaryReportView(CreateAPIView):
                 
                 order_condition = f"AND Supplier_id = {Party}" if Party != 0 else ""
                 
-                OrderDetailsQuery = T_Orders.objects.raw(f'''SELECT T_Orders.id, FullOrderNumber, AdvanceAmount, OrderAmount
+                OrderDetailsQuery = T_Orders.objects.raw(f'''SELECT T_Orders.id, FullOrderNumber, AdvanceAmount, OrderAmount,CreatedOn
                                                             FROM T_Orders
                                                             WHERE AdvanceAmount > 0 AND T_Orders.OrderDate BETWEEN '{FromDate}' AND '{ToDate}'
                                                             {order_condition}''')
