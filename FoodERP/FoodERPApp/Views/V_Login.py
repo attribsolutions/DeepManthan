@@ -535,14 +535,12 @@ class UserPartiesForLoginPage(CreateAPIView):
                         IsFranchisesInt=Case(When(IsFranchises=True, then=Value(1)),default=Value(0),output_field=IntegerField()),
                         UploadSalesDatafromExcelPartyInt=Case( When(UploadSalesDatafromExcelParty=True, then=Value(1)), default=Value(0), output_field=IntegerField() ) 
                     )
-                    .values(
-                        'id', 'Party_id', 'Role_id', 'RoleName', 'PartyName','PartyAddress', 'User__Employee_id',
+                    .values('id', 'Party_id', 'Role_id', 'RoleName', 'PartyName','PartyAddress', 'User__Employee_id',
                         'Party__SAPPartyCode', 'IsSCMPartyTypeInt','IsFranchisesInt', 'GSTIN', 'FSSAINo', 'FSSAIExpiry',
                         'PartyTypeID', 'PartyType','Country_id','CurrencySymbol','Country','Weight', 'UploadSalesDatafromExcelPartyInt','Party__PriceList_id',
                         'ClusterName', 'SubClusterName','MobileNo', 'AlternateContactNo'
                     )
-                    # .filter(IsDefaultPartyAddress=True)
-                    
+                    # .filter(IsDefaultPartyAddress=True) 
                 )    
                 # UserID = request.user.id
                 # print(str(query.query))
@@ -552,12 +550,16 @@ class UserPartiesForLoginPage(CreateAPIView):
                 else:
                     # M_UserParties_Serializer = self.serializer_class(
                     #     query, many=True).data
-                    UserPartiesData = list()
+                    # UserPartiesData = list()
+                    party_data = {}
+                    roles_by_party = {}
+                    
                     for item in query:
-                        UserPartiesData.append({
+                        party_id = item['Party_id']
+
+                        if party_id not in party_data:
+                            party_data[party_id] = {
                             "id" : item['id'],
-                            "Role" : item['Role_id'],
-                            "RoleName" : item['RoleName'],
                             "Party_id" :item['Party_id'],
                             "PartyName" : item['PartyName'],
                             "PartyAddress": item['PartyAddress'], 
@@ -580,7 +582,17 @@ class UserPartiesForLoginPage(CreateAPIView):
                             "SubClusterName": item['SubClusterName'],
                             "MobileNo": item['MobileNo'],
                             "AlternateContactNo": item['AlternateContactNo']
-                        }) 
+                        }
+                        roles_by_party.setdefault(party_id, {'Role': [], 'RoleName': []})
+                        roles_by_party[party_id]['Role'].append(str(item['Role_id']))
+                        roles_by_party[party_id]['RoleName'].append(item['RoleName'])
+                    
+                    UserPartiesData = []
+                    for party_id, data in party_data.items():
+                        roles = roles_by_party[party_id]
+                        data['Role'] = ",".join(roles['Role'])
+                        data['RoleName'] = ",".join(roles['RoleName'])
+                        UserPartiesData.append(data)
                     log_entry = create_transaction_logNew(request,UserPartiesData,0 ,"PartyDropdownforloginpage",145,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': UserPartiesData})
         except Exception as e:
