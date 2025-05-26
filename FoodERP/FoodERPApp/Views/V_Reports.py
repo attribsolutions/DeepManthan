@@ -2691,7 +2691,7 @@ class ManagerSummaryReportView(CreateAPIView):
                 
                 OrderDetailsQuery = T_Orders.objects.raw(f'''SELECT T_Orders.id, FullOrderNumber, AdvanceAmount, OrderAmount,CreatedOn
                                                             FROM T_Orders
-                                                            WHERE AdvanceAmount > 0 AND T_Orders.OrderDate BETWEEN '{FromDate}' AND '{ToDate}'
+                                                            WHERE AdvanceAmount > 0 AND CAST(T_Orders.CreatedOn AS DATE) BETWEEN '{FromDate}' AND '{ToDate}'
                                                             {order_condition}''')
 
                 for order in OrderDetailsQuery:
@@ -2699,7 +2699,9 @@ class ManagerSummaryReportView(CreateAPIView):
                         "id": order.id,
                         "FullOrderNumber": order.FullOrderNumber,
                         "AdvanceAmount": float(order.AdvanceAmount),
-                        "OrderAmount": float(order.OrderAmount)
+                        "OrderAmount": float(order.OrderAmount),
+                        "CreatedOn" : order.CreatedOn,
+                        "OrderDate" : order.OrderDate
                     })
 
                 invoice_condition = f"AND inv.Party = {Party}" if Party != 0 else ""
