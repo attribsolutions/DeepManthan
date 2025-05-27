@@ -2647,3 +2647,12 @@ class TC_GRNExpenses(models.Model):
     class Meta:
         db_table = 'TC_GRNExpenses'
         
+
+class MC_CronJobSettings(models.Model):
+    Name = models.CharField(max_length=50)
+    URL = models.CharField(max_length=50,null=True)
+    Description = models.CharField(max_length=200,null=True)
+    Settings = models.ForeignKey(M_Settings, on_delete=models.CASCADE)
+    
+    class Meta:
+        db_table="MC_CronJobSettings"
