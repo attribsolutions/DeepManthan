@@ -17,10 +17,16 @@ class SPOSCashierSummaryList(CreateAPIView):
                 FromDate = POSCashierdata['FromDate']
                 ToDate = POSCashierdata['ToDate']
                 Party = POSCashierdata['Party']
-
+                Cashier = POSCashierdata['Cashier']
+                
                 WhereClause=""
-                if Party:
+                if int(Party) != 0  :
                     WhereClause= f'''AND SPOSIn.Party={Party}'''
+
+                if Cashier != "" :    
+                    ss=Cashier.split(',')
+                    # print(ss)
+                    WhereClause= f'''AND SPOSIn.CreatedBy in ({','.join(ss)} )'''
                 
                 CashierSummaryQuery=T_SPOSInvoices.objects.raw(f'''SELECT 1 as id , SPOSIn.InvoiceDate,
                 Users.LoginName CashierName ,
@@ -32,6 +38,7 @@ class SPOSCashierSummaryList(CreateAPIView):
                 WHERE SPOSIn.InvoiceDate BETWEEN %s AND %s and SPOSIn.IsDeleted=0 {WhereClause} 
                 GROUP BY SPOSIn.InvoiceDate,Users.LoginName, Users.id
                 ''',(FromDate,ToDate))                
+                # print(CashierSummaryQuery)
                 if CashierSummaryQuery:
                     
                     CashierDetails=list()
