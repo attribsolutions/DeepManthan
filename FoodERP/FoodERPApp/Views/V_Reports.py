@@ -2443,7 +2443,7 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                                 and I.InvoiceDate between %s AND %s {conditions} {ss}
                                 union 
                                 select M_Scheme.id ,M_Scheme.SchemeValue,M_Parties.Name PartyName,I.VoucherCode,I.InvoiceDate,
-                                I.GrandTotal InvoiceAmount,I.InvoiceNumber 
+                                I.GrandTotal InvoiceAmount,I.FullInvoiceNumber 
                                 from SweetPOS.T_SPOSInvoices I
                                 join SweetPOS.TC_InvoicesSchemes InS on InS.Invoice_id=I.id
                                 join M_Parties on M_Parties.id=I.Party
