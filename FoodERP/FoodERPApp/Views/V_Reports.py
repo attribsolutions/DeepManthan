@@ -2408,25 +2408,50 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                 Party = int(CouponCodeData.get('Party', 0))
                 SchemeID = int(CouponCodeData.get('SchemeID', 0))
                 CouponCodeRedemptionData = []
-                
-                conditions = ["M_GiftVoucherCode.IsActive = 0", f"M_GiftVoucherCode.InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}'"]
+                # print('ss')
+                conditions = ''
 
                 if Party != 0:
-                    conditions.append(f"M_GiftVoucherCode.Party = {Party}")
+                    conditions=f" And I.Party = {Party}"
 
-                where_clause = " AND ".join(conditions)
+                if SchemeID != 0:
+                    ss=f" And M_Scheme.id = {SchemeID}"
+                    ss1=f" and InS.scheme= {SchemeID}"
                 
-                CouponCodeRedemptionQuery = M_GiftVoucherCode.objects.raw(f'''SELECT M_GiftVoucherCode.id, VoucherType_id, 
-                                                    M_GiftVoucherCode.VoucherCode, M_GiftVoucherCode.UpdatedOn, M_GiftVoucherCode.InvoiceDate, 
-                                                    M_GiftVoucherCode.InvoiceNumber, M_GiftVoucherCode.InvoiceAmount, M_GiftVoucherCode.Party, 
-                                                    M_GiftVoucherCode.client, M_GiftVoucherCode.IsActive, 
-                                                    M_Parties.Name as PartyName
+                
+                # where_clause = " AND ".join(conditions)
+                # print(conditions)
+                # CouponCodeRedemptionQuery = M_GiftVoucherCode.objects.raw(f'''SELECT M_GiftVoucherCode.id, VoucherType_id, 
+                #                                     M_GiftVoucherCode.VoucherCode, M_GiftVoucherCode.UpdatedOn, M_GiftVoucherCode.InvoiceDate, 
+                #                                     M_GiftVoucherCode.InvoiceNumber, M_GiftVoucherCode.InvoiceAmount, M_GiftVoucherCode.Party, 
+                #                                     M_GiftVoucherCode.client, M_GiftVoucherCode.IsActive, 
+                #                                     M_Parties.Name as PartyName
                                                     
-                                                FROM M_GiftVoucherCode
-                                                JOIN M_Parties ON M_GiftVoucherCode.Party = M_Parties.id
+                #                                 FROM M_GiftVoucherCode
+                #                                 JOIN M_Parties ON M_GiftVoucherCode.Party = M_Parties.id
                                                 
-                                                WHERE {where_clause}
-                                                GROUP BY M_GiftVoucherCode.id, VoucherType_id, M_GiftVoucherCode.VoucherCode,M_GiftVoucherCode.UpdatedOn, M_GiftVoucherCode.InvoiceDate, M_GiftVoucherCode.InvoiceNumber, M_GiftVoucherCode.InvoiceAmount,  M_GiftVoucherCode.Party, M_GiftVoucherCode.client, M_GiftVoucherCode.IsActive, M_Parties.Name''')
+                #                                 WHERE {where_clause}
+                #                                 GROUP BY M_GiftVoucherCode.id, VoucherType_id, M_GiftVoucherCode.VoucherCode,M_GiftVoucherCode.UpdatedOn, M_GiftVoucherCode.InvoiceDate, M_GiftVoucherCode.InvoiceNumber, M_GiftVoucherCode.InvoiceAmount,  M_GiftVoucherCode.Party, M_GiftVoucherCode.client, M_GiftVoucherCode.IsActive, M_Parties.Name''')
+                
+                CouponCodeRedemptionQuery = M_GiftVoucherCode.objects.raw(f'''select M_Scheme.id ,M_Scheme.SchemeValue,M_Parties.Name PartyName,I.VoucherCode,I.InvoiceDate,
+                                I.InvoiceAmount,I.InvoiceNumber
+                                from M_GiftVoucherCode I 
+                                join M_Scheme on M_Scheme.QRPrefix=LEFT(I.VoucherCode,3)
+                                join M_SchemeType on  M_Scheme.SchemeTypeID_id=M_SchemeType.id
+                                join M_Parties on M_Parties.id=I.Party
+                                where UsageType= 'online' and I.IsActive = 0  
+                                and I.InvoiceDate between %s AND %s {conditions} {ss}
+                                union 
+                                select M_Scheme.id ,M_Scheme.SchemeValue,M_Parties.Name PartyName,I.VoucherCode,I.InvoiceDate,
+                                I.GrandTotal InvoiceAmount,I.FullInvoiceNumber 
+                                from SweetPOS.T_SPOSInvoices I
+                                join SweetPOS.TC_InvoicesSchemes InS on InS.Invoice_id=I.id
+                                join M_Parties on M_Parties.id=I.Party
+                                left join M_Scheme on M_Scheme.QRPrefix=LEFT(I.VoucherCode,3)
+                                join M_SchemeType on  M_Scheme.SchemeTypeID_id=M_SchemeType.id
+                                where UsageType= 'offline' 
+                                and I.InvoiceDate between %s AND %s {conditions} {ss1} ''',[FromDate,ToDate,FromDate,ToDate])
+                
                 # print(CouponCodeRedemptionQuery)
                 # scheme1 = M_Scheme.objects.filter(id=1).first()
                 # SchemeValue = scheme1.SchemeValue if scheme1 else 0
@@ -2448,8 +2473,8 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                         "PartyID": CouponCode.Party,
                         "PartyName": CouponCode.PartyName,
                         "client": CouponCode.client,
-                        # "SchemeID": CouponCode.SchemeID,
-                        "SchemeID": 0,
+                        "SchemeID": CouponCode.id,
+                        # "SchemeID": 0,
                         "DiscountAmount": 0
                     })
 
@@ -2553,8 +2578,8 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                         "FranchiseName": row[1],
                         "SchemeName": row[2],            
                         "VoucherCodeCount": row[3],
-                        "ClaimPerVoucher": row[4],
-                        "TotalClaimAmount": row[5],
+                        "ClaimPerVoucher": row[5],
+                        "TotalClaimAmount": row[4],
                         "InvoiceAmount": row[6],
                     })  
                 if CodeRedemptionData:
@@ -2689,9 +2714,9 @@ class ManagerSummaryReportView(CreateAPIView):
                 
                 order_condition = f"AND Supplier_id = {Party}" if Party != 0 else ""
                 
-                OrderDetailsQuery = T_Orders.objects.raw(f'''SELECT T_Orders.id, FullOrderNumber, AdvanceAmount, OrderAmount
+                OrderDetailsQuery = T_Orders.objects.raw(f'''SELECT T_Orders.id, FullOrderNumber, AdvanceAmount, OrderAmount,CreatedOn
                                                             FROM T_Orders
-                                                            WHERE AdvanceAmount > 0 AND T_Orders.OrderDate BETWEEN '{FromDate}' AND '{ToDate}'
+                                                            WHERE AdvanceAmount > 0 AND CAST(T_Orders.CreatedOn AS DATE) BETWEEN '{FromDate}' AND '{ToDate}'
                                                             {order_condition}''')
 
                 for order in OrderDetailsQuery:
@@ -2699,7 +2724,9 @@ class ManagerSummaryReportView(CreateAPIView):
                         "id": order.id,
                         "FullOrderNumber": order.FullOrderNumber,
                         "AdvanceAmount": float(order.AdvanceAmount),
-                        "OrderAmount": float(order.OrderAmount)
+                        "OrderAmount": float(order.OrderAmount),
+                        "CreatedOn" : order.CreatedOn,
+                        "OrderDate" : order.OrderDate
                     })
 
                 invoice_condition = f"AND inv.Party = {Party}" if Party != 0 else ""

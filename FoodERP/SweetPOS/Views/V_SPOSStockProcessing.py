@@ -62,7 +62,7 @@ from
 
 (Select MC_PartyItems.Item_id,IU.id UnitID  from FoodERP.MC_PartyItems 
         join FoodERP.M_Items on M_Items.id=MC_PartyItems.Item_id and M_Items.IsStockProcessItem=1 
-        JOIN FoodERP.MC_ItemUnits IU  ON IU.UnitID_Id=M_Items.BaseUnitID_id and IU.Item_id=M_Items.id 
+        JOIN FoodERP.MC_ItemUnits IU  ON IU.UnitID_Id=M_Items.BaseUnitID_id and IU.Item_id=M_Items.id and IsDeleted=0
         where Party_id=%s)I
 
 left join (SELECT IFNULL(Item,0) ItemID, sum(ClosingBalance)ClosingBalance FROM SweetPOS.O_SPOSDateWiseLiveStock WHERE StockDate = DATE_SUB(  %s, 
@@ -210,7 +210,7 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
 
         (Select MC_PartyItems.Item_id,IU.id UnitID  from FoodERP.MC_PartyItems 
         join FoodERP.M_Items on M_Items.id=MC_PartyItems.Item_id and M_Items.IsStockProcessItem=1 
-        JOIN FoodERP.MC_ItemUnits IU  ON IU.UnitID_Id=M_Items.BaseUnitID_id and IU.Item_id=M_Items.id 
+        JOIN FoodERP.MC_ItemUnits IU  ON IU.UnitID_Id=M_Items.BaseUnitID_id and IU.Item_id=M_Items.id and IsDeleted=0
         where Party_id=%s)I
 
 
@@ -272,7 +272,7 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
                             for a in StockProcessQuery:
                                 if any([a.OpeningBalance, a.GRN, a.Sale, a.PurchaseReturn, a.SalesReturn, a.StockAdjustment]):
                                     stock = O_SPOSDateWiseLiveStock(
-                                        StockDate=Date, OpeningBalance=a.OpeningBalance, GRN=a.GRN, Sale=a.Sale,
+                                        StockDate=Date, OpeningBalance=round(a.OpeningBalance,3), GRN=a.GRN, Sale=a.Sale,
                                         PurchaseReturn=a.PurchaseReturn, SalesReturn=a.SalesReturn, ClosingBalance=a.ClosingBalance,
                                         ActualStock=a.ActualStock, StockAdjustment=a.StockAdjustment, Item=a.ItemID,
                                         Unit=a.UnitID, Party=Party, CreatedBy=0, IsAdjusted=0, MRPValue=0

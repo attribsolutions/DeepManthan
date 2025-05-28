@@ -19,9 +19,16 @@ from rest_framework.parsers import JSONParser
 from django.db.models import Q
 from django.db import connection
 from ..Views.V_CommFunction import *
+from rest_framework.authentication import BasicAuthentication, TokenAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 class ReadFTPFileView(View):
+    
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = [BasicAuthentication, TokenAuthentication, JWTAuthentication]
+    # authentication_class = JSONWebTokenAuthentication
+    
     def get(self, request):
         try:
             # FTP server config
