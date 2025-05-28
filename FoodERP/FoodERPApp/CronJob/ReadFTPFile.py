@@ -18,7 +18,9 @@ def ReadFTPFile():
 
     try:
         response = requests.get(API_URL, auth=auth, headers=headers)
+        print("response data :",response)
         response_data = response.json()
+        print("after convert in json:",response_data)
         
         if response_data.get("StatusCode") == 200:
             print("API call success:", response_data.get("Message"))
