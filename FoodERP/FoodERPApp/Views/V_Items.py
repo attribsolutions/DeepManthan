@@ -660,8 +660,11 @@ class ItemWiseUpdateView(CreateAPIView):
                 
                 query = M_Items.objects.raw(f'''SELECT  M_Items.id, M_Items.Name,M_Group.id GroupID,MC_SubGroup.id SubGroupID, MC_ItemShelfLife.Days AS ShelfLife,
                                                             M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName,M_Items.ShortName, M_Items.Sequence, M_Items.BarCode, M_Items.SAPItemCode, M_Items.Breadth, M_Items.Grammage, M_Items.Height,
-                                                            M_Items.Length, M_Items.StoringCondition, M_Items.SAPUnitID,CASE WHEN M_Items.IsCBMItem=null THEN 0 WHEN M_Items.IsCBMItem=0 THEN false ELSE true END as IsCBMItem,
-                                                            CASE WHEN M_Items.IsMixItem=null THEN 0 WHEN M_Items.IsMixItem=0 THEN false ELSE true END as IsMixItem
+                                                            M_Items.Length, M_Items.StoringCondition, M_Items.SAPUnitID,
+                                                            CASE WHEN M_Items.IsCBMItem=null THEN 0 WHEN M_Items.IsCBMItem=0 THEN false ELSE true END as IsCBMItem,
+                                                            CASE WHEN M_Items.IsMixItem=null THEN 0 WHEN M_Items.IsMixItem=0 THEN false ELSE true END as IsMixItem,
+                                                            CASE WHEN M_Items.IsStockProcessItem=null THEN 0 WHEN M_Items.IsStockProcessItem=0 THEN false ELSE true END as IsStockProcessItem,
+                                                            CASE WHEN M_Items.IsThirdPartyItem=null THEN 0 WHEN M_Items.IsThirdPartyItem=0 THEN false ELSE true END as IsThirdPartyItem
                                                             FROM M_Items
                                                             LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id  and  MC_ItemGroupDetails.GroupType_id= {GroupTypeID}
                                                             LEFT JOIN MC_ItemShelfLife ON M_Items.id = MC_ItemShelfLife.Item_id AND IsDeleted=0
