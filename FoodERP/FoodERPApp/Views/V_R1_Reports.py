@@ -34,7 +34,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     Left JOIN TC_InvoiceUploads ON TC_InvoiceUploads.Invoice_id=T_Invoices.id
                     WHERE Party_id in({Party}) AND InvoiceDate BETWEEN %s AND %s AND M_Parties.GSTIN <> ''
                     GROUP BY M_Parties.GSTIN, M_Parties.Name, T_Invoices.id, T_Invoices.InvoiceDate,
-                    M_States.id, M_States.Name, TC_InvoiceItems.GSTPercentage
+                    M_States.id, M_States.Name, TC_InvoiceItems.GSTPercentage Order by InvoiceNumber
                     UNION
                     SELECT X.id, M_Parties.GSTIN AS GSTIN_UINOfRecipient,
                                                   M_Parties.Name AS ReceiverName, X.FullInvoiceNumber AS InvoiceNumber,'Regular' AS InvoiceType, 
@@ -50,7 +50,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     Left JOIN SweetPOS.TC_SPOSInvoiceUploads ON SweetPOS.TC_SPOSInvoiceUploads.Invoice_id=X.id
                     WHERE X.Party in ({Party}) AND X.InvoiceDate BETWEEN %s AND %s AND M_Parties.GSTIN <> ''AND X.IsDeleted=0
                     GROUP BY M_Parties.GSTIN, M_Parties.Name, X.id, X.InvoiceDate,
-                    M_States.id, M_States.Name, Y.GSTPercentage''', (FromDate, ToDate,FromDate, ToDate))
+                    M_States.id, M_States.Name, Y.GSTPercentage Order by InvoiceNumber ''', (FromDate, ToDate,FromDate, ToDate))
                 # print(B2Bquery)
                 B2B2 = B2B3Serializer1(B2Bquery, many=True).data
                
