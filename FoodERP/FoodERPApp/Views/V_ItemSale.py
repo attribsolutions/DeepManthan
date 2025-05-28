@@ -59,7 +59,7 @@ class ItemSaleReportView(CreateAPIView):
                                 JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id = Cust.id AND MC_PartySubParty.Party_id = Sup.id 
                                 LEFT JOIN M_Routes ON MC_PartySubParty.Route_id = M_Routes.id 
                                 LEFT JOIN TC_GRNReferences ON TC_GRNReferences.Invoice_id = T_Invoices.id 
-                                LEFT JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.Item_id = M_Items.id AND MC_ItemUnits.IsBase = 1
+                                LEFT JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.Item_id = M_Items.id AND MC_ItemUnits.IsBase = 1 and MC_ItemUnits.IsDeleted=0
                                 JOIN FoodERP.M_Units ON MC_ItemUnits.UnitID_id = M_Units.id
                                 LEFT JOIN T_GRNs ON GRN_id = T_GRNs.ID WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s '''
                 # print(Invoicequery)            
@@ -89,7 +89,7 @@ class ItemSaleReportView(CreateAPIView):
                                 LEFT JOIN FoodERP.M_Routes ON D.Route_id = M_Routes.id 
                                 LEFT JOIN FoodERP.TC_GRNReferences ON TC_GRNReferences.Invoice_id = A.id 
                                 LEFT JOIN FoodERP.T_GRNs ON GRN_id = T_GRNs.ID
-                                LEFT JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.Item_id = M_Items.id AND MC_ItemUnits.IsBase = 1
+                                LEFT JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.Item_id = M_Items.id AND MC_ItemUnits.IsBase = 1 and MC_ItemUnits.IsDeleted=0
                                 JOIN FoodERP.M_Units ON MC_ItemUnits.UnitID_id = M_Units.id
                                 -- JOIN SweetPOS.M_SweetPOSUser M ON M.id = A.CreatedBy -- Comment For changing M_SweetPOSUser to M_Users
                                 LEFT JOIN FoodERP.M_Users M ON M.id = A.CreatedBy
@@ -129,7 +129,7 @@ class ItemSaleReportView(CreateAPIView):
                 q1 = T_Invoices.objects.raw(Invoicequery,parameters)
               
                 q2 = T_SPOSInvoices.objects.using('sweetpos_db').raw(SPOSInvoicequery,parameters)
-                # print(q1)
+                # print(q2)
                 combined_invoices = list(q1) + list(q2)  
                 # print(combined_invoices) 
                 if combined_invoices:
