@@ -34,7 +34,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     Left JOIN TC_InvoiceUploads ON TC_InvoiceUploads.Invoice_id=T_Invoices.id
                     WHERE Party_id in({Party}) AND InvoiceDate BETWEEN %s AND %s AND M_Parties.GSTIN <> ''
                     GROUP BY M_Parties.GSTIN, M_Parties.Name, T_Invoices.id, T_Invoices.InvoiceDate,
-                    M_States.id, M_States.Name, TC_InvoiceItems.GSTPercentage Order by InvoiceNumber
+                    M_States.id, M_States.Name, TC_InvoiceItems.GSTPercentage 
                     UNION
                     SELECT X.id, M_Parties.GSTIN AS GSTIN_UINOfRecipient,
                                                   M_Parties.Name AS ReceiverName, X.FullInvoiceNumber AS InvoiceNumber,'Regular' AS InvoiceType, 
