@@ -136,6 +136,7 @@ DATABASES = {
 CRONJOBS = [
     # ('*/1 * * * *', 'FoodERPApp.cron.my_cron_job'),
     ('0 * * * *', 'FoodERPApp.AutoStockProcess.autostockprocess' ),
+    ('0 8 * * *','FoodERPApp.CronJob.ReadFTPFile.ReadFTPFile'),
 ]
 
 # SESSION_ENGINE = 'django.contrib.sessions.backends.db'
