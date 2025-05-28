@@ -789,7 +789,7 @@ urlpatterns = [
 #Logs
               url(r'LogTransaction$',LogTransactionView.as_view()),   
               url(r'DeleteDuplicateStockEntry$',DeleteDuplicateStockEntryPageView.as_view()),        
-              url(r'ReadFTPFile$',ReadFTPFileView.as_view()), 
+              url(r'_Read_FTP_File_$',ReadFTPFileView.as_view()), 
              
 #ItemSupplier
               url(r'ItemSupplier$',ItemSupplierView.as_view()), 
