@@ -263,7 +263,8 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "FSSAINo" : a['FSSAINo'],
                             "FSSAIExipry" : a['FSSAIExipry'],
                             "IsTCSParty":a['IsTCSParty'],
-                            "SkyggeID": a['SkyggeID']
+                            "SkyggeID": a['SkyggeID'], 
+                            "PartyTypeID":a['PartyTypeID'],
                             })
                         
                         
