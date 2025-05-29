@@ -166,7 +166,7 @@ class SchemeTypeView(CreateAPIView):
                 SchemeType_data_serializer = SchemeTypeSerializer(SchemeType_data,many=True)
                 log_entry = create_transaction_logNew(request, SchemeType_data_serializer,0,'',471,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': SchemeType_data_serializer.data})
-        except  M_Scheme.DoesNotExist:
+        except  M_SchemeType.DoesNotExist:
             log_entry = create_transaction_logNew(request,0,0,'Scheme Type Data Does Not Exist',471,0)
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Scheme Type Data Not available', 'Data': []})
         except Exception as e:
@@ -182,7 +182,7 @@ class SchemeTypeView(CreateAPIView):
                 SchemeTypedata.delete()
                 log_entry = create_transaction_logNew(request,{'SchemeTypeID':id},0,'SchemeTypeID:'+str(id),472,id)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Scheme Type Deleted Successfully', 'Data':[]})
-        except M_PartyType.DoesNotExist:
+        except M_SchemeType.DoesNotExist:
             log_entry = create_transaction_logNew(request,{'SchemeTypeID':id},0,'SchemeTypeDelete:'+'Scheme Type Not available',472,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Scheme Type Not available', 'Data': []})
         except IntegrityError:   
