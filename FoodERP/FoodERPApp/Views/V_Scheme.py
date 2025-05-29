@@ -111,7 +111,84 @@ class SchemeListView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'GETAllSchemes:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
+        
+        
+class SchemeTypeView(CreateAPIView):
     
+    permission_classes = (IsAuthenticated,)
+    
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                SchemeTypedata = JSONParser().parse(request)
+                SchemeTypedata_Serializer = SchemeTypeSerializer(data=SchemeTypedata)
+                if SchemeTypedata_Serializer.is_valid():
+                    SchemeType = SchemeTypedata_Serializer.save()
+                    LastInsertID = SchemeType.id
+                    log_entry = create_transaction_logNew(request,SchemeTypedata,0,'TransactionID:'+str(LastInsertID),469,LastInsertID)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Scheme Type Save Successfully', 'Data':[]})
+                else:
+                    log_entry = create_transaction_logNew(request,SchemeTypedata,0,'SchemeTypeSave:'+str(SchemeTypedata_Serializer.errors),34,0)
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  SchemeTypedata_Serializer.errors, 'Data':[]})
+        except Exception as e:
+                log_entry = create_transaction_logNew(request,0,0,'SchemeTypeSave:'+str(Exception(e)),33,0)
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+            
+            
+    @transaction.atomic()
+    def put(self, request, id=0):
+        try:
+            with transaction.atomic():
+                SchemeTypedata = JSONParser().parse(request)
+                SchemeTypedataByID = M_SchemeType.objects.get(id=id)
+                SchemeTypedata_Serializer = SchemeTypeSerializer(
+                    SchemeTypedataByID, data=SchemeTypedata)
+                if SchemeTypedata_Serializer.is_valid():
+                    SchemeTypedata_Serializer.save()
+                    log_entry = create_transaction_logNew(request,SchemeTypedata,0,0,470,id)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Scheme Type Updated Successfully', 'Data':[]})
+                else:
+                    log_entry = create_transaction_logNew(request,SchemeTypedata,0,'SchemeTypeEdit:'+str(SchemeTypedata_Serializer.errors),34,0)
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': SchemeTypedata_Serializer.errors, 'Data':[]})
+        except Exception as e:
+                log_entry = create_transaction_logNew(request,0,0,Exception(e),33,0)
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+            
+            
+    @transaction.atomic()
+    def get(self, request ):
+        try:
+            with transaction.atomic():
+                SchemeType_data = M_SchemeType.objects.all()
+                SchemeType_data_serializer = SchemeTypeSerializer(SchemeType_data,many=True)
+                log_entry = create_transaction_logNew(request, SchemeType_data_serializer,0,'',471,0)
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': SchemeType_data_serializer.data})
+        except  M_Scheme.DoesNotExist:
+            log_entry = create_transaction_logNew(request,0,0,'Scheme Type Data Does Not Exist',471,0)
+            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Scheme Type Data Not available', 'Data': []})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'GETAllSchemeType:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
+        
+        
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        try:
+            with transaction.atomic():
+                SchemeTypedata = M_SchemeType.objects.get(id=id)
+                SchemeTypedata.delete()
+                log_entry = create_transaction_logNew(request,{'SchemeTypeID':id},0,'SchemeTypeID:'+str(id),472,id)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Scheme Type Deleted Successfully', 'Data':[]})
+        except M_PartyType.DoesNotExist:
+            log_entry = create_transaction_logNew(request,{'SchemeTypeID':id},0,'SchemeTypeDelete:'+'Scheme Type Not available',472,0)
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Scheme Type Not available', 'Data': []})
+        except IntegrityError:   
+            log_entry = create_transaction_logNew(request,0,0,'SchemeTypeDelete:'+'Scheme Type used in another table',8,0)
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Scheme Type used in another table', 'Data': []}) 
+        
     
 
 
