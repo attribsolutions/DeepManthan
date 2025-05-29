@@ -12,13 +12,16 @@ from ..Serializer.S_BankMaster import *
 from ..models import  *
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
-from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from django.http import Http404 
 from SweetPOS.models import *
 from django.db.models import F, Value, IntegerField
 from SweetPOS.models import *
 from django.db.models import OuterRef, Exists
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.db import IntegrityError, DatabaseError
+from rest_framework.exceptions import ValidationError, ParseError, APIException
+
 
 class OrderDetailsForInvoice(CreateAPIView):
     
@@ -26,7 +29,13 @@ class OrderDetailsForInvoice(CreateAPIView):
     # authentication__Class = JSONWebTokenAuthentication
 
     def post(self, request, id=0):
-        Orderdata = JSONParser().parse(request)
+        try:
+            Orderdata = JSONParser().parse(request)
+            print("aaaaaaaaaa")
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, Orderdata, 0,'OrderDetailsForInvoiceInvalidJSON:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Invalid JSON format', 'Error': str(e)})
+            
         try:
             with transaction.atomic():
                 # FromDate = Orderdata['FromDate']
@@ -35,9 +44,12 @@ class OrderDetailsForInvoice(CreateAPIView):
                 POOrderIDs = Orderdata['OrderIDs']
                 IsRateWise=Orderdata['IsRateWise']
                 Order_list = POOrderIDs.split(",")
-             
+
+                print("bbbbbbbbbbbb")
+                
                 OrderdataList = list() 
                 for OrderID in Order_list: 
+                    print("ccccccccccc")
                     OrderItemDetails = list()
                     OrderItemQuery=TC_OrderItems.objects.raw(f'''SELECT TC_OrderItems.id,M_Items.id ItemID,M_Items.Name ItemName,M_Items.BaseUnitID_id MIUnitID,TC_OrderItems.Quantity ,MRP_id,MRPValue,Rate,Unit_id, 
                                     MC_ItemUnits.BaseUnitConversion,MC_ItemUnits.UnitID_id MUnitID,MC_ItemUnits.BaseUnitQuantity ConversionUnit,TC_OrderItems.BaseUnitQuantity,
@@ -55,13 +67,18 @@ class OrderDetailsForInvoice(CreateAPIView):
                                     join MC_ItemUnits on MC_ItemUnits.id=TC_OrderItems.Unit_id
                                     join M_GSTHSNCode on M_GSTHSNCode.id=TC_OrderItems.GST_id
                                     left join M_MarginMaster on M_MarginMaster.id=TC_OrderItems.Margin_id
-                                    where TC_OrderItems.Order_id=%s and TC_OrderItems.IsDeleted=0''',[OrderID])              
+                                    where TC_OrderItems.Order_id=%s and TC_OrderItems.IsDeleted=0''',[OrderID])   
+                    print("ddddddddddd")           
                     if OrderItemQuery:
                         for b in OrderItemQuery:
+                            print("eeeeeeeeee")
                             PartyTypeID=b.PartyTypeID
                             Item= b.ItemID 
+                            print(b.ItemID) if Party == 14 else None
                             UnitID = b.MIUnitID 
+                            print(b.MIUnitID) if Party == 14 else None
                             Customer = b.CustomerID  
+                            print(b.CustomerID) if Party == 14 else None
                             
                             SettingQuery = M_Settings.objects.filter(id=67, IsActive=True, DefaultValue__isnull=False).values("DefaultValue").first()
 
@@ -92,13 +109,15 @@ class OrderDetailsForInvoice(CreateAPIView):
                                             "BaseUnitQuantity" : p.BaseUnitQuantity,
                                             "GST" : p.GST
                                             })
-                            else :     
+                            else :   
+                                print("ffffffffff")  
                                 if IsRateWise == 1:
                                    pp = ""
                                    Condition = f",RateCalculationFunction1(LiveBatcheid, ItemID, {Customer}, UnitID, 0, 0, MRP, 0)Rate"                  
                                 else : 
                                     pp = ",ifnull(O_LiveBatches.Rate,0)Rate"
-                                    Condition = ""    
+                                    Condition = "" 
+                                    print("ggggggggggg")   
                                 obatchwisestockquery= O_BatchWiseLiveStock.objects.raw(f'''select * {Condition}
                                                 from (select O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id ItemID,O_LiveBatches.BatchCode {pp},O_LiveBatches.BatchDate,O_LiveBatches.SystemBatchCode,
                                                 O_LiveBatches.SystemBatchDate,O_LiveBatches.id LiveBatcheid,O_LiveBatches.MRP_id LiveBatcheMRPID,O_LiveBatches.GST_id LiveBatcheGSTID,
@@ -112,11 +131,13 @@ class OrderDetailsForInvoice(CreateAPIView):
                                                 join M_GSTHSNCode on M_GSTHSNCode.id=O_LiveBatches.GST_id
                                                 join MC_ItemUnits on MC_ItemUnits.id=O_BatchWiseLiveStock.Unit_id
                                                 where O_BatchWiseLiveStock.Item_id=%s and O_BatchWiseLiveStock.Party_id=%s and O_BatchWiseLiveStock.BaseUnitQuantity > 0 and IsDamagePieces=0)a ''',[Item,Party])
+                                print("hhhhhhhhhhh")
                                 stockDatalist = list()
                                 if not obatchwisestockquery:
                                         stockDatalist =[]
                                 else:   
                                     for d in obatchwisestockquery:
+                                        print("iiiiiiiiiiiiiiii")
                                         stockDatalist.append({
                                             "id": d.id,
                                             "Item":d.ItemID,
@@ -137,12 +158,13 @@ class OrderDetailsForInvoice(CreateAPIView):
                             # =====================Current Discount================================================
                             TodaysDiscount = DiscountMaster(
                                 b.ItemID, Party, date.today(),Customer).GetTodaysDateDiscount()
-                            
+                            print("jjjjjjjjjjjjjjjj")
                             if TodaysDiscount and TodaysDiscount[0].get('TodaysDiscount') not in [None, '']:
                                 DiscountType = TodaysDiscount[0]['DiscountType']
                                 Discount = TodaysDiscount[0]['TodaysDiscount']
-                                
+                                  
                             else:
+                                print("kkkkkkkkkkkk") 
                                 DiscountType = b.DiscountType
                                 Discount = b.Discount
                                 
@@ -181,6 +203,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                                 "UnitDetails":UnitDropdown(b.ItemID,Customer,0),
                                 "StockDetails":stockDatalist
                             })
+                            print("llllllllllllllll")
                         OrderdataList.append({
                                 "OrderIDs":OrderID,
                                 "OrderDate" :  b.OrderDate,
@@ -193,15 +216,38 @@ class OrderDetailsForInvoice(CreateAPIView):
                                 "AdvanceAmount" : b.AdvanceAmount,
                                 "OrderItemDetails":OrderItemDetails
                             })
+                        print("mmmmmmmmmmmmmmm")
                     else :
                         log_entry = create_transaction_logNew(request, Orderdata, 0,'Record Not Found', 32, 0, 0, 0, 0)
                         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
 
                 log_entry = create_transaction_logNew(request, Orderdata, Party,'Supplier:'+str(Party), 32, 0, 0, 0, 0)         
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': OrderdataList})
-                
+
+
+        except ValidationError as ve:
+            log_entry = create_transaction_logNew(request, Orderdata, 0,'OrderDetailsForInvoiceValidation Error:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Validation Error', 'Error': str(ve)})
+    
+        except ObjectDoesNotExist as dne:
+            log_entry = create_transaction_logNew(request, Orderdata, 0,'OrderDetailsForInvoiceObjectDoesNotExist:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'Record Not Found', 'Error': str(dne)})
+
+        except IntegrityError as ie:
+            log_entry = create_transaction_logNew(request, Orderdata, 0,'OrderDetailsForInvoiceIntegrityError:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 500, 'Status': False, 'Message': 'Database Integrity Error', 'Error': str(ie)})
+
+        except DatabaseError as de:
+            log_entry = create_transaction_logNew(request, Orderdata, 0,'OrderDetailsForInvoiceDatabaseError:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 500, 'Status': False, 'Message': 'Database Error', 'Error': str(de)})
+
+        except PermissionDenied as pd:
+            log_entry = create_transaction_logNew(request, Orderdata, 0,'OrderDetailsForInvoicePermissionDenied:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 403, 'Status': False, 'Message': 'Permission Denied', 'Error': str(pd)})
+
+
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Orderdata, 0,'OrderDetailsForInvoice:'+safe_exception_message(e),33,0)
+            log_entry = create_transaction_logNew(request, Orderdata, 0,'OrderDetailsForInvoiceException:'+safe_exception_message(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  safe_exception_message(e), 'Data': []})
         
 def safe_exception_message(ex):
