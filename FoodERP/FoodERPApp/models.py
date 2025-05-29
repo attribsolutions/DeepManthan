@@ -238,6 +238,7 @@ class M_Parties(models.Model):
     UploadSalesDatafromExcelParty= models.BooleanField(default=False)
     Country = models.ForeignKey(M_Country, related_name='PartiesCountry',on_delete=models.PROTECT,null=True, blank=True)
     ShortName = models.CharField(max_length=100,null=True, blank=True)
+    # ClosingDate = models.DateTimeField(blank=True, null=True)
     class Meta:
         db_table = 'M_Parties'
         constraints = [
@@ -750,6 +751,7 @@ class M_Items(models.Model):
     IsCBMItem  = models.BooleanField(default=False)
     IsMixItem = models.BooleanField(default=False)
     IsStockProcessItem = models.BooleanField(default=False)
+    IsThirdPartyItem = models.BooleanField(default=False) #Swiggy/ZomatoItems
     ItemCode = models.IntegerField(default=False,null=True,blank=True)
     
     class Meta:
@@ -919,7 +921,7 @@ class MC_PartyPrefixs(models.Model):
        
 class T_Orders(models.Model):
     OrderDate = models.DateField()
-    DeliveryDate = models.DateTimeField(auto_now=True)
+    DeliveryDate = models.DateTimeField()
     OrderNo = models.IntegerField()
     FullOrderNumber = models.CharField(max_length=500)
     OrderAmount = models.DecimalField(max_digits=20, decimal_places=2)
