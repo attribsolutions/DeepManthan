@@ -812,9 +812,10 @@ urlpatterns = [
 #Scheme Details:
               url(r'SchemeDetails$',SchemeView.as_view()), 
               url(r'SchemeList$',SchemeListView.as_view()), 
-            #   url(r'SaveScheme$',SaveSchemeView.as_view()), 
-              
-
+            #   url(r'SaveScheme$',SaveSchemeView.as_view()),             
+#Scheme Type Details:
+               url(r'SchemeType$',SchemeTypeView.as_view()),              
+               url(r'SchemeType/([0-9]+)$', SchemeTypeView.as_view()),
 #SAPExport:
               url(r'SAPExportDetails$',SAPExportViewDetails.as_view()), 
               url(r'InvoiceSAPExportDetails$',InvoiceSendToFTPForSAP.as_view()), 
