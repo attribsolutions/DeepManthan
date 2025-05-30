@@ -218,7 +218,8 @@ class GenericSaleReportSerializer(serializers.Serializer):
     VoucherCode = serializers.CharField(max_length=500)
     CashierName = serializers.CharField(max_length=500)
     CreatedOn = serializers.DateTimeField()
-     
+    PriceListName = serializers.CharField(max_length=500) 
+    
     def to_representation(self, instance):
         # Ensure proper rounding for specific fields
         representation = super().to_representation(instance)
