@@ -527,6 +527,8 @@ class ItemWiseUpdateSerializer(serializers.Serializer):
     SAPUnitID = serializers.CharField(max_length=200)
     IsCBMItem=serializers.BooleanField(default=False)
     IsMixItem=serializers.BooleanField(default=False)
+    IsStockProcessItem=serializers.BooleanField(default=False)
+    IsThirdPartyItem=serializers.BooleanField(default=False)
         
 class DaysSerializer(serializers.ModelSerializer):
     Item = ItemWiseUpdateSerializer(read_only=True)

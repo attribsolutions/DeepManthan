@@ -72,7 +72,7 @@ class SAPExportViewDetails(APIView):
 			    GROUP BY 
                 M_Items.SAPItemCode,
                 M_Parties.SapPartyCode, 
-                TotalRevenue,MC_ItemUnits.UnitID_id,MRPValue,I.InvoiceDate    '''
+                TotalRevenue,MC_ItemUnits.UnitID_id,MRPValue,I.InvoiceDate Order by I.Party    '''
 
             
             
@@ -132,7 +132,7 @@ class SAPExportViewDetails(APIView):
                 A.ClientID, InvoiceNumber BillNumber 
                 FROM SweetPOS.T_SPOSInvoices A
                 JOIN FoodERP.M_Parties ON A.Party = FoodERP.M_Parties.id
-                WHERE InvoiceDate = %s AND A.Party in ({Party}) and A.IsDeleted=0'''
+                WHERE InvoiceDate = %s AND A.Party in ({Party}) and A.IsDeleted=0 order by A.Party '''
                 
 
                 # SELECT 1 id, DATE_FORMAT(InvoiceDate, '%%Y%%m%%d') SaleDate, FoodERP.M_Parties.SAPPartyCode Store,
@@ -194,7 +194,7 @@ class SAPExportViewDetails(APIView):
             JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.id = Unit
             JOIN FoodERP.M_Units ON M_Units.id = MC_ItemUnits.UnitID_id
             WHERE I.InvoiceDate = %s  AND  I.Party in ({Party})   and I.IsDeleted=0 AND II.Item NOT IN  (%s)
-            GROUP BY SapItemCode,M_Units.Name,M_Parties.SapPartyCode,I.InvoiceDate,M_Units.id
+            GROUP BY SapItemCode,M_Units.Name,M_Parties.SapPartyCode,I.InvoiceDate,M_Units.id order by I.Party
             
             
             '''
