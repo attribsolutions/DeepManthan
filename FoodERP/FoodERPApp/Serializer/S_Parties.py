@@ -1,6 +1,7 @@
 from ..models import *
 from rest_framework import serializers
 from ..Serializer.S_Routes import  *
+from django.utils import timezone
 
 class PartiesSerializer(serializers.ModelSerializer):
        
@@ -394,8 +395,8 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
             'IsDivision', instance.IsDivision)
         instance.District = validated_data.get(
             'District', instance.District)
-        instance.isActive = validated_data.get(
-            'isActive', instance.isActive)
+        # instance.isActive = validated_data.get(
+        #     'isActive', instance.isActive)
         instance.MkUpMkDn = validated_data.get(
             'MkUpMkDn', instance.MkUpMkDn)
         instance.Latitude = validated_data.get(
@@ -406,6 +407,15 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
             'IsApprovedParty', instance.IsApprovedParty) 
         instance.Country = validated_data.get(
             'Country', instance.Country)
+        ExistingStatus_isActive = instance.isActive
+        Updated_isActive = validated_data.get('isActive', ExistingStatus_isActive)
+
+        if ExistingStatus_isActive != Updated_isActive:
+            instance.isActive = Updated_isActive
+            if Updated_isActive == False:
+                instance.ClosingDate = timezone.now()
+            else:
+                instance.ClosingDate = None
         
         instance.save()   
 
