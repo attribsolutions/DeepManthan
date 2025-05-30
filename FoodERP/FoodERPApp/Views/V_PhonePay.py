@@ -64,6 +64,7 @@ def phonepe_callback(request, body_data):
         print(x_verify_header)
 
         if x_verify_header != expected_x_verify:
+            log_entry = create_transaction_logNew(request, body_data, 0, "error:Invalid signature", 474, 0)
             return JsonResponse({'error': 'Invalid signature'}, status=403)
 
         # Step 3: Decode base64 response
@@ -86,12 +87,13 @@ def phonepe_callback(request, body_data):
             print(f"Payment Cancelled: {transaction_id}")
         else:
             print(f"Unknown status: {code}")
-
+        log_entry = create_transaction_logNew(request, transaction_data, 0, f"{code}: {transaction_id},Amount: {amount}", 474, 0)
         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Payment callback processed.','Code': code})
 
     except Exception as e:
         import traceback
         traceback.print_exc()
+        log_entry = create_transaction_logNew(request, body_data, 0, f"PhonePe callback EXCEPTION: {str(e)}", 474, 0)
         return JsonResponse({'error': 'Internal server error', 'details': str(e)}, status=500)
 
 
