@@ -71,7 +71,7 @@ class GetNewPageEntry(RetrieveAPIView):
                             "IsCompulsory": c['IsCompulsory'], "DefaultSort": c['DefaultSort'], 
                             "FieldValidation": c['FieldValidation__id'], "FieldValidationName": c['FieldValidation__Name'], 
                             "ListPageSeq": c['ListPageSeq'], "ShowInListPage": c['ShowInListPage'], 
-                            "ShowInDownload": c['ShowInDownload'], "ShownloadDefaultSelect": c['DownloadDefaultSelect'], 
+                            "ShowInDownload": c['ShowInDownload'], "DownloadDefaultSelect": c['DownloadDefaultSelect'], 
                             "RegularExpression": c['FieldValidation__RegularExpression'], "InValidMsg": c['InValidMsg'], 
                             "Alignment": c['Alignment']
                         } for c in MasterPageFieldQuery]

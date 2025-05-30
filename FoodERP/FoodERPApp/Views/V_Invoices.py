@@ -31,7 +31,7 @@ class OrderDetailsForInvoice(CreateAPIView):
     def post(self, request, id=0):
         try:
             Orderdata = JSONParser().parse(request)
-            print("aaaaaaaaaa")
+            # print("aaaaaaaaaa")
         except Exception as e:
             log_entry = create_transaction_logNew(request, Orderdata, 0,'OrderDetailsForInvoiceInvalidJSON:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Invalid JSON format', 'Error': str(e)})
@@ -45,11 +45,11 @@ class OrderDetailsForInvoice(CreateAPIView):
                 IsRateWise=Orderdata['IsRateWise']
                 Order_list = POOrderIDs.split(",")
 
-                print("bbbbbbbbbbbb")
+                # print("bbbbbbbbbbbb")
                 
                 OrderdataList = list() 
                 for OrderID in Order_list: 
-                    print("ccccccccccc")
+                    # print("ccccccccccc")
                     OrderItemDetails = list()
                     OrderItemQuery=TC_OrderItems.objects.raw(f'''SELECT TC_OrderItems.id,M_Items.id ItemID,M_Items.Name ItemName,M_Items.BaseUnitID_id MIUnitID,TC_OrderItems.Quantity ,MRP_id,MRPValue,Rate,Unit_id, 
                                     MC_ItemUnits.BaseUnitConversion,MC_ItemUnits.UnitID_id MUnitID,MC_ItemUnits.BaseUnitQuantity ConversionUnit,TC_OrderItems.BaseUnitQuantity,
@@ -68,10 +68,10 @@ class OrderDetailsForInvoice(CreateAPIView):
                                     join M_GSTHSNCode on M_GSTHSNCode.id=TC_OrderItems.GST_id
                                     left join M_MarginMaster on M_MarginMaster.id=TC_OrderItems.Margin_id
                                     where TC_OrderItems.Order_id=%s and TC_OrderItems.IsDeleted=0''',[OrderID])   
-                    print("ddddddddddd")           
+                    # print("ddddddddddd")           
                     if OrderItemQuery:
                         for b in OrderItemQuery:
-                            print("eeeeeeeeee")
+                            # print("eeeeeeeeee")
                             PartyTypeID=b.PartyTypeID
                             Item= b.ItemID 
                             print(b.ItemID) if Party == 14 else None
@@ -110,14 +110,14 @@ class OrderDetailsForInvoice(CreateAPIView):
                                             "GST" : p.GST
                                             })
                             else :   
-                                print("ffffffffff")  
+                                # print("ffffffffff")  
                                 if IsRateWise == 1:
                                    pp = ""
                                    Condition = f",RateCalculationFunction1(LiveBatcheid, ItemID, {Customer}, UnitID, 0, 0, MRP, 0)Rate"                  
                                 else : 
                                     pp = ",ifnull(O_LiveBatches.Rate,0)Rate"
                                     Condition = "" 
-                                    print("ggggggggggg")   
+                                    # print("ggggggggggg")   
                                 obatchwisestockquery= O_BatchWiseLiveStock.objects.raw(f'''select * {Condition}
                                                 from (select O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id ItemID,O_LiveBatches.BatchCode {pp},O_LiveBatches.BatchDate,O_LiveBatches.SystemBatchCode,
                                                 O_LiveBatches.SystemBatchDate,O_LiveBatches.id LiveBatcheid,O_LiveBatches.MRP_id LiveBatcheMRPID,O_LiveBatches.GST_id LiveBatcheGSTID,
@@ -131,13 +131,13 @@ class OrderDetailsForInvoice(CreateAPIView):
                                                 join M_GSTHSNCode on M_GSTHSNCode.id=O_LiveBatches.GST_id
                                                 join MC_ItemUnits on MC_ItemUnits.id=O_BatchWiseLiveStock.Unit_id
                                                 where O_BatchWiseLiveStock.Item_id=%s and O_BatchWiseLiveStock.Party_id=%s and O_BatchWiseLiveStock.BaseUnitQuantity > 0 and IsDamagePieces=0)a ''',[Item,Party])
-                                print("hhhhhhhhhhh")
+                                # print("hhhhhhhhhhh")
                                 stockDatalist = list()
                                 if not obatchwisestockquery:
                                         stockDatalist =[]
                                 else:   
                                     for d in obatchwisestockquery:
-                                        print("iiiiiiiiiiiiiiii")
+                                        # print("iiiiiiiiiiiiiiii")
                                         stockDatalist.append({
                                             "id": d.id,
                                             "Item":d.ItemID,
@@ -158,13 +158,13 @@ class OrderDetailsForInvoice(CreateAPIView):
                             # =====================Current Discount================================================
                             TodaysDiscount = DiscountMaster(
                                 b.ItemID, Party, date.today(),Customer).GetTodaysDateDiscount()
-                            print("jjjjjjjjjjjjjjjj")
+                            # print("jjjjjjjjjjjjjjjj")
                             if TodaysDiscount and TodaysDiscount[0].get('TodaysDiscount') not in [None, '']:
                                 DiscountType = TodaysDiscount[0]['DiscountType']
                                 Discount = TodaysDiscount[0]['TodaysDiscount']
                                   
                             else:
-                                print("kkkkkkkkkkkk") 
+                                # print("kkkkkkkkkkkk") 
                                 DiscountType = b.DiscountType
                                 Discount = b.Discount
                                 
@@ -203,7 +203,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                                 "UnitDetails":UnitDropdown(b.ItemID,Customer,0),
                                 "StockDetails":stockDatalist
                             })
-                            print("llllllllllllllll")
+                            # print("llllllllllllllll")
                         OrderdataList.append({
                                 "OrderIDs":OrderID,
                                 "OrderDate" :  b.OrderDate,
@@ -216,7 +216,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                                 "AdvanceAmount" : b.AdvanceAmount,
                                 "OrderItemDetails":OrderItemDetails
                             })
-                        print("mmmmmmmmmmmmmmm")
+                        # print("mmmmmmmmmmmmmmm")
                     else :
                         log_entry = create_transaction_logNew(request, Orderdata, 0,'Record Not Found', 32, 0, 0, 0, 0)
                         return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
