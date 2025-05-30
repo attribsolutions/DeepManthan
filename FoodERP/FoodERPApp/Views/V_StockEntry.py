@@ -350,7 +350,29 @@ order by StockDate,Party_id,Item_id ''')
         except Exception as e:
             
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
-
+   
+class DeleteStockEntryPageView(CreateAPIView):
+    
+    permission_classes = (IsAuthenticated,)  
+    @transaction.atomic()
+    def post(self, request):
+        stockdata = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                PartyID = stockdata['PartyID']
+                StockDate=stockdata['StockDate']
+                Stockdata = T_Stock.objects.filter(StockDate=StockDate,Party_id=PartyID)  
+                if not Stockdata.exists():  
+                    log_entry = create_transaction_logNew(request,{'PartyID': PartyID, 'StockDate': StockDate}, 0, 'StockDelete: Stock Not available', 473, PartyID)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Stock Not available', 'Data': []})            
+                    
+                deleted_count, _ = Stockdata.delete()
+                log_entry = create_transaction_logNew(request,{'PartyID': PartyID, 'StockDate': StockDate}, 0, f'Stock deleted({deleted_count})', 473, PartyID)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Stock Deleted Successfully', 'Data':[]})                        
+            
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0, "Get Stock Entry List:"+ str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
 
    
    
