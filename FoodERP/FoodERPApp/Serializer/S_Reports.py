@@ -44,7 +44,10 @@ class StockProcessingReportSerializer(serializers.Serializer):
     ClosingBalance=serializers.DecimalField(max_digits=10, decimal_places=3)
     ActualStock=serializers.DecimalField(max_digits=10, decimal_places=3)
     StockAdjustment=serializers.DecimalField(max_digits=10, decimal_places=3)
-    
+    Production=serializers.DecimalField(max_digits=10, decimal_places=3)
+    IBPurchase =serializers.DecimalField(max_digits=10, decimal_places=3)
+    IBSale  =serializers.DecimalField(max_digits=10, decimal_places=3)
+    MaterialIssue =serializers.DecimalField(max_digits=10, decimal_places=3)
 
 class StockReportSerializer(serializers.Serializer):
     
@@ -58,12 +61,17 @@ class StockReportSerializer(serializers.Serializer):
     Sale = serializers.DecimalField(max_digits=10, decimal_places=3)
     PurchaseReturn = serializers.DecimalField(max_digits=10, decimal_places=3)
     ClosingBalance=serializers.DecimalField(max_digits=10, decimal_places=3)
+    ClosingAmount = serializers.DecimalField(max_digits=10, decimal_places=2)
     ActualStock=serializers.DecimalField(max_digits=10, decimal_places=3)
     ItemName = serializers.CharField(max_length=500)
     GroupTypeName = serializers.CharField(max_length=500)
     GroupName = serializers.CharField(max_length=500)
     SubGroupName = serializers.CharField(max_length=500)
     StockAdjustment=serializers.DecimalField(max_digits=10, decimal_places=3)
+    Production =serializers.DecimalField(max_digits=10, decimal_places=3)
+    IBPurchase =serializers.DecimalField(max_digits=10, decimal_places=3)
+    IBSale  =serializers.DecimalField(max_digits=10, decimal_places=3)
+    MaterialIssue =serializers.DecimalField(max_digits=10, decimal_places=3)
     
 class PurchaseGSTRateWiseReportSerializer(serializers.Serializer):
     
@@ -207,13 +215,21 @@ class GenericSaleReportSerializer(serializers.Serializer):
     BatchNo = serializers.CharField(max_length=500)
     BatchDate = serializers.DateField()
     SAPItemID = serializers.CharField(max_length=500)
+    VoucherCode = serializers.CharField(max_length=500)
+    CashierName = serializers.CharField(max_length=500)
+    CreatedOn = serializers.DateTimeField()
      
     def to_representation(self, instance):
         # Ensure proper rounding for specific fields
         representation = super().to_representation(instance)
-        representation['QtyInNo'] = Decimal(representation['QtyInNo']).quantize(Decimal('0.00'))
-        representation['QtyInKg'] = Decimal(representation['QtyInKg']).quantize(Decimal('0.00'))
-        representation['QtyInBox'] = Decimal(representation['QtyInBox']).quantize(Decimal('0.00'))
+        float_fields = ['QtyInNo', 'QtyInKg', 'QtyInBox','MRP', 'BasicRate', 'WithGSTRate','Discount', 'DiscountAmount','TaxableValue', 
+                        'CGST', 'CGSTPercentage','SGST', 'SGSTPercentage', 'IGST', 'IGSTPercentage','GSTPercentage', 'GSTAmount', 'TotalValue','TCSAmount', 'RoundOffAmount', 'GrandTotal']
+        
+        for field in float_fields:
+            value = representation.get(field)
+            if value is not None:
+                representation[field] = float(Decimal(value).quantize(Decimal('0.000')))
+    
         representation ['Data Upload / FE2 Billing'] = "Data Upload" if representation['ImportFromExcel'] else "FE2 Billing"
         return representation
      
@@ -438,6 +454,7 @@ class ManPowerSerializer(serializers.Serializer):
     SO = serializers.CharField(max_length=500)
     SR = serializers.CharField(max_length=500)
     MT =  serializers.CharField(max_length=500)
+    fssaidocument = serializers.CharField(max_length=500)
     
 
 class TCSAmountReportSerializer(serializers.Serializer):

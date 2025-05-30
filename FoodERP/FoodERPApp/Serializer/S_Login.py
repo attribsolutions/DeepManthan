@@ -133,7 +133,7 @@ class UserLoginSerializer(serializers.Serializer):
 class RolesSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_Roles
-        fields= ['id','Name']
+        fields= ['id','Name','IdentifyKey']
 
 class PartySerializer(serializers.ModelSerializer):
     class Meta:

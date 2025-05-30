@@ -102,19 +102,18 @@ class OrderListFilterView(CreateAPIView):
                         aaa = Q(Customer__PriceList_id__in=CustomerType_list)
 
                     if(Customer == ''):
-                        q0 = MC_PartySubParty.objects.filter(Party=Supplier).values('SubParty')
+                        q0 = MC_PartySubParty.objects.filter(Party=Supplier,SubParty__IsApprovedParty=0).values('SubParty')
                         q1 = T_Orders.objects.filter(
                             OrderDate__range=[FromDate, ToDate], Supplier_id=Supplier,Customer_id__in=q0).select_related('Customer').filter(aaa,bbb)
                         query = T_Orders.objects.filter(
-                            OrderDate__range=[FromDate, ToDate], Supplier_id=Supplier).select_related('Customer').filter(aaa,bbb)
+                            OrderDate__range=[FromDate, ToDate], Supplier_id=Supplier, Customer__IsApprovedParty=0).select_related('Customer').filter(aaa,bbb)
                         queryForOpenPO = T_Orders.objects.filter(
-                            POFromDate__lte=FromDate, POToDate__gte=ToDate, Supplier_id=Supplier).select_related('Customer').filter(aaa,bbb)
+                            POFromDate__lte=FromDate, POToDate__gte=ToDate, Supplier_id=Supplier,Customer__IsApprovedParty=0).select_related('Customer').filter(aaa,bbb)
                         q2 = query.union(queryForOpenPO)
                         q = q2.union(q1)
 
                     else:
-                        query = T_Orders.objects.filter(OrderDate__range=[
-                                                        FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier).select_related('Customer').filter(aaa,bbb)
+                        query = T_Orders.objects.filter(OrderDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier,Customer__IsApprovedParty=0).select_related('Customer').filter(aaa,bbb)
                         queryForOpenPO = T_Orders.objects.filter(
                             POFromDate__lte=FromDate, POToDate__gte=ToDate, Customer_id=Customer, Supplier_id=Supplier).select_related('Customer').filter(aaa,bbb)
                         q = query.union(queryForOpenPO)
@@ -291,6 +290,7 @@ where T_Invoices.InvoiceDate between %s and %s and  Customer_id=%s and Party_id=
                             #     Invoice=a['id']).values('Invoice').count()
                             # if InvoiceID == 0:
                             InvoiceListData.append({
+                                "GRNMode" : OrderType,
                                 "id": a.id,
                                 "OrderDate": a.InvoiceDate,
                                 "FullOrderNumber": a.FullInvoiceNumber,
@@ -301,7 +301,7 @@ where T_Invoices.InvoiceDate between %s and %s and  Customer_id=%s and Party_id=
                                 "Supplier": a.SupplierName,
                                 "OrderAmount": a.GrandTotal,
                                 "Description": "",
-                                "OrderType": "",
+                                "OrderType": OrderType,
                                 "POType": "",
                                 "BillingAddress": "",
                                 "ShippingAddress": "",
@@ -361,6 +361,7 @@ where T_Invoices.InvoiceDate between %s and %s and  Customer_id=%s and Party_id=
                         if(c['Inward'] == 1):
                             inward = 1
                     OrderListData.append({
+                        "GRNMode" : OrderType,
                         "id": a['id'],
                         "OrderDate": a['OrderDate'],
                         "FullOrderNumber": a['FullOrderNumber'],
@@ -438,18 +439,25 @@ class T_OrdersView(CreateAPIView):
     @transaction.atomic()
     def post(self, request):
         Orderdata = JSONParser().parse(request)
+        # print(Orderdata)
         try:
             with transaction.atomic():
                 Division = Orderdata['Division']
                 OrderType = Orderdata['OrderType']
                 OrderDate = Orderdata['OrderDate']
                 Supplier  = Orderdata['Supplier']
-                AdvanceAmount =  Orderdata['AdvanceAmount']
-                
+                AdvanceAmount =  Orderdata['AdvanceAmount']     
+                CssCompanyID=M_Parties.objects.filter(id=Division).values("Company_id")
+                CssCompany=str(CssCompanyID[0]['Company_id'])
+                CssCompanyIDSetting=M_Settings.objects.filter(id=61).values("DefaultValue")
+                CssCompanySetting=str(CssCompanyIDSetting[0]['DefaultValue'])                      
                 '''Get Max Order Number'''
-                a = GetMaxNumber.GetOrderNumber(Supplier, OrderType, OrderDate)
+                if CssCompany==CssCompanySetting:                    
+                    a = GetMaxNumber.GetCSSPONumber(Division, OrderType, OrderDate)
+                else:
+                    a = GetMaxNumber.GetOrderNumber(Supplier, OrderType, OrderDate)
                 # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[] })
-                
+                # print(a)
                 for aa in Orderdata['OrderItem']:
 
                     BaseUnitQuantity = UnitwiseQuantityConversion(
@@ -732,7 +740,6 @@ class EditOrderView(CreateAPIView):
                 DemandID = request.data['Demand']
                 
                 q1 = M_Parties.objects.filter(id=Customer).select_related('PartyType').values('PartyType','PartyType__IsRetailer','PartyType__IsSCM','PartyType__IsFranchises')
-                # print(q1)
                 # q2 = M_PartyType.objects.filter(
                 #     id=q1[0]['PartyType']).values('IsRetailer', 'IsSCM')
                 if(OrderType == 1):
@@ -740,17 +747,30 @@ class EditOrderView(CreateAPIView):
                 else:
                         Stockparty=Party
                 # Is Not Retailer but is SSDD Order
-               
-                if(q1[0]['PartyType__IsFranchises'] == 1):
-                    GroupTypeid = 5
-                    seq=(f'MC_ItemGroupDetails.ItemSequence')
-                else:    
-                    GroupTypeid = 1
-                    seq=(f'M_Items.Sequence')
-                    
+                
+                if q1[0]['PartyType__IsFranchises'] == 1:
+                        IsCBMItems = ''
+                        StockQuantity = (f'''(SELECT COALESCE(MAX(O_SPOSDateWiseLiveStock.ClosingBalance), 0)    FROM SweetPOS.O_SPOSDateWiseLiveStock
+                                           Where O_SPOSDateWiseLiveStock.Item = a.Item_id 
+                                              AND O_SPOSDateWiseLiveStock.Party = {Stockparty} AND O_SPOSDateWiseLiveStock.StockDate = CURDATE() ) AS StockQuantity''')
+                else:
+                        IsCBMItems = 'AND M_Items.IsCBMItem = 1'
+                        StockQuantity = (f''' (SELECT IFNULL(SUM(BaseUnitQuantity), 0) FROM O_BatchWiseLiveStock 
+                                                    WHERE IsDamagePieces = 0 AND Item_id = a.Item_id AND Party_id = {Stockparty} GROUP BY Item_id) AS StockQuantity''')
 
                 if (q1[0]['PartyType__IsRetailer'] == 0 ):
+                    CssCompanyID=M_Settings.objects.filter(id=61).values("DefaultValue")
+                    CssCompany=str(CssCompanyID[0]['DefaultValue'])
+                    IsItemnotassign =f'AND MC_PartyItems.Item_id in (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = {Party})' 
+                    if CssCompany:
+                        ItemCount = MC_PartyItems.objects.raw(f'''SELECT 1 as id, Count(`Item_id`)ItemIDCount FROM MC_PartyItems WHERE MC_PartyItems.Party_id ={Party}''')
+                        if ItemCount[0].ItemIDCount==0:
+                            IsItemnotassign =f'AND MC_PartyItems.Item_id in (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = {Customer})'
+                        
+                            
                     PartyItem = Customer
+                    ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Stockparty,0).split('!') 
+                    
                     Itemquery = TC_OrderItems.objects.raw(f'''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,
                     convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,1,{RateParty},0) else a.GST_id end),SIGNED)GST_id,
                     convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,2,{RateParty},0) else M_GSTHSNCode.GSTPercentage  end),DECIMAL(10, 2))GSTPercentage,
@@ -760,17 +780,15 @@ class EditOrderView(CreateAPIView):
                     convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,1,%s,%s) else a.Discount  end),DECIMAL(10, 2))Discount,
                     convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,2,%s,%s) else a.DiscountType  end),SIGNED)DiscountType,
 
-a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,ifnull(a.DiscountAmount,0)DiscountAmount
-,
-(select ifnull(sum(BaseUnitQuantity),0) from O_BatchWiseLiveStock where IsDamagePieces=0 and Item_id=a.Item_id 
-and Party_id=%s 
-group by Item_id)StockQuantity , Round(GetTodaysDateRate(a.Item_id, %s,%s,0,2),2) AS VRate,(select BaseUnitQuantity from MC_ItemUnits where IsDeleted=0  and UnitID_id=2 and Item_id=a.Item_id)Weightage                 
+a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,
+{ItemsGroupJoinsandOrderby[0]},
+ifnull(a.DiscountAmount,0)DiscountAmount,
+{StockQuantity}, Round(GetTodaysDateRate(a.Item_id, %s,%s,0,2),2) AS VRate,(select BaseUnitQuantity from MC_ItemUnits where IsDeleted=0  and UnitID_id=2 and Item_id=a.Item_id)Weightage                 
                 from
 (select * from 
     (SELECT MC_PartyItems.Item_id FROM `MC_PartyItems` 
     JOIN M_ChannelWiseItems ON M_ChannelWiseItems.Item_id=MC_PartyItems.Item_id 
-    WHERE `MC_PartyItems`.`Party_id` = %s 
-    AND MC_PartyItems.Item_id in (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = %s) 
+    WHERE `MC_PartyItems`.`Party_id` = %s {IsItemnotassign}    
     AND M_ChannelWiseItems.PartyType_id IN (SELECT PartyType_id FROM  M_Parties where id=%s) 
     AND M_ChannelWiseItems.IsAvailableForOrdering=0 )b 
     
@@ -791,58 +809,18 @@ left join M_MRPMaster on M_MRPMaster.id =a.MRP_id
 left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
 left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
 left join M_GSTHSNCode on M_GSTHSNCode.id=a.GST_id
-
-left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id={GroupTypeid}
-left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id and M_GroupType.id={GroupTypeid}
-left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
-left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
-
-Order By M_Group.Sequence,MC_SubGroup.Sequence,{seq}  ''', ([EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[Customer],[Party],[EffectiveDate],[Customer],[Party],[Stockparty],[EffectiveDate],[RateParty],[PartyItem], [Party],[PartyItem], [OrderID]))
-                
-                elif (q1[0]['PartyType__IsFranchises'] == 1):
-                    PartyItem = Party
-                    Itemquery = TC_OrderItems.objects.raw(f'''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,
-                    convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,1,{RateParty},0) else a.GST_id end),SIGNED)GST_id,
-                    convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,2,{RateParty},0) else M_GSTHSNCode.GSTPercentage  end),DECIMAL(10, 2))GSTPercentage, 
-                    (Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,3,{RateParty},0) else M_GSTHSNCode.HSNCode end)HSNCode,
-                    convert((Case when a.MRP_id is null then GetTodaysDateMRP(a.Item_id,%s,1,0,{RateParty},0) else a.MRP_id end),SIGNED)MRP_id,
-                            (Case when a.MRP_id is null then GetTodaysDateMRP(a.Item_id,%s,2,0,{RateParty},0) else M_MRPMaster.MRP  end)MRPValue,
-                    convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,1,%s,%s) else a.Discount  end),DECIMAL(10, 2))Discount,
-                    convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,2,%s,%s) else a.DiscountType  end),SIGNED)DiscountType,
-
-a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,ifnull(a.DiscountAmount,0)DiscountAmount
-,(select ifnull(sum(BaseUnitQuantity),0) from O_BatchWiseLiveStock where IsDamagePieces=0 and Item_id=a.Item_id 
-and Party_id=%s 
-group by Item_id)StockQuantity ,Round(GetTodaysDateRate(a.Item_id, '{EffectiveDate}','{Party}',0,2),2) AS VRate,(select BaseUnitQuantity from MC_ItemUnits where IsDeleted=0  and UnitID_id=2 and Item_id=a.Item_id)Weightage            
-                from
-(select * from 
-        (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = %s)b 
-    left join
-
-        (SELECT `Item_id` Item,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`, `Comment`,DiscountType,Discount,DiscountAmount
-        FROM `TC_OrderItems` WHERE `TC_OrderItems`.`IsDeleted` = False AND `TC_OrderItems`.`Order_id` = %s
-        
-            union
-    SELECT `Item_id` Item,`Quantity`, `MRP_id`, `Rate`, `Unit_id`, `BaseUnitQuantity`, `GST_id`, `Margin_id`, `BasicAmount`, `GSTAmount`, `CGST`, `SGST`, `IGST`, `CGSTPercentage`, `SGSTPercentage`, `IGSTPercentage`, `Amount`,'' 'Comment','' DiscountType,'' Discount,0 DiscountAmount
-    FROM `TC_DemandItems` WHERE `TC_DemandItems`.`IsDeleted` = False AND `TC_DemandItems`.Demand_id ={DemandID} )c
-    on b.Item_id=c.Item 
-)a
-
-
-join M_Items on M_Items.id=Item_id
-left join M_MRPMaster on M_MRPMaster.id =a.MRP_id
-left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
-left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
-left join M_GSTHSNCode on M_GSTHSNCode.id=a.GST_id
-
-left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id={GroupTypeid}
-left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id and M_GroupType.id={GroupTypeid}
-left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
-left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
-
-Order By M_Group.Sequence,MC_SubGroup.Sequence,{seq}''', ([EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[Customer],[Party],[EffectiveDate],[Customer],[Party],[Stockparty],[PartyItem], [OrderID]))
+{ItemsGroupJoinsandOrderby[1]} 
+{ItemsGroupJoinsandOrderby[2]} ''', ([EffectiveDate], [EffectiveDate], [EffectiveDate], [EffectiveDate],
+                                                           [EffectiveDate], [EffectiveDate], [Customer], [Party], [EffectiveDate], 
+                                                           [Customer], [Party], [EffectiveDate], [RateParty], [PartyItem],
+                                                            [PartyItem], [OrderID]))
+                    
+                    # print(Itemquery.query)   
                 else:
+                    
                     PartyItem = Party
+                    ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(Stockparty,0).split('!') 
+                    
                     Itemquery = TC_OrderItems.objects.raw(f'''select a.Item id, a.Item_id,M_Items.Name ItemName,a.Quantity,a.Rate,a.Unit_id,M_Units.Name UnitName,a.BaseUnitQuantity,
                     convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,1,{RateParty},0) else a.GST_id end),SIGNED)GST_id,
                     convert((Case when a.GST_id is null then GSTHsnCodeMaster(a.Item_id,%s,2,{RateParty},0) else M_GSTHSNCode.GSTPercentage  end),DECIMAL(10, 2))GSTPercentage, 
@@ -852,10 +830,11 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,{seq}''', ([EffectiveDate],[Effec
                     convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,1,%s,%s) else a.Discount  end),DECIMAL(10, 2))Discount,
                     convert((Case when a.Discount is null then GetTodaysDateDiscount(a.Item_id,%s,2,%s,%s) else a.DiscountType  end),SIGNED)DiscountType,
 
-a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') GroupName,ifnull(MC_SubGroup.Name,'') SubGroupName,ifnull(a.DiscountAmount,0)DiscountAmount
-,(select ifnull(sum(BaseUnitQuantity),0) from O_BatchWiseLiveStock where IsDamagePieces=0 and Item_id=a.Item_id 
-and Party_id=%s 
-group by Item_id)StockQuantity ,Round(GetTodaysDateRate(a.Item_id, '{EffectiveDate}','{Party}',0,2),2) AS VRate,(select BaseUnitQuantity from MC_ItemUnits where IsDeleted=0  and UnitID_id=2 and Item_id=a.Item_id)Weightage            
+a.BasicAmount,a.GSTAmount,a.CGST,a.SGST,a.IGST,a.CGSTPercentage,a.SGSTPercentage,a.IGSTPercentage,a.Amount,a.Comment,M_Items.Sequence ,M_Items.SAPItemCode,M_Units.SAPUnit SAPUnitName,
+{ItemsGroupJoinsandOrderby[0]},
+ifnull(a.DiscountAmount,0)DiscountAmount,
+{StockQuantity},
+Round(GetTodaysDateRate(a.Item_id, '{EffectiveDate}','{Party}',0,2),2) AS VRate,(select BaseUnitQuantity from MC_ItemUnits where IsDeleted=0  and UnitID_id=2 and Item_id=a.Item_id)Weightage            
                 from
 (select * from 
         (SELECT `Item_id` FROM `MC_PartyItems` WHERE `MC_PartyItems`.`Party_id` = %s)b 
@@ -871,18 +850,14 @@ group by Item_id)StockQuantity ,Round(GetTodaysDateRate(a.Item_id, '{EffectiveDa
 )a
 
 
-join M_Items on M_Items.id=Item_id and IsCBMItem=1
+JOIN M_Items  ON M_Items.id = a.Item_id {IsCBMItems}
 left join M_MRPMaster on M_MRPMaster.id =a.MRP_id
 left join MC_ItemUnits on MC_ItemUnits.id=a.Unit_id
 left join M_Units on M_Units.id=MC_ItemUnits.UnitID_id
 left join M_GSTHSNCode on M_GSTHSNCode.id=a.GST_id
-
-left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id={GroupTypeid}
-left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id and M_GroupType.id={GroupTypeid}
-left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
-left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
-
-Order By M_Group.Sequence,MC_SubGroup.Sequence,{seq}''', ([EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[Customer],[Party],[EffectiveDate],[Customer],[Party],[Stockparty],[PartyItem], [OrderID]))
+{ItemsGroupJoinsandOrderby[1]}
+{ItemsGroupJoinsandOrderby[2]}''', ([EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[EffectiveDate],[Customer],
+                                    [Party],[EffectiveDate],[Customer],[Party],[PartyItem], [OrderID]))
                 
                 OrderItemSerializer = OrderEditserializer(Itemquery, many=True).data
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': OrderItemSerializer})
@@ -893,12 +868,14 @@ Order By M_Group.Sequence,MC_SubGroup.Sequence,{seq}''', ([EffectiveDate],[Effec
                               "UnitDetails": UnitDropdown(ItemID, RateParty, 0)
                               })
                     
-                    # bomquery = MC_BillOfMaterialItems.objects.filter(
-                    #     Item_id=ItemID, BOM__IsVDCItem=1).select_related('BOM')
-                    # if bomquery.exists():
-                    b.update({"Bom": True})
-                    # else:
-                    #     b.update({"Bom": False})
+                    bomquery = MC_BillOfMaterialItems.objects.filter(
+                        Item_id=ItemID, BOM__IsVDCItem=1).select_related('BOM')
+                    if bomquery.exists():
+                       
+                        b.update({"Bom": True})
+                    else:
+                        
+                        b.update({"Bom": False})
 
                 if (OrderID != 0 or DemandID != 0):
                     if(OrderID != 0):
@@ -1083,7 +1060,7 @@ class SummaryReportView(CreateAPIView):
                 left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1
                 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
                 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id 
-                where  OrderDate between %s and %s''' 
+                where  OrderDate between %s and %s and TC_OrderItems.Isdeleted=0''' 
 
                 if OrderType == 1:
                     if Party == "":
@@ -1127,7 +1104,7 @@ class SummaryReportView(CreateAPIView):
                 else:
                         # OrderQueryresults = T_Orders.objects.raw(OrderQuery, [FromDate,ToDate,pricelist])  
                         OrderQueryresults = T_Orders.objects.raw(OrderQuery, [FromDate,ToDate])   
-                # CustomPrint(OrderQueryresults.query)
+                # print(OrderQueryresults.query)
                 if OrderQuery:
                     OrderItemDetails = list()
                     for row in OrderQueryresults:

@@ -14,6 +14,9 @@ from ..Serializer.S_Bom import *
 from ..models import *
 from django.db.models import *
 from datetime import datetime, timedelta 
+from decimal import Decimal
+from rest_framework.views import APIView
+from django.forms.models import model_to_dict
 
 # GRN List API
 
@@ -27,51 +30,68 @@ class GRNListFilterView(CreateAPIView):
         GRNdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
+                
                 FromDate = GRNdata['FromDate']
                 ToDate = GRNdata['ToDate']
                 Customer = GRNdata['Party']
                 Supplier = GRNdata['Supplier']
-                
+                IsGRNType=GRNdata['IsGRNType']
+                # print('aaaaaaaaaaaaaaaaaaaaa')
                 if(Supplier == ''):
                     # print("shruti")
-                    query = T_GRNs.objects.filter(
-                        GRNDate__range=[FromDate, ToDate], Customer_id=Customer)
+                    # query = T_GRNs.objects.filter(
+                    #     GRNDate__range=[FromDate, ToDate], Customer_id=Customer)
                     # print(query.query)
-                else:
-                    query = T_GRNs.objects.filter(
-                        GRNDate__range=[FromDate, ToDate], Customer_id=Customer, Party_id=Supplier)
+                    condition=""
                     
-                # return JsonResponse({'Data':str(query.query)})
+                else:
+                    condition=f'''and G.Party_id = {Supplier}'''
+                    # query = T_GRNs.objects.filter(
+                    #     GRNDate__range=[FromDate, ToDate], Customer_id=Customer, Party_id=Supplier)
+                # print('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')    
+                query =T_GRNs.objects.raw(f''' select G.id,  G.GRNDate, G.Customer_id, G.GRNNumber, G.FullGRNNumber,G.InvoiceNumber,G.GrandTotal, G.Party_id, G.CreatedBy, G.UpdatedBy,G.CreatedOn, G.UpdatedOn, G.Comment
+                                            ,party.Name PartyName,cust.Name customerName,cust.id customerid,T_Invoices.InvoiceNumber,
+                                          T_Invoices.InvoiceDate,party.id PartyID,T_Invoices.id InvoiceID,T_Invoices.FullInvoiceNumber, G.IsSave,G.TotalExpenses
+                                          from T_GRNs G
+
+join M_Parties party on party.id=G.Party_id
+join M_Parties cust on cust.id=G.Customer_id
+join TC_GRNReferences on TC_GRNReferences.GRN_id=G.id
+left join T_Invoices on T_Invoices.id=TC_GRNReferences.Invoice_id
+where GRNDate between %s and %s and G.Customer_id= %s and IsGRNType={IsGRNType} {condition}''',[FromDate,ToDate,Customer])
+                
+                # print(query)
                 if not query:
                     log_entry = create_transaction_logNew(request, GRNdata, Customer,'List Not available',68,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
                 else:
-                    GRN_serializer = T_GRNSerializerForGET(query, many=True).data
+                    # GRN_serializer = T_GRNSerializerForGET(query, many=True).data
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRN_serializer})
                     GRNListData = list()
                     # print(GRN_serializer)
-                    for a in GRN_serializer:
+                    for a in query:
                         
                         # print("RRRRRRRRRRRRRRRRRRRRRR",a)
                         if (GRNdata['DashBoardMode'] == 1):
                             GRNListData.append({
-                                "GRNDate": a['GRNDate']                
+                                "GRNDate": a.GRNDate                
                             })
                         else:
+                            pass
                             # print("Shrutirriri")
-                            x = a.get('GRNReferences')
-                            # print(a.get('GRNReferences'))                         
-                            # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': a})
-                            challan = None 
+                            # x = a.get('GRNReferences')
+                            # # print(a.get('GRNReferences'))                         
+                            # # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': a})
+                            # challan = None 
                             
-                            if x:
-                                # print("hhhhhhhhh")
-                                challan = x[0]['Challan']
-                                # print(challan)
-                                POType= ""
-                                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': x})
-                            else:
-                                POType= ""
+                            # if x:
+                            #     # print("hhhhhhhhh")
+                            #     challan = x[0]['Challan']
+                            #     # print(challan)
+                            #     POType= ""
+                            #     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': x})
+                            # else:
+                            POType= ""
                         
                             # challan = a['GRNReferences'][0]['Challan']
                             # if challan != None: 
@@ -80,20 +100,23 @@ class GRNListFilterView(CreateAPIView):
                             #     POType= ""
                             #     # POType= a['GRNReferences'][0]['Order']['POType']['id']
                             GRNListData.append({
-                                "id": a['id'],
-                                "GRNDate": a['GRNDate'],
-                                "Customer": a['Customer']['id'],
-                                "CustomerName": a['Customer']['Name'],
-                                "GRNNumber": a['GRNNumber'],
-                                "FullGRNNumber": a['FullGRNNumber'],
-                                "InvoiceNumber": a['InvoiceNumber'],
-                                "FullInvoiceNumber":a['GRNReferences'][0]['Invoice']['FullInvoiceNumber'] if a['GRNReferences'][0]['Invoice'] else a['InvoiceNumber'],
-                                "InvoiceDate": a['GRNReferences'][0]['Invoice']['InvoiceDate'] if a['GRNReferences'][0]['Invoice'] else "",
-                                "GrandTotal": a['GrandTotal'],
-                                "Party": a['Party']['id'],
-                                "PartyName": a['Party']['Name'],
-                                "CreatedOn" : a['CreatedOn'],
-                                "POType":POType
+                                "id": a.id,
+                                "GRNDate": a.GRNDate,
+                                "Customer": a.customerid,
+                                "CustomerName": a.customerName,
+                                "GRNNumber": a.GRNNumber,
+                                "FullGRNNumber": a.FullGRNNumber,
+                                "InvoiceNumber": a.InvoiceNumber,
+                                "FullInvoiceNumber":a.FullInvoiceNumber if a.FullInvoiceNumber else a.InvoiceNumber,
+                                "InvoiceDate": a.InvoiceDate if a.InvoiceNumber else "",
+                                "InvoiceID" : a.InvoiceID,
+                                "GrandTotal": a.GrandTotal,
+                                "Party": a.PartyID,
+                                "PartyName": a.PartyName,
+                                "CreatedOn" : a.UpdatedOn,
+                                "POType":POType,
+                                "IsSave" : a.IsSave,
+                                "TotalExpenses":a.TotalExpenses
 
                             })
                     # print(GRNListData)
@@ -106,6 +129,7 @@ class GRNListFilterView(CreateAPIView):
                     # print(GRNListData)
                     log_entry = create_transaction_logNew(request, GRNdata,Customer,'From:'+FromDate+','+'To:'+ToDate+','+'Supplier:'+str(y),68,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData})
+                
         except Exception as e:
             log_entry = create_transaction_logNew(request, GRNdata, 0,'GRNList:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
@@ -125,14 +149,19 @@ class T_GRNView(CreateAPIView):
                 Customer = GRNdata['Customer']
                 CreatedBy = GRNdata['CreatedBy']
                 GRNDate = GRNdata['GRNDate']
+                IsGRNType= GRNdata['IsGRNType']
                 # CustomPrint(GRNdata['GRNReferences'])
                 # if R in GRNdata['GRNReferences']:
                 #     Query =T_Orders.objects.filter(id=OrderID[0]).update(Inward=GRNReference_data['Inward'])
 # ==========================Get Max GRN Number=====================================================
                 a = GetMaxNumber.GetGrnNumber(Customer,GRNDate)
                 GRNdata['GRNNumber'] = a
-                b = GetPrifix.GetGrnPrifix(Customer)
+                if IsGRNType !=0:                    
+                    b = GetPrifix.GetGrnPrifix(Customer)
+                else:
+                    b = GetPrifix.GetIBInwardPrifix(Customer)
                 
+                b = b.strip() if b else ""
                 GRNdata['FullGRNNumber'] = b+""+str(a)
 #================================================================================================== 
                 item = ""
@@ -145,8 +174,14 @@ class T_GRNView(CreateAPIView):
                     query2=MC_ItemShelfLife.objects.filter(Item_id=a['Item'],IsDeleted=0).values('Days')
                     DaysofItems = query2[0]['Days'] if query2 else 0
                     batch_date = datetime.strptime(a['BatchDate'], '%Y-%m-%d')                
-                    ItemExpiryDateStr = batch_date + timedelta(days=DaysofItems)
-                    ItemExpiryDate = ItemExpiryDateStr.strftime('%Y-%m-%d')
+                    
+                    if 'ItemExpiryDate' in a and a['ItemExpiryDate']:
+                        ItemExpiryDate = a['ItemExpiryDate'] 
+                    else:
+                        ItemExpiryDateStr = batch_date + timedelta(days=DaysofItems)
+                        ItemExpiryDate = ItemExpiryDateStr.strftime('%Y-%m-%d')  
+
+                    
                     if(item == ""):
                         item = a['Item']
                         b = query1.count()
@@ -217,6 +252,80 @@ class T_GRNView(CreateAPIView):
             log_entry = create_transaction_logNew(request, GRNdata, 0,'GRNSave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
+# UPDATE GRN 
+
+class T_GRNViewUpdate(APIView):
+    permission_classes = (IsAuthenticated,)
+    
+    def put(self, request, id=0):
+        GRNupdatedata = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                GRNupdateByID = T_GRNs.objects.get(id=id)
+                gg = T_GRNs.objects.filter(id=id).values('AccountingGRNStatus')
+                # print(gg[0]['AccountingGRNStatus'])
+                
+                if gg[0]['AccountingGRNStatus'] == 1:
+                    # gg.update(AccountingGRNStatus=2)
+                    GRNupdatedata['AccountingGRNStatus'] = 2
+                    
+                
+                for item in GRNupdatedata['GRNItems']:
+                    BaseUnitQuantity = UnitwiseQuantityConversion(
+                        item['Item'], item['Quantity'], item['Unit'], 0, 0, 0, 0).GetBaseUnitQuantity()
+                    item['BaseUnitQuantity'] = BaseUnitQuantity
+                    QtyInNo = UnitwiseQuantityConversion(
+                        item['Item'], item['Quantity'], item['Unit'], 0, 0, 1, 0).ConvertintoSelectedUnit()
+                    item['QtyInNo'] = QtyInNo
+                    QtyInKg = UnitwiseQuantityConversion(
+                        item['Item'], item['Quantity'], item['Unit'], 0, 0, 2, 0).ConvertintoSelectedUnit()
+                    item['QtyInKg'] = QtyInKg
+                    QtyInBox = UnitwiseQuantityConversion(
+                        item['Item'], item['Quantity'], item['Unit'], 0, 0, 4, 0).ConvertintoSelectedUnit()
+                    item['QtyInBox'] = QtyInBox
+                # print(GRNupdatedata)
+                GRNupdate_Serializer = T_GRNSerializer(GRNupdateByID, data=GRNupdatedata)
+                if GRNupdate_Serializer.is_valid():
+                    GRNupdate_Serializer.save()  
+                # TC_GRNExpenses save
+                # TC_GRNExpenses.objects.filter(grn_id=id).delete()
+
+                    # Save new GRNExpenses data
+                    total_expense_amount = 0
+                    for exp in GRNupdatedata.get('GRNExpenses', []):                        
+                        expense = TC_GRNExpenses.objects.create(
+                            GRN_id=exp.get('GRN',0),                        
+                            Ledger_id=exp.get('Ledger',0),
+                            Amount=Decimal(exp.get('Amount', 0) or 0),
+                            GSTPercentage=exp.get('GSTPercentage', 0),
+                            CGST=exp.get('CGST', 0),
+                            SGST=exp.get('SGST', 0),
+                            IGST=exp.get('IGST', 0),
+                            BasicAmount=exp.get('BasicAmount', 0)
+                        )
+                        
+                        # total_expense_amount += Decimal(expense.Amount or 0)
+                    total_expense_amount= GRNupdatedata['TotalExpense']
+
+                        # Update TotalExpenses in T_GRNs
+                    GRNupdateByID.TotalExpenses = total_expense_amount
+                    
+                    GRNupdateByID.save()
+                        
+                        
+                    log_entry = create_transaction_logNew(request, GRNupdatedata, 0,'GRN Updated - ID: ' + str(id), 450, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GRN Updated Successfully', 'Data': []})
+                else:
+                    log_entry = create_transaction_logNew(request, GRNupdatedata, 0, 'GRNEdit:' + str(GRNupdate_Serializer.errors), 450, 0)
+                    transaction.set_rollback(True)
+                return JsonResponse({'StatusCode': 406, 'Status': False, 'Message': GRNupdate_Serializer.errors, 'Data': []})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, GRNupdatedata, 0, 'GRNEdit:' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+        
+        
+
+
 #GRN Single Get API
 
 class T_GRNViewSecond(CreateAPIView):
@@ -232,6 +341,17 @@ class T_GRNViewSecond(CreateAPIView):
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRN_serializer})
                 GRNItemListData = list()
                 for a in GRN_serializer['GRNItems']:
+                    GSTquery=GSTListFun(a['Item']['id'],GRN_serializer['Customer']['id'],0) 
+                    if GSTquery.exists():
+                        # Gstdata = ItemGSTHSNSerializerSecond(GSTquery, many=True).data
+                        ItemGSTDetails = list()
+                        for e in GSTquery:
+                            ItemGSTDetails.append({
+                            "GST": e['id'],
+                            "GSTPercentage": e['GSTPercentage'],   
+                        })
+                    
+                    
                     GRNItemListData.append({
                         "Item": a['Item']['id'],
                         "ItemName": a['Item']['Name'],
@@ -247,6 +367,7 @@ class T_GRNViewSecond(CreateAPIView):
                         "TaxType": a['TaxType'],
                         "GST": a['GST']['id'],
                         "GSTPercentage": a['GSTPercentage'],
+                        "GSTDropdown":ItemGSTDetails,
                         "HSNCode": a['GST']['HSNCode'],
                         "GSTAmount": a['GSTAmount'],
                         "Amount": a['Amount'],
@@ -263,6 +384,9 @@ class T_GRNViewSecond(CreateAPIView):
                         "BatchCode": a['BatchCode'],
                         "SystemBatchDate": a['SystemBatchDate'],
                         "SystemBatchCode": a['SystemBatchCode'],
+                        "DiscrepancyComment" : a['DiscrepancyComment'],
+                        "AccountingQuantity" : a['AccountingQuantity'],
+                        "ItemExpiryDate" : a['ItemExpiryDate'],
                         "UnitDetails":[]
                     })
 
@@ -280,14 +404,19 @@ class T_GRNViewSecond(CreateAPIView):
                     "GRNDate": a['GRNDate'],
                     "Customer": a['Customer']['id'],
                     "CustomerName": a['Customer']['Name'],
+                    "PriceList_id": a['Customer']['PriceList_id'],
                     "GRNNumber": a['GRNNumber'],
                     "FullGRNNumber": a['FullGRNNumber'],
                     "InvoiceNumber": a['InvoiceNumber'],
+                    "InvoiceDate" : a["InvoiceDate"],
                     "GrandTotal": a['GrandTotal'],
+                    "RoundOffAmount" : a['RoundOffAmount'],
                     "Party": a['Party']['id'],
                     "PartyName": a['Party']['Name'],
                     "CreatedBy": a['CreatedBy'],
                     "UpdatedBy": a['UpdatedBy'],
+                    "Comment" : a['Comment'],
+                    "IsSave" : a['IsSave'],
                     "GRNReferences": GRNReferencesData,
                     "GRNItems": GRNItemListData
                 })
@@ -295,7 +424,7 @@ class T_GRNViewSecond(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': GRNListData})
         except Exception as e:
             log_entry = create_transaction_logNew(request,{'GRNID':id}, 0,'SingleGRN:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
  
 # GRN DELETE API 
     @transaction.atomic()
@@ -320,7 +449,8 @@ class T_GRNViewSecond(CreateAPIView):
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'GRN Used in another Transaction', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'GRNDelete:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})    
+            
 # Get PO Details For Make GRN POST API 
 
 class GetOrderDetailsForGrnView(CreateAPIView):
@@ -338,6 +468,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                 
                 # Check if GRN exists for any of the given OrderIDs
                 grn_exists = TC_GRNReferences.objects.filter(Order_id__in=Order_list).exists()
+              
                 IsSave = 2 if grn_exists else 1
                
                 if Mode == 1:
@@ -432,111 +563,134 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                     log_entry = create_transaction_logNew(request, OrderItemSerializedata, OrderSerializedata[0]['CustomerID'],'OrderItemDetails',73,0,0,0,OrderSerializedata[0]['id'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData[0]})
                     
-                elif Mode == 2: #Make GRN from VDCChallan
-                    # CustomPrint("Shrutiiiiii")
-                    ChallanQuery = T_Challan.objects.filter(id=POOrderIDs)
-                    # CustomPrint(POOrderIDs)
-                    # CustomPrint(ChallanQuery.query)
+                elif Mode == 2: #Make GRN from VDCChallan                    
+                    ChallanQuery = T_Challan.objects.filter(id=POOrderIDs)                    
                     if ChallanQuery.exists():
-                        ChallanSerializedata = ChallanSerializerSecond(ChallanQuery, many=True).data
-                        # CustomPrint(ChallanSerializedata)                        
-                        # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ChallanSerializedata})
-                        
+                        ChallanSerializedata = ChallanSerializerSecond(ChallanQuery, many=True).data  
                         ChallanData = list()
                         for x in ChallanSerializedata:
-                            ChallanItemDetails = list()                                                  
-                            for D in x['ChallanReferences']: 
-                                DemandID=D['Demands']
-                                # CustomPrint(DemandID)
-                            DemandQuery=T_Demands.objects.filter(id=DemandID).values('FullDemandNumber','DemandDate')   
-                            FullDemandNumber=DemandQuery[0]['FullDemandNumber']
-                            DemandDate=DemandQuery[0]['DemandDate']
-                            # CustomPrint(DemandQuery.query)
-                            # CustomPrint(DemandDate)
+                            Customer=x['Customer']['id']
+                            IsVDCChallan=x['IsVDCChallan']
+                            # print(IsVDCChallan)
+                            # print(Customer)
+                            ChallanItemDetails = list()  
+                            if  x['ChallanReferences']:                                                  
+                                for D in x['ChallanReferences']: 
+                                    DemandID=D['Demands']
+                                    # CustomPrint(DemandID)
+                                DemandQuery=T_Demands.objects.filter(id=DemandID).values('FullDemandNumber','DemandDate')   
+                                FullDemandNumber=DemandQuery[0]['FullDemandNumber']
+                                DemandDate=DemandQuery[0]['DemandDate']
+                            
                             for y in x['ChallanItems']:
-                                # CustomPrint("yyyyyyy")
-                                # CustomPrint(y)
-                                Qty = y['Quantity']                                
-                                bomquery = MC_BillOfMaterialItems.objects.filter(Item_id=y['Item']['id']).values('BOM')
-                                # CustomPrint(bomquery.query)
-                                Query = M_BillOfMaterial.objects.filter(id=bomquery[0]['BOM'])
-                                # CustomPrint(Query.query)
-                                BOM_Serializer = M_BOMSerializerSecond001(Query,many=True).data
-                                # CustomPrint("PSSSSSS")
-                                # CustomPrint(BOM_Serializer)
-                                BillofmaterialData = list()
-                                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
-                                for a in BOM_Serializer:
-                                    ParentItem= y['Item']['id']
-                                    # CustomPrint("sssssss")
-                                    # CustomPrint(a)
-                                    Parentquery = MC_ItemUnits.objects.filter(Item_id=ParentItem,IsDeleted=0)
-                                    # CustomPrint(Parentquery.query)
-                                    if Parentquery.exists():
-                                        ParentUnitdata = Mc_ItemUnitSerializerThird(Parentquery, many=True).data
-                                        ParentUnitDetails = list()
-                                        for b in ParentUnitdata:
-                                            if b['IsDeleted']== 0 :
-                                                ParentUnitDetails.append({
-                                                "Unit": b['id'],
-                                                "UnitName": b['BaseUnitConversion'],
-                                                })
-                                            
-                                    GSTquery = M_GSTHSNCode.objects.filter(Item_id=ParentItem,IsDeleted=0)
-                                    # CustomPrint(GSTquery.query)
-                                    if GSTquery.exists():
-                                        GSTdata =ItemGSTHSNSerializerSecond(GSTquery, many=True).data
-                                        GSTDetails = list()
-                                        for c in GSTdata:
-                                            GSTDetails.append({
-                                            "id": c['id'],
-                                            "EffectiveDate": c['EffectiveDate'],
-                                            "GSTPercentage": c['GSTPercentage'],
-                                            "HSNCode": c['HSNCode'],
-                                        })
-                                    MRPquery = M_MRPMaster.objects.filter(Item_id=ParentItem,IsDeleted=0)
-                                    # CustomPrint(MRPquery.query)
-                                    if MRPquery.exists():
-                                        MRPdata =ItemMRPSerializerSecond(MRPquery, many=True).data
-                                        MRPDetails = list()
-                                        for d in MRPdata:
-                                            MRPDetails.append({
-                                            "id": d['id'],
-                                            "EffectiveDate": d['EffectiveDate'],
-                                            "Company": d['Company']['id'],
-                                            "CompanyName": d['Company']['Name'],
-                                            "MRP": d['MRP'],
-                                            })                
-                                    BillofmaterialData.append({
-                                        "Item":ParentItem,
-                                        "ItemName":y['Item']['Name'],
-                                        "Quantity": Qty,
-                                        "MRP":MRPDetails[0]['id'],
-                                        "MRPValue": MRPDetails[0]['MRP'],
-                                        "Rate":y['Rate'], 
-                                        "Unit": y['Unit']['id'],
-                                        "UnitName": y['Unit']['BaseUnitConversion'],
-                                        "BaseUnitQuantity": y['Unit']['BaseUnitQuantity'],
-                                        "GST":GSTDetails[0]['id'],
-                                        "HSNCode": GSTDetails[0]['HSNCode'],
-                                        "GSTPercentage": GSTDetails[0]['GSTPercentage'],
-                                        "Margin": "",
-                                        "MarginValue":"",
-                                        "BasicAmount": "",
-                                        "GSTAmount": "",
-                                        "CGST": "",
-                                        "SGST": "",
-                                        "IGST": "",
-                                        "CGSTPercentage": "",
-                                        "SGSTPercentage": "",
-                                        "IGSTPercentage": "",
-                                        "Amount":"",
-                                        "BatchCode":y['BatchCode'],
-                                        "LoginName":"",
-                                        "UnitDetails":ParentUnitDetails
+                                print(y)
+                                ItemID=y['Item']['id'] 
+                                Qty = y['Quantity'] 
+                                BillofmaterialData = list() 
+                                if IsVDCChallan==1:
+                                    # IsVDC= f"and IsVDCItem={IsVDCChallan}"
+                                # else:
+                                #     IsVDC=""
+                                    
+                                                            
+                                    bomquery = MC_BillOfMaterialItems.objects.raw(f'''SELECT 1 id,MC_BillOfMaterialItems.BOM_id FROM MC_BillOfMaterialItems
+                                    JOIN M_BillOfMaterial ON M_BillOfMaterial.id=MC_BillOfMaterialItems.BOM_id
+                                    WHERE MC_BillOfMaterialItems.Item_id ={ItemID} and IsDelete=0 AND ISVDCItem=1''') 
+                                                                
+                                    Query = M_BillOfMaterial.objects.filter(id=bomquery[0].BOM_id)
+                                    # print(Query)
+                                    BOM_Serializer = M_BOMSerializerSecond001(Query,many=True).data
+                                    
+                                    
+                                    # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BOM_Serializer})
+                                    for a in BOM_Serializer:
+                                        # if IsVDCChallan==1:
+                                            ParentItem=  a['Item']['id'] 
+                                else:    
+                                    ParentItem=  y['Item']['id']                              
+                                Parentquery = MC_ItemUnits.objects.filter(Item_id=ParentItem,IsDeleted=0)
+                                # CustomPrint(Parentquery.query)
+                                if Parentquery.exists():
+                                    ParentUnitdata = Mc_ItemUnitSerializerThird(Parentquery, many=True).data
+                                    ParentUnitDetails = list()
+                                    for b in ParentUnitdata:
+                                        if b['IsDeleted']== 0 :
+                                            ParentUnitDetails.append({
+                                            "Unit": b['id'],
+                                            "UnitName": b['BaseUnitConversion'],
+                                            })
                                         
-        
-                                        })       
+                                GSTquery = M_GSTHSNCode.objects.filter(Item_id=ParentItem,IsDeleted=0)
+                                # CustomPrint(GSTquery.query)
+                                if GSTquery.exists():
+                                    GSTdata =ItemGSTHSNSerializerSecond(GSTquery, many=True).data
+                                    GSTDetails = list()
+                                    for c in GSTdata:
+                                        GSTDetails.append({
+                                        "id": c['id'],
+                                        "EffectiveDate": c['EffectiveDate'],
+                                        "GSTPercentage": c['GSTPercentage'],
+                                        "HSNCode": c['HSNCode'],
+                                    })
+                                MRPquery = M_MRPMaster.objects.filter(Item_id=ParentItem,IsDeleted=0)
+                                # CustomPrint(MRPquery.query)
+                                if MRPquery.exists():
+                                    MRPdata =ItemMRPSerializerSecond(MRPquery, many=True).data
+                                    MRPDetails = list()
+                                    for d in MRPdata:
+                                        MRPDetails.append({
+                                        "id": d['id'],
+                                        "EffectiveDate": d['EffectiveDate'],
+                                        "Company": d['Company']['id'],
+                                        "CompanyName": d['Company']['Name'],
+                                        "MRP": d['MRP'],
+                                        })
+                                    
+                                if IsVDCChallan==1:
+                                    
+                                    Item=ParentItem
+                                    ItemName=a['Item']['Name']
+                                    Unit= a['Unit']['id']
+                                    UnitName= a['Unit']['BaseUnitConversion']
+                                    BaseUnitQuantity=a['Unit']['BaseUnitQuantity']
+                                    BatchCode=SystemBatchCodeGeneration.GetGrnBatchCode(ParentItem, Customer,0)
+                                else:
+                                    
+                                    Item=y['Item']['id']
+                                    ItemName=y['Item']['Name']
+                                    Unit= y['Unit']['id']
+                                    UnitName= y['Unit']['BaseUnitConversion']
+                                    BaseUnitQuantity=y['Unit']['BaseUnitQuantity']
+                                    BatchCode= y['BatchCode']            
+                                BillofmaterialData.append({
+                                    "Item":Item,
+                                    "ItemName":ItemName,
+                                    "Quantity": Qty,
+                                    "MRP":MRPDetails[0]['id'],
+                                    "MRPValue": MRPDetails[0]['MRP'],
+                                    "Rate":y['Rate'], 
+                                    "Unit": Unit,
+                                    "UnitName": UnitName,
+                                    "BaseUnitQuantity": BaseUnitQuantity,
+                                    "GST":GSTDetails[0]['id'],
+                                    "HSNCode": GSTDetails[0]['HSNCode'],
+                                    "GSTPercentage": GSTDetails[0]['GSTPercentage'],
+                                    "Margin": "",
+                                    "MarginValue":"",
+                                    "BasicAmount": "",
+                                    "GSTAmount": "",
+                                    "CGST": "",
+                                    "SGST": "",
+                                    "IGST": "",
+                                    "CGSTPercentage": "",
+                                    "SGSTPercentage": "",
+                                    "IGSTPercentage": "",
+                                    "Amount":"",
+                                    "BatchCode":BatchCode,
+                                    "LoginName":"",
+                                    "UnitDetails":ParentUnitDetails                                       
+    
+                                    })       
                                 ChallanItemDetails.append(BillofmaterialData[0])        
                         ChallanData.append({
                             "Supplier": x['Party']['id'],
@@ -545,8 +699,8 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                             "Customer": x['Customer']['id'],
                             "InvoiceNumber":" ",
                             "IsSave": 0,                            
-                            "FullDemandNumber":FullDemandNumber,
-                            "DemandDate":DemandDate,
+                            "FullDemandNumber":x['FullChallanNumber'],
+                            "DemandDate":x['ChallanDate'],
                             "OrderItem": ChallanItemDetails,
                         })
                         # CustomPrint("SPPPPPP")
@@ -587,7 +741,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                         InvoiceData = list()
                         for a in InvoiceSerializedata:
                             InvoiceItemDetails = list()                           
-                            
+                              
                             for b in a['InvoiceItems']:
                                 checkitemassigninPartyItems=MC_PartyItems.objects.filter(Item=b['Item']['id'],Party=a['Customer']['id']).count()
                                 if checkitemassigninPartyItems > 0:
@@ -596,8 +750,10 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                     PartyItemAssign = False
                                     
                                 if IsDivisionFlag == 1:
-                                    CustRate=RateCalculationFunction(0,b['Item']['id'],Query1[0]['Customer'],0,0,b['Unit']["id"],0,0).RateWithGST()
-                                    Rate=CustRate[0]["RateWithoutGST"]
+                                    # CustRate=RateCalculationFunction(0,b['Item']['id'],Query1[0]['Customer'],0,0,b['Unit']["id"],0,0).RateWithGST()
+                                    # Rate=CustRate[0]["RateWithoutGST"]
+                                    CustRate= TC_InvoiceItems.objects.raw(f'''select 1 as id, ifnull(RateCalculationFunction1(0, {b['Item']['id']}, {Query1[0]['Customer']}, 0, {b['Unit']['id']}, 0, 0, 0),0) Rate''')
+                                    Rate =round(CustRate[0].Rate,2)
                                 else:
                                     Rate = b['Rate']
                                     
@@ -807,15 +963,18 @@ class GRNSaveforCSSView(CreateAPIView):
     @transaction.atomic()
     def post(self, request):
         GRNdata = JSONParser().parse(request)
-        try:
+        try: 
+            if 'InvoiceNumber' not in GRNdata or not GRNdata['InvoiceNumber']:
+                return JsonResponse({'StatusCode': 406, 'Status': False, 'Message': 'InvoiceNumber is Required', 'Data': []})
+            
             Customer = GRNdata['Customer']
             InvoiceNumber = GRNdata['InvoiceNumber']
             InvoiceDate = GRNdata['InvoiceDate']
-
+            
             ExistingGRN = T_GRNs.objects.filter(Customer_id=Customer, InvoiceNumber=InvoiceNumber, InvoiceDate=InvoiceDate).exists()
             if ExistingGRN:
-                log_entry = create_transaction_logNew(request, GRNdata, 0, 'GRN already exists with the provided details', 440, 0)
-                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'GRN already exists with the provided details', 'Data': []})
+                log_entry = create_transaction_logNew(request, GRNdata, 0, 'GRN already exists with the provided details. Do you want to continue?', 440, 0)
+                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'GRN already exists with the provided details. Do you want to continue?', 'Data': []})
             log_entry = create_transaction_logNew(request, GRNdata, 0, '', 440, 0)
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'GRN can be saved', 'Data': []})
 
@@ -824,10 +983,34 @@ class GRNSaveforCSSView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
 
 
+class DeleteAccountingGRNView(APIView):
+    permission_classes = [IsAuthenticated]
 
+    @transaction.atomic()
+    def post(self, request):
+        AccountDetails= JSONParser().parse(request)
+       
+        try:
+            with transaction.atomic():
+                id=AccountDetails['GRNid']
+                
+                
+                IsTallySaveCheck = T_GRNs.objects.filter(id=id).values('IsTallySave')
+                if IsTallySaveCheck[0]['IsTallySave'] == 1:
+                    GRN = T_GRNs.objects.filter(id=id).update(IsSave = 1,TotalExpenses = 0,AccountingGRNStatus = 1,RoundOffAmount=0) 
+                else:
+                    GRN = T_GRNs.objects.filter(id=id).update(IsSave = 1,TotalExpenses = 0,RoundOffAmount=0) 
+                
+                
+                TC_GRNItems.objects.filter(GRN=id).update(AccountingQuantity=0)
+                # GRNExpenses delete record
+                TC_GRNExpenses.objects.filter(GRN_id=id).delete()
+                log_entry =create_transaction_logNew(request, {'GRNID':id}, 0, 'Accounting GRN marked as deleted', 457, 0)
+                return JsonResponse({'StatusCode': 200,'Status': True,'Message': 'Accounting GRN marked as deleted.','Data': []})
 
-
-
-
-
-
+        except T_GRNs.DoesNotExist:
+            log_entry = create_transaction_logNew(request, {'GRNID':id}, 0, '', 457, 0)
+            return JsonResponse({'StatusCode': 204,'Status': False,'Message': 'GRN not found.','Data': []})
+        except Exception as e:
+            log_entry =create_transaction_logNew(request, {'GRNID':id}, 0, 'Error updating GRN: ' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400,'Status': False,'Message': str(e),'Data': [] })

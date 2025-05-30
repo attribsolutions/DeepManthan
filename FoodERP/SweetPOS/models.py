@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import UniqueConstraint
+from FoodERPApp.models import M_Scheme
 
 
 # Create your models here.
@@ -86,6 +87,20 @@ class T_SPOSInvoices(models.Model):
     VoucherCode = models.CharField(max_length=50 ,blank=True, null=True)
     class Meta:
         db_table = "T_SPOSInvoices"
+        indexes = [
+            models.Index(fields=['SaleID']),
+            models.Index(fields=['ClientID']),
+            models.Index(fields=['InvoiceNumber']),
+            models.Index(fields=['InvoiceDate']),
+            models.Index(fields=['Customer']),
+            models.Index(fields=['Party']),
+            models.Index(fields=['NetAmount']),
+            models.Index(fields=['CreatedBy']),
+            # If you need to speed up queries on multiple fields, consider composite indexes
+            models.Index(fields=['Party', 'InvoiceDate','IsDeleted']),
+            models.Index(fields=['Customer', 'InvoiceDate']),
+            models.Index(fields=['ClientID', 'Party']),
+        ]
 
 
 class TC_SPOSInvoiceItems(models.Model):
@@ -177,6 +192,7 @@ class T_SPOSStock(models.Model):
     BatchCodeID = models.CharField(max_length=500,blank=True,null=True)
     Difference = models.DecimalField(max_digits=20, decimal_places=3,blank=True,null=True)
     IsStockAdjustment = models.BooleanField(default=False)
+    ClientID =models.IntegerField()
    
     class Meta:
         db_table="T_SPOSStock" 
@@ -207,7 +223,7 @@ class T_SPOSStockOut(models.Model):
     StockDate=models.DateField()
     Item= models.IntegerField()#ForeignKey(M_Items,related_name='stockItem', on_delete=models.PROTECT)
     # BaseUnitQuantity=models.DecimalField(max_digits=20,decimal_places=10)
-    # Quantity=models.DecimalField(max_digits=20,decimal_places=10)
+    Quantity=models.DecimalField(max_digits=15,decimal_places=5)
     # Unit = models.IntegerField()#ForeignKey(MC_ItemUnits, related_name='StockUnit', on_delete=models.PROTECT)
     # MRP = models.IntegerField()#ForeignKey(M_MRPMaster, related_name='StockItemMRP', on_delete=models.PROTECT)
     # MRPValue =  models.DecimalField(max_digits=20, decimal_places=2)
@@ -310,6 +326,7 @@ class M_SweetPOSMachine(models.Model):
     ServerDatabase = models.CharField(max_length=100,null=True,blank=True)
     Invoiceprefix = models.CharField(max_length=100 ,null=True,blank=True)
     ServiceTimeInterval = models.TimeField(null=True,blank=True)
+    PrimaryUser =   models.IntegerField(null=True,blank=True)
 
     class Meta:
         constraints = [
@@ -346,3 +363,10 @@ class M_ServiceSettings(models.Model):
 #     Item=models.IntegerField(null=True,blank=True)
 #     Party=models.IntegerField(null=True,blank=True)
 #     IsActive=models.BooleanField(default=False)
+
+class TC_InvoicesSchemes(models.Model):
+    Invoice = models.ForeignKey(T_SPOSInvoices, related_name= 'SPOSInvoicesScheme', on_delete=models.CASCADE)
+    # Scheme = models.ForeignKey('FoodERP.M_Scheme', related_name='SPOSSchemes', on_delete=models.CASCADE )
+    scheme = models.IntegerField()    
+    class Meta:
+        db_table = "TC_InvoicesSchemes"

@@ -11,7 +11,9 @@ from django.db import IntegrityError, transaction
 from FoodERPApp.models import *
 from ..Serializer.S_SweetPoSUsers import *
 from FoodERPApp.Views.V_CommFunction import create_transaction_logNew
-
+from ftplib import FTP
+import configparser
+import os
 
 
 class SweetPOSUsersView(CreateAPIView):
@@ -179,4 +181,95 @@ FROM SweetPOS.M_SweetPOSRoles S''')
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Role Not available', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'GETAllRoles:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})  
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})
+        
+        
+        
+        
+
+        
+        
+class LVersionsView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def post(self, request):
+        UserData = JSONParser().parse(request)      
+        try:
+            with transaction.atomic():
+                Party = UserData['Party'] 
+                Q11=M_Settings.objects.filter(id=58).values("DefaultValue")
+                PartyTypeID1=Q11[0]['DefaultValue'].split(',')
+                ExeVersion=PartyTypeID1[0].strip()
+                WinVersion=PartyTypeID1[1].strip()
+                # print(ExeVersion,WinVersion)
+                # ftp_host = "web.chitalebandhu.in"  
+                # ftp_user = "attribftp"  
+                # ftp_pass = "Attrib@318" 
+                              
+                # ftp = FTP(ftp_host)
+                # ftp.login(ftp_user, ftp_pass)
+                # ftp.cwd("SweetPOSPython")
+                
+                # local_path = os.path.join(os.path.expanduser("~"), "version.ini")
+                # filename = "version.ini"
+                # with open(local_path, "wb") as file:
+                #     ftp.retrbinary(f"RETR {filename}", file.write)
+
+                # ftp.quit()
+                # print(f"{filename}: {local_path}")
+                
+                
+                # config = configparser.ConfigParser()
+                # config.read(local_path)
+                # exe_version = config.get("current_version", "ExeVersion", fallback=None)
+                # Service_Version = config.get("current_version", "ServiceVersion", fallback=None)    
+                # if not exe_version:
+                #     return JsonResponse({"StatusCode": 404, "Status": False, "Message": "'ExeVersion' Not Found", "Data": []})
+                # else:
+                #     return Response({"message": "'ExeVersion' Not Found", "status": "error"}, status=404)                 
+                # query = M_SweetPOSUser.objects.raw("""SELECT 1 AS id,l.MacID, 
+                #     MAX(CASE WHEN l.ExeVersion LIKE 'WS%%' THEN l.ExeVersion END) AS WinService,
+                #     MAX(CASE WHEN l.ExeVersion NOT LIKE 'WS%%' THEN l.ExeVersion END) AS ExeVersion,
+                #     m.MachineName 
+                #     FROM SweetPOS.M_SweetPOSLogin l
+                #     LEFT JOIN SweetPOS.M_SweetPOSMachine m ON m.MacID = l.MacID
+                #     WHERE l.DivisionID =%s GROUP BY l.MacID, m.MachineName""", [Party])       
+                
+                query=M_SweetPOSUser.objects.raw(f"""SELECT  1 AS id,
+    m.MacID, 
+    MAX(CASE WHEN l.ExeVersion LIKE 'WS%%' THEN l.ExeVersion END) AS WinService,
+    MAX(CASE WHEN l.ExeVersion NOT LIKE 'WS%%' THEN l.ExeVersion END) AS ExeVersion,
+    m.MachineName
+FROM SweetPOS.M_SweetPOSMachine m
+LEFT JOIN (
+    SELECT 
+        MacID, 
+        ExeVersion,
+        ROW_NUMBER() OVER (PARTITION BY MacID, 
+                                      CASE WHEN ExeVersion LIKE 'WS%%' THEN 'WinService' ELSE 'ExeVersion' END
+                           ORDER BY CreatedOn DESC) AS rn
+    FROM SweetPOS.M_SweetPOSLogin
+    WHERE DivisionID = {Party}
+) l ON m.MacID = l.MacID AND l.rn = 1
+WHERE m.MacID IN (SELECT DISTINCT MacID FROM SweetPOS.M_SweetPOSLogin WHERE DivisionID = {Party})
+GROUP BY m.MacID, m.MachineName
+ORDER BY m.MacID""")     
+                user_list = []
+                for row in query:
+                    user_list.append({
+                            "id": row.id,
+                            "MacID": row.MacID,                            
+                            "Version":{
+                                "ExeVersion": row.ExeVersion,
+                                "WinServise":row.WinService
+                            },
+                            "MachineName":row.MachineName                           
+                        })  
+                              
+                # log_entry = create_transaction_logNew( request, user_list, Party, '', 444, 0,0,0,0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Latest_EXE_version': ExeVersion,'Latest_Service_Version':WinVersion,'Data': user_list})        
+
+        except Exception as e:
+            log_entry = create_transaction_logNew( request, 0, 0, str(e), 33,0,0,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})

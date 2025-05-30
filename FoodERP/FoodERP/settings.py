@@ -22,14 +22,13 @@ SECRET_KEY = 'django-insecure-t#s!16-8)sy91!+@q2hmdt_yclkuldlx=*g5aw_cb&^+rzr@ty
 DEBUG = True
 
 # ALLOWED_HOSTS = ['localhost','192.168.1.114','www.cbmfooderp.com','cbmfooderp.com','10.4.5.64','10.4.5.68',] 
-# ALLOWED_HOSTS = ['localhost','127.0.0.1','www.cbmfooderp.com','cbmfooderp.com','10.4.5.64','10.4.5.68','192.168.1.114','65.254.81.162','43.225.53.91'] 
+ALLOWED_HOSTS = ['localhost','127.0.0.1','www.cbmfooderp.com','cbmfooderp.com','10.4.5.64','10.4.5.68','192.168.1.114','65.254.81.162','43.225.53.91','10.1.201.25','s2.cbmfooderp.com','192.168.1.231','44.205.161.35'] 
 
-ALLOWED_HOSTS = ['*']
 # Application definition
 CORS_ORIGIN_ALLOW_ALL = True #we allow the all domain to access through API
 # CRONTAB_DJANGO_SETTINGS_MODULE = 'FoodERP.settings'
 INSTALLED_APPS = [
-    # 'django_crontab',
+    'django_crontab',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -94,14 +93,16 @@ DATABASE_ROUTERS = [
     'SweetPOS.routers.SweetPOSRouter',
 ]
 
-
+host= '10.4.5.68'  #css :10.1.201.25 , erp.in :43.225.53.91 ,erp.com : 10.4.5.68
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'FoodERP',       
-        'USER': 'admin',
-        'PASSWORD': 'prabhakarck318',          
-        'HOST': 'database-1.cjicgyekif0m.us-east-1.rds.amazonaws.com',   
+
+        'USER': 'pk',
+        'PASSWORD': 'P@ssw0rd',  
+        'HOST': host,       
+
         'PORT': '3306' , 
         'OPTIONS': { 
             'sql_mode': 'STRICT_TRANS_TABLES',   
@@ -111,9 +112,9 @@ DATABASES = {
     'transactionlog_db': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'TransactionLog',       
-        'USER': 'admin',
-        'PASSWORD': 'prabhakarck318',  
-        'HOST': 'database-1.cjicgyekif0m.us-east-1.rds.amazonaws.com', 
+        'USER': 'pk',
+        'PASSWORD': 'P@ssw0rd',    
+        'HOST': host,    
         'PORT': '3306' , 
         'OPTIONS': { 
             'sql_mode': 'STRICT_TRANS_TABLES', 
@@ -122,13 +123,9 @@ DATABASES = {
     'sweetpos_db': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'SweetPOS',         
-        # 'USER': 'pk',
-        # 'PASSWORD': 'P@ssw0rd',
-        # 'HOST': '10.4.5.68',
-        'USER': 'admin',
-        'PASSWORD': 'prabhakarck318',
-        'HOST':'database-1.cjicgyekif0m.us-east-1.rds.amazonaws.com',   
-
+        'USER': 'pk',
+        'PASSWORD': 'P@ssw0rd',  
+        'HOST': host,    
         'PORT': '3306' , 
         'OPTIONS': { 
             'sql_mode': 'STRICT_TRANS_TABLES', 
@@ -137,8 +134,9 @@ DATABASES = {
 }
 
 CRONJOBS = [
-    ('*/1 * * * *', 'FoodERPApp.cron.my_cron_job'),
-    # ('*/1 * * * *', 'FoodERPApp.tasks.my_cron_job' ),
+    # ('*/1 * * * *', 'FoodERPApp.cron.my_cron_job'),
+    ('0 * * * *', 'FoodERPApp.AutoStockProcess.autostockprocess' ),
+    ('0 8 * * *','FoodERPApp.CronJob.ReadFTPFile.ReadFTPFile'),
 ]
 
 # SESSION_ENGINE = 'django.contrib.sessions.backends.db'

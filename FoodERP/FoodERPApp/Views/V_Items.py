@@ -23,7 +23,7 @@ class M_ItemTag(CreateAPIView):
     def get(self, request, id=0 ):
         try:
             with transaction.atomic():
-                print('ItemTag API StartTime: ',datetime.now())
+                # print('ItemTag API StartTime: ',datetime.now())
                 query = M_Items.objects.raw('''select id,Name, Tag from M_Items where Tag != '' ''')
                 # return JsonResponse({'query':  str(query.query)})
                 if not query:
@@ -40,13 +40,13 @@ class M_ItemTag(CreateAPIView):
                             ListData.append({
                                 "dta": d+ "-" + a.Name
                             })  
-                    print('ItemTag API EndTime: ',datetime.now())
+                    # print('ItemTag API EndTime: ',datetime.now())
                     log_entry = create_transaction_logNew(request, {'ItemTag':id}, 0,'',100,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ListData})         
         except Exception as e:
-            print('ItemTag API EndTime: ',datetime.now())
+            # print('ItemTag API EndTime: ',datetime.now())
             log_entry = create_transaction_logNew(request,0, 0,'ItemTagList:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
 class MCUnitDetailsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -86,7 +86,7 @@ class M_ItemsFilterView(CreateAPIView):
         Logindata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                print("ItemFilterAPI StartTime : ",datetime.now())
+                # print("ItemFilterAPI StartTime : ",datetime.now())
                 UserID = Logindata['UserID']   
                 RoleID=  Logindata['RoleID']  
                 CompanyID=Logindata['CompanyID']
@@ -184,11 +184,11 @@ class M_ItemsFilterView(CreateAPIView):
                             "UnitDetails":UnitDetails
                         }) 
 
-                    print("ItemFilterAPI EndTime : ",datetime.now())    
+                    # print("ItemFilterAPI EndTime : ",datetime.now())    
                     log_entry = create_transaction_logNew(request, Logindata, x,'Party Items List',102,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': ItemListData})   
         except Exception as e:
-            print("ItemFilterAPI EndTime : ",datetime.now())
+            # print("ItemFilterAPI EndTime : ",datetime.now())
             log_entry = create_transaction_logNew(request, Logindata, 0,'ItemList:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
@@ -203,7 +203,7 @@ class M_ItemsView(CreateAPIView):
         try:
             with transaction.atomic():
                 
-                print("ItemSaveAPI StartTime : ",datetime.now())
+                # print("ItemSaveAPI StartTime : ",datetime.now())
                 
                 query = M_Units.objects.filter(id=Itemsdata['BaseUnitID']).values('Name')
                 BaseUnitName = query[0]['Name']
@@ -225,22 +225,22 @@ class M_ItemsView(CreateAPIView):
                     Item = Items_Serializer.save()
                     LastInsertID = Item.id
                     
-                    print("ItemSaveAPI EndTime : ",datetime.now())
+                    # print("ItemSaveAPI EndTime : ",datetime.now())
                     
                     log_entry = create_transaction_logNew(request, Itemsdata, 0,'TransactionID:'+str(LastInsertID),103,LastInsertID)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Item Save Successfully','TransactionID':LastInsertID,'Data' :[]})
                 
                 else:
                     
-                    print("ItemSaveAPI EndTime : ",datetime.now())
+                    # print("ItemSaveAPI EndTime : ",datetime.now())
                     log_entry = create_transaction_logNew(request, Itemsdata, 0,'ItemSave:'+str(Items_Serializer.errors),34,0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': Items_Serializer.errors,'Data': []})
         
         except Exception as e:
-            print("ItemSaveAPI EndTime : ",datetime.now())
+            # print("ItemSaveAPI EndTime : ",datetime.now())
             log_entry = create_transaction_logNew(request, Itemsdata, 0,'ItemSave:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
 # Get and Update M_Items
 class M_ItemsViewSecond(CreateAPIView):
@@ -253,7 +253,7 @@ class M_ItemsViewSecond(CreateAPIView):
         try:
             with transaction.atomic():
                 
-                print("ItemSingleGETAPI StartTime : ",datetime.now())
+                # print("ItemSingleGETAPI StartTime : ",datetime.now())
                 
                 Itemsquery = M_Items.objects.filter(id=id)
                 
@@ -433,28 +433,28 @@ class M_ItemsViewSecond(CreateAPIView):
                             "ItemShelfLife":ShelfLifeDetails
                         })
                         
-                    print("ItemSingleGETAPI EndTime : ",datetime.now())
+                    # print("ItemSingleGETAPI EndTime : ",datetime.now())
                     
                     log_entry = create_transaction_logNew(request, {'ItemID':id}, 0,'',181,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemData[0]})
                 
-                print("ItemSingleGETAPI EndTime : ",datetime.now())
+                # print("ItemSingleGETAPI EndTime : ",datetime.now())
                 
                 log_entry = create_transaction_logNew(request, {'ItemID':id}, 0, "Items Not available",103,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})
             
         except M_Items.DoesNotExist:
             
-            print("ItemSingleGETAPI EndTime : ",datetime.now())
+            # print("ItemSingleGETAPI EndTime : ",datetime.now())
             
             log_entry = create_transaction_logNew(request,0, 0, "Items Not available",181,0)
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
         
         except Exception as e:
             
-            print("ItemSingleGETAPI EndTime : ",datetime.now())
+            # print("ItemSingleGETAPI EndTime : ",datetime.now())
             log_entry = create_transaction_logNew(request,0, 0,'Item SingleGETmethod :'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
 # update M_Items 
     @transaction.atomic()
@@ -492,7 +492,7 @@ class M_ItemsViewSecond(CreateAPIView):
                 
         except Exception as e:
             log_entry = create_transaction_logNew(request, M_Itemsdata, 0,'ItemEdit:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
     @transaction.atomic()
     def delete(self, request, id=0):
@@ -660,8 +660,11 @@ class ItemWiseUpdateView(CreateAPIView):
                 
                 query = M_Items.objects.raw(f'''SELECT  M_Items.id, M_Items.Name,M_Group.id GroupID,MC_SubGroup.id SubGroupID, MC_ItemShelfLife.Days AS ShelfLife,
                                                             M_Group.Name AS GroupName,MC_SubGroup.Name AS SubGroupName,M_Items.ShortName, M_Items.Sequence, M_Items.BarCode, M_Items.SAPItemCode, M_Items.Breadth, M_Items.Grammage, M_Items.Height,
-                                                            M_Items.Length, M_Items.StoringCondition, M_Items.SAPUnitID,CASE WHEN M_Items.IsCBMItem=null THEN 0 WHEN M_Items.IsCBMItem=0 THEN false ELSE true END as IsCBMItem,
-                                                            CASE WHEN M_Items.IsMixItem=null THEN 0 WHEN M_Items.IsMixItem=0 THEN false ELSE true END as IsMixItem
+                                                            M_Items.Length, M_Items.StoringCondition, M_Items.SAPUnitID,
+                                                            CASE WHEN M_Items.IsCBMItem=null THEN 0 WHEN M_Items.IsCBMItem=0 THEN false ELSE true END as IsCBMItem,
+                                                            CASE WHEN M_Items.IsMixItem=null THEN 0 WHEN M_Items.IsMixItem=0 THEN false ELSE true END as IsMixItem,
+                                                            CASE WHEN M_Items.IsStockProcessItem=null THEN 0 WHEN M_Items.IsStockProcessItem=0 THEN false ELSE true END as IsStockProcessItem,
+                                                            CASE WHEN M_Items.IsThirdPartyItem=null THEN 0 WHEN M_Items.IsThirdPartyItem=0 THEN false ELSE true END as IsThirdPartyItem
                                                             FROM M_Items
                                                             LEFT JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id  and  MC_ItemGroupDetails.GroupType_id= {GroupTypeID}
                                                             LEFT JOIN MC_ItemShelfLife ON M_Items.id = MC_ItemShelfLife.Item_id AND IsDeleted=0

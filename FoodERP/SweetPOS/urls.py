@@ -29,7 +29,7 @@ urlpatterns = [
     url(r'GETMaxSweetPOSSaleIDByClientID/([0-9]+)/([0-9]+)$', SPOSMaxsaleIDView.as_view()),
     url(r'StockEntry$', StockView.as_view()),  # ForStockEntryandAdjustment
     url(r'SPOSStockAdjustment/([0-9]+)/([0-9]+)$',SPOSStockAdjustmentView.as_view()),  #ItemID/PartyID
-    url(r'SPOSStockReport$', SPOSStockReportView.as_view()), 
+    url(r'SPOSStockReportTT$', SPOSStockReportView.as_view()), 
     url(r'SPOSRateList$', RateListView.as_view()),
     url(r'SPOSRateSave$', RateSaveView.as_view()),
     url(r'SPOSMobileLinkToBill$', MobileNumberSaveView.as_view()),
@@ -46,6 +46,7 @@ urlpatterns = [
     url(r'SPOSUsersOfDivision/(?P<Division_id>\d+)$',SweetPOSUsersSecondView.as_view()),    
     url(r'sposroleslist$', SweetPOSRolesView.as_view()),
     url(r'StockProcesSPOS$',SPOSStockProcessingView.as_view()),
+    url(r'CronjobStockProcesSPOS$',SPOSStockProcessingthoughtcronjobView.as_view()),
     url(r'Invoice/(?P<id>\d+)(?:/(?P<characters>[A-Z]+))?$',SPOSInvoiceViewSecond.as_view()),
     url(r'CashierSummary$',SPOSCashierSummaryList.as_view()),
     url(r'UpdateCustomerVehiclePOSinvoice$',UpdateCustomerVehiclePOSInvoiceView.as_view()),
@@ -55,7 +56,10 @@ urlpatterns = [
     url(r'FranchiseSaleWithBillCount$', FranchiseSaleWithBillCountView.as_view()),
     url(r'FranchiseInvoiceDelete/([0-9]+)$', FranchiseInvoiceDeleteView.as_view()),
     url(r'FranchiseInvoiceEdit/([0-9]+)$', FranchiseInvoiceEditView.as_view()),
+    url(r'LVersionList$', LVersionsView.as_view()),
     #Service Settings Import
     url(r'SweetPosServiceSettingsImport/([0-9]+)$', SweetPosServiceSettingsImportView.as_view()),
+    
+    
  
     ]

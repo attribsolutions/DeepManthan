@@ -35,7 +35,10 @@ class PartyTypeListView(CreateAPIView):
                         
                             q= C_Companies.objects.filter(id=CompanyID).values("CompanyGroup")                            
                             q0=C_Companies.objects.filter(IsSCM=1,CompanyGroup=q[0]['CompanyGroup']).values('id')                           
-                            query = M_PartyType.objects.filter(Q(Company=CompanyID  ) | Q(Company=q0[0]['id']))                           
+                            if q0:
+                                query = M_PartyType.objects.filter(Q(Company=CompanyID  ) | Q(Company=q0[0]['id'])) 
+                            else:
+                                query = M_PartyType.objects.filter(Q(Company=CompanyID  ))
                             p=0
                         else:                        
                             query = M_PartyType.objects.filter(IsSCM=IsSCM,Company=CompanyID)                        
@@ -58,7 +61,7 @@ class PartyTypeListView(CreateAPIView):
                     log_entry = create_transaction_logNew(request,PartyType_Data,PartyType_Data['PartyID'],'',185,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data': data})   
         except Exception as e:
-                log_entry = create_transaction_logNew(request,0,0,'PartyTypeList:'+str(Exception(e)),33,0)
+                log_entry = create_transaction_logNew(request,0,0,'PartyTypeList:'+str(e),33,0)
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 

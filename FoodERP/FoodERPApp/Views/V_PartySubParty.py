@@ -263,7 +263,8 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                             "FSSAINo" : a['FSSAINo'],
                             "FSSAIExipry" : a['FSSAIExipry'],
                             "IsTCSParty":a['IsTCSParty'],
-                            "SkyggeID": a['SkyggeID']
+                            "SkyggeID": a['SkyggeID'], 
+                            "PartyTypeID":a['PartyTypeID'],
                             })
                         
                         
@@ -273,7 +274,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'Record Not Found','Data': []})
         except Exception as e:
                 log_entry = create_transaction_logNew(request, 0,0,'GetVendorSupplierCustomer:'+str(Exception(e)),33,0)
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
                 
         
 class RetailerandSSDDView(CreateAPIView):
@@ -289,10 +290,20 @@ class RetailerandSSDDView(CreateAPIView):
                 PartyID=PartySubPartydata['PartyID']
                 Type=PartySubPartydata['Type']   
                 
-                if Type==1: ##All Retailer under given Party and Company
-                    q0=M_PartyType.objects.filter(Company=CompanyID,IsRetailer=1,IsSCM=1)
-                    q1=MC_PartySubParty.objects.filter(Party=PartyID).values('SubParty')
-                    q2=M_Parties.objects.filter(PartyType__in=q0,id__in=q1)
+                q2 = []
+                
+                if Type == 1: ##All Retailer under given Party and Company
+                    if CompanyID == 4: ##ForCSS show all Customers under given Party
+                        setting = M_Settings.objects.filter(id=68, IsActive=True, DefaultValue__isnull=False).values("DefaultValue").first()
+                        if setting:
+                            PartytypeID = int(setting['DefaultValue'])  
+                            q1 = MC_PartySubParty.objects.filter(Party=PartyID).values('SubParty')
+                            q2 = M_Parties.objects.filter(PartyType=PartytypeID, id__in=q1)
+                    else:
+                        q0 = M_PartyType.objects.filter(Company=CompanyID, IsRetailer=1, IsSCM=1)
+                        q1 = MC_PartySubParty.objects.filter(Party=PartyID).values('SubParty')
+                        q2 = M_Parties.objects.filter(PartyType__in=q0, id__in=q1)
+
                   
                 elif Type==2:  ##All SS/DD under given Party and Company
                     

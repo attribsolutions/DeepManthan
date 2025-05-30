@@ -77,7 +77,7 @@ class M_PartiesFilterView(CreateAPIView):
 
                 elif(IsSCMCompany == 0):  # Admin
                                         
-                        if(RoleID == 16 or RoleID == 35):
+                        if(RoleID == 16 or RoleID == 35 or RoleID == 24):
                             
                             q0 = MC_PartySubParty.objects.filter(Party=PartyID).values('SubParty')
                        
@@ -362,7 +362,7 @@ FROM
         M_Settings.IsActive = 1) a
       
       LEFT  JOIN 
-      (SELECT SettingID_id SettingID,MC_SettingsDetails.Value FROM MC_SettingsDetails WHERE MC_SettingsDetails.Company_id=%s)b
+      (SELECT SettingID_id SettingID,MC_SettingsDetails.Value FROM MC_SettingsDetails WHERE MC_SettingsDetails.Company_id=%s and IsDeleted=0)b
       ON a.Setting = b.SettingID
             
       LEFT JOIN

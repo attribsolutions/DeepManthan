@@ -18,6 +18,7 @@ from django.db.models import *
 from datetime import timedelta
 from SweetPOS.Views.SweetPOSCommonFunction import *
 from FoodERPApp.Views.V_TransactionNumberfun import *
+from django.db.models import Min, Max
 
 
 
@@ -73,15 +74,31 @@ class SPOSInvoiceView(CreateAPIView):
                         Invoicedata['Driver'] = 0
                         Invoicedata['SaleID'] =0
                         Invoicedata['MobileNo'] =Invoicedata['Mobile']
-                        if 'VoucherCode' in Invoicedata:
-                            Invoicedata['VoucherCode'] = Invoicedata['VoucherCode']
-                        else:
-                            Invoicedata['VoucherCode'] = None
                         
+                        if 'VoucherCode' not in Invoicedata:
+                            Invoicedata['VoucherCode'] = None
+                            
+                        if Invoicedata['VoucherCode']:
+                            voucher = M_GiftVoucherCode.objects.filter(VoucherCode=Invoicedata['VoucherCode']).first()
+
+                            if Invoicedata['VoucherCode'] == 'SSCCBM2025':
+                                pass
+                            else : 
+                                if voucher.IsActive == 1:
+                                    voucher.IsActive = 0
+                                    voucher.InvoiceDate = Invoicedata.get('InvoiceDate')
+                                    voucher.InvoiceNumber = Invoicedata.get('InvoiceNumber')
+                                    voucher.InvoiceAmount = Invoicedata.get('GrandTotal')
+                                    voucher.Party = Invoicedata.get('Party')
+                                    voucher.save()
+                                            
                         if Invoicedata['CustomerID'] == 0:
                             Invoicedata['Customer'] = 43194
                         else:
                             Invoicedata['Customer'] = Invoicedata['CustomerID']
+                        customer = M_Parties.objects.filter(id=Invoicedata['Customer']).values('GSTIN').first()
+                        Invoicedata['CustomerGSTIN'] = customer['GSTIN'] if customer else None
+
                             
                         if 'Vehicle' in Invoicedata and Invoicedata['Vehicle'] == "":
                             Invoicedata['Vehicle'] = None
@@ -92,7 +109,6 @@ class SPOSInvoiceView(CreateAPIView):
                             Invoicedata['AdvanceAmount'] = None
                         else:
                             Invoicedata['AdvanceAmount'] = Invoicedata.get('AdvanceAmount', None) 
-                        
                         #================================================================================================== 
                         InvoiceItems = Invoicedata['SaleItems']
                         
@@ -153,7 +169,7 @@ class SPOSInvoiceView(CreateAPIView):
                             InvoiceItem['QtyInKg'] = float(QtyInKg)
                             QtyInBox=UnitwiseQuantityConversion(ItemId,InvoiceItem['Quantity'],quryforunit[0]['id'],0,0,4,0).ConvertintoSelectedUnit()
                             InvoiceItem['QtyInBox'] = float(QtyInBox)
-                           
+                            
                         if 'SPOSInvoicesReferences' in Invoicedata:
                             Invoice_serializer = SPOSInvoiceSerializer1(data=Invoicedata)
                         else:
@@ -172,7 +188,16 @@ class SPOSInvoiceView(CreateAPIView):
                             LastInsertId = Invoice.id
                             LastIDs.append(Invoice.id)
                             
+                            log_entry = create_transaction_logNew(request, inputdata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastIDs),383,0,0,0, 0)    
                             
+                            if 'SchemeID' in Invoicedata and Invoicedata['SchemeID']:
+                                SchemeIDs = Invoicedata['SchemeID'].split(",")
+                                
+                                for scheme_id in SchemeIDs:
+                                    SchemeQuery = f"INSERT INTO SweetPOS.TC_InvoicesSchemes (Invoice_id, scheme) VALUES ({LastInsertId}, {scheme_id})"
+                                    connection.cursor().execute(SchemeQuery) 
+                                log_entry = create_transaction_logNew(request, inputdata, Party, 'SchemeIDs: ' + ", ".join(SchemeIDs), 383, 0) 
+
                         else:
                             log_entry = create_transaction_logNew(request, inputdata, Party, str(Invoice_serializer.errors),34,0,0,0,0)
                             transaction.set_rollback(True)
@@ -182,7 +207,7 @@ class SPOSInvoiceView(CreateAPIView):
                 return JsonResponse({'status_code': 200, 'Success': True,  'Message': 'Invoice Save Successfully','TransactionID':LastIDs,'Data':[]})
         except Exception as e:
             log_entry = create_transaction_logNew(request, inputdata, 0,'InvoiceSave:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
         
 
 
@@ -200,21 +225,20 @@ class SPOSMaxsaleIDView(CreateAPIView):
                     
                 if user is not None: 
                     
-                    QueryfordivisionID = M_SweetPOSRoleAccess.objects.filter(Party=DivisionID).values('Party')
+                    # QueryfordivisionID = M_SweetPOSRoleAccess.objects.filter(Party=DivisionID).values('Party')
                     QueryforSaleRecordCount = M_SweetPOSMachine.objects.filter(Party=DivisionID ,id=ClientID).values('UploadSaleRecordCount')
-                    if not QueryfordivisionID:
+                    if not QueryforSaleRecordCount:
                             
-                            return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'DivisionId is not mapped. Please map it from the SPOSRoleAccess page.', 'Data':[]})
+                            return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'SweetPOSMachine is not mapped', 'Data':[]})
                     else:
                         
-                        QueryForMaxSalesID=T_SPOSInvoices.objects.raw('''SELECT 1 id,ifnull(max(ClientSaleID),0) MaxSaleID FROM SweetPOS.T_SPOSInvoices where Party=%s and clientID=%s''', [QueryfordivisionID[0]['Party'] ,ClientID])
+                        QueryForMaxSalesID=T_SPOSInvoices.objects.raw('''SELECT 1 id,ifnull(max(ClientSaleID),0) MaxSaleID FROM SweetPOS.T_SPOSInvoices where Party=%s and clientID=%s''', [DivisionID ,ClientID])
                         for row in QueryForMaxSalesID:
                             maxSaleID=row.MaxSaleID
 
-                        log_entry = create_transaction_logNew(request, 0, QueryfordivisionID[0]['Party'],'',384,0,0,0,ClientID)
+                        log_entry = create_transaction_logNew(request, 0, DivisionID,{'SaleID':maxSaleID},384,0,0,0,ClientID)
                         return JsonResponse({"Success":True,"status_code":200,"SaleID":maxSaleID,"Toprows":QueryforSaleRecordCount[0]['UploadSaleRecordCount']})    
         except Exception as e:
-            
             log_entry = create_transaction_logNew(request, 0, 0,'GET_Max_SweetPOS_SaleID_By_ClientID:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})            
         
@@ -458,14 +482,20 @@ class DeleteInvoiceView(CreateAPIView):
                 
                     InvoiceIDs=list()
                     for DeleteInvoicedata in DeleteInvoicedatas:
-                        InvoiceDeleteUpdate = T_SPOSInvoices.objects.using('sweetpos_db').filter(ClientID=DeleteInvoicedata['ClientID'],ClientSaleID=DeleteInvoicedata['ClientSaleID'],Party=DeleteInvoicedata['PartyID'],InvoiceDate=DeleteInvoicedata['InvoiceDate']).values('id')
+                        InvoiceDeleteUpdate = T_SPOSInvoices.objects.using('sweetpos_db').filter(ClientID=DeleteInvoicedata['ClientID'],ClientSaleID=DeleteInvoicedata['ClientSaleID'],Party=DeleteInvoicedata['PartyID'],InvoiceDate=DeleteInvoicedata['InvoiceDate']).values('id', 'VoucherCode')
                         
+                        if not InvoiceDeleteUpdate:
+                            continue  
+                        
+                        if InvoiceDeleteUpdate[0]['VoucherCode']:
+                            queryforvouchercode = M_GiftVoucherCode.objects.filter(VoucherCode=InvoiceDeleteUpdate[0]['VoucherCode']).update(InvoiceDate=None,InvoiceNumber=None,InvoiceAmount=None,Party=0,client=0,IsActive=1)
                         
                         if DeleteInvoicedata['UpdatedInvoiceDetails'] :
                             
                             invoice_instance = T_SPOSInvoices.objects.get(id=InvoiceDeleteUpdate[0]['id'])
                             InvoiceItems = DeleteInvoicedata['UpdatedInvoiceDetails'][0]['SaleItems']
-                            InvoiceUpdate=T_SPOSInvoices.objects.filter(id=InvoiceDeleteUpdate[0]['id']).update(GrandTotal=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['RoundedAmount'],DiscountAmount=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['DiscountAmount'],TotalAmount=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['TotalAmount'],RoundOffAmount=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['RoundOffAmount'],NetAmount=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['NetAmount'],UpdatedBy=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['UpdatedBy'])
+                            AdvanceAmountValue = DeleteInvoicedata['UpdatedInvoiceDetails'][0].get('AdvanceAmount', 0)
+                            InvoiceUpdate=T_SPOSInvoices.objects.filter(id=InvoiceDeleteUpdate[0]['id']).update(GrandTotal=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['RoundedAmount'],DiscountAmount=DeleteInvoicedata['UpdatedInvoiceDetails'][0] ['DiscountAmount'],TotalAmount=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['TotalAmount'], RoundOffAmount=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['RoundOffAmount'], NetAmount=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['NetAmount'], AdvanceAmount=AdvanceAmountValue, UpdatedBy=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['UpdatedBy'])
                             DeleteItemsData=TC_SPOSInvoiceItems.objects.filter(Invoice=InvoiceDeleteUpdate[0]['id']).delete()
 
                             # return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'ERPItemId is not mapped.', 'Data':InvoiceItems})
@@ -527,9 +557,9 @@ class DeleteInvoiceView(CreateAPIView):
                         
                         InvoiceIDs.append(DeleteInvoicedata['ClientSaleID'])
                     log_entry = create_transaction_logNew(request,DeleteInvoicedatas,0, {'POSDeletedInvoiceID':InvoiceIDs}, 388,0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'POSInvoice Delete Successfully ', 'Data':[]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'POSInvoice Update Successfully ', 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, DeleteInvoicedatas, 0,'UpdatePOSInvoiceDelete:'+str(e),33,0)
+            log_entry = create_transaction_logNew(request, DeleteInvoicedatas, 0,'UpdatePOSInvoiceUpdate:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})             
         
 
@@ -600,7 +630,6 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                                                                     WHERE SweetPOS.T_SPOSInvoices.InvoiceDate BETWEEN %s AND %s AND SweetPOS.T_SPOSInvoices.Party= %s AND SweetPOS.T_SPOSInvoices.IsDeleted=0
                                                                     GROUP BY SweetPOS.TC_SPOSInvoiceItems.Item, M_Items.Name, M_Units.Name
                                                                     ORDER BY TotalAmount DESC, TotalQuantity DESC LIMIT 5''', ([FromDate, ToDate, Party]))
- 
                     TopSaleItems_List = []
                     for item in TopSaleItems:
                         TopSaleItems_List.append({
@@ -610,6 +639,24 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                             "TotalQuantity": item.TotalQuantity,
                             "UnitName": item.UnitName
                         })
+
+                    InvoiceValues = T_SPOSInvoices.objects.filter(InvoiceDate__range=[FromDate, ToDate],Party=Party,IsDeleted=0).aggregate(MinInvoiceValue=Min('GrandTotal'), MaxInvoiceValue=Max('GrandTotal'))
+
+                    MinInvoiceValue = InvoiceValues['MinInvoiceValue'] or 0
+                    MaxInvoiceValue = InvoiceValues['MaxInvoiceValue'] or 0
+
+                    UPTData = TC_SPOSInvoiceItems.objects.raw('''SELECT 1 as id, AVG(ItemCount) as UnitPerTransaction FROM (SELECT COUNT(*) as ItemCount FROM SweetPOS.T_SPOSInvoices A JOIN SweetPOS.TC_SPOSInvoiceItems B ON A.id = B.Invoice_id WHERE A.InvoiceDate BETWEEN %s AND %s  AND A.Party = %s AND A.IsDeleted = 0 AND A.GrandTotal >= %s AND A.GrandTotal <= %s GROUP BY A.id) AS ItemCounts''', [FromDate, ToDate, Party, MinInvoiceValue, MaxInvoiceValue])
+                    
+                    UnitPerTransaction = 0
+                    for upt in UPTData:
+                        UnitPerTransaction = upt.UnitPerTransaction or 0
+                        
+                    ATVData = T_SPOSInvoices.objects.raw('''SELECT 1 as id, AVG(GrandTotal) as AvgTransactionValue FROM SweetPOS.T_SPOSInvoices WHERE InvoiceDate BETWEEN %s AND %s AND Party = %s AND IsDeleted = 0 AND GrandTotal >= %s AND GrandTotal <= %s''', [FromDate, ToDate, Party, MinInvoiceValue, MaxInvoiceValue])
+
+                    AverageTransactionValue = 0
+                    for atv in ATVData:
+                        AverageTransactionValue = atv.AvgTransactionValue or 0
+                        
                     Party_List.append({
                         "PartyId": party.id,
                         "PartyName": party.Name,
@@ -620,10 +667,12 @@ class TopSaleItemsOfFranchiseView(CreateAPIView):
                         "LastBillTime": party.LastBillTime,
                         "LastInvoiceNumber": party.LastInvoiceNumber,
                         "LastInvoiceAmount": party.LastInvoiceAmount,
+                        "UnitPerTransaction": round(UnitPerTransaction, 2),
+                        "AverageTransactionValue": round(AverageTransactionValue, 2),
                         "TopSaleItems": TopSaleItems_List
                     })
                 if Party_List:
-                    log_entry = create_transaction_logNew(request, SaleData, 0, 'TopSaleItems:' + str(Party_List), 390, 0)
+                    log_entry = create_transaction_logNew( request,{"RequestData": SaleData, "TopSaleItems": str(Party_List)},0, 'TopSaleItems-> Details Available In TransactionLogDetails',390,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Party_List})
                 else:
                     log_entry = create_transaction_logNew(request, SaleData, Party, 'Record Not Found', 390, 0)

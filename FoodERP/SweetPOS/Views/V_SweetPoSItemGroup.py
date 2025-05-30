@@ -86,19 +86,19 @@ class ItemListView(CreateAPIView):
             if user is not None:
                 
                 query = M_Items.objects.raw(f"""SELECT i.id , i.CItemID AS CItemID, ifnull(i.BarCode,"")BarCode, 
-                ifnull(GSTHsnCodeMaster(i.id, CURDATE(), 3,0,0),0) AS HSNCode,i.Name, i.SAPItemCode AS ItemCode,  
-                ifnull(Round(GSTHsnCodeMaster(i.id, CURDATE(), 2,0,0),2),0.0)  AS GST,
-                ifnull(Round(GetTodaysDateMRP(i.id, CURDATE(), 2, 0, 0,0),2),0.0) AS Rate,
-                (select EffectiveDate from M_MRPMaster where id=(ifnull(GetTodaysDateMRP(i.id, CURDATE(), 1, 0, 0,0),0.0)))RateEffectiveDate,                          
+                ifnull(GSTHsnCodeMaster(i.id, CURDATE(), 3,0,M_ChannelWiseItems.PartyType_id),0) AS HSNCode,i.Name, i.SAPItemCode AS ItemCode,  
+                ifnull(Round(GSTHsnCodeMaster(i.id, CURDATE(), 2,0,M_ChannelWiseItems.PartyType_id),2),0.0)  AS GST,
+                ifnull(Round(GetTodaysDateMRP(i.id, CURDATE(), 2, 0, 0,M_ChannelWiseItems.PartyType_id),2),0.0) AS Rate,
+                (select EffectiveDate from M_MRPMaster where id=(ifnull(GetTodaysDateMRP(i.id, CURDATE(), 1, 0, 0,M_ChannelWiseItems.PartyType_id),0.0)))RateEffectiveDate,                          
                 ifnull(i.BaseUnitID_id,0) AS UnitID, i.IsFranchisesItem,  
-                ifnull(Round(GetTodaysDateMRP(i.id, CURDATE(), 2, 0,0,0),2),0.0) AS FoodERPMRP,
+                ifnull(Round(GetTodaysDateMRP(i.id, CURDATE(), 2, 0,0,M_ChannelWiseItems.PartyType_id),2),0.0) AS FoodERPMRP,
                 ifnull(MC_ItemGroupDetails.SubGroup_id,0) AS ItemGroupID,MC_ItemGroupDetails.ItemSequence,
                 i.IsCBMItem ,i.IsMixItem,SweetPOS.SPOSRateMaster(i.id)OnlineRates
                 FROM M_Items AS i
                 left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=i.id and GroupType_id=5
                 LEFT JOIN M_ChannelWiseItems ON i.id = M_ChannelWiseItems.Item_id
                 join MC_PartyItems on MC_PartyItems.Item_id=i.id and MC_PartyItems.party_id={DivisionID}
-                WHERE M_ChannelWiseItems.PartyType_id = 19  """)                  
+                WHERE M_ChannelWiseItems.PartyType_id in (select id from M_PartyType where IsFranchises=1)""")                  
                 # return Response({"status": True, "status_code": 200, "count": "", "data": "" }, status=200)
                 # print(query)
                 count=0

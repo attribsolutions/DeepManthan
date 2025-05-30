@@ -109,7 +109,7 @@ class InvoiceItemsSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = TC_InvoiceItems
-        fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','LiveBatch','MRPValue','GSTPercentage','QtyInBox','QtyInKg','QtyInNo']   
+        fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','LiveBatch','MRPValue','GSTPercentage','QtyInBox','QtyInKg','QtyInNo','TrayQuantity']   
 
 class obatchwiseStockSerializer(serializers.ModelSerializer):
     class Meta:
@@ -122,16 +122,26 @@ class InvoiceSerializer(serializers.ModelSerializer):
     obatchwiseStock=obatchwiseStockSerializer(many=True)
     class Meta:
         model = T_Invoices
-        fields = ['id','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','Vehicle','Driver', 'InvoiceItems', 'InvoicesReferences', 'obatchwiseStock','TCSAmount']
+        fields = ['id','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','Vehicle','Driver', 'InvoiceItems', 'InvoicesReferences', 'obatchwiseStock','TCSAmount', 'IsTallySave','IsSendToFTPSAP']
 
     def create(self, validated_data):
         InvoiceItems_data = validated_data.pop('InvoiceItems')
         InvoicesReferences_data = validated_data.pop('InvoicesReferences')
         O_BatchWiseLiveStockItems_data = validated_data.pop('obatchwiseStock')
+        validated_data['IsTallySave'] = False
+        validated_data['IsSendToFTPSAP'] = False
+        
         InvoiceID = T_Invoices.objects.create(**validated_data)
         
+        
+        
         for InvoiceItem_data in InvoiceItems_data:
-            InvoiceItemID =TC_InvoiceItems.objects.create(Invoice=InvoiceID, **InvoiceItem_data)
+            
+            InvoiceItem_data['TrayQuantity'] = InvoiceItem_data.get('TrayQuantity') or None
+                
+            TC_InvoiceItems.objects.create(Invoice=InvoiceID, **InvoiceItem_data)
+
+           
             
         for O_BatchWiseLiveStockItem_data in O_BatchWiseLiveStockItems_data:
                 
@@ -154,17 +164,20 @@ class BulkInvoiceSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = T_Invoices
-        fields = ['InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount','TCSAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','ImportFromExcel', 'InvoiceItems']
+        fields = ['InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount','TCSAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','ImportFromExcel', 'IsSendToFTPSAP','InvoiceItems']
         # fields ='__all__'
     
     def create(self, validated_data):
         CustomPrint(validated_data)
         InvoiceItems_data = validated_data.pop('InvoiceItems')
+        validated_data['IsSendToFTPSAP'] = False
         InvoiceID = T_Invoices.objects.create(**validated_data)
         # CustomPrint(InvoiceID)
         for InvoiceItem_data in InvoiceItems_data:
             CustomPrint(InvoiceID)
-            InvoiceItemID =TC_InvoiceItems.objects.create(Invoice=InvoiceID, **InvoiceItem_data)
+            InvoiceItem_data['TrayQuantity'] = InvoiceItem_data.get('TrayQuantity') or None
+            
+            InvoiceItemID = TC_InvoiceItems.objects.create(Invoice=InvoiceID,  **InvoiceItem_data)
             
         return InvoiceID        
 
@@ -184,7 +197,7 @@ class InvoiceItemsSerializerSecond(serializers.ModelSerializer):
     LiveBatch= O_LiveBatchesserializers(read_only=True)
     class Meta:
         model = TC_InvoiceItems
-        fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','LiveBatch','MRPValue','GSTPercentage','QtyInBox','QtyInKg','QtyInNo','LiveBatch']
+        fields = ['BatchCode', 'Quantity', 'BaseUnitQuantity', 'MRP', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount', 'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'CreatedOn', 'Item', 'Unit', 'BatchDate','LiveBatch','MRPValue','GSTPercentage','QtyInBox','QtyInKg','QtyInNo','TrayQuantity','LiveBatch']
         
     def to_representation(self, instance):
         # get representation from ModelSerializer

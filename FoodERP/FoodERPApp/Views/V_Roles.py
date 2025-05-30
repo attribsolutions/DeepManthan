@@ -7,6 +7,11 @@ from rest_framework.parsers import JSONParser
 from ..Serializer.S_Roles import *
 from ..models import *
 
+from .V_CommFunction import create_transaction_logNew
+from SweetPOS.Views.V_SweetPosRoleAccess import BasicAuthenticationfunction
+from rest_framework.authentication import BasicAuthentication
+
+
 
 
 class M_RolesViewFilter(CreateAPIView):
@@ -16,9 +21,9 @@ class M_RolesViewFilter(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        Logindata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Logindata = JSONParser().parse(request)
                 UserID = Logindata['UserID']   
                 RoleID=  Logindata['RoleID']  
                 CompanyID=Logindata['CompanyID']
@@ -47,9 +52,9 @@ class M_RolesView(CreateAPIView):
     
     @transaction.atomic()
     def post(self, request):
+        M_Rolesdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                M_Rolesdata = JSONParser().parse(request)
                 M_Roles_Serializer = M_RolesSerializer(data=M_Rolesdata)
             if M_Roles_Serializer.is_valid():
                 M_Roles_Serializer.save()
@@ -106,9 +111,9 @@ class M_RolesViewSecond(CreateAPIView):
 
     @transaction.atomic()
     def put(self, request, id=0):
+        M_Rolesdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                M_Rolesdata = JSONParser().parse(request)
                 M_RolesdataByID = M_Roles.objects.get(id=id)
                 M_Roles_Serializer = M_RolesSerializer(
                     M_RolesdataByID, data=M_Rolesdata)
@@ -132,3 +137,29 @@ class M_RolesViewSecond(CreateAPIView):
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Role Not available', 'Data': []})
         except IntegrityError:   
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Role used in another table', 'Data': []})
+        
+
+
+class RoleswithIdentifyKeyListView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = [BasicAuthentication]
+
+
+    @transaction.atomic()
+    def get(self, request):
+        try:
+            with transaction.atomic():
+                RolesData = M_Roles.objects.filter(IdentifyKey__gt=0)
+
+
+                RolesDataSerializer = M_RolesOfIdentifyKeySerializer(RolesData, many=True)
+
+                log_entry = create_transaction_logNew(request, RolesDataSerializer, 0, '', 449, 0)
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': RolesDataSerializer.data})
+
+        except M_Roles.DoesNotExist:
+            log_entry = create_transaction_logNew(request, 0, 0, 'RoleswithIdentifyKey Does Not Exist', 449, 0)
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'RoleswithIdentifyKey Not Available', 'Data': [] })
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0, 'RoleswithIdentifyKey: ' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})

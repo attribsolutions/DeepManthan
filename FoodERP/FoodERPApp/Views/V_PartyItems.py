@@ -7,6 +7,7 @@ from rest_framework.parsers import JSONParser
 from ..Serializer.S_PartyItems import *
 from ..models import *
 from ..Views.V_CommFunction import *
+from django.utils import timezone
 
 
 class PartyItemsListView(CreateAPIView):
@@ -100,8 +101,12 @@ class PartyItemsFilterView(CreateAPIView):
                         Itemquery, many=True).data
                     ItemList = list() 
                     for a in Items_Serializer:
-                        GST_HSNCodeMaster = GSTHsnCodeMaster(ItemID=a['id'], EffectiveDate=date.today())
-                        GST = GST_HSNCodeMaster.GetTodaysGstHsnCode()
+                        # GST_HSNCodeMaster = GSTHsnCodeMaster(ItemID=a['id'], EffectiveDate=date.today())
+                        # GST = GST_HSNCodeMaster.GetTodaysGstHsnCode()
+                        Gst = M_GSTHSNCode.objects.raw(f'''select 1 as id,
+                                                       GSTHsnCodeMaster({a['id']},%s,1,0,0)GSTID,
+                                                       GSTHsnCodeMaster({a['id']},%s,2,0,0)GSTPercentage 
+                                                           ''',[date.today(),date.today()])
 
                         query=O_BatchWiseLiveStock.objects.filter(Item=a['id'],Party=PartyID,BaseUnitQuantity__gt=0)
                         if query.exists():
@@ -119,8 +124,8 @@ class PartyItemsFilterView(CreateAPIView):
                             "SubGroupName": a['SubGroupName'],
                             "InStock":InStock,
                             "MapItem": a['MapItem'],
-                            "GST": GST[0]['GST'], 
-                            "GSTID":GST[0]['Gstid']
+                            "GST": float(Gst[0].GSTPercentage) if Gst[0].GSTPercentage is not None else 0, 
+                            "GSTID": int(Gst[0].GSTID) if Gst[0].GSTPercentage is not None else 0 
                         })
                     log_entry = create_transaction_logNew(request,Logindata,PartyID,'',181,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemList})
@@ -140,17 +145,24 @@ class PartyItemsView(CreateAPIView):
             with transaction.atomic():
                 PartyItems_serializer = MC_PartyItemSerializer(data=PartyItems_data, many=True)
             if PartyItems_serializer.is_valid():
-                id = PartyItems_serializer.data[0]['Party']
-                MC_PartyItem_data = MC_PartyItems.objects.filter(Party=id)
+                PartyID = PartyItems_serializer.data[0]['Party']
+                MC_PartyItem_data = MC_PartyItems.objects.filter(Party=PartyID)
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyItems Save Successfully', 'Data' :str(MC_PartyItem_data.query)})
                 MC_PartyItem_data.delete()
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyItems Save Successfully', 'Data' :PartyItems_serializer.data[0]['Party']})
                 Item = PartyItems_serializer.save()
                 LastInsertID = Item[0].id
-                log_entry = create_transaction_logNew(request,PartyItems_data,PartyItems_data[0]['Party'],'TransactionID:'+str(LastInsertID),182,LastInsertID)
+                
+                # Prepare transaction log details
+                user = request.user.LoginName
+                timestamp = timezone.now().strftime('%Y-%m-%d %H:%M:%S')
+                # ItemDetails = ", ".join([f"ItemID:{item.Item.id}" for item in Item])
+                TransactionDetails = f"PartyItem Saved by {user} on {timestamp}"
+                
+                log_entry = create_transaction_logNew(request,PartyItems_data,PartyID,TransactionDetails,182,LastInsertID)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'PartyItems Save Successfully','TransactionID':LastInsertID, 'Data': []})
             else:
-                log_entry = create_transaction_logNew(request,PartyItems_data,PartyItems_data[0]['Party'],'PartyItem Save:'+str(PartyItems_serializer.errors),34,0)
+                log_entry = create_transaction_logNew(request,PartyItems_data,PartyID,'PartyItem Save:'+str(PartyItems_serializer.errors),34,0)
                 transaction.set_rollback(True)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': PartyItems_serializer.errors, 'Data': []})
         except Exception as e:
