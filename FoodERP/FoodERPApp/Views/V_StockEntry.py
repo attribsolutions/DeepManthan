@@ -361,13 +361,18 @@ class DeleteStockEntryPageView(CreateAPIView):
             with transaction.atomic():
                 PartyID = stockdata['PartyID']
                 StockDate=stockdata['StockDate']
-                Stockdata = T_Stock.objects.filter(StockDate=StockDate,Party_id=PartyID)  
-                if not Stockdata.exists():  
+                qs_default = T_Stock.objects.filter(StockDate=StockDate,Party_id=PartyID) 
+                qs_spos = T_SPOSStock.objects.filter(StockDate=StockDate, Party=PartyID)               
+    
+                if not qs_default.exists() and not qs_spos.exists():  
                     log_entry = create_transaction_logNew(request,{'PartyID': PartyID, 'StockDate': StockDate}, 0, 'StockDelete: Stock Not available', 473, PartyID)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Stock Not available', 'Data': []})            
                     
-                deleted_count, _ = Stockdata.delete()
-                log_entry = create_transaction_logNew(request,{'PartyID': PartyID, 'StockDate': StockDate}, 0, f'Stock deleted({deleted_count})', 473, PartyID)
+                deleted_default, _ = qs_default.delete()
+                deleted_spos, _    = qs_spos.delete()
+                total_deleted      = deleted_default + deleted_spos
+                log_entry = create_transaction_logNew(request,{'PartyID': PartyID, 'StockDate': StockDate}, 0,  f"Stock deleted (default={deleted_default}, "
+                    f"sweetpos={deleted_spos}, total={total_deleted})", 473, PartyID)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Stock Deleted Successfully', 'Data':[]})                        
             
         except Exception as e:
