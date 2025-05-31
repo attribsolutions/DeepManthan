@@ -238,7 +238,7 @@ class M_Parties(models.Model):
     UploadSalesDatafromExcelParty= models.BooleanField(default=False)
     Country = models.ForeignKey(M_Country, related_name='PartiesCountry',on_delete=models.PROTECT,null=True, blank=True)
     ShortName = models.CharField(max_length=100,null=True, blank=True)
-    # ClosingDate = models.DateTimeField(blank=True, null=True)
+    ClosingDate = models.DateTimeField(blank=True, null=True)
     class Meta:
         db_table = 'M_Parties'
         constraints = [
@@ -2585,6 +2585,9 @@ class MC_SchemeItems(models.Model):
     SchemeID = models.ForeignKey(M_Scheme,related_name='SchemeIDForItems', on_delete=models.CASCADE)
     TypeForItem = models.IntegerField()
     Item = models.IntegerField()
+    Quantity  = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
+    DiscountValue  = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True) 
+    DiscountType=models.CharField(max_length=50)
     
     class Meta:
         db_table = "MC_SchemeItems"
