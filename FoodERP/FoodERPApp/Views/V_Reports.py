@@ -1645,6 +1645,13 @@ class ProductAndMarginReportView(CreateAPIView):
                 ItemID = data['Item'].split(",")
                 PartyTypeID = [int(i) for i in PartyTypeID]
                 try:
+                    CompanyIDs=MC_EmployeeParties.objects.raw(f'''select GetAllCompanyIDsFromLoginCompany({CompanyID}) id''')
+                    for row in CompanyIDs:
+                        p=row.id
+                    Party_ID = p.split(",")
+                    dd=Party_ID[:-1]
+                    C=', '.join(dd)
+                    
                     if(PriceListID):
                         PriceListID = int(PriceListID)
                     else:
@@ -1652,8 +1659,8 @@ class ProductAndMarginReportView(CreateAPIView):
                             PartyTypeIDs = ','.join(map(str, PartyTypeID))
                             PriceListQuery=M_PriceList.objects.raw(f''' SELECT id,Name,ShortName AS  PLShortName,CalculationPath
                                                                       FROM M_PriceList 
-                                                                      WHERE PLPartyType_id in({PartyTypeIDs}) order by Sequence''')
-                           
+                                                                      WHERE PLPartyType_id in({PartyTypeIDs}) and Company_id in( {C}) order by Sequence''')
+                            
                             PriceListIDComma = [str(item.id) for item in PriceListQuery]
                             if PriceListIDComma:  
                                 PriceListID = ','.join(PriceListIDComma)
@@ -1681,17 +1688,13 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
  JOIN MC_ItemUnits PIB on PIB.Item_id=M_Items.id and PIB.UnitID_id=4 and PIB.IsDeleted=0
  JOIN MC_ItemUnits PIK on PIK.Item_id=M_Items.id and PIK.UnitID_id=2 and PIK.IsDeleted=0
  JOIN MC_ItemUnits PIN on PIN.Item_id=M_Items.id and PIN.UnitID_id=1 and PIN.IsDeleted=0
+ 
  """
                 q=C_Companies.objects.filter(id=CompanyID).values('IsSCM')
     
                 if q[0]['IsSCM'] == 1:
                    
-                    CompanyIDs=MC_EmployeeParties.objects.raw(f'''select GetAllCompanyIDsFromLoginCompany({CompanyID}) id''')
-                    for row in CompanyIDs:
-                        p=row.id
-                    Party_ID = p.split(",")
-                    dd=Party_ID[:-1]
-                    C=', '.join(dd)
+                    
                     Companycondition = f"where M_Items.Company_id in( {C}) and M_Items.IsSCM=1"
                 else:
                     Companycondition = f"where M_Items.Company_id = {CompanyID}"
@@ -1746,10 +1749,10 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                         if IsSCM == '0':
                            
                             if PriceListID == 0:
-                                pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName AS PLShortName FROM M_PriceList  order by Sequence''')
+                                pricelistquery=M_PriceList.objects.raw(f'''SELECT id,Name,ShortName AS PLShortName FROM M_PriceList where Company_id in( {C})  order by Sequence''')
                             else:
                                 all_ids = []
-                                pricelistquery=M_PriceList.objects.raw(f'''SELECT id,Name,ShortName AS PLShortName,CalculationPath FROM M_PriceList where id  in ({PriceListID}) order by Sequence''')
+                                pricelistquery=M_PriceList.objects.raw(f'''SELECT id,Name,ShortName AS PLShortName,CalculationPath FROM M_PriceList where Company_id in( {C}) id  in ({PriceListID}) order by Sequence''')
                                 
                                 for i in pricelistquery:
                                     pp=(i.CalculationPath).split(',')  
@@ -1862,11 +1865,11 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id in (%s
                             "MRP": row.MRP,
                             "GST%": str(row.GST) +'%',
                             "BaseUnit": row.BaseUnit,
-                            "SKUVol": row.SKUVol,
+                            "SKUVol": float(row.SKUVol),
                             "ShelfLife": row.ShelfLife,
-                            "PcsInBox": row.PcsInBox,
-                            "PcsInKG": row.PcsInKg,
-                            "PcsInNo": row.PcsInNo,
+                            "PcsInBox": float(row.PcsInBox),
+                            "PcsInKG": float(row.PcsInKg),
+                            "PcsInNo": float(row.PcsInNo),
                             "ProductID" : row.ProductID,
                             "SubProductID" :row.SubProductID,
                             "ItemMargins": ww,
