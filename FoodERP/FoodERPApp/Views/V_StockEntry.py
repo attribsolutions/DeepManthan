@@ -69,7 +69,7 @@ class StockEntryPageView(CreateAPIView):
                    
                     O_BatchWiseLiveStockList.append({
                     "Item": a['Item'],
-                    "Quantity": a['Quantity'],
+                    "Quantity": round(a['Quantity'], 3),
                     "Unit": a['Unit'],
                     "BaseUnitQuantity": round(BaseUnitQuantity,3),
                     "OriginalBaseUnitQuantity": round(BaseUnitQuantity,3),
@@ -84,10 +84,10 @@ class StockEntryPageView(CreateAPIView):
                     T_StockEntryList.append({
                     "StockDate":StockDate,    
                     "Item": a['Item'],
-                    "Quantity": a['Quantity'],
+                    "Quantity": round(a['Quantity'], 3),
                     "Unit": a['Unit'],
                     "BaseUnitQuantity": round(BaseUnitQuantity,3),
-                    "MRPValue" :a["MRPValue"],
+                    "MRPValue": round(a['MRPValue'], 2),
                     "MRP": a['MRP'],
                     "Party": Party,
                     "CreatedBy":CreatedBy,
@@ -103,7 +103,7 @@ class StockEntryPageView(CreateAPIView):
                     "ItemExpiryDate":date.today()+ timedelta(days = query2[0]['Days']),
                     "MRP": a['MRP'],
                     "GST": a['GST'],
-                    "MRPValue" :a["MRPValue"],
+                    "MRPValue": round(a['MRPValue'], 2),
                     "GSTPercentage" : a['GSTPercentage'],
                     "SystemBatchDate": a['SystemBatchDate'],
                     "SystemBatchCode": a['SystemBatchCode'],
