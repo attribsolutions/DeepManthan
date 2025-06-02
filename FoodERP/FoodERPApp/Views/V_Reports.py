@@ -1539,7 +1539,7 @@ class ManPowerReportView(CreateAPIView):
                 
                 query = MC_PartySubParty.objects.raw(f'''SELECT  MC_PartySubParty.id,A.SAPPartyCode AS SAPCode, A.id AS FEParty_id, A.NAME AS PartyName,  A.isActive AS PartyActive, A.CreatedOn AS PartyCreation,
 M_PartyType.Name AS PartyType, A.Email, A.PAN, MC_PartySubParty.Party_id AS SS_id, B.NAME AS SSName, M_Users.LoginName AS LoginID, "India" AS country,
- C.Address, M_States.Name AS State, M_Districts.Name AS District,
+ C.Address, M_States.Name AS State, M_Districts.Name AS District, A.ClosingDate AS PartyClosingDate,
 M_Cities.Name AS City, C.PIN AS PIN, A.MobileNo AS Mobile, M_Employees.Name AS OwnerName,
 A.Latitude, A.Longitude, C.FSSAINo AS FSSAINo, 
 C.FSSAIExipry AS FSSAIExpiry, A.GSTIN AS GSTIN, M_Employees_GM.Name AS GM, M_Employees_NH.Name AS NSM,
@@ -1584,6 +1584,7 @@ WHERE M_PartyType.id IN(9,10,15,17,19)  ''',[PartyIDs])
                             "PartyName": a.PartyName,
                             "PartyActive": a.PartyActive,
                             "PartyCreation":PartyCreation,
+                            "PartyClosingDate" : a.PartyClosingDate,
                             "PartyType": a.PartyType,
                             "Email": a.Email,
                             "PAN":a.PAN,
