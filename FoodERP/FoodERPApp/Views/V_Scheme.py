@@ -157,7 +157,7 @@ class SchemeTypeView(CreateAPIView):
                 log_entry = create_transaction_logNew(request,0,0,Exception(e),33,0)
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
             
-            
+           
     @transaction.atomic()
     def get(self, request ):
         try:
@@ -172,6 +172,8 @@ class SchemeTypeView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'GETAllSchemeType:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
+ 
+
         
         
     @transaction.atomic()
@@ -188,7 +190,138 @@ class SchemeTypeView(CreateAPIView):
         except IntegrityError:   
             log_entry = create_transaction_logNew(request,0,0,'SchemeTypeDelete:'+'Scheme Type used in another table',8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Scheme Type used in another table', 'Data': []}) 
-        
+ 
+class SchemeTypsinglegetView(CreateAPIView):
     
+    permission_classes = (IsAuthenticated,)       
+    @transaction.atomic()
+    def get(self, request,id=0 ):
+        try:
+            with transaction.atomic():
+                SchemeType_data = M_SchemeType.objects.get(id=id)
+                SchemeType_data_serializer = SchemeTypeSerializer(SchemeType_data)
+                log_entry = create_transaction_logNew(request, SchemeType_data_serializer,0,'',475,0)
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': SchemeType_data_serializer.data})
+        except  M_SchemeType.DoesNotExist:
+            log_entry = create_transaction_logNew(request,0,0,'Scheme Type Data Does Not Exist',475,0)
+            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Scheme Type Data Not available', 'Data': []})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'GETAllSchemeType:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
+        
+class SchemeDetailsView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = [BasicAuthentication]
+    serializer_class       = SchemeDetailsSerializer 
+    @transaction.atomic()
+    def get(self, request,SchemeID):       
+        try:
+            with transaction.atomic():
+                user = BasicAuthenticationfunction(request)
+               
+                
+                if user is not None:
+                    SchemeDetails = M_Scheme.objects.raw(f'''
+                    SELECT 
+                        M_Scheme.id, SchemeName, SchemeValue, ValueIn, FromPeriod, ToPeriod, FreeItemID, VoucherLimit, SchemeValueUpto,
+                        QrPrefix, SchemeTypeName, SchemeTypeID_id, UsageTime, BillAbove, UsageType, BillEffect, Column1, Column2, Column3,
+                        IsQrApplicable, M_Scheme.IsActive, 
+                        CONCAT(SchemeDetails, '', IFNULL(M_Parties.SAPPartyCode, '')) AS SchemeDetails, OverLappingScheme, Message,
+                        M_Parties.id AS party_id, M_Parties.Name AS party_name,
+                        M_Items.id AS item_id, M_Items.Name AS item_name
+                    FROM M_Scheme 
+                    JOIN M_SchemeType ON M_Scheme.SchemeTypeID_id = M_SchemeType.id 
+                    JOIN MC_SchemeParties ON MC_SchemeParties.SchemeID_id = M_Scheme.id
+                    JOIN M_Parties ON M_Parties.id = MC_SchemeParties.PartyID_id  
+                    JOIN MC_SchemeItems ON MC_SchemeItems.SchemeID_id = M_Scheme.id
+                    JOIN M_Items ON M_Items.id = MC_SchemeItems.Item	                                
+                    WHERE M_Scheme.id = {SchemeID} AND M_Scheme.IsActive = 1
+                ''')
+
+                    data = []
+                    scheme_cache = {}
+
+                    for row in SchemeDetails:
+                        sid = row.id
+
+                        if sid not in scheme_cache:
+                            scheme_cache[sid] = {
+                                "SchemeId":       row.id,
+                                "SchemeName":     row.SchemeName,
+                                "SchemeValue":    row.SchemeValue,
+                                "ValueIn":        row.ValueIn,
+                                "FromPeriod":     row.FromPeriod,
+                                "ToPeriod":       row.ToPeriod,
+                                "FreeItemID":     row.FreeItemID,
+                                "VoucherLimit":   row.VoucherLimit,
+                                "SchemeValueUpto": getattr(row, 'SchemeValueUpto', None),
+                                "BillAbove":      row.BillAbove,
+                                "QrPrefix":       row.QrPrefix,
+                                "IsActive":       row.IsActive,
+                                "SchemeTypeID":   row.SchemeTypeID_id,
+                                "SchemeTypeName": row.SchemeTypeName,
+                                "UsageTime":      row.UsageTime,
+                                "UsageType":      row.UsageType,
+                                "BillEffect":     row.BillEffect,
+                                "ItemDetails":    {},
+                                "PartyDetails":   {},
+                            }
+
+                        sc = scheme_cache[sid]
+
+                        # Party Details
+                        pid = getattr(row, 'party_id', None)
+                        pname = getattr(row, 'party_name', '')
+                        if pid and pid not in sc["PartyDetails"]:
+                            sc["PartyDetails"][pid] = {
+                                "PartyID": pid,
+                                "PartyName": pname,
+                            }
+
+                        # Item Details
+                        iid = getattr(row, 'item_id', None)
+                        iname = getattr(row, 'item_name', '')
+                        if iid and iid not in sc["ItemDetails"]:
+                            sc["ItemDetails"][iid] = {
+                                "ItemID": iid,
+                                "ItemName": iname,
+                            }
+
+                    data = []
+                    for sc in scheme_cache.values():
+                        sc["PartyDetails"] = list(sc["PartyDetails"].values())
+                        sc["ItemDetails"] = list(sc["ItemDetails"].values())
+                        data.append(sc)
+
+                    if data:
+                        create_transaction_logNew(request, data, 0, SchemeID, 476, 0)
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': data})
+                    else:
+                        create_transaction_logNew(request, data, SchemeID, 'Record Not Found', 476, 0)
+                        return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+
+        except Exception as e:
+            create_transaction_logNew(request, {}, 0, 'SchemeDetails: ' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+        
+
+    
+    @transaction.atomic()
+    def post(self, request,*args, **kwargs):
+        try:
+            with transaction.atomic():
+                serializer = self.get_serializer(data=request.data)
+                if serializer.is_valid():
+                    Scheme = serializer.save()
+                    LastInsertID = Scheme.id
+                    log_entry = create_transaction_logNew(request,request.data,0,'TransactionID:'+str(LastInsertID),477,LastInsertID)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Scheme Save Successfully', 'Data':[]})
+                else:
+                    log_entry = create_transaction_logNew(request,request.data,0,'SchemeSave:'+str(serializer.errors),34,0)
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  serializer.errors, 'Data':[]})
+        except Exception as e:
+                log_entry = create_transaction_logNew(request,0,0,'SchemeSave:'+str(Exception(e)),33,0)
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
