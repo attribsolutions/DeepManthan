@@ -1035,6 +1035,7 @@ class T_Invoices(models.Model):
     IsTallySave = models.BooleanField(default=False)
     # IsVDCChallan = models.BooleanField(default=False)
     IsSendToFTPSAP = models.BooleanField(default=False)
+    CustomerGSTIN = models.CharField(max_length=20, blank=True, null=True)
     class Meta:
         db_table = "T_Invoices"
         indexes = [
