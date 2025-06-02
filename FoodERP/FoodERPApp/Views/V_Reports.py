@@ -1862,7 +1862,7 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id in (%s
                             "MRP": row.MRP,
                             "GST%": str(row.GST) +'%',
                             "BaseUnit": row.BaseUnit,
-                            "SKUVol": float(row.SKUVol),
+                            "SKUVol": (row.SKUVol),
                             "ShelfLife": row.ShelfLife,
                             "PcsInBox": float(row.PcsInBox),
                             "PcsInKG": float(row.PcsInKg),
