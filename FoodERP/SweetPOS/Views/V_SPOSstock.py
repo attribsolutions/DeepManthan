@@ -109,10 +109,10 @@ class StockView(CreateAPIView):
                     T_SPOS_StockEntryList.append({
                     "StockDate":StockDate,    
                     "Item": a['Item'],
-                    "Quantity": a['Quantity'],
+                    "Quantity": round(a['Quantity'], 3),
                     "Unit": Unit,
                     "BaseUnitQuantity": round(BaseUnitQuantity,3),
-                    "MRPValue" :a["MRPValue"],
+                    "MRPValue": round(a['MRPValue'], 2),
                     "MRP": MRP,
                     "Party": Party,
                     "CreatedBy":CreatedBy,
