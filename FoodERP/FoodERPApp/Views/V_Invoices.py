@@ -864,7 +864,7 @@ class InvoiceViewSecond(CreateAPIView):
                             "RoundOffAmount":a['RoundOffAmount'],
                             "Customer": a['Customer']['id'],
                             "CustomerName": a['Customer']['Name'],
-                            "CustomerGSTIN": a['CustomerGSTIN'],
+                            "CustomerGSTIN": a['Customer']['GSTIN'],
                             "CustomerMobileNo": a['Customer']['MobileNo'],
                             "Party": a['Party']['id'],
                             "PartyName": a['Party']['Name'],
