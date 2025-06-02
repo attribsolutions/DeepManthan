@@ -268,7 +268,8 @@ TC_InvoiceItems.BasicAmount AS TaxableValue,TC_InvoiceItems.CGST,TC_InvoiceItems
 TC_InvoiceItems.SGSTPercentage,TC_InvoiceItems.IGST,TC_InvoiceItems.IGSTPercentage,TC_InvoiceItems.GSTPercentage,
 TC_InvoiceItems.GSTAmount,TC_InvoiceItems.Amount AS TotalValue,T_Orders.FullOrderNumber,T_Orders.OrderDate,T_Invoices.TCSAmount,
 T_Invoices.RoundOffAmount,T_Invoices.GrandTotal,M_Group.Name AS `Group`, MC_SubGroup.Name AS SubGroup, T_Invoices.CreatedOn,
-M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster, TC_InvoiceItems.BatchCode AS BatchNo , TC_InvoiceItems.BatchDate, M_Items.SAPItemCode SAPItemID ,'' VoucherCode,'' CashierName
+M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster, TC_InvoiceItems.BatchCode AS BatchNo , TC_InvoiceItems.BatchDate,
+M_Items.SAPItemCode SAPItemID ,'' VoucherCode,'' CashierName, FoodERP.M_PriceList.Name AS PriceListName
 FROM FoodERP.TC_InvoiceItems 
 JOIN FoodERP.T_Invoices ON FoodERP.T_Invoices.id = FoodERP.TC_InvoiceItems.Invoice_id 
 JOIN FoodERP.MC_PartySubParty ON FoodERP.MC_PartySubParty.SubParty_id = FoodERP.T_Invoices.Customer_id and MC_PartySubParty.Party_id=T_Invoices.Party_id
@@ -276,6 +277,7 @@ left JOIN FoodERP.TC_InvoicesReferences ON FoodERP.TC_InvoicesReferences.Invoice
 left JOIN FoodERP.T_Orders ON FoodERP.T_Orders.id = FoodERP.TC_InvoicesReferences.Order_id
 JOIN FoodERP.M_Parties A ON A.id = FoodERP.T_Invoices.Party_id 
 JOIN FoodERP.M_Parties B ON B.id = FoodERP.T_Invoices.Customer_id 
+LEFT JOIN FoodERP.M_PriceList ON M_PriceList.id = B.PriceList_id 
 JOIN FoodERP.M_PartyType X on A.PartyType_id = X.id 
 JOIN FoodERP.M_PartyType Y on B.PartyType_id = Y.id 
 JOIN FoodERP.M_Items ON M_Items.id = FoodERP.TC_InvoiceItems.Item_id 
@@ -312,7 +314,9 @@ SweetPOS.TC_SPOSInvoiceItems.BasicAmount AS TaxableValue,SweetPOS.TC_SPOSInvoice
 SweetPOS.TC_SPOSInvoiceItems.SGSTPercentage,SweetPOS.TC_SPOSInvoiceItems.IGST,SweetPOS.TC_SPOSInvoiceItems.IGSTPercentage,SweetPOS.TC_SPOSInvoiceItems.GSTPercentage,
 SweetPOS.TC_SPOSInvoiceItems.GSTAmount,SweetPOS.TC_SPOSInvoiceItems.Amount AS TotalValue,T_Orders.FullOrderNumber,T_Orders.OrderDate,SweetPOS.T_SPOSInvoices.TCSAmount,
 SweetPOS.T_SPOSInvoices.RoundOffAmount,SweetPOS.T_SPOSInvoices.GrandTotal,M_Group.Name AS `Group`, MC_SubGroup.Name AS SubGroup, T_SPOSInvoices.CreatedOn,
-M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster, SweetPOS.TC_SPOSInvoiceItems.BatchCode AS BatchNo , SweetPOS.TC_SPOSInvoiceItems.BatchDate, M_Items.SAPItemCode SAPItemID,VoucherCode,FoodERP.M_Users.LoginName CashierName
+M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster, SweetPOS.TC_SPOSInvoiceItems.BatchCode AS BatchNo ,
+SweetPOS.TC_SPOSInvoiceItems.BatchDate, M_Items.SAPItemCode SAPItemID,
+VoucherCode,FoodERP.M_Users.LoginName CashierName, FoodERP.M_PriceList.Name AS PriceListName
 FROM SweetPOS.TC_SPOSInvoiceItems
 JOIN SweetPOS.T_SPOSInvoices ON SweetPOS.T_SPOSInvoices.id = SweetPOS.TC_SPOSInvoiceItems.Invoice_id
 JOIN FoodERP.M_Users ON FoodERP.M_Users.id=SweetPOS.T_SPOSInvoices.CreatedBy
@@ -320,6 +324,7 @@ left JOIN SweetPOS.TC_SPOSInvoicesReferences ON SweetPOS.TC_SPOSInvoicesReferenc
 left JOIN FoodERP.T_Orders ON FoodERP.T_Orders.id = SweetPOS.TC_SPOSInvoicesReferences.Order
 JOIN FoodERP.M_Parties A ON A.id = SweetPOS.T_SPOSInvoices.Party
 JOIN FoodERP.M_Parties B ON B.id = SweetPOS.T_SPOSInvoices.Customer
+LEFT JOIN FoodERP.M_PriceList ON M_PriceList.id = B.PriceList_id  
 JOIN FoodERP.M_PartyType X on A.PartyType_id = X.id
 JOIN FoodERP.M_PartyType Y on B.PartyType_id = Y.id
 JOIN FoodERP.M_Items ON FoodERP.M_Items.id = SweetPOS.TC_SPOSInvoiceItems.Item
@@ -1640,6 +1645,13 @@ class ProductAndMarginReportView(CreateAPIView):
                 ItemID = data['Item'].split(",")
                 PartyTypeID = [int(i) for i in PartyTypeID]
                 try:
+                    CompanyIDs=MC_EmployeeParties.objects.raw(f'''select GetAllCompanyIDsFromLoginCompany({CompanyID}) id''')
+                    for row in CompanyIDs:
+                        p=row.id
+                    Party_ID = p.split(",")
+                    dd=Party_ID[:-1]
+                    C=', '.join(dd)
+                    
                     if(PriceListID):
                         PriceListID = int(PriceListID)
                     else:
@@ -1647,8 +1659,8 @@ class ProductAndMarginReportView(CreateAPIView):
                             PartyTypeIDs = ','.join(map(str, PartyTypeID))
                             PriceListQuery=M_PriceList.objects.raw(f''' SELECT id,Name,ShortName AS  PLShortName,CalculationPath
                                                                       FROM M_PriceList 
-                                                                      WHERE PLPartyType_id in({PartyTypeIDs}) order by Sequence''')
-                           
+                                                                      WHERE PLPartyType_id in({PartyTypeIDs}) and Company_id in( {C}) order by Sequence''')
+                            
                             PriceListIDComma = [str(item.id) for item in PriceListQuery]
                             if PriceListIDComma:  
                                 PriceListID = ','.join(PriceListIDComma)
@@ -1676,17 +1688,13 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
  JOIN MC_ItemUnits PIB on PIB.Item_id=M_Items.id and PIB.UnitID_id=4 and PIB.IsDeleted=0
  JOIN MC_ItemUnits PIK on PIK.Item_id=M_Items.id and PIK.UnitID_id=2 and PIK.IsDeleted=0
  JOIN MC_ItemUnits PIN on PIN.Item_id=M_Items.id and PIN.UnitID_id=1 and PIN.IsDeleted=0
+ 
  """
                 q=C_Companies.objects.filter(id=CompanyID).values('IsSCM')
     
                 if q[0]['IsSCM'] == 1:
                    
-                    CompanyIDs=MC_EmployeeParties.objects.raw(f'''select GetAllCompanyIDsFromLoginCompany({CompanyID}) id''')
-                    for row in CompanyIDs:
-                        p=row.id
-                    Party_ID = p.split(",")
-                    dd=Party_ID[:-1]
-                    C=', '.join(dd)
+                    
                     Companycondition = f"where M_Items.Company_id in( {C}) and M_Items.IsSCM=1"
                 else:
                     Companycondition = f"where M_Items.Company_id = {CompanyID}"
@@ -1741,10 +1749,10 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                         if IsSCM == '0':
                            
                             if PriceListID == 0:
-                                pricelistquery=M_PriceList.objects.raw('''SELECT id,Name,ShortName AS PLShortName FROM M_PriceList  order by Sequence''')
+                                pricelistquery=M_PriceList.objects.raw(f'''SELECT id,Name,ShortName AS PLShortName FROM M_PriceList where Company_id in( {C})  order by Sequence''')
                             else:
                                 all_ids = []
-                                pricelistquery=M_PriceList.objects.raw(f'''SELECT id,Name,ShortName AS PLShortName,CalculationPath FROM M_PriceList where id  in ({PriceListID}) order by Sequence''')
+                                pricelistquery=M_PriceList.objects.raw(f'''SELECT id,Name,ShortName AS PLShortName,CalculationPath FROM M_PriceList where Company_id in( {C}) id  in ({PriceListID}) order by Sequence''')
                                 
                                 for i in pricelistquery:
                                     pp=(i.CalculationPath).split(',')  
@@ -1857,11 +1865,11 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id in (%s
                             "MRP": row.MRP,
                             "GST%": str(row.GST) +'%',
                             "BaseUnit": row.BaseUnit,
-                            "SKUVol": row.SKUVol,
+                            "SKUVol": float(row.SKUVol),
                             "ShelfLife": row.ShelfLife,
-                            "PcsInBox": row.PcsInBox,
-                            "PcsInKG": row.PcsInKg,
-                            "PcsInNo": row.PcsInNo,
+                            "PcsInBox": float(row.PcsInBox),
+                            "PcsInKG": float(row.PcsInKg),
+                            "PcsInNo": float(row.PcsInNo),
                             "ProductID" : row.ProductID,
                             "SubProductID" :row.SubProductID,
                             "ItemMargins": ww,
