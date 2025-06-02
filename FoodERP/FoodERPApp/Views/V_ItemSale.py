@@ -83,7 +83,7 @@ class ItemSaleReportView(CreateAPIView):
                                 JOIN FoodERP.M_PartyType SupPartyType ON Sup.PartyType_id = SupPartyType.id 
                                 JOIN FoodERP.M_Items ON B.Item = M_Items.id  
                                 LEFT JOIN FoodERP.MC_ItemGroupDetails C ON B.Item = C.Item_id AND GroupType_id = 5 
-                                JOIN FoodERP.M_Group ON C.Group_id = M_Group.ID 
+                                left JOIN FoodERP.M_Group ON C.Group_id = M_Group.ID 
                                 LEFT JOIN FoodERP.MC_SubGroup ON C.SubGroup_id = MC_SubGroup.id
                                 left JOIN FoodERP.MC_PartySubParty D ON D.SubParty_id = Cust.id AND D.Party_id = Sup.id
                                 LEFT JOIN FoodERP.M_Routes ON D.Route_id = M_Routes.id 
