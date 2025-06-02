@@ -122,7 +122,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
     obatchwiseStock=obatchwiseStockSerializer(many=True)
     class Meta:
         model = T_Invoices
-        fields = ['id','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','Vehicle','Driver', 'InvoiceItems', 'InvoicesReferences', 'obatchwiseStock','TCSAmount', 'IsTallySave','IsSendToFTPSAP']
+        fields = ['id','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','Vehicle','Driver', 'InvoiceItems', 'InvoicesReferences', 'obatchwiseStock','TCSAmount', 'IsTallySave','IsSendToFTPSAP','CustomerGSTIN']
 
     def create(self, validated_data):
         InvoiceItems_data = validated_data.pop('InvoiceItems')
@@ -130,7 +130,11 @@ class InvoiceSerializer(serializers.ModelSerializer):
         O_BatchWiseLiveStockItems_data = validated_data.pop('obatchwiseStock')
         validated_data['IsTallySave'] = False
         validated_data['IsSendToFTPSAP'] = False
-        
+
+        customer_instance = validated_data['Customer']
+        customer = M_Parties.objects.filter(id=customer_instance.id).values('GSTIN').first()
+        validated_data['CustomerGSTIN'] = customer['GSTIN'] if customer else None
+            
         InvoiceID = T_Invoices.objects.create(**validated_data)
         
         
