@@ -538,13 +538,10 @@ WHERE GRNDate = %s AND Customer_id = %s and T_GRNs.IsGRNType=0 GROUP BY Item_id)
 
 on I.Item_id=IBPurchase.Item_id 
                                                                         
-left join(select MII.Item_id,IssueQuantity MaterialIssueQuantity from T_MaterialIssue MI 
+left join(select MII.Item_id, SUM(IssueQuantity) MaterialIssueQuantity from T_MaterialIssue MI 
 join TC_MaterialIssueItems MII on MII.MaterialIssue_id=MI.id
 where MI.MaterialIssueDate = %s and Party_id=%s GROUP BY MII.Item_id)MaterialIssue                                                                        
-on I.Item_id=MaterialIssue.Item_id
-
-
-                                    )R                                    
+on I.Item_id=MaterialIssue.Item_id)R                                    
 where 
 OpeningBalance!=0 OR GRN!=0 OR Sale!=0 OR PurchaseReturn != 0 OR SalesReturn !=0 OR StockAdjustment!=0 OR IBPurchaseQuantity !=0 OR IBSaleQuantity != 0 OR ProductionQty != 0 ''',
                                                                         ([Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party], [Date], [Party]))
@@ -1866,7 +1863,7 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id in (%s
                             "MRP": row.MRP,
                             "GST%": str(row.GST) +'%',
                             "BaseUnit": row.BaseUnit,
-                            "SKUVol": float(row.SKUVol),
+                            "SKUVol": (row.SKUVol),
                             "ShelfLife": row.ShelfLife,
                             "PcsInBox": float(row.PcsInBox),
                             "PcsInKG": float(row.PcsInKg),
