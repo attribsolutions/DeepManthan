@@ -668,7 +668,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                                 "CreatedOn": a['CreatedOn'],
                                 "InvoiceUploads": Invoice_serializer,
                                 "CustomerPartyType": a['CustomerPartyType'],
-                                "CustomerGSTIN": a['CustomerGSTIN'],
+                                "CustomerGSTIN": a['PartiesCustomerGSTIN'],
                                 "CustomerPAN": a['CustomerPAN'],
                                 "IsTCSParty": IsTCSParty,
                                 "ImportFromExcel": a['ImportFromExcel'],
