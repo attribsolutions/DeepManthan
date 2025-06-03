@@ -7,7 +7,7 @@ from ..models import *
 from SweetPOS.Views.V_SweetPosRoleAccess import BasicAuthenticationfunction
 from rest_framework.authentication import BasicAuthentication
 from ..Serializer.S_Scheme import *
-
+from rest_framework.views import APIView
 
      
 class SchemeView(CreateAPIView):
@@ -30,9 +30,9 @@ class SchemeView(CreateAPIView):
                         FROM M_Scheme 
                         JOIN M_SchemeType ON M_Scheme.SchemeTypeID_id = M_SchemeType.id 
                         JOIN MC_SchemeParties ON MC_SchemeParties.SchemeID_id = M_Scheme.id
-                        join M_Parties on M_Parties.id=MC_SchemeParties.PartyID_id  
+                        join M_Parties on M_Parties.id=MC_SchemeParties.PartyID  
                                                          
-                        WHERE PartyID_id = {Party} AND M_Scheme.IsActive = 1
+                        WHERE PartyID = {Party} AND M_Scheme.IsActive = 1
                     ''')
                     
                     data = []
@@ -157,7 +157,7 @@ class SchemeTypeView(CreateAPIView):
                 log_entry = create_transaction_logNew(request,0,0,Exception(e),33,0)
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
             
-            
+           
     @transaction.atomic()
     def get(self, request ):
         try:
@@ -172,6 +172,8 @@ class SchemeTypeView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'GETAllSchemeType:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
+ 
+
         
         
     @transaction.atomic()
@@ -188,7 +190,227 @@ class SchemeTypeView(CreateAPIView):
         except IntegrityError:   
             log_entry = create_transaction_logNew(request,0,0,'SchemeTypeDelete:'+'Scheme Type used in another table',8,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Scheme Type used in another table', 'Data': []}) 
-        
+ 
+class SchemeTypsinglegetView(CreateAPIView):
     
+    permission_classes = (IsAuthenticated,)       
+    @transaction.atomic()
+    def get(self, request,id=0 ):
+        try:
+            with transaction.atomic():
+                SchemeType_data = M_SchemeType.objects.get(id=id)
+                SchemeType_data_serializer = SchemeTypeSerializer(SchemeType_data)
+                log_entry = create_transaction_logNew(request, SchemeType_data_serializer,0,'',475,0)
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': SchemeType_data_serializer.data})
+        except  M_SchemeType.DoesNotExist:
+            log_entry = create_transaction_logNew(request,0,0,'Scheme Type Data Does Not Exist',475,0)
+            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Scheme Type Data Not available', 'Data': []})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0,'GETAllSchemeType:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
+        
+class SchemeDetailsView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = [BasicAuthentication]
+    serializer_class       = SchemeDetailsSerializer 
+    @transaction.atomic()
+    def get(self, request,SchemeID):       
+        try:
+            with transaction.atomic():
+                user = BasicAuthenticationfunction(request)
+               
+                
+                if user is not None:
+                    SchemeDetails = M_Scheme.objects.raw(f'''
+                    SELECT 
+                        M_Scheme.id, SchemeName, SchemeValue, ValueIn, FromPeriod, ToPeriod, FreeItemID, VoucherLimit, SchemeValueUpto,
+                        QrPrefix, SchemeTypeName, SchemeTypeID_id, UsageTime, BillAbove, UsageType, BillEffect, Column1, Column2, Column3,
+                        IsQrApplicable, M_Scheme.IsActive, 
+                        CONCAT(SchemeDetails, '', IFNULL(M_Parties.SAPPartyCode, '')) AS SchemeDetails, OverLappingScheme, Message,
+                        M_Parties.id AS party_id, M_Parties.Name AS party_name,
+                        M_Items.id AS item_id, M_Items.Name AS item_name
+                    FROM M_Scheme 
+                    JOIN M_SchemeType ON M_Scheme.SchemeTypeID_id = M_SchemeType.id 
+                    JOIN MC_SchemeParties ON MC_SchemeParties.SchemeID_id = M_Scheme.id
+                    JOIN M_Parties ON M_Parties.id = MC_SchemeParties.PartyID  
+                    JOIN MC_SchemeItems ON MC_SchemeItems.SchemeID_id = M_Scheme.id
+                    JOIN M_Items ON M_Items.id = MC_SchemeItems.Item	                                
+                    WHERE M_Scheme.id = {SchemeID} AND M_Scheme.IsActive = 1
+                ''')
+
+                    data = []
+                    scheme_cache = {}
+
+                    for row in SchemeDetails:
+                        sid = row.id
+
+                        if sid not in scheme_cache:
+                            scheme_cache[sid] = {
+                                "SchemeId":       row.id,
+                                "SchemeName":     row.SchemeName,
+                                "SchemeValue":    row.SchemeValue,
+                                "ValueIn":        row.ValueIn,
+                                "FromPeriod":     row.FromPeriod,
+                                "ToPeriod":       row.ToPeriod,
+                                "FreeItemID":     row.FreeItemID,
+                                "VoucherLimit":   row.VoucherLimit,
+                                "SchemeValueUpto": getattr(row, 'SchemeValueUpto', None),
+                                "BillAbove":      row.BillAbove,
+                                "QrPrefix":       row.QrPrefix,
+                                "IsActive":       row.IsActive,
+                                "SchemeTypeID":   row.SchemeTypeID_id,
+                                "SchemeTypeName": row.SchemeTypeName,
+                                "UsageTime":      row.UsageTime,
+                                "UsageType":      row.UsageType,
+                                "BillEffect":     row.BillEffect,
+                                "ItemDetails":    {},
+                                "PartyDetails":   {},
+                            }
+
+                        sc = scheme_cache[sid]
+
+                        # Party Details
+                        pid = getattr(row, 'party_id', None)
+                        pname = getattr(row, 'party_name', '')
+                        if pid and pid not in sc["PartyDetails"]:
+                            sc["PartyDetails"][pid] = {
+                                "PartyID": pid,
+                                "PartyName": pname,
+                            }
+
+                        # Item Details
+                        iid = getattr(row, 'item_id', None)
+                        iname = getattr(row, 'item_name', '')
+                        if iid and iid not in sc["ItemDetails"]:
+                            sc["ItemDetails"][iid] = {
+                                "ItemID": iid,
+                                "ItemName": iname,
+                            }
+
+                    data = []
+                    for sc in scheme_cache.values():
+                        sc["PartyDetails"] = list(sc["PartyDetails"].values())
+                        sc["ItemDetails"] = list(sc["ItemDetails"].values())
+                        data.append(sc)
+                    print(data)
+                    if data:
+                        create_transaction_logNew(request, data, 0, SchemeID, 476, 0)
+                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': data})
+                    else:
+                        create_transaction_logNew(request, data, SchemeID, 'Record Not Found', 476, 0)
+                        return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+
+        except Exception as e:
+            create_transaction_logNew(request, {}, 0, 'SchemeDetails: ' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+        
+
+    
+    @transaction.atomic()
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                serializer = self.get_serializer(data=request.data)
+                if serializer.is_valid():
+                    Scheme = serializer.save()
+                    LastInsertID = Scheme.id
+                    log_entry = create_transaction_logNew(request,request.data,0,'TransactionID:'+str(LastInsertID),477,LastInsertID)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Scheme Save Successfully', 'Data':[]})
+                else:
+                    log_entry = create_transaction_logNew(request,request.data,0,'SchemeSave:'+str(serializer.errors),34,0)
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  serializer.errors, 'Data':[]})
+        except Exception as e:
+                log_entry = create_transaction_logNew(request,0,0,'SchemeSave:'+str(Exception(e)),33,0)
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+
+
+
+
+    @transaction.atomic
+    def put(self, request, id):
+        try:
+            data = JSONParser().parse(request)
+            # print(data)
+            user = BasicAuthenticationfunction(request)
+
+            if user is None:
+                return JsonResponse({'StatusCode': 401, 'Status': False, 'Message': 'Unauthorized', 'Data': []})
+
+            # scheme_id = data.get('SchemeID')
+
+            # Update M_Scheme
+            try:
+                scheme = M_Scheme.objects.get(id=id)          
+                scheme.SchemeName = data.get('SchemeName')                
+                scheme.SchemeValue = data.get('SchemeValue')
+                scheme.ValueIn = data.get('ValueIn')
+                scheme.FromPeriod = data.get('FromPeriod')
+                scheme.ToPeriod = data.get('ToPeriod')
+                scheme.FreeItemID = data.get('FreeItemID')
+                scheme.VoucherLimit = data.get('VoucherLimit')
+                scheme.SchemeValueUpto = data.get('SchemeValueUpto')
+                scheme.QrPrefix = data.get('QrPrefix')
+                scheme.SchemeTypeID_id = data.get('SchemeTypeID')
+                scheme.UsageTime = data.get('UsageTime')
+                scheme.BillAbove = data.get('BillAbove')
+                scheme.UsageType = data.get('UsageType')
+                scheme.BillEffect = data.get('BillEffect')
+                scheme.IsQrApplicable = data.get('IsQrApplicable')
+                scheme.OverLappingScheme = data.get('OverLappingScheme')
+                scheme.Message = data.get('Message')                
+                
+                scheme.save()
+            except M_Scheme.DoesNotExist:
+                return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'Scheme Not Found', 'Data': []})
+
+            # Clear old Parties and Items
+            MC_SchemeItems.objects.filter(SchemeID=id).delete()
+            MC_SchemeParties.objects.filter(SchemeID=id).delete()
+
+            # Insert updated Items
+            for item in data.get('ItemDetails', []):
+                MC_SchemeItems.objects.create(
+                    SchemeID_id=id,
+                    Item=item['Item'],                    
+                    TypeForItem=item['TypeForItem'],
+                    Quantity= item['Quantity'],
+                    DiscountValue=item['DiscountValue'],
+                    DiscountType=item['DiscountType']                   
+                )
+
+            # Insert updated Parties
+            for party in data.get('PartyDetails', []):
+                MC_SchemeParties.objects.create(
+                    SchemeID_id=id,
+                    PartyID=party['PartyID']
+                )
+
+            log_entry = create_transaction_logNew(request, data, id, 'Scheme updated', 478, 0)
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Scheme updated successfully', 'Data': []})
+
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, {}, 0, 'Scheme Update Error: ' + str(e), 478, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+        
+        
+    def delete(self,request,id=0):
+        try:
+            with transaction.atomic():
+                scheme = M_Scheme.objects.get(id=id)
+               
+                # Delete related Scheme Items and Parties
+                MC_SchemeItems.objects.filter(SchemeID=id).delete()
+                MC_SchemeParties.objects.filter(SchemeID=id).delete()
+
+                # Delete the Scheme itself
+                scheme.delete()
+
+                return Response({"message": "Scheme deleted successfully."}, status=status.HTTP_200_OK)
+
+        except M_Scheme.DoesNotExist:
+            return Response({"error": "Scheme not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
