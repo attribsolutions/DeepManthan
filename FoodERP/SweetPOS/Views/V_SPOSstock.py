@@ -104,15 +104,15 @@ class StockView(CreateAPIView):
 
                     a['BatchCode'] = BatchCode
                     a['StockDate'] = date.today()
-                    a['BaseUnitQuantity'] = round(BaseUnitQuantity,3)
+                    a['BaseUnitQuantity'] = round(float(BaseUnitQuantity),3)
 
                     T_SPOS_StockEntryList.append({
                     "StockDate":StockDate,    
                     "Item": a['Item'],
-                    "Quantity": round(a['Quantity'], 3),
+                    "Quantity": round(float(a['Quantity']), 3),
                     "Unit": Unit,
-                    "BaseUnitQuantity": round(BaseUnitQuantity,3),
-                    "MRPValue": round(a['MRPValue'], 2),
+                    "BaseUnitQuantity": round(float(BaseUnitQuantity),3),
+                    "MRPValue": round(float(a['MRPValue']), 2),
                     "MRP": MRP,
                     "Party": Party,
                     "CreatedBy":CreatedBy,
@@ -143,7 +143,7 @@ class StockView(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': StockEntrySerializer.errors, 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, FranchiseStockdata, 0,'FranchiseStockEntrySave:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':Exception(e), 'Data': []})
         
         
 
