@@ -22,7 +22,7 @@ class SchemeItemsSerializer(serializers.ModelSerializer):
 class SchemePartiesSerializer(serializers.ModelSerializer):
     class Meta:
         model=MC_SchemeParties
-        fields = ["PartyID","SchemeID"]
+        fields = '__all__'
         extra_kwargs = {
             'SchemeID': {'read_only': True}
             
