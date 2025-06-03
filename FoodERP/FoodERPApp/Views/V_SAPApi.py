@@ -74,7 +74,7 @@ class SAPInvoiceView(CreateAPIView):
                                     
                                 # CustomPrint('bbbbbb')   
                                 CustomerMapping = M_Parties.objects.filter(
-                                    SAPPartyCode=aa['CustomerID']).values("id")
+                                    SAPPartyCode=aa['CustomerID']).values("id", "GSTIN")
                                 PartyMapping = M_Parties.objects.filter(
                                     SAPPartyCode=aa['Plant']).values("id")
                                 # CustomPrint('ccccccccc')
@@ -198,7 +198,8 @@ class SAPInvoiceView(CreateAPIView):
                                     "UpdatedBy": 30,
                                     "TCSAmount" : aa['TCSAmount'], 
                                     "InvoiceDate": InvoiceDate,
-                                    "InvoiceItems": InvoiceItems
+                                    "InvoiceItems": InvoiceItems,
+                                    "CustomerGSTIN": CustomerMapping[0]["GSTIN"]
 
                                 })
                                 # CustomPrint(InvoiceData[0])
