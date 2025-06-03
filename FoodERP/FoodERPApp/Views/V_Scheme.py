@@ -30,9 +30,8 @@ class SchemeView(CreateAPIView):
                         FROM M_Scheme 
                         JOIN M_SchemeType ON M_Scheme.SchemeTypeID_id = M_SchemeType.id 
                         JOIN MC_SchemeParties ON MC_SchemeParties.SchemeID_id = M_Scheme.id
-                        join M_Parties on M_Parties.id=MC_SchemeParties.PartyID  
-                                                         
-                        WHERE PartyID = {Party} AND M_Scheme.IsActive = 1
+                        join M_Parties on M_Parties.id=MC_SchemeParties.PartyID_id  
+                        WHERE PartyID_id = {Party} AND M_Scheme.IsActive = 1
                     ''')
                     
                     data = []
@@ -232,7 +231,7 @@ class SchemeDetailsView(CreateAPIView):
                     FROM M_Scheme 
                     JOIN M_SchemeType ON M_Scheme.SchemeTypeID_id = M_SchemeType.id 
                     JOIN MC_SchemeParties ON MC_SchemeParties.SchemeID_id = M_Scheme.id
-                    JOIN M_Parties ON M_Parties.id = MC_SchemeParties.PartyID  
+                    JOIN M_Parties ON M_Parties.id = MC_SchemeParties.PartyID_id  
                     JOIN MC_SchemeItems ON MC_SchemeItems.SchemeID_id = M_Scheme.id
                     JOIN M_Items ON M_Items.id = MC_SchemeItems.Item	                                
                     WHERE M_Scheme.id = {SchemeID} AND M_Scheme.IsActive = 1
@@ -335,6 +334,7 @@ class SchemeDetailsView(CreateAPIView):
             user = BasicAuthenticationfunction(request)
 
             if user is None:
+                log_entry = create_transaction_logNew(request, data, id, 'User not available', 478, 0)
                 return JsonResponse({'StatusCode': 401, 'Status': False, 'Message': 'Unauthorized', 'Data': []})
 
             # scheme_id = data.get('SchemeID')
@@ -362,6 +362,7 @@ class SchemeDetailsView(CreateAPIView):
                 
                 scheme.save()
             except M_Scheme.DoesNotExist:
+                log_entry = create_transaction_logNew(request, data, id, 'Scheme Not Found', 478, 0)
                 return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'Scheme Not Found', 'Data': []})
 
             # Clear old Parties and Items
@@ -383,14 +384,14 @@ class SchemeDetailsView(CreateAPIView):
             for party in data.get('PartyDetails', []):
                 MC_SchemeParties.objects.create(
                     SchemeID_id=id,
-                    PartyID=party['PartyID']
+                    PartyID_id=party['PartyID']
                 )
 
             log_entry = create_transaction_logNew(request, data, id, 'Scheme updated', 478, 0)
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Scheme updated successfully', 'Data': []})
 
         except Exception as e:
-            log_entry = create_transaction_logNew(request, {}, 0, 'Scheme Update Error: ' + str(e), 478, 0)
+            log_entry = create_transaction_logNew(request, data, 0, 'Scheme Update Error: ' + str(e), 478, 0)
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
         
         
@@ -405,12 +406,14 @@ class SchemeDetailsView(CreateAPIView):
 
                 # Delete the Scheme itself
                 scheme.delete()
-
+                log_entry = create_transaction_logNew(request, {}, 0, id ,'Scheme deleted successfully', 479, 0)
                 return Response({"message": "Scheme deleted successfully."}, status=status.HTTP_200_OK)
 
         except M_Scheme.DoesNotExist:
+            log_entry = create_transaction_logNew(request, {}, 0, id,'Scheme not found', 479, 0)
             return Response({"error": "Scheme not found."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
+            log_entry = create_transaction_logNew(request, {}, 0, id, 479, 0)
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
