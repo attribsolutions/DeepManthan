@@ -7,7 +7,7 @@ from ..models import *
 from SweetPOS.Views.V_SweetPosRoleAccess import BasicAuthenticationfunction
 from rest_framework.authentication import BasicAuthentication
 from ..Serializer.S_Scheme import *
-
+from rest_framework.views import APIView
 
      
 class SchemeView(CreateAPIView):
@@ -30,9 +30,9 @@ class SchemeView(CreateAPIView):
                         FROM M_Scheme 
                         JOIN M_SchemeType ON M_Scheme.SchemeTypeID_id = M_SchemeType.id 
                         JOIN MC_SchemeParties ON MC_SchemeParties.SchemeID_id = M_Scheme.id
-                        join M_Parties on M_Parties.id=MC_SchemeParties.PartyID_id  
+                        join M_Parties on M_Parties.id=MC_SchemeParties.PartyID  
                                                          
-                        WHERE PartyID_id = {Party} AND M_Scheme.IsActive = 1
+                        WHERE PartyID = {Party} AND M_Scheme.IsActive = 1
                     ''')
                     
                     data = []
@@ -232,7 +232,7 @@ class SchemeDetailsView(CreateAPIView):
                     FROM M_Scheme 
                     JOIN M_SchemeType ON M_Scheme.SchemeTypeID_id = M_SchemeType.id 
                     JOIN MC_SchemeParties ON MC_SchemeParties.SchemeID_id = M_Scheme.id
-                    JOIN M_Parties ON M_Parties.id = MC_SchemeParties.PartyID_id  
+                    JOIN M_Parties ON M_Parties.id = MC_SchemeParties.PartyID  
                     JOIN MC_SchemeItems ON MC_SchemeItems.SchemeID_id = M_Scheme.id
                     JOIN M_Items ON M_Items.id = MC_SchemeItems.Item	                                
                     WHERE M_Scheme.id = {SchemeID} AND M_Scheme.IsActive = 1
@@ -292,7 +292,7 @@ class SchemeDetailsView(CreateAPIView):
                         sc["PartyDetails"] = list(sc["PartyDetails"].values())
                         sc["ItemDetails"] = list(sc["ItemDetails"].values())
                         data.append(sc)
-
+                    print(data)
                     if data:
                         create_transaction_logNew(request, data, 0, SchemeID, 476, 0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': data})
@@ -307,7 +307,7 @@ class SchemeDetailsView(CreateAPIView):
 
     
     @transaction.atomic()
-    def post(self, request,*args, **kwargs):
+    def post(self, request):
         try:
             with transaction.atomic():
                 serializer = self.get_serializer(data=request.data)
@@ -323,5 +323,94 @@ class SchemeDetailsView(CreateAPIView):
         except Exception as e:
                 log_entry = create_transaction_logNew(request,0,0,'SchemeSave:'+str(Exception(e)),33,0)
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+
+
+
+
+    @transaction.atomic
+    def put(self, request, id):
+        try:
+            data = JSONParser().parse(request)
+            # print(data)
+            user = BasicAuthenticationfunction(request)
+
+            if user is None:
+                return JsonResponse({'StatusCode': 401, 'Status': False, 'Message': 'Unauthorized', 'Data': []})
+
+            # scheme_id = data.get('SchemeID')
+
+            # Update M_Scheme
+            try:
+                scheme = M_Scheme.objects.get(id=id)          
+                scheme.SchemeName = data.get('SchemeName')                
+                scheme.SchemeValue = data.get('SchemeValue')
+                scheme.ValueIn = data.get('ValueIn')
+                scheme.FromPeriod = data.get('FromPeriod')
+                scheme.ToPeriod = data.get('ToPeriod')
+                scheme.FreeItemID = data.get('FreeItemID')
+                scheme.VoucherLimit = data.get('VoucherLimit')
+                scheme.SchemeValueUpto = data.get('SchemeValueUpto')
+                scheme.QrPrefix = data.get('QrPrefix')
+                scheme.SchemeTypeID_id = data.get('SchemeTypeID')
+                scheme.UsageTime = data.get('UsageTime')
+                scheme.BillAbove = data.get('BillAbove')
+                scheme.UsageType = data.get('UsageType')
+                scheme.BillEffect = data.get('BillEffect')
+                scheme.IsQrApplicable = data.get('IsQrApplicable')
+                scheme.OverLappingScheme = data.get('OverLappingScheme')
+                scheme.Message = data.get('Message')                
+                
+                scheme.save()
+            except M_Scheme.DoesNotExist:
+                return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'Scheme Not Found', 'Data': []})
+
+            # Clear old Parties and Items
+            MC_SchemeItems.objects.filter(SchemeID=id).delete()
+            MC_SchemeParties.objects.filter(SchemeID=id).delete()
+
+            # Insert updated Items
+            for item in data.get('ItemDetails', []):
+                MC_SchemeItems.objects.create(
+                    SchemeID_id=id,
+                    Item=item['Item'],                    
+                    TypeForItem=item['TypeForItem'],
+                    Quantity= item['Quantity'],
+                    DiscountValue=item['DiscountValue'],
+                    DiscountType=item['DiscountType']                   
+                )
+
+            # Insert updated Parties
+            for party in data.get('PartyDetails', []):
+                MC_SchemeParties.objects.create(
+                    SchemeID_id=id,
+                    PartyID=party['PartyID']
+                )
+
+            log_entry = create_transaction_logNew(request, data, id, 'Scheme updated', 478, 0)
+            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Scheme updated successfully', 'Data': []})
+
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, {}, 0, 'Scheme Update Error: ' + str(e), 478, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+        
+        
+    def delete(self,request,id=0):
+        try:
+            with transaction.atomic():
+                scheme = M_Scheme.objects.get(id=id)
+               
+                # Delete related Scheme Items and Parties
+                MC_SchemeItems.objects.filter(SchemeID=id).delete()
+                MC_SchemeParties.objects.filter(SchemeID=id).delete()
+
+                # Delete the Scheme itself
+                scheme.delete()
+
+                return Response({"message": "Scheme deleted successfully."}, status=status.HTTP_200_OK)
+
+        except M_Scheme.DoesNotExist:
+            return Response({"error": "Scheme not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
