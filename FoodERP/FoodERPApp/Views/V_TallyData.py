@@ -145,7 +145,7 @@ select E.GRN_id,NULL AS ItemCode,L.Name AS ItemName,
                             "Status": row.Statuss,
                             "User": row.User
                         })
-                    log_entry = create_transaction_logNew(request, {"RequestData": TallyData, "ResponseData": TallyDetails}, 0, 'TallyDetails Available In TransactionLogDetails', 451, 0)
+                    log_entry = create_transaction_logNew(request, {"ResponseData": TallyDetails}, 0, {"RequestData": TallyData}, 451, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TallyDetails})  
             
             log_entry = create_transaction_logNew(request, TallyData, 0, "Data Not Available", 451, 0, 0, 0, 0)
