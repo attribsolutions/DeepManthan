@@ -575,12 +575,13 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     .annotate(
                         Party_id=F('Party'),
                         Customer_id=F('Customer'),
-                        Vehicle_id=F('Vehicle')
+                        Vehicle_id=F('Vehicle'),
+                        PartiesCustomerGSTIN=F('CustomerGSTIN')
                     )
                     .values(
                         'id', 'InvoiceDate', 'PaymentType', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal',
                         'RoundOffAmount', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id', 'Party_id',
-                        'Vehicle_id', 'TCSAmount', 'Hide', 'MobileNo', 'CreatedBy'
+                        'Vehicle_id', 'TCSAmount', 'Hide', 'MobileNo', 'CreatedBy', 'PartiesCustomerGSTIN'
                     )
                 )
                 
