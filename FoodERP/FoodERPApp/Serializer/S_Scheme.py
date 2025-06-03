@@ -10,16 +10,23 @@ class SchemeTypeSerializer(serializers.ModelSerializer):
     class Meta :
         model= M_SchemeType
         fields = '__all__'
+        
 class SchemeItemsSerializer(serializers.ModelSerializer):
     class Meta:
         model=MC_SchemeItems
         fields='__all__'
+        extra_kwargs = {
+            'SchemeID': {'read_only': True}
+        }
         
 class SchemePartiesSerializer(serializers.ModelSerializer):
     class Meta:
         model=MC_SchemeParties
-        fields='__all__'
-        
+        fields = ["PartyID","SchemeID"]
+        extra_kwargs = {
+            'SchemeID': {'read_only': True}
+            
+        }
 class SchemeDetailsSerializer(serializers.ModelSerializer):
     ItemDetails = SchemeItemsSerializer(many=True)
     PartyDetails = SchemePartiesSerializer(many=True)
@@ -42,8 +49,8 @@ class SchemeDetailsSerializer(serializers.ModelSerializer):
         for item in items:
             scheme_items.append(
                 MC_SchemeItems(
-                    SchemeID=scheme,           # ForeignKey to M_Scheme instance
-                    Item_id=item["Item"],      # ForeignKey to Item model (using Item ID)
+                    SchemeID=scheme,           
+                    Item=item["Item"],      
                     TypeForItem=item.get("TypeForItem", None),
                     DiscountType=item.get("DiscountType", None),
                     DiscountValue=item.get("DiscountValue", None),
@@ -51,14 +58,14 @@ class SchemeDetailsSerializer(serializers.ModelSerializer):
                 )
             )
         MC_SchemeItems.objects.bulk_create(scheme_items)
-
         # Create MC_SchemeParties records linked to scheme
         scheme_parties = []
-        for party in parties:
+        for party in parties:            
             scheme_parties.append(
                 MC_SchemeParties(
+                    
                     SchemeID=scheme,
-                    PartyID_id=party["PartyID"]
+                    PartyID=party["PartyID"]
                 )
             )
         MC_SchemeParties.objects.bulk_create(scheme_parties)
