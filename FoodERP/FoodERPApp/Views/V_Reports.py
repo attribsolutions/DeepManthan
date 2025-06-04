@@ -2180,7 +2180,7 @@ class DemandVsSupplyReportView(CreateAPIView):
                 SupplierDetails=""
                 CustomerDetails=""
                 
-                if OrderType==1: # Sales Order                   
+                if OrderType=="Sales": # Sales Order                   
                 
                     SupplierDetails = f"AND S.id in ({Party})" 
                      
