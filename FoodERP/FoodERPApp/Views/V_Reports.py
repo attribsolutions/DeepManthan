@@ -2159,7 +2159,7 @@ class DemandVsSupplyReportView(CreateAPIView):
         try:
             with transaction.atomic():
                 FromDate = Data['FromDate']
-                ToDate = Data['ToDate']
+                ToDate = Data['ToDate']                
                 Party = Data['Party']
                 DemandVsSupplyData = []                
                 # print(FromDate,ToDate,Party)
@@ -2784,9 +2784,9 @@ class BillDeletedSummaryReportView(CreateAPIView):
                 if Party > 0:
                     query += f' AND Party = {Party}'
                     
-                if CashierID > 0 :   
-                      query += f' AND M_Users.id = {CashierID}'
-                print(query)
+                if CashierID > "0" :   
+                      query += f' AND M_Users.id in ({CashierID})'
+                
                 BillDeletedSummaryQuery = T_SPOSInvoices.objects.raw(query)  
         
                 for bill in BillDeletedSummaryQuery:
