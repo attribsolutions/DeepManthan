@@ -2162,12 +2162,39 @@ class DemandVsSupplyReportView(CreateAPIView):
             with transaction.atomic():
                 FromDate = Data['FromDate']
                 ToDate = Data['ToDate']                
-                Party = Data['Party']
+                Party = Data['Party']              
+                
+                OrderType =Data['OrderType']
+                EmployeeID =Data['EmployeeID']
                 DemandVsSupplyData = []                
                 # print(FromDate,ToDate,Party)
+                if Party==0:
+                    party_result = M_Employees.objects.raw(f'''SELECT 1 id ,EmployeeParties({EmployeeID}) Party''')
+                    if party_result:
+                        party_string = party_result[0].Party  # example: "32584,32585"
+                        PartyList = [int(p.strip()) for p in party_string.split(',') if p.strip().isdigit()]
+                        Party = ','.join(str(p) for p in PartyList)
+                        print(Party)
+                    else:
+                        Party = ""
+                                    
+                PartyDetails=""
+                SupplierDetails=""
+                CustomerDetails=""
                 
-                PartyDetails = f"AND Customer_id = {Party}" if Party != 0 else ""
+                if OrderType==1: # Sales Order                   
                 
+                    SupplierDetails = f"AND S.id in ({Party})" 
+                     
+                    CustomerDetails = f"AND C.id in ({Party})" 
+                    
+                    
+                else:
+                    PartyDetails = f"AND C.id in ({Party})" 
+                   
+                
+                   
+                    
                 # DemandVsReportquery =TC_OrderItems.objects.raw(f'''SELECT ROW_NUMBER() OVER (ORDER BY A.PartyName, A.OrderDate) AS id,A.*,B.QtyInKg SupplyInKg, B.QtyInNo SupplyInNo 
                 # FROM (
                 # select M_Parties.Name PartyName, OrderDate, M_Items.Name ItemName, SUM(QtyInKg) QtyInKg, SUM(QtyInNo) QtyInNo FROM T_Orders 
@@ -2193,32 +2220,34 @@ class DemandVsSupplyReportView(CreateAPIView):
     COALESCE(B.QtyInNo, 0) AS SupplyInNo
 FROM (
     SELECT 
-        M_Parties.Name AS PartyName, 
+        C.Name AS PartyName, 
         OrderDate, 
         M_Items.Name AS ItemName, 
         SUM(QtyInKg) AS QtyInKg, 
         SUM(QtyInNo) AS QtyInNo 
     FROM T_Orders
     JOIN TC_OrderItems ON Order_id = T_Orders.id
-    JOIN M_Parties ON Customer_id = M_Parties.id
+    JOIN M_Parties C ON Customer_id = C.id
+    JOIN M_Parties S ON supplier_id=S.id
     JOIN M_Items ON Item_id = M_Items.id
     WHERE IsDeleted = 0 
-        AND OrderDate BETWEEN '{FromDate}' AND '{ToDate}'  {PartyDetails}
-    GROUP BY M_Parties.Name, OrderDate, M_Items.Name
+        AND OrderDate BETWEEN '{FromDate}' AND '{ToDate}'  {PartyDetails} {SupplierDetails} 
+    GROUP BY C.Name, OrderDate, M_Items.Name
 ) A
 LEFT JOIN (
     SELECT 
-        M_Parties.Name AS PartyName, 
+        C.Name AS PartyName, 
         InvoiceDate, 
         M_Items.Name AS ItemName, 
         SUM(QtyInKg) AS QtyInKg, 
         SUM(QtyInNo) AS QtyInNo 
     FROM T_Invoices
     JOIN TC_InvoiceItems ON Invoice_id = T_Invoices.id
-    JOIN M_Parties ON Customer_id = M_Parties.id
+    JOIN M_Parties C ON Customer_id = C.id
+    JOIN M_Parties S ON Party_id=S.id
     JOIN M_Items ON Item_id = M_Items.id
-    WHERE InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}'  {PartyDetails}
-    GROUP BY M_Parties.Name, InvoiceDate, M_Items.Name
+    WHERE InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}'  {PartyDetails} {CustomerDetails} 
+    GROUP BY C.Name, InvoiceDate, M_Items.Name
 ) B
 ON A.PartyName = B.PartyName 
    AND A.OrderDate = B.InvoiceDate 
@@ -2228,7 +2257,7 @@ WHERE A.QtyInKg != COALESCE(B.QtyInKg, 0) and (
        OR ROUND(COALESCE(A.QtyInNo, 5), 5) <> ROUND(COALESCE(B.QtyInNo, 5), 5))  
 ORDER BY (CASE WHEN COALESCE(B.QtyInKg, 0) = 0 AND COALESCE(B.QtyInNo, 0) = 0 THEN 0 ELSE 1 END), A.PartyName, A.OrderDate''')
 
-                # print(DemandVsReportquery.query)  
+                print(DemandVsReportquery.query)  
                 if DemandVsReportquery:  
                     # print("SHRUR")              
                     for row in DemandVsReportquery:                       
@@ -2242,8 +2271,8 @@ ORDER BY (CASE WHEN COALESCE(B.QtyInKg, 0) = 0 AND COALESCE(B.QtyInNo, 0) = 0 TH
                             "SupplyInKg":round(float(row.SupplyInKg),2),
                             "SupplyInNo":round(float(row.SupplyInNo),2)                           
                         })                          
-                      
-                log_entry = create_transaction_logNew(request, Data, Party, '', 432, 0, FromDate, ToDate, 0)
+                # print(DemandVsSupplyData)
+                log_entry = create_transaction_logNew(request, Data, 0, '', 432, 0, FromDate, ToDate, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': DemandVsSupplyData})  
             log_entry = create_transaction_logNew(request, Data, 0, "Data Not Available", 431, 0, FromDate, ToDate, 0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Data Not Available', 'Data': []}) 
