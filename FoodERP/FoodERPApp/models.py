@@ -2516,6 +2516,8 @@ class M_GiftVoucherCode(models.Model):
         db_table = "M_GiftVoucherCode"
         indexes = [
             models.Index(fields=['client', 'ClientSaleID']),
+            models.Index(fields=['Party', 'InvoiceDate','InvoiceNumber']),
+            models.Index(fields=['Party', 'InvoiceDate','InvoiceNumber','client', 'ClientSaleID']),
         ] 
 
 # class debug_log(models.Model):

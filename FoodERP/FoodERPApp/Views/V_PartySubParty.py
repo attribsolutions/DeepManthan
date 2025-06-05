@@ -163,7 +163,7 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
         PartyName=F('Party__Name'),
         GSTIN = F('Party__GSTIN'),
         PAN= F('Party__PAN'),
-        PartyTypeID=F('SubParty__PartyType'),
+        PartyTypeID=F('Party__PartyType'),
         SkyggeID=F('Party__SkyggeID'),
         FSSAINo=F('Party__PartyAddress__FSSAINo'),
         FSSAIExipry=F('Party__PartyAddress__FSSAIExipry'),
