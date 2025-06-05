@@ -1035,6 +1035,7 @@ class T_Invoices(models.Model):
     IsTallySave = models.BooleanField(default=False)
     # IsVDCChallan = models.BooleanField(default=False)
     IsSendToFTPSAP = models.BooleanField(default=False)
+    CustomerGSTIN = models.CharField(max_length=20, blank=True, null=True)
     class Meta:
         db_table = "T_Invoices"
         indexes = [
@@ -2515,6 +2516,8 @@ class M_GiftVoucherCode(models.Model):
         db_table = "M_GiftVoucherCode"
         indexes = [
             models.Index(fields=['client', 'ClientSaleID']),
+            models.Index(fields=['Party', 'InvoiceDate','InvoiceNumber']),
+            models.Index(fields=['Party', 'InvoiceDate','InvoiceNumber','client', 'ClientSaleID']),
         ] 
 
 # class debug_log(models.Model):
@@ -2574,10 +2577,18 @@ class MC_SchemeQRs(models.Model):
     class Meta:
         db_table = "MC_SchemeQRs"
 
-class MC_SchemeParties(models.Model):
-    SchemeID = models.ForeignKey(M_Scheme,related_name='SchemeIDForParties', on_delete=models.CASCADE)
-    PartyID = models.IntegerField()
+# class MC_SchemeParties(models.Model):
+#     SchemeID = models.ForeignKey(M_Scheme,related_name='SchemeIDForParties', on_delete=models.CASCADE)
+#     PartyID = models.IntegerField()
   
+#     class Meta:
+
+#         db_table = "MC_SchemeParties"
+
+class MC_SchemeParties(models.Model):
+    SchemeID = models.ForeignKey(M_Scheme,related_name='SchemeIDForPartie', on_delete=models.CASCADE)
+    PartyID = models.ForeignKey(M_Parties,related_name='PartyIDForScheme', on_delete=models.PROTECT)
+    # Party = models.IntegerField()
     class Meta:
         db_table = "MC_SchemeParties"
 

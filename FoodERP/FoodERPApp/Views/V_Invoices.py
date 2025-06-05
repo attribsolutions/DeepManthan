@@ -439,7 +439,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     ).values_list('id', flat=True)                         
                     
                 Invoices_query = T_Invoices.objects.filter(**filter_args).select_related('Party', 'Customer', 'Driver','Vehicle').annotate(
-                    CustomerGSTIN=F('Customer__GSTIN'),
+                    PartiesCustomerGSTIN=F('Customer__GSTIN'),
                     CustomerPAN=F('Customer__PAN'),
                     CustomerPartyType=F('Customer__PartyType'),
                     PartyName=F('Party__Name'),
@@ -452,7 +452,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     'id','PaymentType','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal',
                     'RoundOffAmount', 'CreatedBy','CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id',
                     'Party_id', 'Vehicle_id', 'TCSAmount', 'Hide', 'ImportFromExcel', 'PartyName', 'CustomerName','VehicleNo',
-                    'DeletedFromSAP', 'DataRecovery', 'CustomerGSTIN', 'CustomerPAN', 'CustomerPartyType', 'DriverName','MobileNo','IsSendToFTPSAP').order_by('-InvoiceDate')
+                    'DeletedFromSAP', 'DataRecovery', 'PartiesCustomerGSTIN', 'CustomerPAN', 'CustomerPartyType', 'DriverName','MobileNo','IsSendToFTPSAP').order_by('-InvoiceDate')
                 
                 user_role_ids = list(MC_UserRoles.objects.filter(User_id=request.user.id).values_list('Role_id', flat=True))                
                 RoleID=M_Settings.objects.filter(id=55).values("DefaultValue")
@@ -575,12 +575,13 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     .annotate(
                         Party_id=F('Party'),
                         Customer_id=F('Customer'),
-                        Vehicle_id=F('Vehicle')
+                        Vehicle_id=F('Vehicle'),
+                        PartiesCustomerGSTIN=F('CustomerGSTIN')
                     )
                     .values(
                         'id', 'InvoiceDate', 'PaymentType', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal',
                         'RoundOffAmount', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id', 'Party_id',
-                        'Vehicle_id', 'TCSAmount', 'Hide', 'MobileNo', 'CreatedBy'
+                        'Vehicle_id', 'TCSAmount', 'Hide', 'MobileNo', 'CreatedBy', 'PartiesCustomerGSTIN'
                     )
                 )
                 
@@ -668,7 +669,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                                 "CreatedOn": a['CreatedOn'],
                                 "InvoiceUploads": Invoice_serializer,
                                 "CustomerPartyType": a['CustomerPartyType'],
-                                "CustomerGSTIN": a['CustomerGSTIN'],
+                                "CustomerGSTIN": a['PartiesCustomerGSTIN'],
                                 "CustomerPAN": a['CustomerPAN'],
                                 "IsTCSParty": IsTCSParty,
                                 "ImportFromExcel": a['ImportFromExcel'],

@@ -15,11 +15,13 @@ class InvoiceItemsSerializer(serializers.ModelSerializer):
 
 class InvoiceSerializer(serializers.ModelSerializer):
     InvoiceItems = InvoiceItemsSerializer(many=True)
+    CustomerGSTIN = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+
     # InvoicesReferences = InvoicesReferencesSerializer(many=True) 
     # obatchwiseStock=obatchwiseStockSerializer(many=True)
     class Meta:
         model = T_Invoices
-        fields = ['InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','TCSAmount', 'InvoiceItems']
+        fields = ['InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','TCSAmount', 'CustomerGSTIN', 'InvoiceItems']
 
     def create(self, validated_data):
         # CustomPrint('dddddddddddddddddddddddd',validated_data)

@@ -122,7 +122,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
     obatchwiseStock=obatchwiseStockSerializer(many=True)
     class Meta:
         model = T_Invoices
-        fields = ['id','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','Vehicle','Driver', 'InvoiceItems', 'InvoicesReferences', 'obatchwiseStock','TCSAmount', 'IsTallySave','IsSendToFTPSAP']
+        fields = ['id','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','Vehicle','Driver', 'InvoiceItems', 'InvoicesReferences', 'obatchwiseStock','TCSAmount', 'IsTallySave','IsSendToFTPSAP','CustomerGSTIN']
 
     def create(self, validated_data):
         InvoiceItems_data = validated_data.pop('InvoiceItems')
@@ -130,7 +130,11 @@ class InvoiceSerializer(serializers.ModelSerializer):
         O_BatchWiseLiveStockItems_data = validated_data.pop('obatchwiseStock')
         validated_data['IsTallySave'] = False
         validated_data['IsSendToFTPSAP'] = False
-        
+
+        customer_instance = validated_data['Customer']
+        customer = M_Parties.objects.filter(id=customer_instance.id).values('GSTIN').first()
+        validated_data['CustomerGSTIN'] = customer['GSTIN'] if customer else None
+            
         InvoiceID = T_Invoices.objects.create(**validated_data)
         
         
@@ -164,17 +168,25 @@ class BulkInvoiceSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = T_Invoices
-        fields = ['InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount','TCSAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','ImportFromExcel', 'IsSendToFTPSAP','InvoiceItems']
+        fields = ['InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal', 'RoundOffAmount','TCSAmount', 'CreatedBy', 'UpdatedBy', 'Customer', 'Party','ImportFromExcel', 'IsSendToFTPSAP', 'CustomerGSTIN', 'InvoiceItems']
         # fields ='__all__'
     
     def create(self, validated_data):
         CustomPrint(validated_data)
         InvoiceItems_data = validated_data.pop('InvoiceItems')
         validated_data['IsSendToFTPSAP'] = False
+  
+        customer_instance = validated_data.get('Customer')
+        if customer_instance:
+            customer = M_Parties.objects.filter(id=customer_instance.id).values('GSTIN').first()
+            validated_data['CustomerGSTIN'] = customer['GSTIN'] if customer else None
+        else:
+            validated_data['CustomerGSTIN'] = None
+        
         InvoiceID = T_Invoices.objects.create(**validated_data)
         # CustomPrint(InvoiceID)
         for InvoiceItem_data in InvoiceItems_data:
-            CustomPrint(InvoiceID)
+            
             InvoiceItem_data['TrayQuantity'] = InvoiceItem_data.get('TrayQuantity') or None
             
             InvoiceItemID = TC_InvoiceItems.objects.create(Invoice=InvoiceID,  **InvoiceItem_data)

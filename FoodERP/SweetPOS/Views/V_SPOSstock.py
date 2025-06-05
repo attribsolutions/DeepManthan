@@ -104,15 +104,15 @@ class StockView(CreateAPIView):
 
                     a['BatchCode'] = BatchCode
                     a['StockDate'] = date.today()
-                    a['BaseUnitQuantity'] = round(BaseUnitQuantity,3)
+                    a['BaseUnitQuantity'] = round(float(BaseUnitQuantity),3)
 
                     T_SPOS_StockEntryList.append({
                     "StockDate":StockDate,    
                     "Item": a['Item'],
-                    "Quantity": round(a['Quantity'], 3),
+                    "Quantity": round(float(a['Quantity']), 3),
                     "Unit": Unit,
-                    "BaseUnitQuantity": round(BaseUnitQuantity,3),
-                    "MRPValue": round(a['MRPValue'], 2),
+                    "BaseUnitQuantity": round(float(BaseUnitQuantity),3),
+                    "MRPValue": round(float(a['MRPValue']), 2),
                     "MRP": MRP,
                     "Party": Party,
                     "CreatedBy":CreatedBy,
