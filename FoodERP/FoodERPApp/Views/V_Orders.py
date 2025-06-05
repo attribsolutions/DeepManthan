@@ -154,13 +154,20 @@ class OrderListFilterView(CreateAPIView):
                            
                             if PartyTypeID == 19:
                                 Count = TC_SPOSInvoicesReferences.objects.filter(Order=a['id']).count()
+                                InvoiceIDs = TC_SPOSInvoicesReferences.objects.filter(Order=a['id']).values_list('Invoice_id', flat=True)
+                                DeletedInvoiceCount = T_SPOSDeletedInvoices.objects.filter(Invoice_id__in=InvoiceIDs).count()
                             else:
                                 Count = TC_InvoicesReferences.objects.filter(Order=a['id']).count()
+                                DeletedInvoiceCount = TC_DeletedInvoicesReferences.objects.filter(Order=a['id']).count()
 
-                            if Count == 0:
+                            if Count == 0 and DeletedInvoiceCount==0:
                                 InvoiceCreated = False
+                                DeletedInvoice=False
                             else:
                                 InvoiceCreated = True
+                                DeletedInvoice=True
+                            
+                            
                                                             
                             OrderListData.append({
                                 "id": a['id'],
@@ -192,7 +199,8 @@ class OrderListFilterView(CreateAPIView):
                                 "IsTCSParty":TCSPartyFlag,
                                 "MobileAppOrderFlag" : a['MobileAppOrderFlag'],
                                 "AdvanceAmount": a['AdvanceAmount'],
-                                "SubPartyFlag": SubPartyFlag
+                                "SubPartyFlag": SubPartyFlag,
+                                "DeletedInvoice":DeletedInvoice
                                 
                             })
 
