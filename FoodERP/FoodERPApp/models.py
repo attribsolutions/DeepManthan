@@ -2577,10 +2577,18 @@ class MC_SchemeQRs(models.Model):
     class Meta:
         db_table = "MC_SchemeQRs"
 
-class MC_SchemeParties(models.Model):
-    SchemeID = models.ForeignKey(M_Scheme,related_name='SchemeIDForParties', on_delete=models.CASCADE)
-    PartyID = models.IntegerField()
+# class MC_SchemeParties(models.Model):
+#     SchemeID = models.ForeignKey(M_Scheme,related_name='SchemeIDForParties', on_delete=models.CASCADE)
+#     PartyID = models.IntegerField()
   
+#     class Meta:
+
+#         db_table = "MC_SchemeParties"
+
+class MC_SchemeParties(models.Model):
+    SchemeID = models.ForeignKey(M_Scheme,related_name='SchemeIDForPartie', on_delete=models.CASCADE)
+    PartyID = models.ForeignKey(M_Parties,related_name='PartyIDForScheme', on_delete=models.PROTECT)
+    # Party = models.IntegerField()
     class Meta:
         db_table = "MC_SchemeParties"
 
