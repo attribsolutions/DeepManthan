@@ -209,17 +209,13 @@ class SchemeTypsinglegetView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
         
 class SchemeDetailsView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = [BasicAuthentication]
+    permission_classes = (IsAuthenticated,)    
     serializer_class       = SchemeDetailsSerializer 
     @transaction.atomic()
     def get(self, request,SchemeID):       
         try:
             with transaction.atomic():
-                user = BasicAuthenticationfunction(request)
                
-                
-                if user is not None:
                     SchemeDetails = M_Scheme.objects.raw(f'''
                     SELECT 
                         M_Scheme.id, SchemeName, SchemeValue, ValueIn, FromPeriod, ToPeriod, FreeItemID, VoucherLimit, SchemeValueUpto,
@@ -331,11 +327,10 @@ class SchemeDetailsView(CreateAPIView):
         try:
             data = JSONParser().parse(request)
             # print(data)
-            user = BasicAuthenticationfunction(request)
-
-            if user is None:
-                log_entry = create_transaction_logNew(request, data, id, 'User not available', 478, 0)
-                return JsonResponse({'StatusCode': 401, 'Status': False, 'Message': 'Unauthorized', 'Data': []})
+           
+            # if user is None:
+            #     log_entry = create_transaction_logNew(request, data, id, 'User not available', 478, 0)
+            #     return JsonResponse({'StatusCode': 401, 'Status': False, 'Message': 'Unauthorized', 'Data': []})
 
             # scheme_id = data.get('SchemeID')
 
