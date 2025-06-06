@@ -1851,7 +1851,7 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id in (%s
                             "FE2ItemID": row.id,
                             "SAPCode": row.SAPItemCode,
                             "Barcode": row.BarCode,
-                            "HSNCode": ''+ row.HSNCode +'',
+                            "HSNCode": row.HSNCode,
                             "Company": row.CompanyName,
                             "SKUStatus(T,F)": row.isActive,
                             "BoxSize": row.BoxSize,
