@@ -2815,7 +2815,7 @@ class BillDeletedSummaryReportView(CreateAPIView):
                 FromDate = BillData['FromDate']
                 ToDate = BillData['ToDate']
                 Party = BillData['Party']
-                CashierID =BillData['CashierID']
+                CashierID =BillData['Cashier']
                 BillDeletedSummaryData = [] 
                 query = f'''SELECT SweetPOS.T_SPOSInvoices.id, InvoiceDate, FullInvoiceNumber, GrandTotal, FoodERP.M_Users.LoginName AS UserName 
                             FROM SweetPOS.T_SPOSInvoices
