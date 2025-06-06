@@ -223,13 +223,13 @@ class SchemeDetailsView(CreateAPIView):
                         IsQrApplicable, M_Scheme.IsActive, 
                         CONCAT(SchemeDetails, '', IFNULL(M_Parties.SAPPartyCode, '')) AS SchemeDetails, OverLappingScheme, Message,
                         M_Parties.id AS party_id, M_Parties.Name AS party_name,
-                        M_Items.id AS item_id, M_Items.Name AS item_name
+                        M_Items.id AS item_id, M_Items.Name AS item_name,DiscountType,DiscountValue,Quantity,TypeForItem
                     FROM M_Scheme 
                     JOIN M_SchemeType ON M_Scheme.SchemeTypeID_id = M_SchemeType.id 
                     JOIN MC_SchemeParties ON MC_SchemeParties.SchemeID_id = M_Scheme.id
                     JOIN M_Parties ON M_Parties.id = MC_SchemeParties.PartyID_id  
-                    JOIN MC_SchemeItems ON MC_SchemeItems.SchemeID_id = M_Scheme.id
-                    JOIN M_Items ON M_Items.id = MC_SchemeItems.Item	                                
+                    LEFT JOIN MC_SchemeItems ON MC_SchemeItems.SchemeID_id = M_Scheme.id
+                    LEFT JOIN M_Items ON M_Items.id = MC_SchemeItems.Item	                                
                     WHERE M_Scheme.id = {SchemeID} AND M_Scheme.IsActive = 1
                 ''')
 
@@ -280,6 +280,11 @@ class SchemeDetailsView(CreateAPIView):
                             sc["ItemDetails"][iid] = {
                                 "ItemID": iid,
                                 "ItemName": iname,
+                                "DiscountType": row.DiscountType,
+                                "DiscountValue": row.DiscountValue,
+                                "Quantity": row.Quantity,
+                                "TypeForItem": row.TypeForItem,
+
                             }
 
                     data = []
@@ -287,7 +292,7 @@ class SchemeDetailsView(CreateAPIView):
                         sc["PartyDetails"] = list(sc["PartyDetails"].values())
                         sc["ItemDetails"] = list(sc["ItemDetails"].values())
                         data.append(sc)
-                    print(data)
+                    # print(data)
                     if data:
                         create_transaction_logNew(request, data, 0, SchemeID, 476, 0)
                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': data})
