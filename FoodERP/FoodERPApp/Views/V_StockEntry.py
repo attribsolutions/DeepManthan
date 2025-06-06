@@ -65,14 +65,14 @@ class StockEntryPageView(CreateAPIView):
                     # CustomPrint(query3)
                     a['SystemBatchCode'] = BatchCode
                     a['SystemBatchDate'] = date.today()
-                    a['BaseUnitQuantity'] = round(BaseUnitQuantity,3)
+                    a['BaseUnitQuantity'] = round(float(BaseUnitQuantity),3)
                    
                     O_BatchWiseLiveStockList.append({
                     "Item": a['Item'],
-                    "Quantity": round(a['Quantity'], 3),
+                    "Quantity": round(float(a['Quantity']), 3),
                     "Unit": a['Unit'],
-                    "BaseUnitQuantity": round(BaseUnitQuantity,3),
-                    "OriginalBaseUnitQuantity": round(BaseUnitQuantity,3),
+                    "BaseUnitQuantity": round(float(BaseUnitQuantity),3),
+                    "OriginalBaseUnitQuantity": round(float(BaseUnitQuantity),3),
                     "Party": Party,
                     "CreatedBy":CreatedBy,
                    
@@ -84,17 +84,17 @@ class StockEntryPageView(CreateAPIView):
                     T_StockEntryList.append({
                     "StockDate":StockDate,    
                     "Item": a['Item'],
-                    "Quantity": round(a['Quantity'], 3),
+                    "Quantity": round(float(a['Quantity']), 3),
                     "Unit": a['Unit'],
-                    "BaseUnitQuantity": round(BaseUnitQuantity,3),
-                    "MRPValue": round(a['MRPValue'], 2),
+                    "BaseUnitQuantity": round(float(BaseUnitQuantity),3),
+                    "MRPValue": round(float(a['MRPValue']), 2),
                     "MRP": a['MRP'],
                     "Party": Party,
                     "CreatedBy":CreatedBy,
                     "BatchCode" : a['BatchCode'],
                     "BatchCodeID" : a['BatchCodeID'],
                     "IsSaleable" : 1,
-                    "Difference" : round(BaseUnitQuantity-totalstock,3),
+                    "Difference" : round(float(BaseUnitQuantity-totalstock),3),
                     "IsStockAdjustment" : IsStockAdjustment
                     })
                     
@@ -103,7 +103,7 @@ class StockEntryPageView(CreateAPIView):
                     "ItemExpiryDate":date.today()+ timedelta(days = query2[0]['Days']),
                     "MRP": a['MRP'],
                     "GST": a['GST'],
-                    "MRPValue": round(a['MRPValue'], 2),
+                    "MRPValue": round(float(a['MRPValue']), 2),
                     "GSTPercentage" : a['GSTPercentage'],
                     "SystemBatchDate": a['SystemBatchDate'],
                     "SystemBatchCode": a['SystemBatchCode'],
@@ -111,7 +111,7 @@ class StockEntryPageView(CreateAPIView):
                     "BatchCode": a['BatchCode'],
                     "Mode" :Mode,
                     "Rate": Rate ,
-                    "OriginalBatchBaseUnitQuantity" : round(BaseUnitQuantity,3),
+                    "OriginalBatchBaseUnitQuantity" : round(float(BaseUnitQuantity),3),
                     "O_BatchWiseLiveStockList" :O_BatchWiseLiveStockList, 
                     "T_StockEntryList" :T_StockEntryList                   
                     
