@@ -93,7 +93,7 @@ class OrderListFilterView(CreateAPIView):
                     if Country:
                         bbb = Q(Customer__PartyType__Country_id=Country)
                     else:
-                        bbb = Q()
+                        bbb = Q()   
 
                     if(CustomerType == ''):  # all
                         aaa = Q()
@@ -125,7 +125,7 @@ class OrderListFilterView(CreateAPIView):
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
                     OrderListData = list()
                     for a in Order_serializer:
-
+                       
                         SubPartyFlagquery = MC_PartySubParty.objects.filter(Party=a['Supplier']['id'],SubParty=a['Customer']['id']).values('SubParty')
 
                         if SubPartyFlagquery:
@@ -153,15 +153,13 @@ class OrderListFilterView(CreateAPIView):
                             PartyTypeID = a['Supplier']['PartyType']['id'] if a['Supplier']['PartyType'] else None                  
                            
                             if PartyTypeID == 19:
-                                Count = TC_SPOSInvoicesReferences.objects.filter(Order=a['id']).count()
+                                Count = TC_SPOSInvoicesReferences.objects.filter(Order=a['id']).count()   
                             else:
                                 Count = TC_InvoicesReferences.objects.filter(Order=a['id']).count()
-
-                            if Count == 0:
+                            if Count == 0 :
                                 InvoiceCreated = False
                             else:
-                                InvoiceCreated = True
-                                                            
+                                InvoiceCreated = True                           
                             OrderListData.append({
                                 "id": a['id'],
                                 "OrderDate": a['OrderDate'],
@@ -192,7 +190,8 @@ class OrderListFilterView(CreateAPIView):
                                 "IsTCSParty":TCSPartyFlag,
                                 "MobileAppOrderFlag" : a['MobileAppOrderFlag'],
                                 "AdvanceAmount": a['AdvanceAmount'],
-                                "SubPartyFlag": SubPartyFlag
+                                "SubPartyFlag": SubPartyFlag,
+                                
                                 
                             })
 
