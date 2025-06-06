@@ -631,46 +631,64 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                 Docsquery = T_Invoices.objects.raw(f'''SELECT 1 as id, NatureOfDocument, Sr_No_From, Sr_No_To, TotalNumber, Cancelled, b, PartyID
                 FROM (
                     -- 1. Regular Invoices
-                    SELECT 
-                        'Invoices for outward supply' AS NatureOfDocument,
-                        MIN(T.FullInvoiceNumber) AS Sr_No_From,
-                        MAX(T.FullInvoiceNumber) AS Sr_No_To,
+                      SELECT'Invoices for outward supply' AS NatureOfDocument,
+                        (SELECT FullInvoiceNumber FROM T_Invoices
+                        WHERE Party_id = T.Party_id
+                        AND InvoiceDate BETWEEN  %s AND  %s
+                        ORDER BY  CAST(REPLACE(SUBSTRING_INDEX(FullInvoiceNumber, '-', 1), 'IN', '') AS UNSIGNED)
+                        LIMIT 1
+                        ) AS Sr_No_From,
+
+                        (SELECT FullInvoiceNumber FROM T_Invoices
+                        WHERE Party_id = T.Party_id
+                        AND InvoiceDate BETWEEN  %s AND  %s
+                        ORDER BY  CAST(REPLACE(SUBSTRING_INDEX(FullInvoiceNumber, '-', -1), 'IN', '') AS UNSIGNED) DESC
+                        LIMIT 1
+                        ) AS Sr_No_To,
                         COUNT(*) AS TotalNumber,
                         (
-                            SELECT COUNT(*) 
-                            FROM T_DeletedInvoices D 
+                            SELECT COUNT(*)
+                            FROM T_DeletedInvoices D
                             WHERE D.Party = T.Party_id
-                            AND D.InvoiceDate BETWEEN %s AND %s
+                            AND D.InvoiceDate BETWEEN  %s AND  %s
                         ) AS Cancelled,
                         '1' AS b,
                         T.Party_id AS PartyID
                     FROM T_Invoices T
                     WHERE T.Party_id IN ({Party})
-                    AND T.InvoiceDate BETWEEN %s AND %s
+                    AND T.InvoiceDate BETWEEN  %s AND  %s
                     GROUP BY T.Party_id
 
                     UNION ALL
 
                     -- 2. SPOS Invoices
-                    SELECT 
-                        'Invoices for outward supply',
-                        MIN(X.FullInvoiceNumber),
-                        MAX(X.FullInvoiceNumber),
-                        COUNT(*),
+                              SELECT
+                        'Invoices for outward supply'AS NatureOfDocument,
+                        (SELECT FullInvoiceNumber FROM SweetPOS.T_SPOSInvoices
+                        WHERE Party = X.Party
+                        AND InvoiceDate BETWEEN %s AND  %s
+                        ORDER BY CAST(SUBSTRING_INDEX(FullInvoiceNumber, '-', 1) AS UNSIGNED)
+                        LIMIT 1
+                        ) AS Sr_No_From,
+
+                        (SELECT FullInvoiceNumber FROM SweetPOS.T_SPOSInvoices
+                        WHERE Party = X.Party
+                        AND InvoiceDate BETWEEN %s AND  %s
+                        ORDER BY CAST(SUBSTRING_INDEX(FullInvoiceNumber, '-', -1)AS UNSIGNED) DESC
+                        LIMIT 1
+                        ) AS Sr_No_To,
+                        COUNT(*) AS TotalNumber,
                         (
-                            SELECT COUNT(*) 
-                            FROM SweetPOS.T_SPOSDeletedInvoices D 
+                            SELECT COUNT(*)
+                            FROM SweetPOS.T_SPOSDeletedInvoices D
                             WHERE D.Party = X.Party
-                            AND D.InvoiceDate BETWEEN %s AND %s
-                        ),
-                        '1',
+                            AND D.InvoiceDate BETWEEN %s AND  %s
+                        )AS Cancelled,
+                        '1'AS b,
                         X.Party AS PartyID
                     FROM SweetPOS.T_SPOSInvoices X
-                    JOIN SweetPOS.TC_SPOSInvoiceItems Y ON Y.Invoice_id = X.id
-                    JOIN M_GSTHSNCode H ON H.id = Y.HSNCode
-                    JOIN M_Items I ON I.id = Y.Item
                     WHERE X.Party IN ({Party})
-                    AND X.InvoiceDate BETWEEN %s AND %s
+                    AND X.InvoiceDate BETWEEN %s AND  %s
                     GROUP BY X.Party
 
                     UNION ALL
@@ -707,7 +725,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     AND C.CRDRNoteDate BETWEEN %s AND %s
                     GROUP BY C.Party_id
                 ) AS subquery
-                ORDER BY PartyID, b''', [FromDate, ToDate, FromDate, ToDate, FromDate, ToDate, FromDate, ToDate,FromDate, ToDate, FromDate, ToDate])
+                ORDER BY PartyID, b''', [FromDate, ToDate, FromDate, ToDate,FromDate, ToDate, FromDate, ToDate, FromDate, ToDate, FromDate, ToDate,FromDate, ToDate, FromDate, ToDate,FromDate, ToDate, FromDate, ToDate])
                 # print(Docsquery)                                         
                 Docs2 = DocsSerializer(Docsquery, many=True).data
             

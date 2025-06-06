@@ -2159,13 +2159,40 @@ class DemandVsSupplyReportView(CreateAPIView):
         try:
             with transaction.atomic():
                 FromDate = Data['FromDate']
-                ToDate = Data['ToDate']
-                Party = Data['Party']
+                ToDate = Data['ToDate']                
+                Party = Data['Party']              
+                
+                OrderType =Data['OrderType']
+                EmployeeID =Data['EmployeeID']
                 DemandVsSupplyData = []                
                 # print(FromDate,ToDate,Party)
+                if Party==0:
+                    party_result = M_Employees.objects.raw(f'''SELECT 1 id ,EmployeeParties({EmployeeID}) Party''')
+                    if party_result:
+                        party_string = party_result[0].Party  # example: "32584,32585"
+                        PartyList = [int(p.strip()) for p in party_string.split(',') if p.strip().isdigit()]
+                        Party = ','.join(str(p) for p in PartyList)
+                        print(Party)
+                    else:
+                        Party = ""
+                                    
+                PartyDetails=""
+                SupplierDetails=""
+                CustomerDetails=""
                 
-                PartyDetails = f"AND Customer_id = {Party}" if Party != 0 else ""
+                if OrderType=="Sales": # Sales Order                   
                 
+                    SupplierDetails = f"AND S.id in ({Party})" 
+                     
+                    CustomerDetails = f"AND C.id in ({Party})" 
+                    
+                    
+                else:
+                    PartyDetails = f"AND C.id in ({Party})" 
+                   
+                
+                   
+                    
                 # DemandVsReportquery =TC_OrderItems.objects.raw(f'''SELECT ROW_NUMBER() OVER (ORDER BY A.PartyName, A.OrderDate) AS id,A.*,B.QtyInKg SupplyInKg, B.QtyInNo SupplyInNo 
                 # FROM (
                 # select M_Parties.Name PartyName, OrderDate, M_Items.Name ItemName, SUM(QtyInKg) QtyInKg, SUM(QtyInNo) QtyInNo FROM T_Orders 
@@ -2191,32 +2218,34 @@ class DemandVsSupplyReportView(CreateAPIView):
     COALESCE(B.QtyInNo, 0) AS SupplyInNo
 FROM (
     SELECT 
-        M_Parties.Name AS PartyName, 
+        C.Name AS PartyName, 
         OrderDate, 
         M_Items.Name AS ItemName, 
         SUM(QtyInKg) AS QtyInKg, 
         SUM(QtyInNo) AS QtyInNo 
     FROM T_Orders
     JOIN TC_OrderItems ON Order_id = T_Orders.id
-    JOIN M_Parties ON Customer_id = M_Parties.id
+    JOIN M_Parties C ON Customer_id = C.id
+    JOIN M_Parties S ON supplier_id=S.id
     JOIN M_Items ON Item_id = M_Items.id
     WHERE IsDeleted = 0 
-        AND OrderDate BETWEEN '{FromDate}' AND '{ToDate}'  {PartyDetails}
-    GROUP BY M_Parties.Name, OrderDate, M_Items.Name
+        AND OrderDate BETWEEN '{FromDate}' AND '{ToDate}'  {PartyDetails} {SupplierDetails} 
+    GROUP BY C.Name, OrderDate, M_Items.Name
 ) A
 LEFT JOIN (
     SELECT 
-        M_Parties.Name AS PartyName, 
+        C.Name AS PartyName, 
         InvoiceDate, 
         M_Items.Name AS ItemName, 
         SUM(QtyInKg) AS QtyInKg, 
         SUM(QtyInNo) AS QtyInNo 
     FROM T_Invoices
     JOIN TC_InvoiceItems ON Invoice_id = T_Invoices.id
-    JOIN M_Parties ON Customer_id = M_Parties.id
+    JOIN M_Parties C ON Customer_id = C.id
+    JOIN M_Parties S ON Party_id=S.id
     JOIN M_Items ON Item_id = M_Items.id
-    WHERE InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}'  {PartyDetails}
-    GROUP BY M_Parties.Name, InvoiceDate, M_Items.Name
+    WHERE InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}'  {PartyDetails} {CustomerDetails} 
+    GROUP BY C.Name, InvoiceDate, M_Items.Name
 ) B
 ON A.PartyName = B.PartyName 
    AND A.OrderDate = B.InvoiceDate 
@@ -2226,7 +2255,7 @@ WHERE A.QtyInKg != COALESCE(B.QtyInKg, 0) and (
        OR ROUND(COALESCE(A.QtyInNo, 5), 5) <> ROUND(COALESCE(B.QtyInNo, 5), 5))  
 ORDER BY (CASE WHEN COALESCE(B.QtyInKg, 0) = 0 AND COALESCE(B.QtyInNo, 0) = 0 THEN 0 ELSE 1 END), A.PartyName, A.OrderDate''')
 
-                # print(DemandVsReportquery.query)  
+                print(DemandVsReportquery.query)  
                 if DemandVsReportquery:  
                     # print("SHRUR")              
                     for row in DemandVsReportquery:                       
@@ -2240,8 +2269,8 @@ ORDER BY (CASE WHEN COALESCE(B.QtyInKg, 0) = 0 AND COALESCE(B.QtyInNo, 0) = 0 TH
                             "SupplyInKg":round(float(row.SupplyInKg),2),
                             "SupplyInNo":round(float(row.SupplyInNo),2)                           
                         })                          
-                      
-                log_entry = create_transaction_logNew(request, Data, Party, '', 432, 0, FromDate, ToDate, 0)
+                # print(DemandVsSupplyData)
+                log_entry = create_transaction_logNew(request, Data, 0, '', 432, 0, FromDate, ToDate, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': DemandVsSupplyData})  
             log_entry = create_transaction_logNew(request, Data, 0, "Data Not Available", 431, 0, FromDate, ToDate, 0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Data Not Available', 'Data': []}) 
@@ -2415,7 +2444,7 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                 SchemeID = int(CouponCodeData.get('SchemeID', 0))
                 CouponCodeRedemptionData = []
                 # print('ss')
-                conditions = ''
+                conditions,ss,ss1 = '','',''
 
                 if Party != 0:
                     conditions=f" And I.Party = {Party}"
@@ -2425,48 +2454,51 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                     ss1=f" and InS.scheme= {SchemeID}"
                 
                 
-                # where_clause = " AND ".join(conditions)
-                # print(conditions)
-                # CouponCodeRedemptionQuery = M_GiftVoucherCode.objects.raw(f'''SELECT M_GiftVoucherCode.id, VoucherType_id, 
-                #                                     M_GiftVoucherCode.VoucherCode, M_GiftVoucherCode.UpdatedOn, M_GiftVoucherCode.InvoiceDate, 
-                #                                     M_GiftVoucherCode.InvoiceNumber, M_GiftVoucherCode.InvoiceAmount, M_GiftVoucherCode.Party, 
-                #                                     M_GiftVoucherCode.client, M_GiftVoucherCode.IsActive, 
-                #                                     M_Parties.Name as PartyName
-                                                    
-                #                                 FROM M_GiftVoucherCode
-                #                                 JOIN M_Parties ON M_GiftVoucherCode.Party = M_Parties.id
-                                                
-                #                                 WHERE {where_clause}
-                #                                 GROUP BY M_GiftVoucherCode.id, VoucherType_id, M_GiftVoucherCode.VoucherCode,M_GiftVoucherCode.UpdatedOn, M_GiftVoucherCode.InvoiceDate, M_GiftVoucherCode.InvoiceNumber, M_GiftVoucherCode.InvoiceAmount,  M_GiftVoucherCode.Party, M_GiftVoucherCode.client, M_GiftVoucherCode.IsActive, M_Parties.Name''')
-                
+               
                 CouponCodeRedemptionQuery = M_GiftVoucherCode.objects.raw(f'''select M_Scheme.id ,M_Scheme.SchemeValue,M_Parties.Name PartyName,I.VoucherCode,I.InvoiceDate,
-                                I.InvoiceAmount,I.InvoiceNumber
+                                I.InvoiceAmount,I.InvoiceNumber,
+                                case when M_SchemeType.BillEffect=0 then M_Scheme.SchemeValue else TotalDiscountAmount end DiscountAmount
                                 from M_GiftVoucherCode I 
                                 join M_Scheme on M_Scheme.QRPrefix=LEFT(I.VoucherCode,3)
                                 join M_SchemeType on  M_Scheme.SchemeTypeID_id=M_SchemeType.id
                                 join M_Parties on M_Parties.id=I.Party
+                                left join 
+                                (SELECT I.InvoiceDate,I.FullInvoiceNumber,I.Party,SUM(aa.DiscountAmount) AS TotalDiscountAmount
+                                FROM SweetPOS.T_SPOSInvoices AS I
+                                JOIN SweetPOS.TC_SPOSInvoiceItems AS aa ON I.id = aa.Invoice_id
+                                where I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions}
+                                GROUP BY I.InvoiceDate,I.FullInvoiceNumber,I.Party) AS SweetPOSDiscount 
+                                    ON SweetPOSDiscount.InvoiceDate = I.InvoiceDate
+                                    AND SweetPOSDiscount.FullInvoiceNumber = I.InvoiceNumber
+                                    AND SweetPOSDiscount.Party = I.Party
                                 where UsageType= 'online' and I.IsActive = 0  
-                                and I.InvoiceDate between %s AND %s {conditions} {ss}
+                                and I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss}
                                 union 
                                 select M_Scheme.id ,M_Scheme.SchemeValue,M_Parties.Name PartyName,I.VoucherCode,I.InvoiceDate,
-                                I.GrandTotal InvoiceAmount,I.FullInvoiceNumber 
+                                I.GrandTotal InvoiceAmount,I.FullInvoiceNumber ,
+                                case when M_SchemeType.BillEffect=0 then M_Scheme.SchemeValue else TotalDiscountAmount end DiscountAmount
                                 from SweetPOS.T_SPOSInvoices I
                                 join SweetPOS.TC_InvoicesSchemes InS on InS.Invoice_id=I.id
                                 join M_Parties on M_Parties.id=I.Party
                                 left join M_Scheme on M_Scheme.QRPrefix=LEFT(I.VoucherCode,3)
                                 join M_SchemeType on  M_Scheme.SchemeTypeID_id=M_SchemeType.id
+                                left join 
+                                (SELECT I.InvoiceDate,I.FullInvoiceNumber,I.Party,SUM(aa.DiscountAmount) AS TotalDiscountAmount
+                                FROM SweetPOS.T_SPOSInvoices AS I
+                                JOIN SweetPOS.TC_SPOSInvoiceItems AS aa ON I.id = aa.Invoice_id
+                                where I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions}
+                                GROUP BY I.InvoiceDate,I.FullInvoiceNumber,I.Party) AS SweetPOSDiscount 
+                                    ON SweetPOSDiscount.InvoiceDate = I.InvoiceDate
+                                    AND SweetPOSDiscount.FullInvoiceNumber = I.InvoiceNumber
+                                    AND SweetPOSDiscount.Party = I.Party
                                 where UsageType= 'offline' 
-                                and I.InvoiceDate between %s AND %s {conditions} {ss1} ''',[FromDate,ToDate,FromDate,ToDate])
+                                and I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss1} ''')
                 
                 # print(CouponCodeRedemptionQuery)
-                # scheme1 = M_Scheme.objects.filter(id=1).first()
-                # SchemeValue = scheme1.SchemeValue if scheme1 else 0
+                
 
                 for CouponCode in CouponCodeRedemptionQuery:
-                #     if CouponCode.SchemeID == 1:
-                #         DiscountAmount = SchemeValue
-                #     else:
-                #         DiscountAmount = CouponCode.DiscountAmount
+                
 
                     CouponCodeRedemptionData.append({
                         "id": CouponCode.id,
@@ -2480,8 +2512,7 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                         "PartyName": CouponCode.PartyName,
                         "client": CouponCode.client,
                         "SchemeID": CouponCode.id,
-                        # "SchemeID": 0,
-                        "DiscountAmount": 0
+                        "DiscountAmount": CouponCode.DiscountAmount
                     })
 
                 if CouponCodeRedemptionData:
@@ -2493,7 +2524,7 @@ class CouponCodeRedemptionReportView(CreateAPIView):
 
         except Exception as e:
             log_entry = create_transaction_logNew(request, CouponCodeData, 0, "CouponCodeRedemptionReport: " + str(e), 33, 0)
-            return JsonResponse({"StatusCode": 400,"Status": False,"Message": str(e),"Data": [],})
+            return JsonResponse({"StatusCode": 400,"Status": False,"Message": Exception(e),"Data": [],})
 
         
         
@@ -2509,85 +2540,95 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                 ToDate = MATAData['ToDate']
                 Party = MATAData['Party']
                 SchemeID=MATAData['SchemeID']
-                CodeRedemptionData = []    
                 
-                # party_condition = ""
-                # scheme_condition = ""
-                where = [
-                            "gv.InvoiceDate BETWEEN %s AND %s",
-                            "gv.IsActive = 0",
-                            "gv.VoucherCode <> ''",
-                            "gv.VoucherCode LIKE CONCAT(s.QRPrefix, '%%')",
-                            "s.SchemeValue > 0",
-                        ]
-                params = [FromDate, ToDate]
-                if Party != "0":
-                    where.append(f"sp.PartyID_id IN ({Party})")
+                conditions,ss,ss1 = '','',''
 
-                if SchemeID != "0":
-                    where.append(f"s.id IN ({SchemeID})")
+                if Party != 0:
+                    conditions=f" And I.Party = {Party}"
 
-                where_clause = " AND ".join(where)             
+                if int(SchemeID) != 0:
+                    ss=f" And M_Scheme.id = {SchemeID}"
+                    ss1=f" and InS.scheme= {SchemeID}"
                 
-                # with connection.cursor() as cursor:
-                #     cursor.execute(f'''SELECT  Distinct s.id, s.QRPrefix
-                #         FROM MC_SchemeParties sp
-                #         JOIN M_Scheme s ON s.id = sp.SchemeID_id
-                #         {final_where}''')
-                #     schemes = cursor.fetchall()  
-                # PartyID=""
-                # Scheme=""
-                # if Party!="0":
-                #     PartyID=f"AND gv.Party in ({Party})"             
                 
-                               
-                # for scheme_id, prefix in schemes:
-                #     if SchemeID !="0":
-                #         Scheme=f"AND s.id in ({scheme_id})"
-                #     with connection.cursor() as cursor:
-                #         cursor.execute(f'''
-                sql =f'''SELECT 
-                        s.id,
-                        p.Name AS FranchiseName,
-                        s.SchemeName,
-                        COUNT(*) AS VoucherCodeCount,
-                        
-                    Sum( CASE
-                        WHEN s.ValueIn = 'Rs' THEN s.SchemeValue
-                        WHEN s.ValueIn = '%%' THEN 
-                            ((gv.InvoiceAmount) * s.SchemeValue / 100)
-                        ELSE 0 
-                    END )AS ClaimPerVoucher,
+               
+                CouponCodeRedemptionQuery = M_GiftVoucherCode.objects.raw(f'''select M_Scheme.id,M_Scheme.SchemeName,M_Parties.id PartyID ,M_Parties.Name PartyName,count(*)count,
+                                case when M_SchemeType.BillEffect=0 then sum(M_Scheme.SchemeValue) else sum(TotalDiscountAmount) end DiscountAmount,M_Scheme.SchemeValue
+                               from M_GiftVoucherCode I 
+                                join M_Scheme on M_Scheme.QRPrefix=LEFT(I.VoucherCode,3)
+                                join M_SchemeType on  M_Scheme.SchemeTypeID_id=M_SchemeType.id
+                                join M_Parties on M_Parties.id=I.Party
+                                left join 
+                                (SELECT I.InvoiceDate,I.FullInvoiceNumber,I.Party,SUM(aa.DiscountAmount) AS TotalDiscountAmount
+                                FROM SweetPOS.T_SPOSInvoices AS I
+                                JOIN SweetPOS.TC_SPOSInvoiceItems AS aa ON I.id = aa.Invoice_id
+                                where I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions}
+                                GROUP BY I.InvoiceDate,I.FullInvoiceNumber,I.Party) AS SweetPOSDiscount 
+                                    ON SweetPOSDiscount.InvoiceDate = I.InvoiceDate
+                                    AND SweetPOSDiscount.FullInvoiceNumber = I.InvoiceNumber
+                                    AND SweetPOSDiscount.Party = I.Party
+                                where UsageType= 'online' and I.IsActive = 0  
+                                and I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss}
+                                group by  M_Scheme.id ,M_Parties.id,M_Scheme.SchemeValue
+                                union 
+                                select M_Scheme.id,M_Scheme.SchemeName,M_Parties.id PartyID ,M_Parties.Name PartyName,count(*)count,
+                                case when M_SchemeType.BillEffect=0 then sum(M_Scheme.SchemeValue) else sum(TotalDiscountAmount) end DiscountAmount,M_Scheme.SchemeValue
+                               from SweetPOS.T_SPOSInvoices I
+                                join SweetPOS.TC_InvoicesSchemes InS on InS.Invoice_id=I.id
+                                join M_Parties on M_Parties.id=I.Party
+                                left join M_Scheme on M_Scheme.QRPrefix=LEFT(I.VoucherCode,3)
+                                join M_SchemeType on  M_Scheme.SchemeTypeID_id=M_SchemeType.id
+                                left join 
+                                (SELECT I.InvoiceDate,I.FullInvoiceNumber,I.Party,SUM(aa.DiscountAmount) AS TotalDiscountAmount
+                                FROM SweetPOS.T_SPOSInvoices AS I
+                                JOIN SweetPOS.TC_SPOSInvoiceItems AS aa ON I.id = aa.Invoice_id
+                                where I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions}
+                                GROUP BY I.InvoiceDate,I.FullInvoiceNumber,I.Party) AS SweetPOSDiscount 
+                                    ON SweetPOSDiscount.InvoiceDate = I.InvoiceDate
+                                    AND SweetPOSDiscount.FullInvoiceNumber = I.InvoiceNumber
+                                    AND SweetPOSDiscount.Party = I.Party
+                                where UsageType= 'offline' 
+                                and I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss1}
+                                group by  M_Scheme.id ,M_Parties.id,M_Scheme.SchemeValue ''')
+                
+                # print(CouponCodeRedemptionQuery)
+                
+                CodeRedemptionData = []
+                i=1
+                for CouponCode in CouponCodeRedemptionQuery:
+                
 
-                    CASE
-                        WHEN s.ValueIn = 'Rs' THEN s.SchemeValue 
-                        WHEN s.ValueIn = '%%' THEN 
-                            ((gv.InvoiceAmount) * s.SchemeValue / 100)
-                        ELSE 0 
-                    END AS TotalClaimAmount,Sum(InvoiceAmount)InvoiceAmount
-                    FROM M_GiftVoucherCode gv
-                    JOIN FoodERP.M_Parties p ON p.id = gv.Party
-                    JOIN FoodERP.MC_SchemeParties sp ON sp.PartyID_id = p.id
-                    JOIN FoodERP.M_Scheme s ON s.id = sp.SchemeID_id
-                    WHERE {where_clause}                               
-                    GROUP BY s.id, s.SchemeName, s.ValueIn, s.SchemeValue,p.id ORDER BY p.Name, s.SchemeName
-                '''                        
-                with connection.cursor() as cur:
-                    cur.execute(sql, params)
-                    rows = cur.fetchall()
-
-                # --------- format output ---------------------
-                CodeRedemptionData = []                    
-                for row in rows:
                     CodeRedemptionData.append({
-                        "id": row[0],
-                        "FranchiseName": row[1],
-                        "SchemeName": row[2],            
-                        "VoucherCodeCount": row[3],
-                        "ClaimPerVoucher": row[5],
-                        "TotalClaimAmount": row[4],
-                        "InvoiceAmount": row[6],
-                    })  
+                        "id": i,
+                        # "VoucherTypeID": CouponCode.VoucherType_id,
+                        # "VoucherCode": CouponCode.VoucherCode,
+                        # "UpdatedOn": CouponCode.UpdatedOn,
+                        # "InvoiceDate":CouponCode.InvoiceDate,
+                        # "InvoiceNumber": CouponCode.InvoiceNumber,
+                        # "InvoiceAmount": CouponCode.InvoiceAmount,
+                        "PartyID": CouponCode.PartyID,
+                        "FranchiseName": CouponCode.PartyName,
+                        # "client": CouponCode.client,
+                        "SchemeID": CouponCode.id,
+                        "TotalClaimAmount": CouponCode.DiscountAmount,
+                        "SchemeName": CouponCode.SchemeName,
+                        "VoucherCodeCount" : CouponCode.count,
+                        "ClaimPerVoucher" : CouponCode.SchemeValue,
+                        "SchemeShortName" : ""
+                    })
+                    i=i+1
+                # --------- format output ---------------------
+                # CodeRedemptionData = []                    
+                # for row in rows:
+                #     CodeRedemptionData.append({
+                #         "id": row[0],
+                #         "FranchiseName": row[1],
+                #         "SchemeName": row[2],            
+                #         "VoucherCodeCount": row[3],
+                #         "ClaimPerVoucher": row[5],
+                #         "TotalClaimAmount": row[4],
+                #         "InvoiceAmount": row[6],
+                #     })  
                 if CodeRedemptionData:
                     log_entry = create_transaction_logNew(request, MATAData, 0, "", 448, 0, FromDate, ToDate, 0)
                     return JsonResponse({"StatusCode": 200, "Status": True, "Message": "CodeRedemptionReport","Data": CodeRedemptionData,})
@@ -2774,8 +2815,8 @@ class BillDeletedSummaryReportView(CreateAPIView):
                 FromDate = BillData['FromDate']
                 ToDate = BillData['ToDate']
                 Party = BillData['Party']
-                BillDeletedSummaryData = []                            
-       
+                CashierID =BillData['CashierID']
+                BillDeletedSummaryData = [] 
                 query = f'''SELECT SweetPOS.T_SPOSInvoices.id, InvoiceDate, FullInvoiceNumber, GrandTotal, FoodERP.M_Users.LoginName AS UserName 
                             FROM SweetPOS.T_SPOSInvoices
                             LEFT JOIN FoodERP.M_Users ON T_SPOSInvoices.CreatedBy = M_Users.id
@@ -2783,7 +2824,10 @@ class BillDeletedSummaryReportView(CreateAPIView):
 
                 if Party > 0:
                     query += f' AND Party = {Party}'
-
+                    
+                if CashierID > "0" :   
+                      query += f' AND M_Users.id in ({CashierID})'
+                
                 BillDeletedSummaryQuery = T_SPOSInvoices.objects.raw(query)  
         
                 for bill in BillDeletedSummaryQuery:
