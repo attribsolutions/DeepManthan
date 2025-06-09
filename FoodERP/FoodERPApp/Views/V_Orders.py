@@ -132,6 +132,11 @@ class OrderListFilterView(CreateAPIView):
                             SubPartyFlag= True
                         else:
                             SubPartyFlag= False
+                            
+                        CreatedByName = ""
+                        if a['CreatedBy']:
+                            user = M_Users.objects.filter(id=a['CreatedBy']).values('LoginName').first()
+                            CreatedByName = user['LoginName'] if user else ""
                         
                         if (Orderdata['DashBoardMode'] == 1):
                             OrderListData.append({
@@ -183,6 +188,7 @@ class OrderListFilterView(CreateAPIView):
                                 "ShippingAddress": a['ShippingAddress']['Address'],
                                 "InvoiceCreated": InvoiceCreated,
                                 "CreatedBy": a['CreatedBy'],
+                                "CreatedByName": CreatedByName,
                                 "CreatedOn": a['CreatedOn'],
                                 "SAPResponse": a['SAPResponse'],
                                 "IsConfirm": a['IsConfirm'],
