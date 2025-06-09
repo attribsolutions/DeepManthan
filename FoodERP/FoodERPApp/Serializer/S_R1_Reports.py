@@ -264,7 +264,8 @@ class EXEMP2Serializer2(serializers.Serializer):
 
     
 class HSNSerializer1(serializers.Serializer):    
-    HSN=serializers.IntegerField()
+    # HSN=serializers.IntegerField()
+    HSN=serializers.CharField()
     # Description=serializers.CharField(max_length=100)
     UQC=serializers.CharField(max_length=100)
     TotalQuantity=FloatDecimalField()
