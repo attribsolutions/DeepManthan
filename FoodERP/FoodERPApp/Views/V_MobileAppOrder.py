@@ -35,8 +35,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                        
                         # Decoding the base64-encoded username and password
                         try:
-                            username, password = base64.b64decode(
-                                auth_string).decode().split(':', 1)
+                            username, password = base64.b64decode(auth_string).decode().split(':', 1)
                         except (TypeError, ValueError, UnicodeDecodeError):
                             return responses('Invalid authorization header', status=status.HTTP_401_UNAUTHORIZED)
                         
@@ -45,12 +44,20 @@ class T_MobileAppOrdersView(CreateAPIView):
                     InvoiceItems = list()
                     
                     if user is not None:
-                        # CustomPrint('aaaaaaaaaaaa')
                         Supplier = data['FoodERPSupplierID']
                         Customer = data['FoodERPRetailerID']
                         OrderDate = data['OrderDate']
                         OrderAmount = data['TotalOrderValue']
                         AppOrderNumber = data['AppOrderNumber']
+               
+                        approved_customer = M_Parties.objects.filter(id=Customer).values('IsApprovedParty').first()
+
+                        if approved_customer:
+                            if approved_customer['IsApprovedParty'] == 1:
+                                subparty_exists = MC_PartySubParty.objects.filter(Party_id=Supplier,SubParty_id=Customer).exists()
+                                if not subparty_exists:
+                                    MC_PartySubParty.objects.create(Party_id=Supplier,SubParty_id=Customer,CreatedBy=430,UpdatedBy=430)
+                        
                         Orderdata = list()
                         Orderitem=list()
                         
@@ -148,8 +155,8 @@ class T_MobileAppOrdersView(CreateAPIView):
                                 "POType": 1,
                                 "POFromDate": OrderDate,
                                 "POToDate": OrderDate,
-                                "CreatedBy": 1,
-                                "UpdatedBy": 1,
+                                "CreatedBy": 430,
+                                "UpdatedBy": 430,
                                 "MobileAppOrderFlag" : 1,
                                 "OrderTermsAndConditions": [
                                     {
@@ -302,8 +309,8 @@ class T_MobileAppOrdersView(CreateAPIView):
                             "POType": 1,
                             "POFromDate": OrderDate,
                             "POToDate": OrderDate,
-                            "CreatedBy": 1,
-                            "UpdatedBy": 1,
+                            "CreatedBy": 430,
+                            "UpdatedBy": 430,
                             "OrderTermsAndConditions": [
                                 {
                                 "TermsAndCondition": 1,
