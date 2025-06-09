@@ -2566,6 +2566,7 @@ class M_Scheme(models.Model):
     Column1 = models.TextField(null=True, blank=True)
     Column2 = models.TextField(null=True, blank=True)
     Column3 = models.TextField(null=True, blank=True)
+    ShortName = models.CharField(max_length=10)
 
     class Meta:
         db_table = "M_Scheme"
