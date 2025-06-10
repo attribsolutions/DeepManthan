@@ -370,3 +370,47 @@ class TC_InvoicesSchemes(models.Model):
     scheme = models.IntegerField()    
     class Meta:
         db_table = "TC_InvoicesSchemes"
+
+class M_PosSettings(models.Model):
+    Setting_Key    = models.CharField(max_length=255)
+    Setting_Value  = models.CharField(max_length=255)
+    Description    = models.CharField(max_length=400)
+    Setting_Type   = models.BooleanField(default= False)
+    Is_Disabled    = models.BooleanField(default= False)
+    CreatedOn      = models.DateTimeField(auto_now_add=True)
+    UpdatedOn      = models.DateTimeField(auto_now=True)
+   
+    class Meta:
+        db_table = "M_PosSettings"
+       
+ 
+class MC_PosSettingDetails(models.Model):
+    PosSetting = models.ForeignKey(M_PosSettings, related_name='PosSettingDetails', on_delete=models.CASCADE)
+    Setting_Value = models.CharField(max_length=255)
+    PartyId         = models.IntegerField()
+    Is_Disabled    = models.BooleanField(default= False)
+ 
+    class Meta:
+        db_table = 'MC_PosSettingDetails'   
+
+class M_PhonePeSettings(models.Model):
+       
+    client_id = models.IntegerField()
+    party_id  = models.IntegerField()
+    user_id = models.IntegerField()
+    base_url = models.CharField(max_length=255)
+    merchant_id = models.BinaryField(max_length=255)
+    provider_id = models.BinaryField(max_length=255)
+    salt_key   = models.BinaryField(max_length=255)
+    key_index = models.CharField(max_length=255)
+    store_id = models.CharField(max_length=100)
+    store_name = models.CharField(max_length=255)
+    terminal_id =models.CharField(max_length=100)
+    merchant_name =models.CharField(max_length=255)
+    x_callback_url = models.CharField(max_length=400)
+    is_active  = models.BooleanField(default=True)
+    CreatedOn      = models.DateTimeField(auto_now_add=True)
+    UpdatedOn      = models.DateTimeField(auto_now=True)             
+
+    class Meta:
+        db_table = 'M_PhonePeSettings'  

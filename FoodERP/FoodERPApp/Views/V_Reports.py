@@ -2161,7 +2161,7 @@ class DemandVsSupplyReportView(CreateAPIView):
                 FromDate = Data['FromDate']
                 ToDate = Data['ToDate']                
                 Party = Data['Party']              
-                
+                unit = Data['Unit']
                 OrderType =Data['OrderType']
                 EmployeeID =Data['EmployeeID']
                 DemandVsSupplyData = []                
@@ -2211,49 +2211,117 @@ class DemandVsSupplyReportView(CreateAPIView):
                 # ON A.PartyName = B.PartyName AND A.OrderDate = B.InvoiceDate AND A.ItemName = B.ItemName
                 # WHERE A.QtyInKg != B.QtyInKg Order By A.PartyName, OrderDate''')
                 
-                DemandVsReportquery =TC_OrderItems.objects.raw(f'''SELECT 
+#                 DemandVsReportquery =TC_OrderItems.objects.raw(f'''SELECT 
+#     ROW_NUMBER() OVER (ORDER BY A.PartyName, A.OrderDate) AS id,
+#     A.*, 
+#     COALESCE(B.BaseUnitQuantity, 0) AS SupplyBaseUnitQuantity, 
+    
+# FROM (
+#     SELECT 
+#         C.id CustomerID,S.id PartyID,
+#         C.Name AS CustomerName, 
+#         S.Name AS PartyName,
+#         OrderDate, 
+#         M_Items.id ItemID,
+#         M_Items.Name AS ItemName, 
+#         sum(BaseUnitQuantity) as BaseUnitQuantity,
+        
+#     FROM T_Orders
+#     JOIN TC_OrderItems ON Order_id = T_Orders.id
+#     JOIN M_Parties C ON Customer_id = C.id
+#     JOIN M_Parties S ON supplier_id=S.id
+#     JOIN M_Items ON Item_id = M_Items.id
+#     WHERE IsDeleted = 0 
+#         AND OrderDate BETWEEN '{FromDate}' AND '{ToDate}'  {PartyDetails} {SupplierDetails} 
+#     GROUP BY C.id,S.id, OrderDate, M_Items.Name
+# ) A
+# LEFT JOIN (
+#     SELECT 
+#         C.id CustomerID,S.id PartyID,
+#         C.Name AS CustomerName, 
+#         S.Name AS PartyName,
+#         InvoiceDate, 
+#         M_Items.id ItemID,
+#         M_Items.Name AS ItemName, 
+#         sum(BaseUnitQuantity) as BaseUnitQuantity,
+        
+#     FROM T_Invoices
+#     JOIN TC_InvoiceItems ON Invoice_id = T_Invoices.id
+#     JOIN M_Parties C ON Customer_id = C.id
+#     JOIN M_Parties S ON Party_id=S.id
+#     JOIN M_Items ON Item_id = M_Items.id
+#     WHERE InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}'  {PartyDetails} {CustomerDetails} 
+#     GROUP BY C.id,S.id, InvoiceDate, M_Items.Name
+# ) B
+#     ON A.id = B.id 
+#    AND A.OrderDate = B.InvoiceDate 
+#    AND A.ItemID = B.ItemID
+#  WHERE A.BaseUnitQuantity != COALESCE(B.BaseUnitQuantity, 0) 
+# ORDER BY (CASE WHEN COALESCE(B.QtyInKg, 0) = 0 AND COALESCE(B.QtyInNo, 0) = 0 THEN 0 ELSE 1 END), A.PartyName, A.OrderDate''')
+
+# Shruti code 
+# WHERE A.QtyInKg != COALESCE(B.QtyInKg, 0) and (
+#         ROUND(COALESCE(A.QtyInKg, 5), 5) <> ROUND(COALESCE(B.QtyInKg, 5), 5)
+#        OR ROUND(COALESCE(A.QtyInNo, 5), 5) <> ROUND(COALESCE(B.QtyInNo, 5), 5))  
+# ORDER BY (CASE WHEN COALESCE(B.QtyInKg, 0) = 0 AND COALESCE(B.QtyInNo, 0) = 0 THEN 0 ELSE 1 END), A.PartyName, A.OrderDate
+
+# ======================================================================================================
+                DemandVsReportquery =TC_OrderItems.objects.raw(f'''SELECT
     ROW_NUMBER() OVER (ORDER BY A.PartyName, A.OrderDate) AS id,
-    A.*, 
-    COALESCE(B.QtyInKg, 0) AS SupplyInKg, 
-    COALESCE(B.QtyInNo, 0) AS SupplyInNo
+    A.*,
+    UnitwiseQuantityConversion(A.ItemID,COALESCE(A.BaseUnitQuantity, 0),0,A.BaseUnitID,0,A.UnitID,1) Demand,
+    UnitwiseQuantityConversion(B.ItemID,COALESCE(B.BaseUnitQuantity, 0),0,B.BaseUnitID,0,B.UnitID,1) Supply,
+    M_Units.Name UnitName
+    
 FROM (
-    SELECT 
-        C.Name AS PartyName, 
-        OrderDate, 
-        M_Items.Name AS ItemName, 
-        SUM(QtyInKg) AS QtyInKg, 
-        SUM(QtyInNo) AS QtyInNo 
+    SELECT
+        C.id CustomerID,S.id PartyID,
+        C.Name AS CustomerName,
+        S.Name AS PartyName,
+        OrderDate,
+        M_Items.Name AS ItemName,
+        M_Items.id as ItemID,
+        sum(BaseUnitQuantity) as BaseUnitQuantity,
+        M_Items.BaseUnitID_id BaseUnitID ,
+        (case when {unit}=0 then M_Items.BaseUnitID_id else {unit} end) UnitID
     FROM T_Orders
     JOIN TC_OrderItems ON Order_id = T_Orders.id
     JOIN M_Parties C ON Customer_id = C.id
     JOIN M_Parties S ON supplier_id=S.id
     JOIN M_Items ON Item_id = M_Items.id
-    WHERE IsDeleted = 0 
+    
+    WHERE IsDeleted = 0
         AND OrderDate BETWEEN '{FromDate}' AND '{ToDate}'  {PartyDetails} {SupplierDetails} 
-    GROUP BY C.Name, OrderDate, M_Items.Name
+    GROUP BY C.id,S.id, OrderDate, M_Items.id , M_Items.BaseUnitID_id
 ) A
 LEFT JOIN (
-    SELECT 
-        C.Name AS PartyName, 
-        InvoiceDate, 
-        M_Items.Name AS ItemName, 
-        SUM(QtyInKg) AS QtyInKg, 
-        SUM(QtyInNo) AS QtyInNo 
+    SELECT
+        C.id CustomerID,S.id PartyID,
+        C.Name AS CustomerName,
+        S.Name AS PartyName,
+        InvoiceDate,
+        M_Items.id as ItemID,
+        M_Items.Name AS ItemName,
+        sum(BaseUnitQuantity) as BaseUnitQuantity,
+       
+        M_Items.BaseUnitID_id BaseUnitID,
+        (case when {unit}=0 then M_Items.BaseUnitID_id else {unit} end) UnitID
+         
     FROM T_Invoices
     JOIN TC_InvoiceItems ON Invoice_id = T_Invoices.id
     JOIN M_Parties C ON Customer_id = C.id
     JOIN M_Parties S ON Party_id=S.id
     JOIN M_Items ON Item_id = M_Items.id
+    
     WHERE InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}'  {PartyDetails} {CustomerDetails} 
-    GROUP BY C.Name, InvoiceDate, M_Items.Name
+    GROUP BY C.id,S.id, InvoiceDate, M_Items.id, M_Items.BaseUnitID_id
 ) B
-ON A.PartyName = B.PartyName 
-   AND A.OrderDate = B.InvoiceDate 
+ON A.PartyName = B.PartyName
+   AND A.OrderDate = B.InvoiceDate
    AND A.ItemName = B.ItemName
-WHERE A.QtyInKg != COALESCE(B.QtyInKg, 0) and (
-        ROUND(COALESCE(A.QtyInKg, 5), 5) <> ROUND(COALESCE(B.QtyInKg, 5), 5)
-       OR ROUND(COALESCE(A.QtyInNo, 5), 5) <> ROUND(COALESCE(B.QtyInNo, 5), 5))  
-ORDER BY (CASE WHEN COALESCE(B.QtyInKg, 0) = 0 AND COALESCE(B.QtyInNo, 0) = 0 THEN 0 ELSE 1 END), A.PartyName, A.OrderDate''')
+join M_Units ON M_Units.id=A.UnitID   
+WHERE A.BaseUnitQuantity != COALESCE(B.BaseUnitQuantity, 0)
+ORDER BY  A.PartyName, A.OrderDate''')
 
                 print(DemandVsReportquery.query)  
                 if DemandVsReportquery:  
@@ -2261,13 +2329,14 @@ ORDER BY (CASE WHEN COALESCE(B.QtyInKg, 0) = 0 AND COALESCE(B.QtyInNo, 0) = 0 TH
                     for row in DemandVsReportquery:                       
                         DemandVsSupplyData.append({
                             "id":row.id,
-                            "PartyName":row.PartyName,
+                            "CustomerName" : row.CustomerName, 
+                            "PartyName" :  row.PartyName,
                             "OrderDate":row.OrderDate,
                             "ItemName":row.ItemName,
-                            "QtyInKg":round(float(row.QtyInKg),2),
-                            "QtyInNo":round(float(row.QtyInNo),2),
-                            "SupplyInKg":round(float(row.SupplyInKg),2),
-                            "SupplyInNo":round(float(row.SupplyInNo),2)                           
+                            "Demand":round(float(row.Demand),3),
+                            "Supply":round(float(row.Supply),3),
+                            "Difference" : round(float(row.Demand) - float(row.Supply) ,3  )  ,  
+                            "UnitName" : row.UnitName                 
                         })                          
                 # print(DemandVsSupplyData)
                 log_entry = create_transaction_logNew(request, Data, 0, '', 432, 0, FromDate, ToDate, 0)
@@ -2543,7 +2612,7 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                 
                 conditions,ss,ss1 = '','',''
 
-                if Party != 0:
+                if int(Party) != 0:
                     conditions=f" And I.Party = {Party}"
 
                 if int(SchemeID) != 0:
@@ -2552,7 +2621,7 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                 
                 
                
-                CouponCodeRedemptionQuery = M_GiftVoucherCode.objects.raw(f'''select M_Scheme.id,M_Scheme.SchemeName,M_Parties.id PartyID ,M_Parties.Name PartyName,count(*)count,
+                CouponCodeRedemptionQuery = M_GiftVoucherCode.objects.raw(f'''select * from (select M_Scheme.id,M_Scheme.SchemeName,M_Scheme.ShortName,M_Parties.id PartyID ,M_Parties.Name PartyName,count(*)count,
                                 case when M_SchemeType.BillEffect=0 then sum(M_Scheme.SchemeValue) else sum(TotalDiscountAmount) end DiscountAmount,M_Scheme.SchemeValue
                                from M_GiftVoucherCode I 
                                 join M_Scheme on M_Scheme.QRPrefix=LEFT(I.VoucherCode,3)
@@ -2571,7 +2640,7 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                                 and I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss}
                                 group by  M_Scheme.id ,M_Parties.id,M_Scheme.SchemeValue
                                 union 
-                                select M_Scheme.id,M_Scheme.SchemeName,M_Parties.id PartyID ,M_Parties.Name PartyName,count(*)count,
+                                select M_Scheme.id,M_Scheme.SchemeName,M_Scheme.ShortName,M_Parties.id PartyID ,M_Parties.Name PartyName,count(*)count,
                                 case when M_SchemeType.BillEffect=0 then sum(M_Scheme.SchemeValue) else sum(TotalDiscountAmount) end DiscountAmount,M_Scheme.SchemeValue
                                from SweetPOS.T_SPOSInvoices I
                                 join SweetPOS.TC_InvoicesSchemes InS on InS.Invoice_id=I.id
@@ -2589,7 +2658,8 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                                     AND SweetPOSDiscount.Party = I.Party
                                 where UsageType= 'offline' 
                                 and I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss1}
-                                group by  M_Scheme.id ,M_Parties.id,M_Scheme.SchemeValue ''')
+                                group by  M_Scheme.id ,M_Parties.id,M_Scheme.SchemeValue)a
+                                 order by PartyID ''')
                 
                 # print(CouponCodeRedemptionQuery)
                 
@@ -2614,7 +2684,7 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                         "SchemeName": CouponCode.SchemeName,
                         "VoucherCodeCount" : CouponCode.count,
                         "ClaimPerVoucher" : CouponCode.SchemeValue,
-                        "SchemeShortName" : ""
+                        "SchemeShortName" : CouponCode.ShortName
                     })
                     i=i+1
                 # --------- format output ---------------------
@@ -2778,16 +2848,18 @@ class ManagerSummaryReportView(CreateAPIView):
 
                 invoice_condition = f"AND inv.Party = {Party}" if Party != 0 else ""
                 
-                InvoicesDetailsQuery = T_Invoices.objects.raw(f'''SELECT inv.id, inv.FullInvoiceNumber, inv.GrandTotal, inv.AdvanceAmount
+                InvoicesDetailsQuery = T_Invoices.objects.raw(f'''SELECT inv.id, inv.FullInvoiceNumber, inv.GrandTotal, inv.AdvanceAmount, ord.FullOrderNumber, ord.OrderDate
                                                                 FROM SweetPOS.T_SPOSInvoices inv
                                                                 JOIN SweetPOS.TC_SPOSInvoicesReferences ref ON inv.id = ref.Invoice_id
+                                                                JOIN FoodERP.T_Orders ord ON ref.Order = ord.id
                                                                 WHERE inv.InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}' AND inv.IsDeleted=0
                                                                 {invoice_condition}''')
 
                 for invoice in InvoicesDetailsQuery:
+                    FullInvoiceNumber = f"{invoice.FullInvoiceNumber} ({invoice.FullOrderNumber} {invoice.OrderDate.strftime('%Y-%m-%d')})"
                     InvoiceData.append({
                         "id": invoice.id,
-                        "FullInvoiceNumber": invoice.FullInvoiceNumber,
+                        "FullInvoiceNumber": FullInvoiceNumber,
                         "GrandTotal": float(invoice.GrandTotal-invoice.AdvanceAmount),
                         "AdvanceAmount": float(invoice.AdvanceAmount) if invoice.AdvanceAmount is not None else "0.00"
                     })
