@@ -222,12 +222,12 @@ join M_PriceList on M_PriceList.id=M_Parties.PriceList_id'''
 
                     Partys.append({
                         
-                        "PartyID": PartyData.id,
-                        "PartyName": PartyData.Name,
+                        "id": PartyData.id,
+                        "Name": PartyData.Name,
                         "PartyType": PartyData.PartyTypeName,
-                        "CompanyName": PartyData.CompanyName,
-                        "PriceListName" : PartyData.PriceListName,
-                        "StatusName" : PartyData.StatesName
+                        "Company": PartyData.CompanyName,
+                        "PriceList" : PartyData.PriceListName,
+                        "State" : PartyData.StatesName
                     })
                 
                 if not PartyQuery:
