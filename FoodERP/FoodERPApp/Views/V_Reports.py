@@ -1851,7 +1851,7 @@ where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s and M_PriceList.id in (%s
                             "FE2ItemID": row.id,
                             "SAPCode": row.SAPItemCode,
                             "Barcode": row.BarCode,
-                            "HSNCode": row.HSNCode,
+                            "HSNCode": '`'+ row.HSNCode,
                             "Company": row.CompanyName,
                             "SKUStatus(T,F)": row.isActive,
                             "BoxSize": row.BoxSize,
@@ -2627,14 +2627,14 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                                 join M_Scheme on M_Scheme.QRPrefix=LEFT(I.VoucherCode,3)
                                 join M_SchemeType on  M_Scheme.SchemeTypeID_id=M_SchemeType.id
                                 join M_Parties on M_Parties.id=I.Party
-                                left join 
-                                (SELECT I.InvoiceDate,I.FullInvoiceNumber,I.Party,SUM(aa.DiscountAmount) AS TotalDiscountAmount
+                                left join
+                                (SELECT InS.scheme, I.Party,SUM(aa.DiscountAmount) AS TotalDiscountAmount
                                 FROM SweetPOS.T_SPOSInvoices AS I
                                 JOIN SweetPOS.TC_SPOSInvoiceItems AS aa ON I.id = aa.Invoice_id
-                                where I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions}
-                                GROUP BY I.InvoiceDate,I.FullInvoiceNumber,I.Party) AS SweetPOSDiscount 
-                                    ON SweetPOSDiscount.InvoiceDate = I.InvoiceDate
-                                    AND SweetPOSDiscount.FullInvoiceNumber = I.InvoiceNumber
+                                join SweetPOS.TC_InvoicesSchemes InS on InS.Invoice_id=I.id
+                                where I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss}
+                                GROUP BY InS.scheme,I.Party) AS SweetPOSDiscount
+                                    ON SweetPOSDiscount.scheme = M_Scheme.id
                                     AND SweetPOSDiscount.Party = I.Party
                                 where UsageType= 'online' and I.IsActive = 0  
                                 and I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss}
@@ -2647,21 +2647,21 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                                 join M_Parties on M_Parties.id=I.Party
                                 left join M_Scheme on M_Scheme.QRPrefix=LEFT(I.VoucherCode,3)
                                 join M_SchemeType on  M_Scheme.SchemeTypeID_id=M_SchemeType.id
-                                left join 
-                                (SELECT I.InvoiceDate,I.FullInvoiceNumber,I.Party,SUM(aa.DiscountAmount) AS TotalDiscountAmount
+                                left join
+                                (SELECT InS.scheme, I.Party,SUM(aa.DiscountAmount) AS TotalDiscountAmount
                                 FROM SweetPOS.T_SPOSInvoices AS I
                                 JOIN SweetPOS.TC_SPOSInvoiceItems AS aa ON I.id = aa.Invoice_id
-                                where I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions}
-                                GROUP BY I.InvoiceDate,I.FullInvoiceNumber,I.Party) AS SweetPOSDiscount 
-                                    ON SweetPOSDiscount.InvoiceDate = I.InvoiceDate
-                                    AND SweetPOSDiscount.FullInvoiceNumber = I.InvoiceNumber
+                                join SweetPOS.TC_InvoicesSchemes InS on InS.Invoice_id=I.id
+                                where I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss1}
+                                GROUP BY InS.scheme,I.Party) AS SweetPOSDiscount
+                                    ON SweetPOSDiscount.scheme = M_Scheme.id
                                     AND SweetPOSDiscount.Party = I.Party
                                 where UsageType= 'offline' 
                                 and I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss1}
                                 group by  M_Scheme.id ,M_Parties.id,M_Scheme.SchemeValue)a
                                  order by PartyID ''')
                 
-                # print(CouponCodeRedemptionQuery)
+                print(CouponCodeRedemptionQuery)
                 
                 CodeRedemptionData = []
                 i=1
