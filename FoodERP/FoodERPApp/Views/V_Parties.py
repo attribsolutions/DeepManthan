@@ -170,29 +170,26 @@ class M_PartiesFilterView2(CreateAPIView):
                 IsRetailer = Logindata['IsRetailer']
                 EmployeeID = Logindata['EmployeeID']
 
+                qq='''SELECT M_Parties.id,M_Parties.Name,M_PartyType.Name PartyTypeName,C_Companies.Name CompanyName ,M_PriceList.Name PriceListName,M_States.Name StatesName
+FROM M_Parties
+join C_Companies on C_Companies.id=M_Parties.Company_id
+join M_PartyType on M_PartyType.id=M_Parties.PartyType_id
+join M_States on M_States.id=M_Parties.State_id
+join M_PriceList on M_PriceList.id=M_Parties.PriceList_id'''
+                
                 if int(RoleID) == 1:
-                     PartyQuery=M_Parties.objects.raw(f'''SELECT M_Parties.id,M_Parties.Name,M_PartyType.Name PartyTypeName,M_Parties.Company_id
-                                                        FROM M_Parties
-                                                        join C_Companies on C_Companies.id=M_Parties.Company_id
-                                                        join M_PartyType on M_PartyType.id=M_Parties.PartyType_id
-                                                        where M_PartyType.Company_id ={CompanyID}''')
+                     PartyQuery=M_Parties.objects.raw(f'''{qq} where M_PartyType.Company_id ={CompanyID}''')
                 elif int(RoleID) ==2:
                     if IsSCMCompany == 0:
-                            PartyQuery=M_Parties.objects.raw(f'''SELECT M_Parties.id,M_Parties.Name,M_PartyType.Name PartyTypeName,M_Parties.Company_id
-                                                                FROM M_Parties
-                                                                join C_Companies on C_Companies.id=M_Parties.Company_id
-                                                                join M_PartyType on M_PartyType.id=M_Parties.PartyType_id
+                            PartyQuery=M_Parties.objects.raw(f'''{qq}
                                                                 where M_Parties.Company_id in({CompanyID}) and M_PartyType.IsRetailer = 0 ''')
                     else:
-                            PartyQuery=M_Parties.objects.raw(f'''SELECT M_Parties.id,M_Parties.Name,M_PartyType.Name PartyTypeName,M_Parties.Company_id
-                                                                FROM M_Parties
-                                                                join C_Companies on C_Companies.id=M_Parties.Company_id
-                                                                join M_PartyType on M_PartyType.id=M_Parties.PartyType_id
+                            PartyQuery=M_Parties.objects.raw(f'''{qq}
                                                                 where C_Companies.CompanyGroup_id={CompanyGroupID} and M_PartyType.IsSCM = {IsSCMCompany} and M_PartyType.IsRetailer = 0 ;''')
                 else:
                     
                     EmployeeTypecheck = M_Employees.objects.raw(f'''select 1 as id, M_EmployeeTypes.IsSalesTeamMember SalesTeam from M_Employees join M_EmployeeTypes on M_EmployeeTypes.id=M_Employees.EmployeeType_id where M_Employees.id={EmployeeID}''')
-                    print(EmployeeTypecheck[0].SalesTeam)
+                    # print(EmployeeTypecheck[0].SalesTeam)
                     
                     if int(EmployeeTypecheck[0].SalesTeam) == 1:
                         
@@ -202,28 +199,18 @@ class M_PartiesFilterView2(CreateAPIView):
                             PartyList = [int(p.strip()) for p in party_string.split(',') if p.strip().isdigit()]
                             Party = ','.join(str(p) for p in PartyList)
                         
-                            PartyQuery=M_Parties.objects.raw(f'''SELECT M_Parties.id,M_Parties.Name,M_PartyType.Name PartyTypeName,M_Parties.Company_id
-                                                        FROM M_Parties
-                                                        join C_Companies on C_Companies.id=M_Parties.Company_id
-                                                        join M_PartyType on M_PartyType.id=M_Parties.PartyType_id
-                                                        where M_Parties.id in( {Party})  ''')
+                            PartyQuery=M_Parties.objects.raw(f'''{qq} where M_Parties.id in( {Party})  ''')
                     else:
                         q = M_Roles.objects.filter(id=RoleID).values("isSCMRole")
                         
                         if q[0]['isSCMRole'] == 1:
                         
                             if IsRetailer == 1:
-                                PartyQuery=M_Parties.objects.raw(f'''SELECT M_Parties.id,M_Parties.Name,M_PartyType.Name PartyTypeName,M_Parties.Company_id
-                                                        FROM M_Parties
-                                                        join C_Companies on C_Companies.id=M_Parties.Company_id
-                                                        join M_PartyType on M_PartyType.id=M_Parties.PartyType_id 
+                                PartyQuery=M_Parties.objects.raw(f'''{qq}
                                                         join MC_PartySubParty on MC_PartySubParty.SubParty_id=M_Parties.id
                                                         where MC_PartySubParty.Party_id={PartyID} and M_PartyType.IsRetailer=1 and IsApprovedParty =0   ''')
                             else:
-                                PartyQuery=M_Parties.objects.raw(f'''SELECT M_Parties.id,M_Parties.Name,M_PartyType.Name PartyTypeName,M_Parties.Company_id
-                                                        FROM M_Parties
-                                                        join C_Companies on C_Companies.id=M_Parties.Company_id
-                                                        join M_PartyType on M_PartyType.id=M_Parties.PartyType_id 
+                                PartyQuery=M_Parties.objects.raw(f'''{qq}
                                                         join MC_PartySubParty on MC_PartySubParty.SubParty_id=M_Parties.id
                                                         where MC_PartySubParty.Party_id={PartyID} and M_PartyType.IsRetailer=0 and IsApprovedParty =0   ''')
 
@@ -235,12 +222,12 @@ class M_PartiesFilterView2(CreateAPIView):
 
                     Partys.append({
                         
-                        
                         "PartyID": PartyData.id,
                         "PartyName": PartyData.Name,
                         "PartyType": PartyData.PartyTypeName,
-                        "Company_id": PartyData.Company_id,
-                        
+                        "CompanyName": PartyData.CompanyName,
+                        "PriceListName" : PartyData.PriceListName,
+                        "StatusName" : PartyData.StatesName
                     })
                 
                 if not PartyQuery:

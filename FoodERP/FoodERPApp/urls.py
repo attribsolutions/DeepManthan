@@ -426,7 +426,7 @@ urlpatterns = [
             url(r'Parties/([0-9]+)$', M_PartiesViewSecond.as_view()),
             url(r'Parties$', M_PartiesView.as_view()),
             url(r'PartiesFilter$', M_PartiesFilterView.as_view()),
-            url(r'_Party_List_$', M_PartiesFilterView2.as_view()),
+            url(r'Party_List$', M_PartiesFilterView2.as_view()),
             url(r'ImportRetailerBulkdata$', BulkRetailerDataView.as_view()),
             url(r'Divisions/([0-9]+)$', DivisionsView.as_view()),
             url(r'PriceList/([0-9]+)$', PriceListViewSecond.as_view()),
