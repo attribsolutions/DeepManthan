@@ -2609,20 +2609,22 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                 ToDate = MATAData['ToDate']
                 Party = MATAData['Party']
                 SchemeID=MATAData['SchemeID']
+                Party_list = Party.split(",")
+                Scheme_list = SchemeID.split(",")
                 
                 conditions,ss,ss1 = '','',''
 
-                if int(Party) != 0:
-                    conditions=f" And I.Party = {Party}"
-
-                if int(SchemeID) != 0:
-                    ss=f" And M_Scheme.id = {SchemeID}"
-                    ss1=f" and InS.scheme= {SchemeID}"
+                if Party_list and any(p.strip() != '0' for p in Party_list):
+                    conditions = f" AND I.Party IN ({','.join(Party_list)})"
+                if Scheme_list and any(s.strip() != '0' for s in Scheme_list):
+                    ss = f" AND M_Scheme.id IN ({','.join(Scheme_list)})"
+                    ss1 = f" AND InS.scheme IN ({','.join(Scheme_list)})"
+                   
                 
                 
                
                 CouponCodeRedemptionQuery = M_GiftVoucherCode.objects.raw(f'''select * from (select M_Scheme.id,M_Scheme.SchemeName,M_Scheme.ShortName,M_Parties.id PartyID ,M_Parties.Name PartyName,count(*)count,
-                                case when M_SchemeType.BillEffect=0 then sum(M_Scheme.SchemeValue) else sum(TotalDiscountAmount) end DiscountAmount,M_Scheme.SchemeValue
+                                case when M_SchemeType.BillEffect=0 then sum(M_Scheme.SchemeValue) else (TotalDiscountAmount) end DiscountAmount,M_Scheme.SchemeValue
                                from M_GiftVoucherCode I 
                                 join M_Scheme on M_Scheme.QRPrefix=LEFT(I.VoucherCode,3)
                                 join M_SchemeType on  M_Scheme.SchemeTypeID_id=M_SchemeType.id
@@ -2632,7 +2634,7 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                                 FROM SweetPOS.T_SPOSInvoices AS I
                                 JOIN SweetPOS.TC_SPOSInvoiceItems AS aa ON I.id = aa.Invoice_id
                                 join SweetPOS.TC_InvoicesSchemes InS on InS.Invoice_id=I.id
-                                where I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss}
+                                where I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss1}
                                 GROUP BY InS.scheme,I.Party) AS SweetPOSDiscount
                                     ON SweetPOSDiscount.scheme = M_Scheme.id
                                     AND SweetPOSDiscount.Party = I.Party
@@ -2641,7 +2643,7 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                                 group by  M_Scheme.id ,M_Parties.id,M_Scheme.SchemeValue
                                 union 
                                 select M_Scheme.id,M_Scheme.SchemeName,M_Scheme.ShortName,M_Parties.id PartyID ,M_Parties.Name PartyName,count(*)count,
-                                case when M_SchemeType.BillEffect=0 then sum(M_Scheme.SchemeValue) else sum(TotalDiscountAmount) end DiscountAmount,M_Scheme.SchemeValue
+                                case when M_SchemeType.BillEffect=0 then sum(M_Scheme.SchemeValue) else (TotalDiscountAmount) end DiscountAmount,M_Scheme.SchemeValue
                                from SweetPOS.T_SPOSInvoices I
                                 join SweetPOS.TC_InvoicesSchemes InS on InS.Invoice_id=I.id
                                 join M_Parties on M_Parties.id=I.Party
@@ -2659,9 +2661,9 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                                 where UsageType= 'offline' 
                                 and I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss1}
                                 group by  M_Scheme.id ,M_Parties.id,M_Scheme.SchemeValue)a
-                                 order by PartyID ''')
+                                 order by PartyID ''',)
                 
-                print(CouponCodeRedemptionQuery)
+                # print(CouponCodeRedemptionQuery)
                 
                 CodeRedemptionData = []
                 i=1
