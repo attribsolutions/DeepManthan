@@ -2532,7 +2532,7 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                                 where I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss1}
                                 GROUP BY I.InvoiceDate,I.FullInvoiceNumber,I.Party)
                 
-                                select M_Scheme.id ,M_Scheme.SchemeValue,M_Parties.Name PartyName,I.VoucherCode,I.InvoiceDate,
+                                select M_Scheme.id,M_Scheme.SchemeName,M_Scheme.FromPeriod,M_Scheme.ToPeriod ,M_Scheme.SchemeValue,M_Parties.Name PartyName,I.VoucherCode,I.InvoiceDate,
                                 I.InvoiceAmount,I.InvoiceNumber,
                                 case when M_SchemeType.BillEffect=0 then M_Scheme.SchemeValue else TotalDiscountAmount end DiscountAmount
                                 from M_GiftVoucherCode I 
@@ -2546,7 +2546,7 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                                 where UsageType= 'online' and I.IsActive = 0  
                                 and I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss}
                                 union 
-                                select M_Scheme.id ,M_Scheme.SchemeValue,M_Parties.Name PartyName,I.VoucherCode,I.InvoiceDate,
+                                select M_Scheme.id, M_Scheme.SchemeName,M_Scheme.FromPeriod,M_Scheme.ToPeriod ,M_Scheme.SchemeValue,M_Parties.Name PartyName,I.VoucherCode,I.InvoiceDate,
                                 I.GrandTotal InvoiceAmount,I.FullInvoiceNumber ,
                                 case when M_SchemeType.BillEffect=0 then M_Scheme.SchemeValue else TotalDiscountAmount end DiscountAmount
                                 from SweetPOS.T_SPOSInvoices I
@@ -2579,6 +2579,8 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                         "PartyName": CouponCode.PartyName,
                         "client": CouponCode.client,
                         "SchemeID": CouponCode.id,
+                        "SchemeName" : CouponCode.SchemeName,
+                        "SchemePeriod" : str(CouponCode.FromPeriod) + ' - ' + str(CouponCode.ToPeriod),
                         "DiscountAmount": CouponCode.DiscountAmount
                     })
                     i=i+1
