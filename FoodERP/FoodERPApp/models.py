@@ -2518,6 +2518,8 @@ class M_GiftVoucherCode(models.Model):
             models.Index(fields=['client', 'ClientSaleID']),
             models.Index(fields=['Party', 'InvoiceDate','InvoiceNumber']),
             models.Index(fields=['Party', 'InvoiceDate','InvoiceNumber','client', 'ClientSaleID']),
+            models.Index(fields=['Party', 'InvoiceDate','VoucherCode']),
+            
         ] 
 
 # class debug_log(models.Model):
@@ -2548,7 +2550,7 @@ class M_SchemeType(models.Model):
         db_table = "M_SchemeType"
 
 class M_Scheme(models.Model):
-    SchemeName = models.CharField(max_length=100)    
+    SchemeName = models.CharField(max_length=200)    
     SchemeTypeID = models.ForeignKey(M_SchemeType,related_name='SchemeTypeID', on_delete=models.CASCADE) 
     SchemeValue  = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True) 
     ValueIn=models.CharField(max_length=100)
@@ -2566,7 +2568,7 @@ class M_Scheme(models.Model):
     Column1 = models.TextField(null=True, blank=True)
     Column2 = models.TextField(null=True, blank=True)
     Column3 = models.TextField(null=True, blank=True)
-    ShortName = models.CharField(max_length=10)
+    ShortName = models.CharField(max_length=200)
 
     class Meta:
         db_table = "M_Scheme"
