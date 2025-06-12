@@ -182,6 +182,11 @@ class MachineTypeListView(CreateAPIView):
                     MachineTypeIDs = a.MachineType.split(',') if a.MachineType else []
                     MachineTypeDetails = []
                     RoleIDs = []
+                    role_names = []
+                    IdentifyKey = []
+                    MachineRole_Name = ""
+                    RoleIdentifyKey = ""
+
                     
                     for MachineTypeID in MachineTypeIDs:
                         subquery = M_GeneralMaster.objects.filter(id=MachineTypeID.strip()).values('id', 'Name').first() 
