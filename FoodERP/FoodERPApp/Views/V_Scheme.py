@@ -125,7 +125,7 @@ class SchemeListperMonthView(CreateAPIView):
                                                         FROM M_Scheme
                                                         WHERE FromPeriod <= '{ToDate}'  
                                                         AND ToPeriod >= '{FromDate}' ''')
-                print(Scheme_data)
+                # print(Scheme_data)
                 Scheme_data = SchemeSerializer1(Scheme_data,many=True)
                 log_entry = create_transaction_logNew(request, Scheme_data,0,'',328,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': Scheme_data.data})
