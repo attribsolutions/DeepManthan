@@ -94,12 +94,13 @@ class T_SPOSInvoices(models.Model):
             models.Index(fields=['InvoiceDate']),
             models.Index(fields=['Customer']),
             models.Index(fields=['Party']),
-            models.Index(fields=['NetAmount']),
+            # models.Index(fields=['NetAmount']),
             models.Index(fields=['CreatedBy']),
             # If you need to speed up queries on multiple fields, consider composite indexes
             models.Index(fields=['Party', 'InvoiceDate','IsDeleted']),
             models.Index(fields=['Customer', 'InvoiceDate']),
             models.Index(fields=['ClientID', 'Party']),
+            models.Index(fields=['Party', 'InvoiceDate','FullInvoiceNumber']),
         ]
 
 

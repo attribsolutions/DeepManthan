@@ -2518,6 +2518,8 @@ class M_GiftVoucherCode(models.Model):
             models.Index(fields=['client', 'ClientSaleID']),
             models.Index(fields=['Party', 'InvoiceDate','InvoiceNumber']),
             models.Index(fields=['Party', 'InvoiceDate','InvoiceNumber','client', 'ClientSaleID']),
+            models.Index(fields=['Party', 'InvoiceDate','VoucherCode']),
+            
         ] 
 
 # class debug_log(models.Model):
