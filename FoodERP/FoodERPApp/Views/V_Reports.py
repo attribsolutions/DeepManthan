@@ -15,6 +15,7 @@ from django.db import connection
 from ..Serializer.S_Reports import *
 from ..models import *
 from datetime import datetime, timedelta
+from django.db.models import Sum
 
 class PartyLedgerReportView(CreateAPIView):  
     permission_classes = (IsAuthenticated,)
@@ -2527,6 +2528,7 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                 CouponCodeRedemptionQuery = M_GiftVoucherCode.objects.raw(f''' with SweetPOSDiscount as (SELECT I.InvoiceDate,I.FullInvoiceNumber,I.Party,SUM(aa.DiscountAmount) AS TotalDiscountAmount
                                 FROM SweetPOS.T_SPOSInvoices AS I
                                 JOIN SweetPOS.TC_SPOSInvoiceItems AS aa ON I.id = aa.Invoice_id
+                                join SweetPOS.TC_InvoicesSchemes InS on InS.Invoice_id=I.id
                                 where I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss1}
                                 GROUP BY I.InvoiceDate,I.FullInvoiceNumber,I.Party)
                 
@@ -2559,7 +2561,7 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                                 where UsageType= 'offline' 
                                 and I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss1} ''')
                 
-                # print(CouponCodeRedemptionQuery)
+                print(CouponCodeRedemptionQuery)
                 
                 i=1
                 for CouponCode in CouponCodeRedemptionQuery:
@@ -2914,4 +2916,113 @@ class BillDeletedSummaryReportView(CreateAPIView):
 
         except Exception as e:
             log_entry = create_transaction_logNew(request, BillData, Party, "BillDeletedSummaryReport: " + str(e), 33, 0)
+            return JsonResponse({"StatusCode": 400,"Status": False,"Message": str(e), "Data": [],})
+
+class ItemWiseConsumptionReportView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    @transaction.atomic
+    def post(self, request):
+        itemData = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                FromDate = itemData['FromDate']
+                ToDate = itemData['ToDate']
+                Party = itemData['Party']
+                ItemID =itemData['ItemID']                
+                finish_products = []
+                query = T_MaterialIssue.objects.raw(f'''SELECT 1 id,D.RawItemid, D.Item_id,
+                    D.FinishItemName,D.RawItemName,
+                    IFNULL(D.Quantity, 0) AS Quantity,
+                    IFNULL(E.ProductionQuantity, 0) AS ProductionQuantity,
+                    D.UnitName,UnitID_id
+                    FROM (
+                        SELECT 
+                        FinishItem.id Item_id ,RawItem.id RawItemid,FinishItem.Name FinishItemName,RawItem.Name RawItemName,
+                        M_Units.Name UnitName,MC_ItemUnits.UnitID_id ,SUM(TC_MaterialIssueItems.IssueQuantity) AS Quantity
+                        FROM T_MaterialIssue  
+                        JOIN TC_MaterialIssueItems ON TC_MaterialIssueItems.MaterialIssue_id = T_MaterialIssue.ID
+                        JOIN M_Items FinishItem ON FinishItem.id=T_MaterialIssue.Item_id
+                        JOIN M_Items RawItem ON RawItem.id=TC_MaterialIssueItems.Item_id
+                        JOIN MC_ItemUnits ON MC_ItemUnits.id=T_MaterialIssue.Unit_id
+                        JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id
+                        WHERE T_MaterialIssue.MaterialIssueDate BETWEEN '{FromDate}' AND '{ToDate}'  
+                        AND TC_MaterialIssueItems.Item_id = {ItemID}  
+                        AND T_MaterialIssue.Party_id = {Party}       
+                        GROUP BY FinishItem.id
+                        ) D
+                    LEFT JOIN (
+                        SELECT 
+                            T_Production.Item_id AS ItemID2,
+                            SUM(T_Production.ActualQuantity) AS ProductionQuantity 
+                        FROM T_Production  
+                        JOIN M_Items ON M_Items.ID = T_Production.Item_id 
+                        WHERE T_Production.ProductionDate BETWEEN '{FromDate}' AND '{ToDate}' 
+                        AND T_Production.Division_id = {Party}                       
+                        GROUP BY T_Production.Item_id
+                    ) AS E ON D.Item_id = E.ItemID2
+                    WHERE IFNULL(D.Quantity, 0) != 0 OR IFNULL(E.ProductionQuantity, 0) != 0 ''')  
+                
+
+                raw_material_name = ""
+                raw_material_id = 0
+                raw_material_unit = ""
+                query_list = list(query)
+                if not query_list:
+                    log_entry = create_transaction_logNew(request, itemData, Party, "No Data found", 480, 0, FromDate, ToDate, 0)
+                    return JsonResponse({"StatusCode": 204, "Status": True, "Message": "No Data found.", "Data": []})
+                query2 = O_DateWiseLiveStock.objects.filter(
+                        StockDate=FromDate, Party=Party, Item=ItemID).values('OpeningBalance', 'Unit_id')
+
+                if query2:
+
+                    unit_id = query[0].UnitID_id
+                    OpeningBalance = UnitwiseQuantityConversion(
+                        ItemID, query2[0]['OpeningBalance'], 0, query2[0]['Unit_id'], 0, unit_id, 0).ConvertintoSelectedUnit()
+                else:
+
+                    OpeningBalance = 0.00
+
+                query3 = O_DateWiseLiveStock.objects.filter(
+                    StockDate=ToDate, Party=Party, Item=ItemID).values('ClosingBalance', 'Unit_id')
+
+                if query3:
+
+                    ClosingBalance = UnitwiseQuantityConversion(
+                        ItemID, query3[0]['ClosingBalance'], 0, query3[0]['Unit_id'], 0, unit_id, 0).ConvertintoSelectedUnit()
+
+                else:
+                    ClosingBalance = 0.00
+                    
+                RecieveQty = TC_GRNItems.objects.filter(
+                    GRN__GRNDate__range=[FromDate, ToDate],
+                    GRN__Customer_id=Party,
+                    Item_id=ItemID
+                ).aggregate(RecieveQuantity=Sum('Quantity'))
+                RecieveQuantity=RecieveQty['RecieveQuantity'] or 0.00
+                for row in query:
+                    raw_material_name = row.RawItemName
+                    raw_material_id = row.RawItemid
+                    raw_material_unit = row.UnitName                    
+                    finish_products.append({
+                        "FinishItemID": row.Item_id,
+                        "FinishProduct": row.FinishItemName,
+                        "UsedQty": float(row.Quantity),
+                        "ProductionQty": float(row.ProductionQuantity),
+                    })
+                
+            response_data = {
+            "RawMaterial": raw_material_name,
+            "RawMaterialID": raw_material_id,
+            "RawMaterialUnit": raw_material_unit,
+             "OpeningBalance":OpeningBalance,
+            "ClosingBalance":ClosingBalance,
+            "RecieveQuantity":RecieveQuantity,
+            "FinishproductDetails": finish_products 
+            }
+                
+            log_entry = create_transaction_logNew(request, itemData, Party, "Success", 480, 0, FromDate, ToDate, 0)
+            return JsonResponse({"StatusCode": 204, "Status": True,"Message": "Success.","Data": response_data, })
+
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, itemData, Party, "ItemwiseConsumptionReport: " + str(e), 33, 0)
             return JsonResponse({"StatusCode": 400,"Status": False,"Message": str(e), "Data": [],})

@@ -814,6 +814,7 @@ urlpatterns = [
 #Scheme Details:
               url(r'SchemeDetails$',SchemeView.as_view()), 
               url(r'SchemeList$',SchemeListView.as_view()), 
+              url(r'SchemeListperMonth$',SchemeListperMonthView.as_view()), 
             #   url(r'SaveScheme$',SaveSchemeView.as_view()), 
               # url(r'SchemeSingleGet/([0-9]+)$',SchemeDetailsView.as_view()), 
               url(r'Scheme$',SchemeDetailsView.as_view()), 
@@ -841,7 +842,8 @@ urlpatterns = [
               
 #PhonePay 
               url(r'PhonePayResponse$',PhonePayReceiveMsg.as_view()), 
-
+#ItemConsumptionReport
+              url(r'ItemConsumptionReport$',ItemWiseConsumptionReportView.as_view()),
               
            
               
