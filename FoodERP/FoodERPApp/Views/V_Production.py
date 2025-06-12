@@ -11,7 +11,7 @@ from ..Views.V_TransactionNumberfun import SystemBatchCodeGeneration
 from ..Serializer.S_Production import *
 from ..models import *  
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix       
-
+from django.db.models import F, ExpressionWrapper, DecimalField
 class MaterialIssueDetailsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication_class = JSONWebTokenAuthentication
@@ -40,7 +40,25 @@ class ProductionList(CreateAPIView):
                 FromDate = Productiondata['FromDate']
                 ToDate = Productiondata['ToDate']
                 DivisionID=Productiondata['Party']
-                query = T_Production.objects.filter(ProductionDate__range=[FromDate,ToDate],Division_id=DivisionID,IsDelete=0)
+                query = T_Production.objects.filter(ProductionDate__range=[FromDate,ToDate],Division_id=DivisionID,IsDelete=0).annotate(
+                    EstimatedOutputQty=ExpressionWrapper(
+                        F('Item__m_billofmaterial__EstimatedOutputQty') * F('NumberOfLot'),
+                        output_field=DecimalField(max_digits=15, decimal_places=2)
+                    )
+                )
+
+                # query = T_Production.objects.raw(f'''SELECT 
+                # T_Production.id,
+                # T_Production.EstimatedQuantity,
+                # T_Production.ActualQuantity,
+                # T_Production.NumberOfLot,                
+                # (M_BillOfMaterial.EstimatedOutputQty * T_Production.NumberOfLot) AS EstimatedOutputQty
+                # FROM T_Production
+                # JOIN M_BillOfMaterial ON M_BillOfMaterial.Item_id = T_Production.Item_id
+                # WHERE T_Production.ProductionDate BETWEEN '{FromDate}' AND '{ToDate}'
+                # AND T_Production.Division_id = {DivisionID}
+                # AND T_Production.IsDelete = 0 ''')    
+                # print(query.query)
                 if query:
                     Production_Serializer = H_ProductionSerializerforGET(query, many=True).data                  
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Production_Serializer})  
