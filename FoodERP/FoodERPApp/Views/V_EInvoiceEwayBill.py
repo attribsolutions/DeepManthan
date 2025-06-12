@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
-
+from collections import defaultdict
 from SweetPOS.models import *
 
 from ..Serializer.S_EInvoiceEwayBill import *
@@ -45,7 +45,6 @@ class Uploaded_EInvoice(CreateAPIView):
     def get(self, request, id=0,userID=0,Mode=0):
         try:
             with transaction.atomic():
-
                 access_token = generate_Access_Token()
                 aa=access_token.split('!')
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': access_token})
@@ -187,7 +186,32 @@ where Invoice_id=%s group by SPOSInvoiceItems.Item,SPOSInvoiceItems.HSNCode,M_Un
                             'batch_details': Batchlist
                         })
 
-                   
+                    merged_items = {}
+
+                    for item in InvoiceItemDetails:
+                        key = item['item_serial_number']
+
+                        if key not in merged_items:
+                            # First occurrence — copy entire item dict
+                            merged_items[key] = item
+                            merged_items[key]['batch_details'] = list(item.get('batch_details', []))
+                        else:
+                            # Merge quantities and amounts safely as floats
+                            merged_items[key]['quantity'] = float(merged_items[key].get('quantity', 0)) + float(item.get('quantity', 0))
+                            merged_items[key]['discount'] = float(merged_items[key].get('discount', 0)) + float(item.get('discount', 0))
+                            merged_items[key]['igst_amount'] = float(merged_items[key].get('igst_amount', 0)) + float(item.get('igst_amount', 0))
+                            merged_items[key]['cgst_amount'] = float(merged_items[key].get('cgst_amount', 0)) + float(item.get('cgst_amount', 0))
+                            merged_items[key]['sgst_amount'] = float(merged_items[key].get('sgst_amount', 0)) + float(item.get('sgst_amount', 0))
+                            merged_items[key]['total_amount'] = float(merged_items[key].get('total_amount', 0)) + float(item.get('total_amount', 0))
+                            merged_items[key]['assessable_value'] = float(merged_items[key].get('assessable_value', 0)) + float(item.get('assessable_value', 0))
+                            merged_items[key]['total_item_value'] = float(merged_items[key].get('total_item_value', 0)) + float(item.get('total_item_value', 0))
+                            # Merge batch_details
+                            merged_items[key]['batch_details'].extend(item.get('batch_details', []))
+
+                    # Replace original list with merged items list
+                    InvoiceItemDetails = list(merged_items.values())
+
+
                    
                     transaction_details.append({
                         "supply_type": 'B2B'
@@ -280,6 +304,7 @@ where Invoice_id=%s group by SPOSInvoiceItems.Item,SPOSInvoiceItems.HSNCode,M_Un
                     # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': '', 'Data': InvoiceData[0]})
                     EInvoice_URL = 'https://pro.mastersindia.co/generateEinvoice'
                     payload1 = json.dumps(InvoiceData[0])
+                    # print(payload1)
                     # payload = json.loads(payload1)
                     headers = {
                         'Content-Type': 'application/json',
@@ -691,7 +716,7 @@ where Invoice_id={Invoice.id}''')
                                     'transporter_document_number': "",
                                     'transporter_document_date': "",
                                     'transportation_mode': "road",
-                                    'transportation_distance': distance_dict['results']['distance'],
+                                    'transportation_distance': 0,
                                     'vehicle_number': Invoice.VehicleNumber,
                                     'transporter_name': "",
                                     'vehicle_type': "Regular",
