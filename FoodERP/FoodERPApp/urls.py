@@ -842,7 +842,8 @@ urlpatterns = [
               
 #PhonePay 
               url(r'PhonePayResponse$',PhonePayReceiveMsg.as_view()), 
-
+#ItemConsumptionReport
+              url(r'ItemConsumptionReport$',ItemWiseConsumptionReportView.as_view()),
               
            
               
