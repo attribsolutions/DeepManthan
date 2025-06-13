@@ -53,7 +53,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                         approved_customer = M_Parties.objects.filter(id=Customer).values('IsApprovedParty').first()
 
                         if approved_customer:
-                            if approved_customer['IsApprovedParty'] == 1:
+                            if approved_customer['IsApprovedParty'] == 0:
                                 subparty_exists = MC_PartySubParty.objects.filter(Party_id=Supplier,SubParty_id=Customer).exists()
                                 if not subparty_exists:
                                     MC_PartySubParty.objects.create(Party_id=Supplier,SubParty_id=Customer,CreatedBy=430,UpdatedBy=430)
