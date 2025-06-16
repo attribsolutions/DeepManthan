@@ -2534,7 +2534,7 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                 
                                 select M_Scheme.id,M_Scheme.SchemeName,M_Scheme.FromPeriod,M_Scheme.ToPeriod ,M_Scheme.SchemeValue,M_Parties.Name PartyName,I.VoucherCode,I.InvoiceDate,
                                 I.InvoiceAmount,I.InvoiceNumber,
-                                case when M_SchemeType.BillEffect=0 then M_Scheme.SchemeValue else TotalDiscountAmount end DiscountAmount
+                                IFNULL((case when M_SchemeType.BillEffect=0 then M_Scheme.SchemeValue else TotalDiscountAmount end),0) DiscountAmount
                                 from M_GiftVoucherCode I 
                                 join M_Scheme on M_Scheme.QRPrefix=LEFT(I.VoucherCode,3)
                                 join M_SchemeType on  M_Scheme.SchemeTypeID_id=M_SchemeType.id
@@ -2548,7 +2548,7 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                                 union 
                                 select M_Scheme.id, M_Scheme.SchemeName,M_Scheme.FromPeriod,M_Scheme.ToPeriod ,M_Scheme.SchemeValue,M_Parties.Name PartyName,I.VoucherCode,I.InvoiceDate,
                                 I.GrandTotal InvoiceAmount,I.FullInvoiceNumber ,
-                                case when M_SchemeType.BillEffect=0 then M_Scheme.SchemeValue else TotalDiscountAmount end DiscountAmount
+                                ifnull((case when M_SchemeType.BillEffect=0 then M_Scheme.SchemeValue else (TotalDiscountAmount) end),0) DiscountAmount
                                 from SweetPOS.T_SPOSInvoices I
                                 join SweetPOS.TC_InvoicesSchemes InS on InS.Invoice_id=I.id
                                 join M_Parties on M_Parties.id=I.Party
@@ -2580,8 +2580,8 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                         "client": CouponCode.client,
                         "SchemeID": CouponCode.id,
                         "SchemeName" : CouponCode.SchemeName,
-                        "SchemePeriod" : str(CouponCode.FromPeriod) + ' - ' + str(CouponCode.ToPeriod),
-                        "DiscountAmount": CouponCode.DiscountAmount
+                        "SchemePeriod" : str(CouponCode.FromPeriod) + ' To ' + str(CouponCode.ToPeriod),
+                        "DiscountAmount": round(CouponCode.DiscountAmount,0)
                     })
                     i=i+1
                 if CouponCodeRedemptionData:
@@ -2631,9 +2631,9 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                                 where I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss1}
                                 GROUP BY InS.scheme,I.Party)
                                                                           
-                                select M_Scheme.id,M_Scheme.SchemeName,M_Scheme.ShortName,M_Parties.id PartyID ,M_Parties.Name PartyName,count(*)count,
-                                case when M_SchemeType.BillEffect=0 then sum(M_Scheme.SchemeValue) else (TotalDiscountAmount) end DiscountAmount,M_Scheme.SchemeValue
-                               from M_GiftVoucherCode I 
+                                select M_Scheme.id,M_Scheme.SchemeName,M_Scheme.ShortName,M_Scheme.FromPeriod,M_Scheme.ToPeriod ,M_Parties.id PartyID ,M_Parties.Name PartyName,count(*)count,
+                                IFUNLL((case when M_SchemeType.BillEffect=0 then sum(M_Scheme.SchemeValue) else TotalDiscountAmount end ),0)DiscountAmount,M_Scheme.SchemeValue
+                                from M_GiftVoucherCode I 
                                 join M_Scheme on M_Scheme.QRPrefix=LEFT(I.VoucherCode,3)
                                 join M_SchemeType on  M_Scheme.SchemeTypeID_id=M_SchemeType.id
                                 join M_Parties on M_Parties.id=I.Party
@@ -2644,8 +2644,8 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                                 and I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss}
                                 group by  M_Scheme.id ,M_Parties.id,M_Scheme.SchemeValue
                                 union 
-                                select M_Scheme.id,M_Scheme.SchemeName,M_Scheme.ShortName,M_Parties.id PartyID ,M_Parties.Name PartyName,count(*)count,
-                                case when M_SchemeType.BillEffect=0 then sum(M_Scheme.SchemeValue) else (TotalDiscountAmount) end DiscountAmount,M_Scheme.SchemeValue
+                                select M_Scheme.id,M_Scheme.SchemeName,M_Scheme.ShortName,M_Scheme.FromPeriod,M_Scheme.ToPeriod ,M_Parties.id PartyID ,M_Parties.Name PartyName,count(*)count,
+                                IFNULL((case when M_SchemeType.BillEffect=0 then sum(M_Scheme.SchemeValue) else TotalDiscountAmount end),0) DiscountAmount,M_Scheme.SchemeValue
                                from SweetPOS.T_SPOSInvoices I
                                 join SweetPOS.TC_InvoicesSchemes InS on InS.Invoice_id=I.id
                                 join M_Parties on M_Parties.id=I.Party
@@ -2676,13 +2676,13 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                         # "InvoiceAmount": CouponCode.InvoiceAmount,
                         "PartyID": CouponCode.PartyID,
                         "FranchiseName": CouponCode.PartyName,
-                        # "client": CouponCode.client,
                         "SchemeID": CouponCode.id,
-                        "TotalClaimAmount": CouponCode.DiscountAmount,
+                        "TotalClaimAmount": round(CouponCode.DiscountAmount,2),
                         "SchemeName": CouponCode.SchemeName,
                         "VoucherCodeCount" : CouponCode.count,
                         "ClaimPerVoucher" : CouponCode.SchemeValue,
-                        "SchemeShortName" : CouponCode.ShortName
+                        "SchemeShortName" : CouponCode.ShortName,
+                        "SchemePeriod" : str(CouponCode.FromPeriod) + ' To ' + str(CouponCode.ToPeriod),
                     })
                     i=i+1
                 # --------- format output ---------------------
