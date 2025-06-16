@@ -2552,7 +2552,7 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                                 from SweetPOS.T_SPOSInvoices I
                                 join SweetPOS.TC_InvoicesSchemes InS on InS.Invoice_id=I.id
                                 join M_Parties on M_Parties.id=I.Party
-                                left join M_Scheme on M_Scheme.QRPrefix=LEFT(I.VoucherCode,3)
+                                join M_Scheme on M_Scheme.id=InS.scheme
                                 join M_SchemeType on  M_Scheme.SchemeTypeID_id=M_SchemeType.id
                                 left join  SweetPOSDiscount 
                                     ON SweetPOSDiscount.InvoiceDate = I.InvoiceDate
@@ -2561,7 +2561,7 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                                 where UsageType= 'offline' 
                                 and I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss1} ''')
                 
-                print(CouponCodeRedemptionQuery)
+                # print(CouponCodeRedemptionQuery)
                 
                 i=1
                 for CouponCode in CouponCodeRedemptionQuery:
@@ -2649,7 +2649,7 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                                from SweetPOS.T_SPOSInvoices I
                                 join SweetPOS.TC_InvoicesSchemes InS on InS.Invoice_id=I.id
                                 join M_Parties on M_Parties.id=I.Party
-                                left join M_Scheme on M_Scheme.QRPrefix=LEFT(I.VoucherCode,3)
+                                join M_Scheme on M_Scheme.id=InS.scheme
                                 join M_SchemeType on  M_Scheme.SchemeTypeID_id=M_SchemeType.id
                                 left join SweetPOSDiscount
                                     ON SweetPOSDiscount.scheme = M_Scheme.id
