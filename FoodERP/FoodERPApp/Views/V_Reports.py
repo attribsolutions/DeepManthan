@@ -2632,7 +2632,7 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                                 GROUP BY InS.scheme,I.Party)
                                                                           
                                 select M_Scheme.id,M_Scheme.SchemeName,M_Scheme.ShortName,M_Scheme.FromPeriod,M_Scheme.ToPeriod ,M_Parties.id PartyID ,M_Parties.Name PartyName,count(*)count,
-                                IFUNLL((case when M_SchemeType.BillEffect=0 then sum(M_Scheme.SchemeValue) else TotalDiscountAmount end ),0)DiscountAmount,M_Scheme.SchemeValue
+                                IFNULL((case when M_SchemeType.BillEffect=0 then sum(M_Scheme.SchemeValue) else TotalDiscountAmount end ),0)DiscountAmount,M_Scheme.SchemeValue
                                 from M_GiftVoucherCode I 
                                 join M_Scheme on M_Scheme.QRPrefix=LEFT(I.VoucherCode,3)
                                 join M_SchemeType on  M_Scheme.SchemeTypeID_id=M_SchemeType.id
