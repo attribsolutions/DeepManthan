@@ -2556,7 +2556,7 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                                 join M_SchemeType on  M_Scheme.SchemeTypeID_id=M_SchemeType.id
                                 left join  SweetPOSDiscount 
                                     ON SweetPOSDiscount.InvoiceDate = I.InvoiceDate
-                                    AND SweetPOSDiscount.FullInvoiceNumber = I.InvoiceNumber
+                                    AND SweetPOSDiscount.FullInvoiceNumber = I.FullInvoiceNumber
                                     AND SweetPOSDiscount.Party = I.Party
                                 where UsageType= 'offline' 
                                 and I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss1} ''')
