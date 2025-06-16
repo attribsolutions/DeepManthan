@@ -2528,6 +2528,7 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                 CouponCodeRedemptionQuery = M_GiftVoucherCode.objects.raw(f''' with SweetPOSDiscount as (SELECT I.InvoiceDate,I.FullInvoiceNumber,I.Party,SUM(aa.DiscountAmount) AS TotalDiscountAmount
                                 FROM SweetPOS.T_SPOSInvoices AS I
                                 JOIN SweetPOS.TC_SPOSInvoiceItems AS aa ON I.id = aa.Invoice_id
+                                join SweetPOS.TC_InvoicesSchemes InS on InS.Invoice_id=I.id
                                 where I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss1}
                                 GROUP BY I.InvoiceDate,I.FullInvoiceNumber,I.Party)
                 
@@ -2560,7 +2561,7 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                                 where UsageType= 'offline' 
                                 and I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss1} ''')
                 
-                # print(CouponCodeRedemptionQuery)
+                print(CouponCodeRedemptionQuery)
                 
                 i=1
                 for CouponCode in CouponCodeRedemptionQuery:

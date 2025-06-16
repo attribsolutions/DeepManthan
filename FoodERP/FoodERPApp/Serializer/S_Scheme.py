@@ -5,6 +5,11 @@ class SchemeSerializer(serializers.ModelSerializer):
     class Meta :
         model= M_Scheme
         fields = '__all__'
+
+class SchemeSerializer1(serializers.ModelSerializer):
+    class Meta :
+        model= M_Scheme
+        fields = ['id','SchemeName']      
         
 class SchemeTypeSerializer(serializers.ModelSerializer):
     class Meta :
