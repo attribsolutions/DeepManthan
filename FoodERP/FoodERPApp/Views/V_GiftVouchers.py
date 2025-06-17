@@ -304,6 +304,7 @@ class GiftVoucherUploadView(CreateAPIView):
     authentication_classes = [BasicAuthentication, JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
+
     @transaction.atomic()
     def post(self, request):
         data = JSONParser().parse(request)
@@ -323,27 +324,31 @@ class GiftVoucherUploadView(CreateAPIView):
                 log_entry = create_transaction_logNew(request,data,0,'Invalid SchemeID:'+str(scheme_id),483,0)
                 return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Invalid Scheme ID', 'Data': []})
 
-            voucher_objects = []
-            for voucher in vouchers:
-                code = voucher.get('Voucher')
-                if not code:
-                    continue 
+            voucher_codes = [voucher.get('Voucher') for voucher in vouchers if voucher.get('Voucher')]
 
-                VoucherTypeID = 196
+            existing_vouchers = M_GiftVoucherCode.objects.filter(VoucherCode__in=voucher_codes, Scheme_id=scheme_id).values_list('VoucherCode', flat=True)
 
-                voucher_objects.append(M_GiftVoucherCode(VoucherCode=code,IsActive=True,Party=0,client=0,ClientSaleID=0,VoucherType_id=VoucherTypeID,Scheme_id=scheme_id))
+            if existing_vouchers:
+                log_entry = create_transaction_logNew(request, data, 0, f'Duplicate vouchers: {",".join(existing_vouchers)}', 483, 0)
+                return JsonResponse({'StatusCode': 400,'Status': False,'Message': f'These voucher codes already exist for this scheme: {", ".join(existing_vouchers)}','Data': []})
+
+            VoucherTypeID = 196
+            voucher_objects = [M_GiftVoucherCode(VoucherCode=code,IsActive=True,Party=0,client=0,ClientSaleID=0,VoucherType_id=VoucherTypeID,Scheme_id=scheme_id)
+                for code in voucher_codes
+            ]
 
             if voucher_objects:
                 M_GiftVoucherCode.objects.bulk_create(voucher_objects)
-                log_entry = create_transaction_logNew(request,data,0,'Gift Vouchers saved for SchemeID:'+str(scheme_id),483,0)
+                log_entry = create_transaction_logNew(request, data, 0, 'Gift Vouchers saved for SchemeID:'+str(scheme_id), 483, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Gift Vouchers saved successfully', 'Data': []})
             else:
-                log_entry =  create_transaction_logNew(request, data, 0, 'No valid voucher data Found', 483, 0)
+                log_entry = create_transaction_logNew(request, data, 0, 'No valid voucher data Found', 483, 0)
                 return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'No valid voucher data found', 'Data': []})
 
         except Exception as e:
             log_entry = create_transaction_logNew(request, data, 0, 'VoucherDetails: ' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+
         
         
 class DeleteGiftVouchersBySchemeView(CreateAPIView):
