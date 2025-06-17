@@ -415,3 +415,16 @@ class M_PhonePeSettings(models.Model):
 
     class Meta:
         db_table = 'M_PhonePeSettings'  
+
+class M_PaymentModes(models.Model):
+    Payment_Mode = models.CharField(max_length=100)
+ 
+    class Meta:
+        db_table = 'M_PaymentModes'
+ 
+class MC_PaymentModeDetails(models.Model):
+    Paymentmodes = models.ForeignKey(M_PaymentModes, on_delete=models.CASCADE)
+    PartyId      = models.IntegerField()
+ 
+    class Meta:
+        db_table = 'MC_PaymentModeDetails'       
