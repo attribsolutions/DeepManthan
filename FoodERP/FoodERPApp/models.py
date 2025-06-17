@@ -2500,27 +2500,7 @@ class M_ItemSupplier(models.Model):
     class Meta:
         db_table = "M_ItemSupplier"
 
-class M_GiftVoucherCode(models.Model):
-    VoucherType  = models.ForeignKey(M_GeneralMaster, related_name='GiftVoucherType', on_delete=models.PROTECT)
-    VoucherCode = models.CharField(max_length=50)
-    IsActive =models.BooleanField(default=False)
-    UpdatedOn = models.DateTimeField(auto_now=True)
-    InvoiceDate = models.DateField(null=True, blank=True)  
-    InvoiceNumber = models.CharField(max_length=500, null=True, blank=True)  
-    InvoiceAmount = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True) 
-    Party = models.IntegerField()
-    client = models.IntegerField()
-    ClientSaleID = models.IntegerField()
 
-    class Meta:
-        db_table = "M_GiftVoucherCode"
-        indexes = [
-            models.Index(fields=['client', 'ClientSaleID']),
-            models.Index(fields=['Party', 'InvoiceDate','InvoiceNumber']),
-            models.Index(fields=['Party', 'InvoiceDate','InvoiceNumber','client', 'ClientSaleID']),
-            models.Index(fields=['Party', 'InvoiceDate','VoucherCode']),
-            
-        ] 
 
 # class debug_log(models.Model):
 #     debug_message = models.CharField(max_length=300, null=True)
@@ -2572,6 +2552,28 @@ class M_Scheme(models.Model):
 
     class Meta:
         db_table = "M_Scheme"
+
+class M_GiftVoucherCode(models.Model):
+    VoucherType  = models.ForeignKey(M_GeneralMaster, related_name='GiftVoucherType', on_delete=models.PROTECT)
+    VoucherCode = models.CharField(max_length=50)
+    IsActive =models.BooleanField(default=False)
+    UpdatedOn = models.DateTimeField(auto_now=True)
+    InvoiceDate = models.DateField(null=True, blank=True)  
+    InvoiceNumber = models.CharField(max_length=500, null=True, blank=True)  
+    InvoiceAmount = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True) 
+    Party = models.IntegerField()
+    client = models.IntegerField()
+    ClientSaleID = models.IntegerField()
+    Scheme  = models.ForeignKey(M_Scheme, related_name='GiftVoucherSchemeID', on_delete=models.PROTECT)
+    class Meta:
+        db_table = "M_GiftVoucherCode"
+        indexes = [
+            models.Index(fields=['client', 'ClientSaleID']),
+            models.Index(fields=['Party', 'InvoiceDate','InvoiceNumber']),
+            models.Index(fields=['Party', 'InvoiceDate','InvoiceNumber','client', 'ClientSaleID']),
+            models.Index(fields=['Party', 'InvoiceDate','VoucherCode']),
+            
+        ] 
 
 class MC_SchemeQRs(models.Model):
     SchemeID=models.ForeignKey(M_Scheme,related_name='SchemeIDforQR', on_delete=models.CASCADE)
