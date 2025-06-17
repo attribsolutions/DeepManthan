@@ -241,8 +241,7 @@ class GiftVoucherList(CreateAPIView):
         try:
             with transaction.atomic():
                 GiftVoucherDataByID = M_GiftVoucherCode.objects.get(id=id)
-                GiftVoucher_Data_serializer = GiftVoucherSerializer(
-                    GiftVoucherDataByID, data=GiftVoucherSerializer)
+                GiftVoucher_Data_serializer = GiftVoucherSerializer(GiftVoucherDataByID, data=GiftVoucherSerializer)
                 if GiftVoucher_Data_serializer.is_valid():
                     GiftVoucher_Data_serializer.save()
                     log_entry = create_transaction_logNew(request, GiftVoucher_Data,0,'GiftVoucherID:'+str(id),438,0)
@@ -301,5 +300,83 @@ class GiftVoucherList(CreateAPIView):
             return JsonResponse({'StatusCode': 400,'Status': False,'Message': str(e),'Data': [] })
 
 
+class GiftVoucherUploadView(CreateAPIView):
+    authentication_classes = [BasicAuthentication, JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @transaction.atomic()
+    def post(self, request):
+        data = JSONParser().parse(request)
+        try:
+            vouchers = data.get('Data', [])
+            scheme_id = data.get('Scheme', None)
+
+            if not scheme_id:
+                log_entry = create_transaction_logNew(request,data,0,'Scheme ID is required',483,0)
+                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Scheme ID is required', 'Data': []})
+
+            if not vouchers:
+                log_entry = create_transaction_logNew(request,data,0,'No voucher data provided for SchemeID:'+str(scheme_id),483,0)
+                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'No voucher data provided', 'Data': []})
+
+            if not M_Scheme.objects.filter(id=scheme_id).exists():
+                log_entry = create_transaction_logNew(request,data,0,'Invalid SchemeID:'+str(scheme_id),483,0)
+                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Invalid Scheme ID', 'Data': []})
+
+            voucher_objects = []
+            for voucher in vouchers:
+                code = voucher.get('Voucher')
+                if not code:
+                    continue 
+
+                VoucherTypeID = 196
+
+                voucher_objects.append(M_GiftVoucherCode(VoucherCode=code,IsActive=True,Party=0,client=0,ClientSaleID=0,VoucherType_id=VoucherTypeID,Scheme_id=scheme_id))
+
+            if voucher_objects:
+                M_GiftVoucherCode.objects.bulk_create(voucher_objects)
+                log_entry = create_transaction_logNew(request,data,0,'Gift Vouchers saved for SchemeID:'+str(scheme_id),483,0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Gift Vouchers saved successfully', 'Data': []})
+            else:
+                log_entry =  create_transaction_logNew(request, data, 0, 'No valid voucher data Found', 483, 0)
+                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'No valid voucher data found', 'Data': []})
+
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, data, 0, 'VoucherDetails: ' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
         
         
+class DeleteGiftVouchersBySchemeView(CreateAPIView):
+    authentication_classes = [BasicAuthentication, JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @transaction.atomic()
+    def delete(self, request, id=0):
+        try:
+            with transaction.atomic():
+                if not M_Scheme.objects.filter(id=id).exists():
+                    log_entry = create_transaction_logNew(request, 0, 0, 'Scheme ID not available', 484, 0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Scheme ID not available', 'Data': []})
+                
+                vouchers = M_GiftVoucherCode.objects.filter(Scheme_id=id)
+
+                if not vouchers.exists():
+                    log_entry = create_transaction_logNew(request, 0, 0, 'No vouchers found for SchemeID:'+str(id), 484, 0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'No vouchers found for this Scheme', 'Data': []})
+
+                if vouchers.filter(IsActive=False).exists():
+                    log_entry = create_transaction_logNew(request, 0, 0, 'Some vouchers are active for SchemeID:'+str(id), 484, 0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Voucher data used in another table', 'Data': []})
+                
+                DeleteCount, DeleteVouchers = vouchers.delete()
+
+                log_entry = create_transaction_logNew(request, 0, 0, f'Deleted {DeleteCount} vouchers for SchemeID:{id}', 484, 0)
+                return JsonResponse({'StatusCode': 200,'Status': True,'Message': f'{DeleteCount} vouchers deleted successfully','Data': []})
+
+        except IntegrityError:
+            log_entry = create_transaction_logNew(request, 0, 0, 'GiftVoucherCode data used in another table', 8, 0)
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'GiftVoucherCode data used in another table', 'Data': []})
+
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0, 'VoucherDeletion:' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})

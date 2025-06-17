@@ -2677,7 +2677,7 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                         "PartyID": CouponCode.PartyID,
                         "FranchiseName": CouponCode.PartyName,
                         "SchemeID": CouponCode.id,
-                        "TotalClaimAmount": round(CouponCode.DiscountAmount,2),
+                        "TotalClaimAmount": round(CouponCode.DiscountAmount,0),
                         "SchemeName": CouponCode.SchemeName,
                         "VoucherCodeCount" : CouponCode.count,
                         "ClaimPerVoucher" : CouponCode.SchemeValue,
