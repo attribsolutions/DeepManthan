@@ -16,6 +16,7 @@ from .Views.V_SPOSstock import *
 
 from .Views.V_SPOSRate import *
 from .Views.V_SPOSServicesSettings import *
+from .Views.V_PosSettings import *
 
 urlpatterns = [
     
@@ -60,6 +61,8 @@ urlpatterns = [
     #Service Settings Import
     url(r'SweetPosServiceSettingsImport/([0-9]+)$', SweetPosServiceSettingsImportView.as_view()),
     
-    
+    #Pos Settings
+    url(r'PosSettings$',PosSettings.as_view()),
+    url(r'PosSettings/(?P<pk>[0-9]+)/$', PosSettings.as_view()), 
  
     ]
