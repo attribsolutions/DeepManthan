@@ -2,9 +2,26 @@ from ..models import *
 from rest_framework import serializers
 
 class SchemeSerializer(serializers.ModelSerializer):
-    class Meta :
-        model= M_Scheme
-        fields = '__all__'
+    TotalVoucherCodeCount = serializers.SerializerMethodField()
+    ActiveVoucherCodeCount = serializers.SerializerMethodField()
+    InactiveVoucherCodeCount = serializers.SerializerMethodField()
+
+    class Meta:
+        model = M_Scheme
+        fields = fields = ['id','SchemeName','SchemeValue','ValueIn','FromPeriod','ToPeriod','FreeItemID','VoucherLimit','QRPrefix',
+                          'IsActive','BillAbove','SchemeDetails','Message','OverLappingScheme','SchemeValueUpto','Column1','Column2',
+                          'Column3','ShortName','SchemeTypeID','TotalVoucherCodeCount','ActiveVoucherCodeCount','InactiveVoucherCodeCount']
+
+    def get_TotalVoucherCodeCount(self, obj):
+        return obj.GiftVoucherSchemeID.count()
+
+    def get_ActiveVoucherCodeCount(self, obj):
+        return obj.GiftVoucherSchemeID.filter(IsActive=True).count()
+
+    def get_InactiveVoucherCodeCount(self, obj):
+        return obj.GiftVoucherSchemeID.filter(IsActive=False).count()
+
+
 
 class SchemeSerializer1(serializers.ModelSerializer):
     class Meta :

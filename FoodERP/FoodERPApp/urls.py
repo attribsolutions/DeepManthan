@@ -805,6 +805,10 @@ urlpatterns = [
               url(r'^giftvouchervalidityCheck/(?P<coupon_code>[a-zA-Z0-9]+)$',giftvouchervalidityCheck.as_view()),
               url(r'^GiftVoucherList$',GiftVoucherList.as_view()), 
               url(r'^GiftVoucherList/([0-9]+)$',GiftVoucherList.as_view()),
+              url(r'^GiftVoucherUpload$',GiftVoucherUploadView.as_view()), 
+              url(r'^DeleteGiftVouchersByScheme/([0-9]+)$',DeleteGiftVouchersBySchemeView.as_view()),
+              
+              
               
 #Bill Booking
               url(r'BillBookingReport$',BillBookingReportView.as_view()),
