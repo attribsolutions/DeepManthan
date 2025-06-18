@@ -801,8 +801,9 @@ urlpatterns = [
               url(r'CountrySave$',CountryCurrencySaveView.as_view()), 
               url(r'GETCountry$',CountryCurrencyListView.as_view()),
               url(r'Country/([0-9]+)$',CountryCurrencyViewSecond.as_view()),
-              url(r'^giftvouchervalidityCheck$',giftvouchervalidityCheck.as_view()),
-              url(r'^giftvouchervalidityCheck/(?P<coupon_code>[a-zA-Z0-9]+)$',giftvouchervalidityCheck.as_view()),
+              url(r'^giftvouchervalidityCheck/(?P<coupon_code>[a-zA-Z0-9]+)$',giftvouchervalidityCheck.as_view()), #ForGETMethod(CheckonlySingleVoucherValidation)
+              url(r'^giftvouchervalidityCheck$',giftvouchervalidityCheck.as_view()), #ForPOSTMethod(SaveSingleVoucher)
+              url(r'^giftvouchervalidityCheck_Multiple$',giftvouchervalidityCheck_Multiple.as_view()), #ForPATCHMethod(CheckMultipleVoucherValidation)
               url(r'^GiftVoucherList$',GiftVoucherList.as_view()), 
               url(r'^GiftVoucherList/([0-9]+)$',GiftVoucherList.as_view()),
               url(r'^GiftVoucherUpload$',GiftVoucherUploadView.as_view()), 
