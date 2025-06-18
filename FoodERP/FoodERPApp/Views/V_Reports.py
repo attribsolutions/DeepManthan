@@ -3028,3 +3028,85 @@ class ItemWiseConsumptionReportView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, itemData, Party, "ItemwiseConsumptionReport: " + str(e), 33, 0)
             return JsonResponse({"StatusCode": 400,"Status": False,"Message": str(e), "Data": [],})
+        
+class BatchTraceabilityReportView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    @transaction.atomic
+    def post(self, request):
+        WorkOrderData = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+               
+                WorkOrderID =WorkOrderData['WorkOrderID']                
+                
+                query1 = T_WorkOrder.objects.raw(f'''SELECT 1 id,(T_WorkOrder.WorkOrderNumber) BatchCardNo,T_WorkOrder.ID BacthCardID,T_WorkOrder.WorkOrderDate,
+                M_Users.LoginName,Quantity,NumberOfLot,'Process Close' Status FROM T_WorkOrder 
+                JOIN M_Users ON M_Users.ID=T_WorkOrder.CreatedBy 
+                WHERE T_WorkOrder.ID={WorkOrderID}''')  
+                query2 = T_WorkOrder.objects.raw(f'''SELECT 1 id,M_Items.ID ItemID,M_Items.Name ItemName,BOMQuantity,M_Units.Name UnitName FROM TC_WorkOrderItems 
+                JOIN T_WorkOrder ON T_WorkOrder.ID=TC_WorkOrderItems.WorkOrder_id
+                JOIN M_Items ON TC_WorkOrderItems.Item_id=M_Items.ID
+                JOIN MC_ItemUnits ON MC_ItemUnits.ID=TC_WorkOrderItems.Unit_id
+                JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id
+                WHERE T_WorkOrder.ID={WorkOrderID}''')
+                
+                query3 = T_MaterialIssue.objects.raw(f'''SELECT 1 id,M_Items.Name ItemName,TC_MaterialIssueItems.IssueQuantity Quantity,M_Units.Name UnitName,TC_MaterialIssueItems.Item_id,
+                IFNULL((GRN_id),'') GRNNo,IFNULL((T_Production.ID),'') ProductionNo,
+                IFNULL(T_Production.ID,'') ProductionID,IFNULL(TC_GRNItems.GRN_id,'') grnID,
+                TC_MaterialIssueItems.BatchCode  FROM T_MaterialIssue 
+                JOIN TC_MaterialIssueItems ON TC_MaterialIssueItems.MaterialIssue_id=T_MaterialIssue.ID 
+                JOIN TC_MaterialIssueWorkOrders ON TC_MaterialIssueWorkOrders.MaterialIssue_id=T_MaterialIssue.ID
+                JOIN M_Items ON M_Items.ID=TC_MaterialIssueItems.Item_id
+                JOIN MC_ItemUnits ON MC_ItemUnits.ID=TC_MaterialIssueItems.Unit_id
+                JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id
+                LEFT JOIN T_Production ON T_Production.BatchCode=TC_MaterialIssueItems.BatchCode and T_Production.Item_id=M_Items.ID
+                LEFT JOIN TC_GRNItems ON TC_GRNItems.BatchCode=TC_MaterialIssueItems.BatchCode and TC_GRNItems.BatchCode!='0'
+                WHERE TC_MaterialIssueItems.IssueQuantity > 0 AND TC_MaterialIssueWorkOrders.WorkOrder_id={WorkOrderID}''')
+                
+                query4 = T_Production.objects.raw(f'''SELECT  1 id ,(TC_MaterialIssueWorkOrders.WorkOrder_id) BatchCardNo,M_Items.ID ItemID,M_Items.Name ItemName,T_Production.NumberOfLot 
+                ,ActualQuantity LotQty,T_Production.BatchCode,T_Production.ProductionDate,T_Production.PrintedBatchCode,T_Production.BestBefore
+                FROM T_Production
+                JOIN TC_ProductionMaterialIssue ON TC_ProductionMaterialIssue.Production_id=T_Production.ID
+                JOIN T_MaterialIssue ON T_MaterialIssue.ID=TC_ProductionMaterialIssue.MaterialIssue_id
+                JOIN TC_MaterialIssueWorkOrders ON TC_MaterialIssueWorkOrders.MaterialIssue_id=TC_ProductionMaterialIssue.MaterialIssue_id
+                JOIN M_Items ON T_Production.Item_id=M_Items.ID
+                WHERE TC_MaterialIssueWorkOrders.WorkOrder_id={WorkOrderID}''')
+                
+                query5=T_Production.objects.raw(f'''SELECT  1 id,T_Invoices.ID InvoiceID,T_Invoices.FullInvoiceNumber ,
+                T_Invoices.InvoiceDate ,C.Name CustomerName,TC_InvoiceItems.Quantity ,
+                TC_InvoiceItems.BatchCode from T_Production 
+                JOIN TC_ProductionMaterialIssue ON TC_ProductionMaterialIssue.Production_id=T_Production.id
+                JOIN O_BatchWiseLiveStock  ON O_BatchWiseLiveStock.Production_id=T_Production.id
+                JOIN O_LiveBatches ON O_LiveBatches.id=O_BatchWiseLiveStock.LiveBatche_id
+                JOIN TC_InvoiceItems ON TC_InvoiceItems.LiveBatch_id= O_LiveBatches.id
+                JOIN T_Invoices ON T_Invoices.id=TC_InvoiceItems.Invoice_id
+                JOIN M_Parties C ON C.id=T_Invoices.Customer_id
+                JOIN TC_MaterialIssueWorkOrders ON TC_MaterialIssueWorkOrders.MaterialIssue_id=TC_ProductionMaterialIssue.MaterialIssue_id 
+                WHERE WorkOrder_id={WorkOrderID}''')
+                
+                
+                def to_dict_list(queryset, fields):
+                    return [
+                        {field: getattr(row, field) for field in fields}
+                        for row in queryset
+                    ]
+
+                BatchDetails = to_dict_list(query1, ['BatchCardNo', 'BacthCardID', 'WorkOrderDate', 'LoginName', 'Quantity', 'NumberOfLot', 'Status'])
+                BillOfMaterial = to_dict_list(query2, ['ItemID', 'ItemName', 'BOMQuantity', 'UnitName'])
+                ActualMaterialIssue = to_dict_list(query3, ['ItemName', 'Quantity', 'UnitName', 'Item_id', 'GRNNo', 'ProductionNo', 'ProductionID', 'grnID', 'BatchCode'])
+                ProductionDetails = to_dict_list(query4, ['BatchCardNo', 'ItemID', 'ItemName', 'NumberOfLot', 'LotQty', 'BatchCode', 'ProductionDate', 'PrintedBatchCode', 'BestBefore'])
+                CustomerDispatchDetails=to_dict_list(query5,['InvoiceID','FullInvoiceNumber','InvoiceDate','CustomerName','Quantity','BatchCode'])
+            
+                
+            log_entry = create_transaction_logNew(request, WorkOrderData, 0, "Success", 481, 0,0,0,0)
+            return JsonResponse({"StatusCode": 204, "Status": True,"Message": "Success.","Data": {"WorkOrderDetails": BatchDetails,
+                    "WorkOrderItems": BillOfMaterial,
+                    "MaterialIssues": ActualMaterialIssue,
+                    "ProductionDetails": ProductionDetails,
+                    "CustomerDispatchDetails":CustomerDispatchDetails},})
+
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, WorkOrderData, 0, "BatchTrasabilityReport: " + str(e), 33, 0)
+            return JsonResponse({"StatusCode": 400,"Status": False,"Message": str(e), "Data": [],})
+
+     
