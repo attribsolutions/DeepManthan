@@ -178,16 +178,20 @@ join M_States on M_States.id=M_Parties.State_id
 join M_PriceList on M_PriceList.id=M_Parties.PriceList_id'''
                 
                 if int(RoleID) == 1:
+                    #  print('aa')
                      PartyQuery=M_Parties.objects.raw(f'''{qq} where M_PartyType.Company_id ={CompanyID}''')
                 elif int(RoleID) ==2:
+                    # print('bb')
                     if IsSCMCompany == 0:
+                            # print('cc')
                             PartyQuery=M_Parties.objects.raw(f'''{qq}
                                                                 where M_Parties.Company_id in({CompanyID}) and M_PartyType.IsRetailer = 0 ''')
                     else:
+                            # print('dd')
                             PartyQuery=M_Parties.objects.raw(f'''{qq}
                                                                 where C_Companies.CompanyGroup_id={CompanyGroupID} and M_PartyType.IsSCM = {IsSCMCompany} and M_PartyType.IsRetailer = 0 ;''')
                 else:
-                    
+                    # print('ee')
                     EmployeeTypecheck = M_Employees.objects.raw(f'''select 1 as id, M_EmployeeTypes.IsSalesTeamMember SalesTeam from M_Employees join M_EmployeeTypes on M_EmployeeTypes.id=M_Employees.EmployeeType_id where M_Employees.id={EmployeeID}''')
                     # print(EmployeeTypecheck[0].SalesTeam)
                     
@@ -195,22 +199,25 @@ join M_PriceList on M_PriceList.id=M_Parties.PriceList_id'''
                         
                         party_result = M_Employees.objects.raw(f'''SELECT 1 id ,EmployeeParties({EmployeeID}) Party''')
                         if party_result:
+                            # print('ff')
                             party_string = party_result[0].Party  # example: "32584,32585"
                             PartyList = [int(p.strip()) for p in party_string.split(',') if p.strip().isdigit()]
                             Party = ','.join(str(p) for p in PartyList)
                         
                             PartyQuery=M_Parties.objects.raw(f'''{qq} where M_Parties.id in( {Party})  ''')
                     else:
+                        # print('gg')
                         q = M_Roles.objects.filter(id=RoleID).values("isSCMRole")
-                        
-                        if q[0]['isSCMRole'] == 1:
-                        
-                            if IsRetailer == 1:
-                                PartyQuery=M_Parties.objects.raw(f'''{qq}
+                        # print(q,q[0]['isSCMRole'])
+                        # if q[0]['isSCMRole'] == True and  IsRetailer == 1:
+                        if IsRetailer == 1:    
+                            # print('hh')
+                            PartyQuery=M_Parties.objects.raw(f'''{qq}
                                                         join MC_PartySubParty on MC_PartySubParty.SubParty_id=M_Parties.id
                                                         where MC_PartySubParty.Party_id={PartyID} and M_PartyType.IsRetailer=1 and IsApprovedParty =0   ''')
-                            else:
-                                PartyQuery=M_Parties.objects.raw(f'''{qq}
+                        else:
+                            # print('ii')
+                            PartyQuery=M_Parties.objects.raw(f'''{qq}
                                                         join MC_PartySubParty on MC_PartySubParty.SubParty_id=M_Parties.id
                                                         where MC_PartySubParty.Party_id={PartyID} and M_PartyType.IsRetailer=0 and IsApprovedParty =0   ''')
 
@@ -242,7 +249,7 @@ join M_PriceList on M_PriceList.id=M_Parties.PriceList_id'''
 
         except Exception as e:
             log_entry = create_transaction_logNew(request, Logindata, 0, 'PartiesFilterList:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})        
 
 
 class M_PartiesView(CreateAPIView):
