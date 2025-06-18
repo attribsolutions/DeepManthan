@@ -3023,7 +3023,7 @@ class ItemWiseConsumptionReportView(CreateAPIView):
             }
                 
             log_entry = create_transaction_logNew(request, itemData, Party, "Success", 480, 0, FromDate, ToDate, 0)
-            return JsonResponse({"StatusCode": 204, "Status": True,"Message": "Success.","Data": response_data, })
+            return JsonResponse({"StatusCode": 200, "Status": True,"Message": "Success.","Data": response_data, })
 
         except Exception as e:
             log_entry = create_transaction_logNew(request, itemData, Party, "ItemwiseConsumptionReport: " + str(e), 33, 0)
@@ -3099,7 +3099,7 @@ class BatchTraceabilityReportView(CreateAPIView):
             
                 
             log_entry = create_transaction_logNew(request, WorkOrderData, 0, "Success", 481, 0,0,0,0)
-            return JsonResponse({"StatusCode": 204, "Status": True,"Message": "Success.","Data": {"WorkOrderDetails": BatchDetails,
+            return JsonResponse({"StatusCode": 200, "Status": True,"Message": "Success.","Data": {"WorkOrderDetails": BatchDetails,
                     "WorkOrderItems": BillOfMaterial,
                     "MaterialIssues": ActualMaterialIssue,
                     "ProductionDetails": ProductionDetails,
