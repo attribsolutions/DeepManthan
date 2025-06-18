@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from rest_framework.parsers import JSONParser
 from FoodERPApp.Views.V_CommFunction import create_transaction_logNew
-from FoodERPApp.models import CustomPrint, M_Items, M_Parties
+from FoodERPApp.models import *
 from SweetPOS.Views.SweetPOSCommonFunction import BasicAuthenticationfunction
 from ..models import *
 from rest_framework.authentication import BasicAuthentication
@@ -165,12 +165,13 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
                     
                     start_date_str = yesterday
                     end_date_str = today
-                    Partys = M_Parties.objects.filter(PartyType=19,isActive=1).values('id')
-                                        
+                    PartyTypes=M_Settings.objects.filter( id=56).values('DefaultValue')
+                    Partys = M_Parties.objects.filter(PartyType__in=PartyTypes,isActive=1).values('id')
+                    # print(Partys.query)                    
 
                     log_entry = create_transaction_logNew(request, Orderdata, 0, 'Stock Process start', 209, 0, start_date_str, end_date_str, 0)
                     for Party in Partys:
-                        print(Party['id'] ,"start time  : ",datetime.now())
+                        # print(Party['id'] ,"start time  : ",datetime.now())
                         # start_date = start_date_str.strptime( "%Y-%m-%d")
                         # end_date = end_date_str.strptime( "%Y-%m-%d")
                         Party=Party['id']
