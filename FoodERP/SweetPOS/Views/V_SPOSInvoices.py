@@ -228,10 +228,10 @@ class SPOSMaxsaleIDView(CreateAPIView):
                     # QueryfordivisionID = M_SweetPOSRoleAccess.objects.filter(Party=DivisionID).values('Party')
                     QueryforSaleRecordCount = M_SweetPOSMachine.objects.filter(Party=DivisionID ,id=ClientID).values('UploadSaleRecordCount')
                     if not QueryforSaleRecordCount:
-                            
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'SweetPOSMachine is not mapped', 'Data':[]})
+                    if QueryforSaleRecordCount[0]['UploadSaleRecordCount'] == 0:
+                        return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Sale data upload is not allowed at the moment', 'Data': []})
                     else:
-                        
                         QueryForMaxSalesID=T_SPOSInvoices.objects.raw('''SELECT 1 id,ifnull(max(ClientSaleID),0) MaxSaleID FROM SweetPOS.T_SPOSInvoices where Party=%s and clientID=%s''', [DivisionID ,ClientID])
                         for row in QueryForMaxSalesID:
                             maxSaleID=row.MaxSaleID
@@ -576,15 +576,20 @@ class SPOSMaxDeletedInvoiceIDView(CreateAPIView):
                 user=BasicAuthenticationfunction(request)
                     
                 if user is not None: 
-                    
-                    QueryForMaxSalesID=T_SPOSDeletedInvoices.objects.raw('''SELECT 1 id,ifnull(max(DeletedTableAutoID),0) MaxSaleID 
-                                                                         FROM SweetPOS.T_SPOSDeletedInvoices 
-                                                                         where Party=%s and clientID=%s''', [DivisionID ,ClientID])
-                    for row in QueryForMaxSalesID:
-                        maxSaleID=row.MaxSaleID
+                    QueryforSaleRecordCount = M_SweetPOSMachine.objects.filter(Party=DivisionID ,id=ClientID).values('UploadSaleRecordCount')
+                    if not QueryforSaleRecordCount:
+                            return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'SweetPOSMachine is not mapped', 'Data':[]})
+                    if QueryforSaleRecordCount[0]['UploadSaleRecordCount'] == 0:
+                        return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': 'Sale data upload is not allowed at the moment', 'Data': []})
+                    else:
+                        QueryForMaxSalesID=T_SPOSDeletedInvoices.objects.raw('''SELECT 1 id,ifnull(max(DeletedTableAutoID),0) MaxSaleID 
+                                                                            FROM SweetPOS.T_SPOSDeletedInvoices 
+                                                                            where Party=%s and clientID=%s''', [DivisionID ,ClientID])
+                        for row in QueryForMaxSalesID:
+                            maxSaleID=row.MaxSaleID
 
-                    log_entry = create_transaction_logNew(request, 0, DivisionID,'DeletedInvoiceID:'+str(maxSaleID),389,0,0,0,ClientID)
-                    return JsonResponse({"Success":True,"status_code":200,"DeletedInvoiceID":maxSaleID,"Toprows":200})    
+                        log_entry = create_transaction_logNew(request, 0, DivisionID,'DeletedInvoiceID:'+str(maxSaleID),389,0,0,0,ClientID)
+                        return JsonResponse({"Success":True,"status_code":200,"DeletedInvoiceID":maxSaleID,"Toprows":200})    
         except Exception as e:
             
             log_entry = create_transaction_logNew(request, 0, DivisionID,'DeletedInvoiceID:'+str(e),33,0)
