@@ -3029,7 +3029,7 @@ class ItemWiseConsumptionReportView(CreateAPIView):
             log_entry = create_transaction_logNew(request, itemData, Party, "ItemwiseConsumptionReport: " + str(e), 33, 0)
             return JsonResponse({"StatusCode": 400,"Status": False,"Message": str(e), "Data": [],})
         
-class BatchTrasabilityReportView(CreateAPIView):
+class BatchTraceabilityReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     @transaction.atomic
     def post(self, request):
