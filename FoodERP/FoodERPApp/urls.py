@@ -849,7 +849,8 @@ urlpatterns = [
 #ItemConsumptionReport
               url(r'ItemConsumptionReport$',ItemWiseConsumptionReportView.as_view()),
               
-           
+#BatchtrasabilityReport
+              url(r'BatchTraceabilityReport$',BatchTraceabilityReportView.as_view()),          
               
               
             
