@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
-
+from collections import defaultdict
 from SweetPOS.models import *
 
 from ..Serializer.S_EInvoiceEwayBill import *
@@ -45,7 +45,6 @@ class Uploaded_EInvoice(CreateAPIView):
     def get(self, request, id=0,userID=0,Mode=0):
         try:
             with transaction.atomic():
-
                 access_token = generate_Access_Token()
                 aa=access_token.split('!')
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': access_token})
@@ -79,7 +78,7 @@ class Uploaded_EInvoice(CreateAPIView):
     on a.id=b.Invoice_id''',([id],[id])
     )
                         InvoiceItem=TC_InvoiceItems.objects.raw('''SELECT M_Items.id,M_Items.Name ItemName ,M_GSTHSNCode.HSNCode,sum(Quantity) Quantity,M_Units.EwayBillUnit,TC_InvoiceItems.Rate,sum(TC_InvoiceItems.DiscountAmount)DiscountAmount,
-    sum(CGST)CGST,sum(SGST)SGST,sum(IGST)IGST,(sum(Quantity)* Rate)total_amount,((sum(Quantity)* Rate)-sum(DiscountAmount))assessable_value,TC_InvoiceItems.GSTPercentage gst_rate,
+    sum(CGST)CGST,sum(SGST)SGST,sum(IGST)IGST,(sum(BasicAmount)+sum(DiscountAmount))total_amount,(sum(BasicAmount))assessable_value,TC_InvoiceItems.GSTPercentage gst_rate,
     sum(Amount) total_item_value
     FROM TC_InvoiceItems 
     join M_Items on TC_InvoiceItems.Item_id=M_Items.id
@@ -98,7 +97,7 @@ P.Name seller_legal_name,C.Name Buyer_legal_name,SPOSInvoice.FullInvoiceNumber d
 PS.Name seller_State ,CS.Name buyer_State,PS.StateCode Seller_state_code ,CS.StateCode Buyer_state_code,
 PD.Name Seller_location ,CD.Name Buyer_location,
 P.GSTIN Seller_gstin,C.GSTIN Buyer_gstin, 
-PA.Address seller_address1,PA.PIN seller_pincode,CA.Address Buyer_address1,PA.PIN buyer_pincode 
+PA.Address seller_address1,PA.PIN seller_pincode,CA.Address Buyer_address1,CA.PIN buyer_pincode 
 FROM SweetPOS.T_SPOSInvoices SPOSInvoice
 join FoodERP.M_Parties P on P.id=SPOSInvoice.Party
 join FoodERP.M_Parties C on C.id=SPOSInvoice.Customer
@@ -116,7 +115,7 @@ from SweetPOS.TC_SPOSInvoiceItems where Invoice_id=%s)b
 on a.id=b.Invoice_id''',([id],[id])
 )
                         InvoiceItem=TC_SPOSInvoiceItems.objects.raw('''SELECT M_Items.id,M_Items.Name ItemName ,SPOSInvoiceItems.HSNCode,sum(Quantity) Quantity,M_Units.EwayBillUnit,SPOSInvoiceItems.Rate,sum(SPOSInvoiceItems.DiscountAmount)DiscountAmount,
-sum(CGST)CGST,sum(SGST)SGST,sum(IGST)IGST,(sum(Quantity)* Rate)total_amount,((sum(Quantity)* Rate)-sum(DiscountAmount))assessable_value,SPOSInvoiceItems.GSTPercentage gst_rate,
+sum(CGST)CGST,sum(SGST)SGST,sum(IGST)IGST,(sum(BasicAmount)+sum(DiscountAmount))total_amount,(sum(BasicAmount))assessable_value,SPOSInvoiceItems.GSTPercentage gst_rate,
 sum(Amount) total_item_value
 FROM SweetPOS.TC_SPOSInvoiceItems SPOSInvoiceItems
 join FoodERP.M_Items on SPOSInvoiceItems.Item=M_Items.id
@@ -164,10 +163,14 @@ where Invoice_id=%s group by SPOSInvoiceItems.Item,SPOSInvoiceItems.HSNCode,M_Un
                             Batchlist.append({
                                 'name': "Batch-"+d['BatchCode']
                             })
+                            if a['HSNCode'].startswith("99"):
+                                is_service= "Y"  # Yes, it's a service
+                            else:
+                                is_service= "N" # No, it's not a service
                         InvoiceItemDetails.append({
                             'item_serial_number': a['id'],
                             'product_description': a['ItemName'],
-                            'is_service': 'N',
+                            'is_service': is_service,
                             'hsn_code': a['HSNCode'],
                             'quantity': a['Quantity'],
                             'unit': a['EwayBillUnit'],
@@ -176,14 +179,39 @@ where Invoice_id=%s group by SPOSInvoiceItems.Item,SPOSInvoiceItems.HSNCode,M_Un
                             'igst_amount': a['IGST'],
                             'cgst_amount': a['CGST'],
                             'sgst_amount': a['SGST'],
-                            'total_amount':  round(float(a['Quantity'])*float(a['Rate']),2),
-                            'assessable_value': round((float(a['Quantity'])*float(a['Rate']))-(float(a['DiscountAmount'])),2),
+                            'total_amount': float(a['total_amount']),
+                            'assessable_value': float(a['assessable_value']),
                             'gst_rate': a['gst_rate'],
                             'total_item_value': float(a['total_item_value']),
                             'batch_details': Batchlist
                         })
 
-                   
+                    merged_items = {}
+
+                    for item in InvoiceItemDetails:
+                        key = item['item_serial_number']
+
+                        if key not in merged_items:
+                            # First occurrence — copy entire item dict
+                            merged_items[key] = item
+                            merged_items[key]['batch_details'] = list(item.get('batch_details', []))
+                        else:
+                            # Merge quantities and amounts safely as floats
+                            merged_items[key]['quantity'] = float(merged_items[key].get('quantity', 0)) + float(item.get('quantity', 0))
+                            merged_items[key]['discount'] = float(merged_items[key].get('discount', 0)) + float(item.get('discount', 0))
+                            merged_items[key]['igst_amount'] = float(merged_items[key].get('igst_amount', 0)) + float(item.get('igst_amount', 0))
+                            merged_items[key]['cgst_amount'] = float(merged_items[key].get('cgst_amount', 0)) + float(item.get('cgst_amount', 0))
+                            merged_items[key]['sgst_amount'] = float(merged_items[key].get('sgst_amount', 0)) + float(item.get('sgst_amount', 0))
+                            merged_items[key]['total_amount'] = float(merged_items[key].get('total_amount', 0)) + float(item.get('total_amount', 0))
+                            merged_items[key]['assessable_value'] = float(merged_items[key].get('assessable_value', 0)) + float(item.get('assessable_value', 0))
+                            merged_items[key]['total_item_value'] = float(merged_items[key].get('total_item_value', 0)) + float(item.get('total_item_value', 0))
+                            # Merge batch_details
+                            merged_items[key]['batch_details'].extend(item.get('batch_details', []))
+
+                    # Replace original list with merged items list
+                    InvoiceItemDetails = list(merged_items.values())
+
+
                    
                     transaction_details.append({
                         "supply_type": 'B2B'
@@ -208,7 +236,7 @@ where Invoice_id=%s group by SPOSInvoiceItems.Item,SPOSInvoiceItems.HSNCode,M_Un
                         'location': Invoice['Buyer_location'],
                         'pincode': Invoice['buyer_pincode'],
                         'place_of_supply': Invoice['Buyer_state_code'],
-                        'state_code': Invoice['seller_State']
+                        'state_code': Invoice['buyer_State']
                     }),
                     dispatch_details.append({
                         'company_name': Invoice['seller_legal_name'],
@@ -276,6 +304,7 @@ where Invoice_id=%s group by SPOSInvoiceItems.Item,SPOSInvoiceItems.HSNCode,M_Un
                     # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': '', 'Data': InvoiceData[0]})
                     EInvoice_URL = 'https://pro.mastersindia.co/generateEinvoice'
                     payload1 = json.dumps(InvoiceData[0])
+                    # print(payload1)
                     # payload = json.loads(payload1)
                     headers = {
                         'Content-Type': 'application/json',
@@ -285,7 +314,7 @@ where Invoice_id=%s group by SPOSInvoiceItems.Item,SPOSInvoiceItems.HSNCode,M_Un
                         "POST", EInvoice_URL, headers=headers, data=payload1)
                     
                     data_dict = json.loads(response.text)
-                    # CustomPrint(data_dict)
+                    # print(data_dict)
                     # return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': data_dict['results']['status'], 'Data': InvoiceData[0]})
                     if(data_dict['results']['status']== 'Success' and data_dict['results']['code']== 200):
                         if int(Mode) == 1:
@@ -310,8 +339,8 @@ where Invoice_id=%s group by SPOSInvoiceItems.Item,SPOSInvoiceItems.HSNCode,M_Un
                             log_entry = create_transaction_logNew(request,InvoiceUploadSerializer,0,f'E-Invoice Upload Successfully  of InvoiceID: {InvoiceID}',362,0 )
                             return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-Invoice Upload Successfully', 'Data': payload1})
                     else:
-                        log_entry = create_transaction_logNew(request, InvoiceUploadSerializer,0, data_dict['results']['errorMessage'], 92,0)
-                        return JsonResponse({'StatusCode': data_dict['results']['code'], 'Status': True, 'Message': data_dict['results']['errorMessage'], 'Data': InvoiceData[0] })
+                        log_entry = create_transaction_logNew(request, InvoiceUploadSerializer,0, data_dict['results'], 92,0)
+                        return JsonResponse({'StatusCode': data_dict['results']['code'], 'Status': True, 'Message': data_dict['results'], 'Data': InvoiceData[0] })
                     
                 else:
                     log_entry = create_transaction_logNew(request,InvoiceUploadSerializer,0, aa[1],362,0) 
@@ -687,7 +716,7 @@ where Invoice_id={Invoice.id}''')
                                     'transporter_document_number': "",
                                     'transporter_document_date': "",
                                     'transportation_mode': "road",
-                                    'transportation_distance': distance_dict['results']['distance'],
+                                    'transportation_distance': 0,
                                     'vehicle_number': Invoice.VehicleNumber,
                                     'transporter_name': "",
                                     'vehicle_type': "Regular",
@@ -750,7 +779,7 @@ where Invoice_id={Invoice.id}''')
                         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'E-WayBill Upload:'+str((e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})        
 
 
 class Cancel_EwayBill(CreateAPIView):
@@ -818,7 +847,7 @@ class Cancel_EwayBill(CreateAPIView):
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'E-WayBill Cancel:'+str((e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class Cancel_EInvoice(CreateAPIView):
@@ -885,7 +914,7 @@ class Cancel_EInvoice(CreateAPIView):
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'E-Invoice Cancel:'+str((e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 
@@ -1118,7 +1147,7 @@ where CRDRNote_id=%s group by id,ItemName,HSNCode,M_Units.EwayBillUnit,TC_Credit
                     
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 #==========================================================================================================================
 class Cancel_CreditDebitNotes_EInvoice(CreateAPIView):
@@ -1173,4 +1202,4 @@ class Cancel_CreditDebitNotes_EInvoice(CreateAPIView):
                 else:
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})            
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})            

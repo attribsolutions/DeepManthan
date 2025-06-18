@@ -108,8 +108,6 @@ class C_CompaniesView(CreateAPIView):
             with transaction.atomic():
                 AdminDivisionDatalist=list()
                 
-
-                
                 AdminDivisionDatalist.append({
                         "Name": Companiesdata['Name']+' AdminDivision',
                         "PartyType": 1,
@@ -128,7 +126,16 @@ class C_CompaniesView(CreateAPIView):
                         "IsDivision": True,
                         "CreatedBy": 1,
                         "UpdatedBy": 1,
-                        "IsRetailer" : 0
+                        "IsRetailer" : 0,
+                        "PartyAddress":[{
+                            "Address":"Pune",
+                            "FSSAINo":"",
+                            "FSSAIExipry":"2024-10-17",
+                            "PIN":"411009",
+                            "IsDefault":1,
+                            "fssaidocument":"",
+                            "Party_id":""
+                        }]
                         
               })
                 
@@ -167,6 +174,7 @@ class C_CompaniesView(CreateAPIView):
                     "CreatedBy": 1,
                     "UpdatedBy": 1,
                     "last_activity" : '2023-04-01 00:00:00',
+                    "POSRateType" : 0,
                     "UserRole": [
                                 {
                                     "Party": "",
@@ -174,24 +182,24 @@ class C_CompaniesView(CreateAPIView):
                                 }
                     ]
                 }
-
+                
                 Companies_Serializer = C_CompanySerializer(data=Companiesdata)
                 
-                AdminDivisionDatalist_Serializer=M_PartySerializer(data=AdminDivisionDatalist[0])
+                AdminDivisionDatalist_Serializer=M_PartySerializer(data=AdminDivisionDatalist,many=True)
                 
                 Employee_Serializer = M_EmployeesSerializer(data=EmployeeJSON)
                 
                 UserRegistration_Serializer = UserRegistrationSerializer(data=UserJSON)
                 
-                if Companies_Serializer.is_valid() and AdminDivisionDatalist_Serializer.is_valid() and Employee_Serializer.is_valid() and UserRegistration_Serializer.is_valid():
+                
+                if (Companies_Serializer.is_valid() and AdminDivisionDatalist_Serializer.is_valid() and Employee_Serializer.is_valid() and UserRegistration_Serializer.is_valid()):
                     Companies_Serializer.save()
                     # CustomPrint(Companies_Serializer)
                     CompanyID=Companies_Serializer.data['id']
-                    
-                    
+
                     AdminDivisionDatalist_Serializer.save()
                     # CustomPrint(AdminDivisionDatalist_Serializer)
-                    partyID=AdminDivisionDatalist_Serializer.data['id']
+                    partyID=AdminDivisionDatalist_Serializer.data[0]['id']
                     M_Parties.objects.filter(id=partyID).update(Company=CompanyID)
 
                     Employee_Serializer.save()
@@ -205,21 +213,20 @@ class C_CompaniesView(CreateAPIView):
                     UserID=UserRegistration_Serializer.data['id']
                     M_Users.objects.filter(id=UserID).update(Employee=EmployeeID)
                     MC_UserRoles.objects.filter(User=UserID).update(Party=partyID)
-                    log_entry = create_transaction_logNew(request, Companiesdata,0,'',307,0)
+                    # log_entry = create_transaction_logNew(request, Companiesdata,0,'',307,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Company Save Successfully', 'Data':[]})
                 else:
-                    log_entry = create_transaction_logNew(request, Companiesdata,0,'CompanySave:'+str(Employee_Serializer.errors),34,0)
+                    # log_entry = create_transaction_logNew(request, Companiesdata,0,'CompanySave:'+str(Employee_Serializer.errors),34,0)
                     transaction.set_rollback(True)
-                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  Employee_Serializer.errors, 'Data':[]})
+                    return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':str(Companies_Serializer.errors) +','+  str(Employee_Serializer.errors) +','+ str(AdminDivisionDatalist_Serializer.errors) +','+ str(UserRegistration_Serializer.errors), 'Data':[]})
         except IntegrityError:   
-            log_entry = create_transaction_logNew(request, 0,0,'Company used in another table',8,0)  
+            # log_entry = create_transaction_logNew(request, 0,0,'Company used in another table',8,0)  
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Company used in another table', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, Companiesdata, 0,'CompanySave:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})   
+            # log_entry = create_transaction_logNew(request, Companiesdata, 0,'CompanySave:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})   
             
-
-
+     
 class C_CompaniesViewSecond(CreateAPIView):
 
     permission_classes = (IsAuthenticated,)

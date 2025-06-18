@@ -45,4 +45,4 @@ class DashBoardView(CreateAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Invoice_list[0]})
                 
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})

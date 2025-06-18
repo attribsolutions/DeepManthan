@@ -42,8 +42,8 @@ class M_RatesView(CreateAPIView):
                     log_entry = create_transaction_logNew(request, Ratedata_Serializer, 0,'',371,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Ratedata_Serializer})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,0, 0,'SingleGET Rate:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request,0, 0,'SingleGET Rate:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
     
     @transaction.atomic()
     def post(self, request):
@@ -52,12 +52,10 @@ class M_RatesView(CreateAPIView):
             with transaction.atomic():
                 M_Ratesdata = JSONParser().parse(request)
                 
-                MCUnitID = M_Ratesdata[0]['UnitID']
-                
-                query = MC_ItemUnits.objects.filter(id=MCUnitID).values('UnitID')                              
-                UnitID=query[0]['UnitID']
-                M_Ratesdata[0]['UnitID']=UnitID
-                
+                # MCUnitID = M_Ratesdata[0]['UnitID']                
+                # query = MC_ItemUnits.objects.filter(id=MCUnitID).values('UnitID')                              
+                # UnitID=query[0]['UnitID']
+                # M_Ratesdata[0]['UnitID']=UnitID                
                 a=MaxValueMaster(M_RateMaster,'CommonID')
                 jsondata=a.GetMaxValue() 
                 # CustomPrint(jsondata)
@@ -86,8 +84,8 @@ class M_RatesView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Rates_Serializer.errors,'Data' :[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'MRPSave:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0, 0,'MRPSave:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
   
            
@@ -144,8 +142,8 @@ class GETRateDetails(CreateAPIView):
                     log_entry = create_transaction_logNew(request,ItemList, 0,'',367,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':ItemList })
         except Exception as e:
-            log_entry = create_transaction_logNew(request,ItemList, 0,'GetRatemethod:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request,ItemList, 0,'GetRatemethod:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 ''' Rate Master List Delete Api Depend on ID '''
 class M_RatesViewSecond(CreateAPIView):
@@ -199,7 +197,74 @@ class M_RatesViewThird(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':'Rate used in another table', 'Data': []}) 
         log_entry = create_transaction_logNew(request, {'RateID':id}, 0,'RateID:'+str(id),369,0)
         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Rate Deleted Successfully','DeleteID':id,'Data':[]})
-           
-            
-                
-           
+        
+class BatchDetailsAdjustmentView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def post(self, request):
+        AdjustmentData = JSONParser().parse(request)
+        updated_items = []
+
+        try:
+            with transaction.atomic():
+                Party = AdjustmentData['PartyID']
+                TypeID = AdjustmentData.get('TypeID')
+
+                if not TypeID:
+                    return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'TypeID is required.', 'Data': []})
+
+                Type = M_GeneralMaster.objects.filter(id=TypeID, IsActive=1).first()
+
+                if not Type:
+                    return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': f'Invalid TypeID: {TypeID}', 'Data': []})
+
+                for item in AdjustmentData['StockItems']:
+                    BatchCode = item['BatchCode']
+                    Rate = item.get('Rate')
+                    GST = item.get('GST')
+                    MRPValue = item.get('MRPValue')   
+
+                    BatchDetails = O_LiveBatches.objects.filter(BatchCode=BatchCode).first()
+
+                    if BatchDetails:
+                        updated = False
+
+                        if Type.Name == 'Rate':
+                            if Rate is not None:
+                                BatchDetails.Rate = Rate
+                                updated = True
+                            else:
+                                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': f'Missing Rate for BatchCode: {BatchCode}', 'Data': []})
+
+                        elif Type.Name == 'GST':
+                            GSTInstance = M_GSTHSNCode.objects.filter(id=GST, IsDeleted=0).first()
+                            if GSTInstance:
+                                BatchDetails.GST_id = GSTInstance
+                                updated = True
+                            else:
+                                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': f'Invalid GST ID: {GST} for BatchCode: {BatchCode}', 'Data': []})
+                            
+                        elif Type.Name == 'MRP':
+                            if MRPValue is not None:
+                                BatchDetails.MRPValue = MRPValue
+                                updated = True
+                            else:
+                                return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': f'Missing MRP for BatchCode: {BatchCode}', 'Data': []})
+
+                        if updated:
+                            BatchDetails.save()
+                            updated_items.append(BatchCode)
+
+                if updated_items:
+                    log_entry = create_transaction_logNew(request, AdjustmentData, Party, 'Data Updated Successfully', 455, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Data Updated Successfully', 'Data': updated_items})
+                else:
+                    log_entry = create_transaction_logNew(request, 0, 0, "No records updated", 455, 0)
+                    return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'No records updated', 'Data': []})
+
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, AdjustmentData, 0, 'DataAdjustment: ' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+
+

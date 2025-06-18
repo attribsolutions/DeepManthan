@@ -64,8 +64,8 @@ class M_EmployeesSerializer(serializers.ModelSerializer):
             'PAN', instance.PAN)
         instance.AadharNo = validated_data.get(
             'AadharNo', instance.AadharNo)
-        instance.Company = validated_data.get(
-            'Company', instance.Company)
+        # instance.Company = validated_data.get(
+        #     'Company', instance.Company)
         instance.EmployeeType = validated_data.get(
             'EmployeeType', instance.EmployeeType)
         instance.State = validated_data.get(
@@ -97,6 +97,18 @@ class M_EmployeesSerializer(serializers.ModelSerializer):
 class EmployeepartiesDataSerializer(serializers.Serializer):
     id= serializers.IntegerField()
     Name = serializers.CharField(max_length=100)
+
+
+class EmployeepartiesDataSerializer03(serializers.Serializer):
+    # id= serializers.IntegerField()
+    # Role_id= serializers.IntegerField()
+    # Name = serializers.CharField(max_length=100)
+    # RoleName= serializers.CharField(max_length=100)
+    id = serializers.IntegerField()
+    Party_id = serializers.IntegerField()
+    Name=serializers.CharField(max_length=500)
+    Role= serializers.IntegerField()
+    RoleName=serializers.CharField(max_length=500)  
 
 class M_EmployeesSerializerforgetdata(serializers.ModelSerializer):
     # Company_id =  serializers.IntegerField()

@@ -35,24 +35,29 @@ class TC_GRNItemsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TC_GRNItems
         fields = ['Item', 'Quantity', 'Unit', 'BaseUnitQuantity', 'MRP', 'ReferenceRate', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount',
-                  'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'BatchDate', 'BatchCode','SystemBatchCode','SystemBatchDate','GSTPercentage','MRPValue','QtyInBox','QtyInKg','QtyInNo','ActualQuantity']
+                  'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'BatchDate', 'BatchCode','SystemBatchCode','SystemBatchDate','GSTPercentage','MRPValue','QtyInBox','QtyInKg','QtyInNo','ActualQuantity','DiscrepancyComment','DiscrepancyReason','AccountingQuantity']
 
+class TC_GRNExpensesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TC_GRNExpenses
+        fields = '__all__'
 class T_GRNSerializer(serializers.ModelSerializer):
 
     GRNItems = TC_GRNItemsSerializer(many=True)
     
-    O_LiveBatchesList=O_LiveBatchesSerializer(many=True)
+    O_LiveBatchesList=O_LiveBatchesSerializer(many=True, required=False)
     
     GRNReferences = TC_GRNReferencesSerializer(many=True) 
+    
+    GRNExpenses = TC_GRNExpensesSerializer(many=True, required=False)
     class Meta:
         model = T_GRNs
-        fields = ['GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber','InvoiceNumber','GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy', 'GRNItems','O_LiveBatchesList','GRNReferences']
+        fields = ['GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber','InvoiceNumber','InvoiceDate','GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy', 'IsSave', 'Comment','IsGRNType', 'GRNItems','O_LiveBatchesList','GRNReferences','GRNExpenses','AccountingGRNStatus','RoundOffAmount']
        
     def create(self, validated_data):
        
         GRNItems_data = validated_data.pop('GRNItems')
         O_LiveBatchesLists_data=validated_data.pop('O_LiveBatchesList')
-        
         GRNReferences_data = validated_data.pop('GRNReferences')
         
         
@@ -99,25 +104,43 @@ class T_GRNSerializer(serializers.ModelSerializer):
         instance.GrandTotal = validated_data.get('GrandTotal', instance.GrandTotal)
        
         instance.UpdatedBy = validated_data.get('UpdatedBy', instance.UpdatedBy)
+        
+        instance.InvoiceNumber = validated_data.get('InvoiceNumber', instance.InvoiceNumber)
+        
+        instance.IsSave = validated_data.get('IsSave', instance.IsSave)
+        instance.RoundOffAmount = validated_data.get('RoundOffAmount', instance.RoundOffAmount)
+        instance.AccountingGRNStatus = validated_data.get('AccountingGRNStatus', instance.AccountingGRNStatus)
+      
+        if instance.IsTallySave is None:
+            instance.IsTallySave = False
 
         instance.save()
+        
 
         for items in instance.GRNItems.all():
             items.delete()
 
         for items in instance.GRNReferences.all():
             items.delete()
+            
+        GRNReferences_data = validated_data.pop('GRNReferences', None)
+        if GRNReferences_data is not None:
+            instance.GRNReferences.all().delete()
+            for GRNReference_data in GRNReferences_data:
+                TC_GRNReferences.objects.create(GRN=instance, **GRNReference_data)
 
-        for GRNReference_data in validated_data['GRNReferences']:
-            Reference_data = TC_GRNReferences.objects.create(
-                GRN=instance, **GRNReference_data)
+        # for GRNReference_data in validated_data['GRNReferences']:
+        #     Reference_data = TC_GRNReferences.objects.create(
+        #         GRN=instance, **GRNReference_data)
 
         for GRNItem_data in validated_data['GRNItems']:
             TC_GRNItemsID = TC_GRNItems.objects.create(
                 GRN=instance, **GRNItem_data)
         return instance
+ 
 
-
+        # Remove 'GRNReferences' if not needed
+      
 
 
 '''Single Record Details Fetch Get Methods Serializer '''
@@ -126,13 +149,18 @@ class T_GRNSerializer(serializers.ModelSerializer):
 class Partiesserializer(serializers.ModelSerializer):
     class Meta:
         model = M_Parties
-        fields = ['id', 'Name']
-
+        fields = ['id', 'Name', 'PriceList_id']
+class InvoiceDateserializer(serializers.ModelSerializer):
+    class Meta:
+        model = T_Invoices
+        fields = ['FullInvoiceNumber','InvoiceDate']
+        
 class TC_GRNReferencesSerializerSecond(serializers.ModelSerializer):
     Order = T_OrderSerializerThird(read_only=True)
+    Invoice = InvoiceDateserializer(read_only=True)
     class Meta:
         model = TC_GRNReferences
-        fields = ['Invoice', 'Order', 'ChallanNo','Inward', 'Challan'] 
+        fields ='__all__'
         
 class ItemSerializer(serializers.ModelSerializer):
     class Meta : 
@@ -156,11 +184,15 @@ class TC_GRNItemsSerializerSecond(serializers.ModelSerializer):
     Unit=UnitSerializerSecond(read_only=True)
     GST = M_GstHsnCodeSerializer(read_only=True)
     MRP = M_MRPsSerializer(read_only=True)
+    ItemExpiryDate = serializers.SerializerMethodField()
     class Meta:
         model = TC_GRNItems
         fields = ['Item', 'Quantity', 'Unit', 'BaseUnitQuantity', 'MRP', 'ReferenceRate', 'Rate', 'BasicAmount', 'TaxType', 'GST', 'GSTAmount',
-                  'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'BatchDate', 'BatchCode','SystemBatchCode','SystemBatchDate','MRPValue','GSTPercentage']          
+                  'Amount', 'DiscountType', 'Discount', 'DiscountAmount', 'CGST', 'SGST', 'IGST', 'CGSTPercentage', 'SGSTPercentage', 'IGSTPercentage', 'BatchDate', 'BatchCode','SystemBatchCode','SystemBatchDate','MRPValue','GSTPercentage','DiscrepancyComment','AccountingQuantity', 'ItemExpiryDate']          
 
+    def get_ItemExpiryDate(self, obj):
+        batch = O_LiveBatches.objects.filter(BatchCode=obj.BatchCode, MRP=obj.MRP, GST=obj.GST).order_by('-ItemExpiryDate').first()
+        return batch.ItemExpiryDate if batch else None
     
     def to_representation(self, instance):
         # get representation from ModelSerializer
@@ -172,13 +204,18 @@ class TC_GRNItemsSerializerSecond(serializers.ModelSerializer):
         if not ret.get("MRP", None):
             ret["MRP"] = {"id": None, "MRP": None}    
         return ret
+    
+
 
 class T_GRNSerializerForGET(serializers.ModelSerializer):
     Customer = Partiesserializer(read_only=True)
     Party = Partiesserializer(read_only=True)
     GRNReferences = TC_GRNReferencesSerializerSecond(many=True,read_only=True)
     GRNItems = TC_GRNItemsSerializerSecond(many=True)
-
+    
     class Meta:
         model = T_GRNs
-        fields = ['id', 'GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber','InvoiceNumber','GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy','CreatedOn', 'GRNReferences', 'GRNItems']
+        fields = ['id', 'GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber','InvoiceDate','InvoiceNumber','GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy','CreatedOn', 'Comment', 'IsSave', 'GRNReferences','RoundOffAmount', 'GRNItems']
+
+    def get_PriceList_id(self, obj):
+        return obj.PriceList_id

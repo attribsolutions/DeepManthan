@@ -97,7 +97,7 @@ class TargetUploadsView(CreateAPIView):
         except Exception as e:
             
             log_entry = create_transaction_logNew(request, TargetDataDetails, 0, 'TargetDataUpload: ' + str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data': [] })
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': [] })
 
 
 class GetTargetUploadsView(CreateAPIView):
@@ -148,7 +148,7 @@ class GetTargetUploadsView(CreateAPIView):
                 log_entry = create_transaction_logNew(request,0,0,'TargetData Does Not Exist',354,0)
                 return Response({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'TargetData:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0,'TargetData:'+str(e),33,0)
             return Response({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
 
@@ -177,8 +177,8 @@ class GetTargetUploadsBySheetNoView(CreateAPIView):
             log_entry = create_transaction_logNew(request,0,0,'Targetrdata Does Not Exist',355,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Data Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'Targetrdata:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request, 0, 0,'Targetrdata:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
 
 
 class DeleteTargetRecordsView(CreateAPIView):
@@ -200,7 +200,7 @@ class DeleteTargetRecordsView(CreateAPIView):
             log_entry = create_transaction_logNew(request, 0,0,'Targets Data used in another table',8,0)     
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'TargetsNotDeleted:'+str(Exception(e)),33,0)
+            log_entry = create_transaction_logNew(request, 0,0,'TargetsNotDeleted:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
         
 
@@ -552,7 +552,7 @@ class GetPartyOnSubclusterandclusterAndEmployeeView(CreateAPIView):
 
                 PartyList=GetPartyOnSubclusterandclusterAndEmployee(ClusterID,SubClusterID,EmployeeID,2)
                 
-                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available', 'Data': PartyList})  
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': PartyList})  
         except Exception as e:
             # log_entry = create_transaction_logNew(request, 0, 0,'ItemSaleReport:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})                
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})                

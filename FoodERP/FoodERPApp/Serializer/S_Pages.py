@@ -65,6 +65,8 @@ class M_PagesSerializer(serializers.Serializer):
     CreatedOn = serializers.DateTimeField()
     UpdatedBy = serializers.IntegerField(default=False)
     UpdatedOn = serializers.DateTimeField() 
+    # add IsSweetPOSPage
+    IsSweetPOSPage=serializers.BooleanField(default=False)
     
 class M_PagesSerializer2(serializers.ModelSerializer):
     class Meta:
@@ -106,6 +108,8 @@ class M_PagesSerializer1(serializers.ModelSerializer):
     def update(self, instance, validated_data):
             
             # * Page Info
+            instance.id = validated_data.get(
+                'id', instance.id)
             instance.Name = validated_data.get(
                 'Name', instance.Name)
             instance.PageHeading = validated_data.get(
@@ -138,6 +142,9 @@ class M_PagesSerializer1(serializers.ModelSerializer):
             instance.ShowCountLabel = validated_data.get(
                 'ShowCountLabel', instance.ShowCountLabel)
             
+            # add New Flag IsSweetPOSPage
+            instance.IsSweetPOSPage=validated_data.get('IsSweetPOSPage',instance.IsSweetPOSPage)
+            
             instance.save()
 
             for Access in instance.PagePageAccess.all():
@@ -146,8 +153,7 @@ class M_PagesSerializer1(serializers.ModelSerializer):
             if (validated_data['PageFieldMaster'] != ''):      
                 for a in instance.PageFieldMaster.all():
                     a.delete()
-                
-
+                 
             if (instance.PageType !=1):
                 for PagePageAccess_data in validated_data['PagePageAccess']:
                     PageAccess = MC_PagePageAccess.objects.create(Page=instance, **PagePageAccess_data)

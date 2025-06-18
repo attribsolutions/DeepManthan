@@ -15,14 +15,11 @@ from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework.authentication import BasicAuthentication
 import json ,requests
-
-
-
+ 
 class T_MobileAppOrdersView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = [BasicAuthentication]
-
-
+ 
     @transaction.atomic()
     def post(self, request):
         data = JSONParser().parse(request)
@@ -34,47 +31,66 @@ class T_MobileAppOrdersView(CreateAPIView):
                     
                     # Parsing the authorization header
                     auth_type, auth_string = auth_header.split(' ', 1)
-                    if auth_type.lower() == 'basic':
+                    if auth_type.lower() == 'basic': 
                        
                         # Decoding the base64-encoded username and password
                         try:
-                            username, password = base64.b64decode(
-                                auth_string).decode().split(':', 1)
+                            username, password = base64.b64decode(auth_string).decode().split(':', 1)
                         except (TypeError, ValueError, UnicodeDecodeError):
                             return responses('Invalid authorization header', status=status.HTTP_401_UNAUTHORIZED)
-                        # Authenticating the user
-                    # CustomPrint(username,password)    
-                    # CustomPrint('1111!1')    
+                        
                     user = authenticate(request, username=username, password=password)
                     # CustomPrint(username,password)
                     InvoiceItems = list()
                     
                     if user is not None:
-                        # CustomPrint('aaaaaaaaaaaa')
                         Supplier = data['FoodERPSupplierID']
                         Customer = data['FoodERPRetailerID']
                         OrderDate = data['OrderDate']
                         OrderAmount = data['TotalOrderValue']
                         AppOrderNumber = data['AppOrderNumber']
+               
+                        approved_customer = M_Parties.objects.filter(id=Customer).values('IsApprovedParty').first()
+
+                        if approved_customer:
+                            if approved_customer['IsApprovedParty'] == 0:
+                                subparty_exists = MC_PartySubParty.objects.filter(Party_id=Supplier,SubParty_id=Customer).exists()
+                                if not subparty_exists:
+                                    MC_PartySubParty.objects.create(Party_id=Supplier,SubParty_id=Customer,CreatedBy=430,UpdatedBy=430)
+                        
                         Orderdata = list()
                         Orderitem=list()
                         
-                        checkduplicate=T_Orders.objects.filter(FullOrderNumber=data['AppOrderNumber'],Supplier_id=data['FoodERPSupplierID'])
-                        if checkduplicate:
+
+                        checkduplicate=T_Orders.objects.filter(FullOrderNumber=AppOrderNumber,Supplier_id=Supplier,OrderDate=OrderDate)
+                        ordercount=checkduplicate.count()
+                        if ordercount > 0:
                             log_entry = create_transaction_logNew(request, data, Supplier, 'A similar order already exists in the system, AppOrderNumber : '+data['AppOrderNumber'],161,0,0,0,Customer)
                             return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'A similar order already exists in the system, AppOrderNumber : '+data['AppOrderNumber']})
                         else:
+
+                            # log_entry = create_transaction_logNew(request, data, Supplier, '',149,0,0,0,Customer)
+
                             for aa in data['OrderItem']:
+                                
+                                Item=aa['FoodERPItemID']
+                                # Check Item Is Exist
                                 ItemCheck = M_Items.objects.filter(id=aa['FoodERPItemID']).exists()
                                 if not ItemCheck:
                                     log_entry = create_transaction_logNew(request, data, Supplier, f'ItemID {aa["FoodERPItemID"]} is not present in the FoodERP 2.0', 161, 0, 0, 0, Customer)
                                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': f'ItemID {aa["FoodERPItemID"]} is not present in the FoodERP 2.0'})
                                 # CustomPrint(aa['FoodERPItemID'])
+                                
                                 unit=MC_ItemUnits.objects.filter(UnitID_id=1,Item_id=aa['FoodERPItemID'],IsDeleted=0).values('id')
                                 
-                                Gst = GSTHsnCodeMaster(aa['FoodERPItemID'], OrderDate).GetTodaysGstHsnCode()
+                                # Gst = GSTHsnCodeMaster(aa['FoodERPItemID'], OrderDate).GetTodaysGstHsnCode()
+                                Gst = M_GSTHSNCode.objects.raw(f'''select 1 as id, GSTHsnCodeMaster({Item},%s,1,0,0)GSTID,
+                                                                             GSTHsnCodeMaster({Item},%s,2,0,0)GSTPercentage ''',[OrderDate,OrderDate])
+                                
+                                
+                                
                                 BasicAmount=round(float(aa['RatewithoutGST'])*float(aa['QuantityinPieces']),2)
-                                CGST= round(BasicAmount*(float(Gst[0]['GST'])/100),2)
+                                CGST= round(BasicAmount*(float(Gst[0].GSTPercentage)/100),2)
                                 BaseUnitQuantity = UnitwiseQuantityConversion(
                                     aa['FoodERPItemID'], aa['QuantityinPieces'], unit[0]['id'], 0, 0, 0, 0).GetBaseUnitQuantity()
                                 QtyInNo = UnitwiseQuantityConversion(
@@ -83,9 +99,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                                     aa['FoodERPItemID'], aa['QuantityinPieces'], unit[0]['id'], 0, 0, 2, 0).ConvertintoSelectedUnit()
                                 QtyInBox = UnitwiseQuantityConversion(
                                     aa['FoodERPItemID'], aa['QuantityinPieces'], unit[0]['id'], 0, 0, 4, 0).ConvertintoSelectedUnit()
-                            
-                                
-                                
+
                                 Orderitem.append(
                                     {
                                         "Item": aa['FoodERPItemID'],
@@ -96,13 +110,13 @@ class T_MobileAppOrdersView(CreateAPIView):
                                         "Unit": unit[0]['id'],
                                         "BaseUnitQuantity": BaseUnitQuantity,
                                         "Margin": "",
-                                        "GST": Gst[0]['Gstid'],
+                                        "GST": Gst[0].GSTID,
                                         "CGST": CGST,
                                         "SGST": CGST,
                                         "IGST": 0,
-                                        "GSTPercentage": float(Gst[0]['GST']),
-                                        "CGSTPercentage": float(Gst[0]['GST'])/2,
-                                        "SGSTPercentage": float(Gst[0]['GST'])/2,
+                                        "GSTPercentage": float(Gst[0].GSTPercentage),
+                                        "CGSTPercentage": float(Gst[0].GSTPercentage)/2,
+                                        "SGSTPercentage": float(Gst[0].GSTPercentage)/2,
                                         "IGSTPercentage": "0.00",
                                         "BasicAmount": BasicAmount,
                                         "GSTAmount": round(CGST+CGST,2),
@@ -116,9 +130,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                                         "QtyInNo" : QtyInNo,
                                         "QtyInKg" : QtyInKg,
                                         "QtyInBox" : QtyInBox
-
-
-                                        }
+                                    }
                                 )
                                 
                             '''Get Max Order Number'''
@@ -129,9 +141,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                             c=MC_PartyAddress.objects.filter(Party_id=Customer,IsDefault=1).values('id')
                             # CustomPrint(c)
                                 
-                            
                             Orderdata.append({
-                                
                                 "OrderDate": OrderDate,
                                 "DeliveryDate": OrderDate,
                                 "OrderAmount": OrderAmount,
@@ -145,8 +155,8 @@ class T_MobileAppOrdersView(CreateAPIView):
                                 "POType": 1,
                                 "POFromDate": OrderDate,
                                 "POToDate": OrderDate,
-                                "CreatedBy": 1,
-                                "UpdatedBy": 1,
+                                "CreatedBy": 430,
+                                "UpdatedBy": 430,
                                 "MobileAppOrderFlag" : 1,
                                 "OrderTermsAndConditions": [
                                     {
@@ -154,23 +164,24 @@ class T_MobileAppOrdersView(CreateAPIView):
                                     "IsDeleted": 0
                                     }
                                 ],
+                                "AdvanceAmount" : 0,
                                 "Customer": Customer,
                                 "Supplier": Supplier,
                                 "OrderType": 2,
                                 "IsConfirm": True,
                                 "OrderItem" :  Orderitem
-
-                            })
-
-
+                            }) 
                             # return JsonResponse({ 'Data': Orderdata })
                             Order_serializer = T_OrderSerializer(data=Orderdata[0])
+                            # print(Order_serializer)
                             if Order_serializer.is_valid():
+                                
                                 Order_serializer.save()
+                                
                                 OrderID = Order_serializer.data['id']
                                 PartyID = Order_serializer.data['Customer']
                                 
-                                log_entry = create_transaction_logNew(request, data, Supplier, 'MobileAppOrder Save Successfully',149,OrderID,0,0,Customer)
+                                log_entry = create_transaction_logNew(request, {"RequestBody": str(data), "ResponseData": str(Orderdata[0]) }, Supplier,'MobileAppOrder Save Successfully',149,OrderID,0,0,Customer)
                                 return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Order Save Successfully', 'FoodERPOrderID': OrderID})
                             log_entry = create_transaction_logNew(request, data, Supplier,  Order_serializer.errors,161,OrderID,0,0,Customer)
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
@@ -227,9 +238,11 @@ class T_MobileAppOrdersView(CreateAPIView):
                         for aa in data['OrderItem']:
                             # CustomPrint(aa['FoodERPItemID'])
                             unit=MC_ItemUnits.objects.filter(UnitID_id=1,Item_id=aa['FoodERPItemID'],IsDeleted=0).values('id')
-                            Gst = GSTHsnCodeMaster(aa['FoodERPItemID'], OrderDate).GetTodaysGstHsnCode()
+                            # Gst = GSTHsnCodeMaster(aa['FoodERPItemID'], OrderDate).GetTodaysGstHsnCode()
+                            Gst = M_GSTHSNCode.objects.raw(f'''select 1 as id, GSTHsnCodeMaster({aa['FoodERPItemID']},%s,1,0,0)GSTID,
+                                                                             GSTHsnCodeMaster({aa['FoodERPItemID']},%s,2,0,0)GSTPercentage ''',[OrderDate,OrderDate])
                             BasicAmount=round(float(aa['RatewithoutGST'])*float(aa['QuantityinPieces']),2)
-                            CGST= round(BasicAmount*(float(Gst[0]['GST'])/100),2)
+                            CGST= round(BasicAmount*(float(Gst[0].GSTPercentage)/100),2)
                             BaseUnitQuantity = UnitwiseQuantityConversion(
                                 aa['FoodERPItemID'], aa['QuantityinPieces'], unit[0]['id'], 0, 0, 0, 0).GetBaseUnitQuantity()
                             QtyInNo = UnitwiseQuantityConversion(
@@ -238,8 +251,6 @@ class T_MobileAppOrdersView(CreateAPIView):
                                 aa['FoodERPItemID'], aa['QuantityinPieces'], unit[0]['id'], 0, 0, 2, 0).ConvertintoSelectedUnit()
                             QtyInBox = UnitwiseQuantityConversion(
                                 aa['FoodERPItemID'], aa['QuantityinPieces'], unit[0]['id'], 0, 0, 4, 0).ConvertintoSelectedUnit()
-                        
-                            
                             
                             Orderitem.append(
                                 {
@@ -251,13 +262,13 @@ class T_MobileAppOrdersView(CreateAPIView):
                                     "Unit": unit[0]['id'],
                                     "BaseUnitQuantity": BaseUnitQuantity,
                                     "Margin": "",
-                                    "GST": Gst[0]['Gstid'],
+                                    "GST": Gst[0].GSTID,
                                     "CGST": CGST,
                                     "SGST": CGST,
                                     "IGST": 0,
-                                    "GSTPercentage": float(Gst[0]['GST']),
-                                    "CGSTPercentage": float(Gst[0]['GST'])/2,
-                                    "SGSTPercentage": float(Gst[0]['GST'])/2,
+                                    "GSTPercentage": float(Gst[0].GSTPercentage),
+                                    "CGSTPercentage": float(Gst[0].GSTPercentage)/2,
+                                    "SGSTPercentage": float(Gst[0].GSTPercentage)/2,
                                     "IGSTPercentage": "0.00",
                                     "BasicAmount": BasicAmount,
                                     "GSTAmount": round(CGST+CGST,2),
@@ -282,9 +293,7 @@ class T_MobileAppOrdersView(CreateAPIView):
                         # b = GetPrifix.GetOrderPrifix(Supplier)
                         
                         c=MC_PartyAddress.objects.filter(Party_id=Customer,IsDefault=1).values('id')
-                        # CustomPrint(c)
-                            
-                        
+                         
                         Orderdata.append({
                             
                             "OrderDate": OrderDate,
@@ -300,8 +309,8 @@ class T_MobileAppOrdersView(CreateAPIView):
                             "POType": 1,
                             "POFromDate": OrderDate,
                             "POToDate": OrderDate,
-                            "CreatedBy": 1,
-                            "UpdatedBy": 1,
+                            "CreatedBy": 430,
+                            "UpdatedBy": 430,
                             "OrderTermsAndConditions": [
                                 {
                                 "TermsAndCondition": 1,
@@ -331,12 +340,10 @@ class T_MobileAppOrdersView(CreateAPIView):
                         log_entry = create_transaction_logNew(request, data, Supplier, Order_serializer.errors,162,OrderID,0,0,Customer)
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Order_serializer.errors, 'Data': []})
                     else:
-                        # CustomPrint('bbbbbbbbbb')
                         # Invalid authorization header or authentication failed
                         return response('Unauthorized', status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
             log_entry = create_transaction_logNew(request, data, 0,  str(e),162,0)
-            # CustomPrint('ccccccccccccccccccc')
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 class T_MobileAppOrdersDeleteView(CreateAPIView):
@@ -383,7 +390,7 @@ class T_MobileAppOrdersDeleteView(CreateAPIView):
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Order is used in another Transaction'})
         except Exception as e:
             log_entry = create_transaction_logNew(request, data, 0,str(e),163,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 class NewProductSendToMobileAppView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -398,7 +405,7 @@ class NewProductSendToMobileAppView(CreateAPIView):
                 today = date.today()
                 q0=M_Items.objects.raw('''SELECT M_Items.id ,M_Items.Name ItemName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') FoodERPParentName,ifnull(MC_SubGroup.Name,'') FoodERPFamilyName 
 ,ifnull(MC_ItemGroupDetails.GroupType_id,'') GroupTypeId,ifnull(MC_ItemGroupDetails.Group_id,'') FoodERPParentId,ifnull(MC_ItemGroupDetails.SubGroup_id,0) FoodERPFamilyId,M_Items.BaseUnitID_id,M_Items.isActive
-,GSTHsnCodeMaster(M_Items.id,%s,3) HSNCode,GetTodaysDateMRP(M_Items.id,%s,2,0,0) MRPValue
+,GSTHsnCodeMaster(M_Items.id,%s,3,0,0) HSNCode,GetTodaysDateMRP(M_Items.id,%s,2,0,0,0) MRPValue
 FROM M_Items
 left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
@@ -457,7 +464,7 @@ where M_Items.id=%s''',([today],[today],[id]))
                     log_entry = create_transaction_logNew(request, payload_json_data, 0,response_json,152,0)
                     for a in response_json['data']:
                         query = M_Items.objects.filter(id=id).update(SkyggeProductID =a['productId'])
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': payload_json_data})
                 else:
                     log_entry = create_transaction_logNew(request, payload_json_data, 0,response_json['message'],164,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':response_json, 'Data': []})
@@ -477,7 +484,7 @@ where M_Items.id=%s''',([today],[today],[id]))
                 today = date.today()
                 q0=M_Items.objects.raw('''SELECT M_Items.id ,M_Items.Name ItemName,ifnull(M_GroupType.Name,'') GroupTypeName,ifnull(M_Group.Name,'') FoodERPParentName,ifnull(MC_SubGroup.Name,'') FoodERPFamilyName 
 ,ifnull(MC_ItemGroupDetails.GroupType_id,'') GroupTypeId,ifnull(MC_ItemGroupDetails.Group_id,'') FoodERPParentId,ifnull(MC_ItemGroupDetails.SubGroup_id,'') FoodERPFamilyId,M_Items.BaseUnitID_id,M_Items.isActive
-,GSTHsnCodeMaster(M_Items.id,%s,3) HSNCode,GetTodaysDateMRP(M_Items.id,%s,2,0,0) MRPValue
+,GSTHsnCodeMaster(M_Items.id,%s,3,0,0) HSNCode,GetTodaysDateMRP(M_Items.id,%s,2,0,0,0) MRPValue
 FROM M_Items
 left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=M_Items.id and MC_ItemGroupDetails.GroupType_id=1
 left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id 
@@ -489,21 +496,21 @@ where M_Items.id in %s''',([today],[today],ProductID_list))
                     RetaileRate=RateCalculationFunction(0,row.id,0,0,1,0,3).RateWithGST() 
                     DistributorRate=RateCalculationFunction(0,row.id,0,0,1,0,2).RateWithGST()
                     SuperStockistRate=RateCalculationFunction(0,row.id,0,0,1,0,1).RateWithGST() 
-                    ItemData.append({
-                            "FoodERPItemID": str(row.id),
-                            "FoodERPCategoryId":1,
-                            "FoodERPFamilyId":row.FoodERPFamilyId,
-                            "FoodERPTypeId":1,
-                            "FoodERPUomId":row.BaseUnitID_id,
-                            "ItemName":row.ItemName,
-                            "MRP":float(row.MRPValue),
-                            "RetailerRate":float(RetaileRate[0]['RateWithoutGST']),
-                            "DistributorRate":float(DistributorRate[0]['RateWithoutGST']),
-                            "SuperStockistRate":float(SuperStockistRate[0]['RateWithoutGST']),
-                            "ProductHSN":row.HSNCode,
-                            "IsActive":row.isActive
+                    # ItemData.append({
+                    #         "FoodERPItemID": str(row.id),
+                    #         "FoodERPCategoryId":1,
+                    #         "FoodERPFamilyId":row.FoodERPFamilyId,
+                    #         "FoodERPTypeId":1,
+                    #         "FoodERPUomId":row.BaseUnitID_id,
+                    #         "ItemName":row.ItemName,
+                    #         "MRP":float(row.MRPValue),
+                    #         "RetailerRate":float(RetaileRate[0]['RateWithoutGST']),
+                    #         "DistributorRate":float(DistributorRate[0]['RateWithoutGST']),
+                    #         "SuperStockistRate":float(SuperStockistRate[0]['RateWithoutGST']),
+                    #         "ProductHSN":row.HSNCode,
+                    #         "IsActive":row.isActive
                             
-                        })
+                    #     })
 
                 payload={
                     "products" : ItemData
@@ -517,15 +524,16 @@ where M_Items.id in %s''',([today],[today],ProductID_list))
                           }
                 
                 payload_json_data = json.dumps(payload)
+                # print('mobileappdat: -',payload_json_data)
                 response = requests.request("put", url, headers=headers, data=payload_json_data)
                 response_json=json.loads(response.text)
                 
                 if(response_json['success'] == True):
-                    log_entry = create_transaction_logNew(request, payload_json_data, 0,response_json['message'],153,0)
+                    log_entry = create_transaction_logNew(request, Productdata, 0,response_json['message'],153,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
                 else:
                     # CustomPrint('aaaaaaaaaaaaaaaaa')
-                    log_entry = create_transaction_logNew(request, payload_json_data, 0,response_json['message'],165,0)
+                    log_entry = create_transaction_logNew(request, Productdata, 0,response_json['message'],165,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
 
         except Exception as e:
@@ -635,12 +643,12 @@ cust.GSTIN GSTNumber,cust.Latitude, cust.Longitude,dist.id distid,MC_PartyAddres
                 response_json=json.loads(response.text)
                 # CustomPrint(response_json)
                 if(response_json['success'] == True):
-                    log_entry = create_transaction_logNew(request,response_json,0,response_json['message'],155,0)
+                    log_entry = create_transaction_logNew(request,Orderdata,0,response_json['message'],155,0)
                     for a in response_json['data']:
                         query = M_Parties.objects.filter(id=a['externalMappingId']).update(SkyggeID =a['outletId'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
                 else:
-                    log_entry = create_transaction_logNew(request,response_json,0,response_json['message'],167,0)
+                    log_entry = create_transaction_logNew(request,Orderdata,0,response_json['message'],167,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':response_json['message'], 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request,Orderdata,0,'RetailerSendToMobileAppSave:'+str(e),167,0)
@@ -704,10 +712,10 @@ cust.GSTIN GSTNumber,cust.Latitude,cust.Longitude,dist.id distid,MC_PartyAddress
                 response_json=json.loads(response.text)
                 # CustomPrint('======================',response_json)
                 if(response_json['success'] == True):
-                    log_entry = create_transaction_logNew(request, payload_json_data, 0,response_json['message'],156,0)
+                    log_entry = create_transaction_logNew(request, Orderdata, 0,response_json['message'],156,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
                 else:
-                    log_entry = create_transaction_logNew(request, payload_json_data, 0,response_json['message'],168,0)
+                    log_entry = create_transaction_logNew(request, Orderdata, 0,response_json['message'],168,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':response_json['message'], 'Data': []})    
             
         except Exception as e:
@@ -820,6 +828,7 @@ class RetailerAddFromMobileAppview(CreateAPIView):
                                     "PriceList": 3,
                                     "PartyType": 11,
                                     "Company": 3,
+                                    "SAPPartyCode": a.get('SAPPartyCode', None),
                                     "PAN": a['PANNumber'],
                                     "Email":a['EmailAddress'],
                                     "MobileNo": a['MobileNumber'],
@@ -852,14 +861,14 @@ class RetailerAddFromMobileAppview(CreateAPIView):
                                 "GSTNumber":Retailer.GSTIN
                             })
                         else:
-                            log_entry = create_transaction_logNew(request, Retailer_serializer.errors, 0,'fail to Added Retailer From MobileApp ',170,0)
+                            log_entry = create_transaction_logNew(request, data, 0,'fail to Added Retailer From MobileApp ',170,0)
                             transaction.set_rollback(True)
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Retailer_serializer.errors})
-                    log_entry = create_transaction_logNew(request,inserted_retailerlist,0,'Retailer Added From MobileApp Successfully',158,0)
+                    log_entry = create_transaction_logNew(request,data,0,'Retailer Added From MobileApp Successfully',158,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Added From App Successfully','InsertedoutletsCount': len(inserted_retailerlist),"outlets":inserted_retailerlist})                        
         except Exception as e:
             log_entry = create_transaction_logNew(request,data,0,'RetailerAddedFromMobileApp:'+str(e),170,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e) })
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e) })
         
         
         
@@ -919,13 +928,14 @@ class RetailerUpdateFromMobileAppview(CreateAPIView):
                         Retailer_serializer = RetailerUpdateFromMobileAppSerializer(PartiesdataByID, data=aa)
                         if Retailer_serializer.is_valid():
                             Retailer = Retailer_serializer.save()
-                            log_entry = create_transaction_logNew(request, aa, 0,'Retailer Updated From Mobile App Successfully',159,0)
-                            return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Updated From Mobile App Successfully' })
+                            # log_entry = create_transaction_logNew(request, data, 0,'Retailer Updated From Mobile App Successfully',159,0)
+                            # return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Updated From Mobile App Successfully' })
                         else:
-                            log_entry = create_transaction_logNew(request, aa, 0,'RetailerUpdatedFromMobileApp:'+str(Retailer_serializer.errors),171,0)
+                            log_entry = create_transaction_logNew(request, data, 0,'RetailerUpdatedFromMobileApp:'+str(Retailer_serializer.errors),171,0)
                             transaction.set_rollback(True)
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Retailer_serializer.errors})
-                    # return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Updated From Mobile App Successfully' })                        
+                    log_entry = create_transaction_logNew(request, data, 0,'Retailer Updated From Mobile App Successfully',159,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Retailer Updated From Mobile App Successfully' })                        
         except Exception as e:
             log_entry = create_transaction_logNew(request, data, 0,'RetailerUpdatedFromMobileApp:'+str(e),171,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []}) 
@@ -953,8 +963,8 @@ class RetailerDeleteFromMobileApp(CreateAPIView):
                     user = authenticate(request, username=username, password=password)
                     M_Partiesdata = M_Parties.objects.get(id=id)
                     M_Partiesdata.delete()
-                    log_entry = create_transaction_logNew(request, id, 0,'Retailer  Deleted Successfully',160,0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Retailer  Deleted Successfully'})
+                    log_entry = create_transaction_logNew(request,{'RetailerID':id}, 0,'Deleted Successfully',160,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Retailer Deleted Successfully'})
         except M_Parties.DoesNotExist:
             log_entry = create_transaction_logNew(request, 0, 0,'Retailer Not available',172,0)
             return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Retailer Not available'})

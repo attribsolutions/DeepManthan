@@ -81,7 +81,7 @@ class ItemSerializer(serializers.ModelSerializer):
     
     ItemUnitDetails = ItemUnitsSerializer(many=True)
     
-    ItemImagesDetails = ItemImagesSerializer(many=True)
+    # ItemImagesDetails = ItemImagesSerializer(many=True)
     
     ItemDivisionDetails = ItemDivisionsSerializer(many=True) 
     
@@ -93,15 +93,16 @@ class ItemSerializer(serializers.ModelSerializer):
     
     ItemShelfLife = ItemShelfLifeSerializer(many=True)
    
+    ItemCode = serializers.DecimalField(max_digits=20,decimal_places=0,required=False, default=0)
     class Meta:
         model = M_Items
-        fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode','SAPItemCode', 'isActive', 'IsSCM', 'CanBeSold', 'CanBePurchase', 'BrandName', 'Tag','Length','Breadth','Height','StoringCondition','Grammage','CreatedBy', 'UpdatedBy','ItemCategoryDetails','ItemGroupDetails', 'ItemUnitDetails', 'ItemImagesDetails', 'ItemDivisionDetails', 'ItemMRPDetails', 'ItemMarginDetails', 'ItemGSTHSNDetails', 'ItemShelfLife' ]
+        fields = ['Name', 'ShortName', 'Sequence', 'Company', 'BaseUnitID', 'BarCode','SAPItemCode', 'isActive', 'IsSCM', 'CanBeSold', 'CanBePurchase', 'BrandName', 'Tag','Length','Breadth','Height','StoringCondition','Grammage','ItemCode','CreatedBy', 'UpdatedBy','ItemCategoryDetails','ItemGroupDetails', 'ItemUnitDetails', 'ItemDivisionDetails', 'ItemMRPDetails', 'ItemMarginDetails', 'ItemGSTHSNDetails', 'ItemShelfLife','IsCBMItem','IsMixItem','IsStockProcessItem' ]
        
     def create(self, validated_data):
         ItemCategorys_data = validated_data.pop('ItemCategoryDetails')
         ItemGroups_data = validated_data.pop('ItemGroupDetails')
         ItemUnits_data = validated_data.pop('ItemUnitDetails')
-        ItemImages_data = validated_data.pop('ItemImagesDetails')
+        # ItemImages_data = validated_data.pop('ItemImagesDetails')
         ItemDivisions_data = validated_data.pop('ItemDivisionDetails')
         ItemMRPs_data = validated_data.pop('ItemMRPDetails')
         ItemMargins_data = validated_data.pop('ItemMarginDetails')
@@ -119,9 +120,9 @@ class ItemSerializer(serializers.ModelSerializer):
         
             ItemUnits = MC_ItemUnits.objects.create(Item=ItemID,**ItemUnit_data)
             
-        if ItemImages_data != '':
-            for ItemImage_data in ItemImages_data:
-                ItemImage = MC_ItemImages.objects.create(Item=ItemID, **ItemImage_data)
+        # if ItemImages_data != '':
+        #     for ItemImage_data in ItemImages_data:
+        #         ItemImage = MC_ItemImages.objects.create(Item=ItemID, **ItemImage_data)
         
         for ItemDivision_data in ItemDivisions_data:
             ItemDivision = MC_PartyItems.objects.create(Item=ItemID, **ItemDivision_data)    
@@ -142,8 +143,8 @@ class ItemSerializer(serializers.ModelSerializer):
     
     def update(self, instance, validated_data):
 
-        # instance.Name = validated_data.get(
-        #     'Name', instance.Name)
+        instance.Name = validated_data.get(
+            'Name', instance.Name)
         instance.ShortName = validated_data.get(
             'ShortName', instance.ShortName)
         instance.Sequence = validated_data.get(
@@ -178,7 +179,12 @@ class ItemSerializer(serializers.ModelSerializer):
             'StoringCondition', instance.StoringCondition)
         instance.Grammage = validated_data.get(
             'Grammage', instance.Grammage)
-            
+        # add IsCBMItem for update
+        instance.IsCBMItem=validated_data.get(
+            'IsCBMItem',instance.IsCBMItem)
+        # add IsMixItem for update
+        instance.IsMixItem=validated_data.get(
+            'IsMixItem', instance.IsMixItem)    
         instance.save()
         
         for a in instance.ItemCategoryDetails.all():
@@ -192,17 +198,22 @@ class ItemSerializer(serializers.ModelSerializer):
         else:
            
             for c in instance.ItemUnitDetails.all():
-                # CustomPrint(c.id)
+                
                 SetFlag=MC_ItemUnits.objects.filter(id=c.id,IsBase=0 ).update(IsDeleted=1)
 
             for ItemUnit_data in validated_data['ItemUnitDetails']:
-                ItemUnits = MC_ItemUnits.objects.create(Item=instance, **ItemUnit_data)    
+                
+                if ItemUnit_data['IsBase'] == False:
+                    
+                    ItemUnits = MC_ItemUnits.objects.create(Item=instance, **ItemUnit_data)    
+                else:
+                    SetFlag=MC_ItemUnits.objects.filter(IsBase=ItemUnit_data['IsBase'],Item=instance ).update(PODefaultUnit=ItemUnit_data['PODefaultUnit'],SODefaultUnit=ItemUnit_data['SODefaultUnit'])
+
         
         
-        
-        if validated_data['ItemImagesDetails'] != '':    
-            for d in instance.ItemImagesDetails.all():
-                d.delete()
+        # if validated_data['ItemImagesDetails'] != '':    
+        #     for d in instance.ItemImagesDetails.all():
+        #         d.delete()
             
         for e in instance.ItemDivisionDetails.all():
             e.delete()
@@ -232,9 +243,9 @@ class ItemSerializer(serializers.ModelSerializer):
 
         
             
-        if validated_data['ItemImagesDetails'] != '':
-            for ItemImage_data in validated_data['ItemImagesDetails']:
-                ItemImage = MC_ItemImages.objects.create(Item=instance, **ItemImage_data)
+        # if validated_data['ItemImagesDetails'] != '':
+        #     for ItemImage_data in validated_data['ItemImagesDetails']:
+        #         ItemImage = MC_ItemImages.objects.create(Item=instance, **ItemImage_data)
         
         for ItemDivision_data in validated_data['ItemDivisionDetails']:
             ItemDivision = MC_PartyItems.objects.create(Item=instance, **ItemDivision_data)    
@@ -247,8 +258,7 @@ class ItemSerializer(serializers.ModelSerializer):
         
         for ItemGSTHSN_data in validated_data['ItemGSTHSNDetails']:
             ItemGSTHSN = M_GSTHSNCode.objects.create(Item=instance, **ItemGSTHSN_data) 
-        
-              
+            
         
         return instance 
          
@@ -515,6 +525,10 @@ class ItemWiseUpdateSerializer(serializers.Serializer):
     SubGroupName = serializers.CharField(max_length=200) 
     ShelfLife =  serializers.CharField(max_length=200) 
     SAPUnitID = serializers.CharField(max_length=200)
+    IsCBMItem=serializers.BooleanField(default=False)
+    IsMixItem=serializers.BooleanField(default=False)
+    IsStockProcessItem=serializers.BooleanField(default=False)
+    IsThirdPartyItem=serializers.BooleanField(default=False)
         
 class DaysSerializer(serializers.ModelSerializer):
     Item = ItemWiseUpdateSerializer(read_only=True)

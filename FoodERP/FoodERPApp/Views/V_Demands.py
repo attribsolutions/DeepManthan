@@ -19,9 +19,9 @@ class InterBranchDivisionView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request, id=0):
+        Divisiondata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Divisiondata = JSONParser().parse(request)
                 Company = Divisiondata['Company']
                 Party = Divisiondata['Party']
                 query = M_Parties.objects.filter(Company=Company,IsDivision=1).filter(~Q(id=Party))
@@ -36,7 +36,7 @@ class InterBranchDivisionView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': DivisionListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
     
 # class InterBranchItemsView(CreateAPIView):
 #     permission_classes = (IsAuthenticated,)
@@ -204,7 +204,7 @@ class InterBranchDivisionView(CreateAPIView):
 
 #                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':  '', 'Data': FinalResult})
 #         except Exception as e:
-#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})    
+#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})    
     
     
 
@@ -214,26 +214,29 @@ class DemandListFilterView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request, id=0):
+        Demanddata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Demanddata = JSONParser().parse(request)
                 FromDate = Demanddata['FromDate']
                 ToDate = Demanddata['ToDate']
                 Customer = Demanddata['Customer'] # Customer Compansary
                 Supplier = Demanddata['Supplier']
                 IBType = Demanddata['IBType']
                 if (IBType == "IBSO" ): # InterBranch Sales Order 
-                    if(Supplier == ''):
+                    if(Customer == ''):
+                        
                         if(FromDate=="" and ToDate=="" ):
-                            query = T_Demands.objects.filter(Supplier_id=Customer)
+                            query = T_Demands.objects.filter(Supplier_id=Supplier)
                         else:
-                            query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate],Supplier_id=Customer)                            
+                            query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate],Supplier_id=Supplier)                            
                     else:
+                       
                         if(FromDate=="" and ToDate=="" ):
-                            query = T_Demands.objects.filter(Customer_id=Supplier, Supplier_id=Customer)  
+                            query = T_Demands.objects.filter(Customer_id=Customer, Supplier_id=Supplier)  
                         else:
-                            query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate], Customer_id=Supplier, Supplier_id=Customer)  
-                            
+                           
+                            query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate], Customer_id=Customer, Supplier_id=Supplier)  
+                                      
                 elif(IBType == "IBPO"):
                     if(Supplier == ''): # InterBranch Purchase Order
                         query = T_Demands.objects.filter(DemandDate__range=[FromDate, ToDate],Customer_id=Customer)
@@ -276,7 +279,7 @@ class DemandListFilterView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': DemandListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class DemandView(CreateAPIView):
@@ -285,9 +288,9 @@ class DemandView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        Demanddata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Demanddata = JSONParser().parse(request)
                 Division = Demanddata['Division']
                 Customer = Demanddata['Customer']
                 DemandDate = Demanddata['DemandDate']
@@ -310,7 +313,7 @@ class DemandView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'IB Purchase Order Save Successfully', 'Data': []})
                 return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Demand_serializer.errors, 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class DemandViewSecond(CreateAPIView):
@@ -428,20 +431,20 @@ class DemandViewSecond(CreateAPIView):
                                 })
                                 CustomPrint(OrderData)
                     log_entry = create_transaction_logNew(request, {'OrderID':id}, a['Supplier']['id'],'DemandDate:'+a['DemandDate']+','+'Supplier:'+str(a['Supplier']['id']),62,id,"","",a['Customer']['id'])
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData[0]})
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': OrderData})
                 log_entry = create_transaction_logNew(request, {'OrderID':id}, a['Supplier']['id'], 'Order Not Found',62,0,0,0,a['Customer']['id'])
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Order Data Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'SingleOrder:'+Exception(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0, 0,'SingleOrder:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
     
     
          
     def put(self, request, id=0):
+        Demandupdatedata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Demandupdatedata = JSONParser().parse(request)
                 DemandupdateByID = T_Demands.objects.get(id=id)
                 Demandupdate_Serializer = T_DemandSerializer(
                     DemandupdateByID, data=Demandupdatedata)
@@ -452,7 +455,7 @@ class DemandViewSecond(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': Demandupdate_Serializer.errors, 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})    
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})    
         
         
     @transaction.atomic()
@@ -467,4 +470,4 @@ class DemandViewSecond(CreateAPIView):
         except IntegrityError:
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Transaction used in another table', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})

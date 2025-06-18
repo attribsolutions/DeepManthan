@@ -30,6 +30,7 @@ class RetailerAddFromMobileAppSerializer(serializers.ModelSerializer):
         PartyAddress_data = validated_data.pop('PartyAddress')
         PartyPrefix_data = validated_data.pop('PartyPrefix')
         PartySubPartys=validated_data.pop('PartySubParty')
+        validated_data.setdefault('SAPPartyCode', None)
         PartyID= M_Parties.objects.create(**validated_data)
         
         for PartyAddress in PartyAddress_data:
@@ -79,6 +80,6 @@ class RetailerUpdateFromMobileAppSerializer(serializers.ModelSerializer):
         
         for PartyAddress_updatedata in validated_data['PartyAddress']:
             if PartyAddress_updatedata['FoodERPRetailerID'] >0:
-                Partyaddress = MC_PartyAddress.objects.filter(id=PartyAddress_updatedata['FoodERPRetailerID'],IsDefault=1).update(Address=PartyAddress_updatedata['Address'],FSSAINo=PartyAddress_updatedata['FSSAINo'],FSSAIExipry=PartyAddress_updatedata['FSSAIExipry'])
+                Partyaddress = MC_PartyAddress.objects.filter(Party=PartyAddress_updatedata['FoodERPRetailerID'],IsDefault=1).update(Address=PartyAddress_updatedata['Address'],FSSAINo=PartyAddress_updatedata['FSSAINo'],FSSAIExipry=PartyAddress_updatedata['FSSAIExipry'])
                         
         return instance     

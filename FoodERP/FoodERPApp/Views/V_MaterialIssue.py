@@ -4,10 +4,11 @@ from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.db import transaction
 from rest_framework.parsers import JSONParser
-from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
+from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix,SystemBatchCodeGeneration
 from ..Serializer.S_WorkOrder import *
 from ..Serializer.S_MaterialIssue import *
 from ..models import *
+from datetime import datetime, timedelta
 
 
 
@@ -41,8 +42,15 @@ class WorkOrderDetailsView(CreateAPIView):
                         MaterialDetails = list()
                         workorderqty = a['Quantity']                        
                         for b in a['WorkOrderItems']:
-                            # CustomPrint(b)
+                            # print(b)
                             Item = b['Item']['id']
+                            # print(Item)
+                            Child_Item_BOM_id= list(M_BillOfMaterial.objects.filter(Item_id=Item,IsDelete=0).values('id'))
+                            if Child_Item_BOM_id:
+                                Child_Item_BOM = Child_Item_BOM_id[0]['id']
+                            else:
+                                Child_Item_BOM = None 
+                            # print(Child_Item_BOM)
                             z = 0
                             obatchwisestockquery = O_BatchWiseLiveStock.objects.filter(
                                 Item_id=Item, Party_id=PartyID, BaseUnitQuantity__gt=0)
@@ -67,7 +75,7 @@ class WorkOrderDetailsView(CreateAPIView):
                                     
                                     stockDatalist.append({
                                         "id": c['id'],
-                                        "Item": c['Item'],
+                                        "Item": c['Item'],                                        
                                         "BatchDate": c['LiveBatche']['BatchDate'],
                                         "BatchCode": c['LiveBatche']['BatchCode'],
                                         "SystemBatchDate": c['LiveBatche']['SystemBatchDate'],
@@ -86,7 +94,9 @@ class WorkOrderDetailsView(CreateAPIView):
                                 "UnitName": b['Unit']['BaseUnitConversion'],
                                 "Quantity": round(ActualQty, 3),
                                 "OriginalWorkOrderQty":b['Quantity'],
-                                "BatchesData": stockDatalist                                
+                                "Bom_id":Child_Item_BOM,
+                                "BatchesData": stockDatalist 
+                                                             
                                 # "Status":a['Status']
                             })
                             # CustomPrint(MaterialDetails)
@@ -106,10 +116,11 @@ class MaterialIsssueList(CreateAPIView):
                 MaterialIsssuedata = JSONParser().parse(request)
                 FromDate = MaterialIsssuedata['FromDate']
                 ToDate = MaterialIsssuedata['ToDate'] 
+                Party=MaterialIsssuedata['Party']
                 if(FromDate=="" and ToDate=="" ): 
-                    query = T_MaterialIssue.objects.filter(~Q(Status=2)) 
+                    query = T_MaterialIssue.objects.filter(~Q(Status=2),Party_id=Party,IsDelete=0) 
                 else: 
-                    query = T_MaterialIssue.objects.filter(MaterialIssueDate__range=[FromDate, ToDate])                 
+                    query = T_MaterialIssue.objects.filter(MaterialIssueDate__range=[FromDate, ToDate],Party_id=Party,IsDelete=0)                 
                 if query:
                     MaterialIsssue_serializerdata = MatetrialIssueSerializerSecond( query, many=True).data
                     
@@ -117,16 +128,37 @@ class MaterialIsssueList(CreateAPIView):
                     MaterialIsssueListData = list()
                    
                     for a in MaterialIsssue_serializerdata:
-                        if(a['RemainNumberOfLot']!=0):
-                            # CustomPrint("Shrutip")
-                            if(a['NumberOfLot']!=a['RemainNumberOfLot']):
-                                # CustomPrint("Shrutip")
-                                Percentage=a['RemainNumberOfLot']/a['NumberOfLot']*100 
-                                Percentage=100-Percentage
-                            else:
-                                Percentage=0
-                        else:  
-                            Percentage=100                        
+                        # if(a['RemainNumberOfLot']!=0):                            
+                        #     if(a['NumberOfLot']!=a['RemainNumberOfLot']):
+                        #         # print(a['RemainNumberOfLot'],a['NumberOfLot'])
+                        #         Percentage=(1-float(a['RemainNumberOfLot'])/float(a['NumberOfLot'])*100) 
+                            
+                        #         # Percentage=100-Percentage
+                        #     else:
+                        #         Percentage=0
+                        # else:  
+                        #     Percentage=100   
+                        total_lot = float(a['NumberOfLot'])
+                        remaining_lot = float(a['RemainNumberOfLot'])
+
+                        if remaining_lot == 0:
+                            Percentage = 100  
+                        elif remaining_lot == total_lot:
+                            Percentage = 0  
+                        else:
+                            Percentage = round((1 - (remaining_lot / total_lot)) * 100, 2)
+                            
+                        ItemShelflife=MC_ItemShelfLife.objects.filter(Item_id=a['Item']['id'],IsDeleted=0).values('Days')
+                        
+                        if ItemShelflife:
+                            today = datetime.today()
+                            shelf_date = today + timedelta(days=ItemShelflife[0]['Days'])
+                            shelf_date = shelf_date.strftime("%Y-%m-%d")
+                        else:
+                            shelf_date = today                            
+                        
+                        Productionquery1 = T_MaterialIssue.objects.filter(Item_id=a['Item']['id']).values('id')                
+                        BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item']['id'], a['Party']['id'], Productionquery1.count())                     
                         MaterialIsssueListData.append({
                             "id": a['id'],
                             "MaterialIssueDate": a['MaterialIssueDate'],
@@ -144,14 +176,16 @@ class MaterialIsssueList(CreateAPIView):
                             "PartyName": a['Party']['Name'],
                             "CreatedOn": a['CreatedOn'],
                             "Status":a['Status'],
-                            "Percentage":Percentage                         
+                            "PrintedBatchCode":BatchCode,
+                            "Percentage":Percentage ,
+                            "ShelfDate":shelf_date                       
                            
                         })                        
                         # CustomPrint(MaterialIsssueListData)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': MaterialIsssueListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class MaterialIssueView(CreateAPIView):
@@ -180,7 +214,10 @@ class MaterialIssueView(CreateAPIView):
                 MaterialIssueData['FullMaterialIssueNumber'] = b+""+str(a)
                 MaterialIssueData['Status']=0
                 MaterialIssueData['RemainNumberOfLot']=MaterialIssueData['NumberOfLot']
+                # print(MaterialIssueData['RemainNumberOfLot'])
+                
                 MaterialIssueData['RemaninLotQuantity']=MaterialIssueData['LotQuantity']
+                # print(MaterialIssueData['RemaninLotQuantity'])
                 
                 MaterialIssueItems = MaterialIssueData['MaterialIssueItems']
                 MaterialWorkOrder=MaterialIssueData['MaterialIssueWorkOrder']   
@@ -212,12 +249,14 @@ class MaterialIssueView(CreateAPIView):
                
                 MaterialIssue_Serializer = MaterialIssueSerializer(
                     data=MaterialIssueData)
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': MaterialIssue_Serializer})
                 # CustomPrint(MaterialIssue_Serializer)                
                 if MaterialIssue_Serializer.is_valid():
-                    MaterialIssue_Serializer.save() 
-                    RemainNumberOfLot=RemaningLots-NoOfLotsQty
+                    MaterialIssue_Serializer.save()                     
+                    RemainNumberOfLot=float(RemaningLots)-float(NoOfLotsQty)
                     RemaninQuantity=float(RamaningQty)-float(NoOfQuantity) 
-                    if(RemaningLots==NoOfLotsQty):                      
+                    # if(RemaningLots==NoOfLotsQty):        
+                    if RemainNumberOfLot == 0:              
                        query = T_WorkOrder.objects.filter(id=WorkOrderID).update(Status=2,RemainNumberOfLot=RemainNumberOfLot,RemaninQuantity=RemaninQuantity)
                     else:                       
                        query = T_WorkOrder.objects.filter(id=WorkOrderID).update(Status=1,RemainNumberOfLot=RemainNumberOfLot,RemaninQuantity=RemaninQuantity)                       
@@ -314,7 +353,7 @@ class MaterialIssueViewSecond(RetrieveAPIView):
                 MLot=MaterialIssueItemdataserializer[0]['NumberOfLot']
                 MQuantity=MaterialIssueItemdataserializer[0]['LotQuantity']
                 query1 = T_WorkOrder.objects.filter(id=workOrderID).values('RemainNumberOfLot','RemaninQuantity','NumberOfLot')
-                ActualLot=query1[0]['RemainNumberOfLot']+MLot
+                ActualLot=float(query1[0]['RemainNumberOfLot'] ) + float(MLot)
                 ActualQty=float(query1[0]['RemaninQuantity'])+float(MQuantity)
                 orignalLot=query1[0]['NumberOfLot']                
                 if(orignalLot==ActualLot):
@@ -322,9 +361,9 @@ class MaterialIssueViewSecond(RetrieveAPIView):
                 else:
                      Status=1
                 query = T_WorkOrder.objects.filter(id=workOrderID).update(Status=Status,RemainNumberOfLot=ActualLot,RemaninQuantity=ActualQty)
-                MaterialIssuedata = T_MaterialIssue.objects.get(id=id)
-                MaterialIssuedata.delete()
-                
+                # MaterialIssuedata = T_MaterialIssue.objects.get(id=id)
+                # MaterialIssuedata.delete()
+                MaterialIssuedata = T_MaterialIssue.objects.filter(id=id).update(IsDelete = 1)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Material Issue Delete Successfully', 'Data': []})
                 # else:
                 #     transaction.set_rollback(True)

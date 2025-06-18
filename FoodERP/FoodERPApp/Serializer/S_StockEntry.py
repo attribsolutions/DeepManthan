@@ -23,7 +23,7 @@ class PartyStockEntryOLiveBatchesSerializer(serializers.ModelSerializer):
     O_BatchWiseLiveStockList = PartyStockEntryOBatchWiseLiveStockSerializer(many=True)
     class Meta:
         model = O_LiveBatches
-        fields = ['MRP','GST','BatchDate','BatchCode','SystemBatchDate','SystemBatchCode','ItemExpiryDate','GSTPercentage','MRPValue','OriginalBatchBaseUnitQuantity','O_BatchWiseLiveStockList','T_StockEntryList']
+        fields = ['MRP','GST','BatchDate','BatchCode','SystemBatchDate','SystemBatchCode','Rate','ItemExpiryDate','GSTPercentage','MRPValue','OriginalBatchBaseUnitQuantity','O_BatchWiseLiveStockList','T_StockEntryList']
         
         
     def create(self, validated_data):
@@ -62,3 +62,19 @@ class PartyStockAdjustmentOLiveBatchesSerializer(serializers.ModelSerializer):
             GrnItem=O_BatchWiseLiveStock.objects.filter(id=T_StockEntryItem_data['BatchCodeID']).update(BaseUnitQuantity=O_BatchWiseLiveStockItems_data['BaseUnitQuantity'])    
         
         return GrnItem
+     
+class M_StockEntryListSerializerSecond(serializers.Serializer): 
+    id =  serializers.IntegerField() 
+    StockDate = serializers.DateField() 
+    PartyName = serializers.CharField(max_length=500)
+    Party_id =  serializers.IntegerField() 
+    ClientID = serializers.IntegerField(allow_null=True, required=False)
+    
+class M_StockEntryItemListSecond(serializers.Serializer): 
+    id =  serializers.IntegerField() 
+    ItemID =  serializers.IntegerField(allow_null=True, required=False) 
+    Name=serializers.CharField(max_length=500) 
+    Quantity=serializers.DecimalField(max_digits=20, decimal_places=3)
+    MRPValue=serializers.DecimalField(max_digits=20, decimal_places=2)
+    Unit=serializers.CharField(max_length=500)
+    GSTPercentage = serializers.DecimalField(max_digits=10, decimal_places=2)

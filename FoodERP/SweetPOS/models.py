@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models import UniqueConstraint
+from FoodERPApp.models import M_Scheme
 
 
 # Create your models here.
@@ -81,8 +83,25 @@ class T_SPOSInvoices(models.Model):
     Description = models.CharField(max_length=500,null=True,blank=True)
     IsDeleted = models.BooleanField(default=False)
     ReferenceInvoiceID = models.IntegerField(null=True,blank=True)
+    AdvanceAmount=models.DecimalField(max_digits=20, decimal_places=2,blank=True, null=True)
+    VoucherCode = models.CharField(max_length=50 ,blank=True, null=True)
     class Meta:
         db_table = "T_SPOSInvoices"
+        indexes = [
+            models.Index(fields=['SaleID']),
+            models.Index(fields=['ClientID']),
+            models.Index(fields=['InvoiceNumber']),
+            models.Index(fields=['InvoiceDate']),
+            models.Index(fields=['Customer']),
+            models.Index(fields=['Party']),
+            # models.Index(fields=['NetAmount']),
+            models.Index(fields=['CreatedBy']),
+            # If you need to speed up queries on multiple fields, consider composite indexes
+            models.Index(fields=['Party', 'InvoiceDate','IsDeleted']),
+            models.Index(fields=['Customer', 'InvoiceDate']),
+            models.Index(fields=['ClientID', 'Party']),
+            models.Index(fields=['Party', 'InvoiceDate','FullInvoiceNumber']),
+        ]
 
 
 class TC_SPOSInvoiceItems(models.Model):
@@ -125,6 +144,8 @@ class TC_SPOSInvoiceItems(models.Model):
     HSNCode = models.CharField(max_length=20)
     InvoiceDate = models.DateField()
     Party = models.IntegerField()
+    IsMixItem = models.BooleanField(default=False)
+    MixItemId = models.IntegerField(blank=True, null=True)
 
     class Meta:
         db_table = "TC_SPOSInvoiceItems"    
@@ -141,7 +162,7 @@ class M_SweetPOSUser(models.Model):
     CreatedOn = models.DateTimeField(auto_now_add=True)
     UpdatedBy = models.IntegerField()
     UpdatedOn = models.DateTimeField(auto_now=True)
-    POSRateType = models.IntegerField()
+    POSRateType = models.IntegerField(blank=True, null=True)
     
     class Meta:
         db_table="M_SweetPOSUser"
@@ -172,6 +193,7 @@ class T_SPOSStock(models.Model):
     BatchCodeID = models.CharField(max_length=500,blank=True,null=True)
     Difference = models.DecimalField(max_digits=20, decimal_places=3,blank=True,null=True)
     IsStockAdjustment = models.BooleanField(default=False)
+    ClientID =models.IntegerField()
    
     class Meta:
         db_table="T_SPOSStock" 
@@ -202,7 +224,7 @@ class T_SPOSStockOut(models.Model):
     StockDate=models.DateField()
     Item= models.IntegerField()#ForeignKey(M_Items,related_name='stockItem', on_delete=models.PROTECT)
     # BaseUnitQuantity=models.DecimalField(max_digits=20,decimal_places=10)
-    # Quantity=models.DecimalField(max_digits=20,decimal_places=10)
+    Quantity=models.DecimalField(max_digits=15,decimal_places=5)
     # Unit = models.IntegerField()#ForeignKey(MC_ItemUnits, related_name='StockUnit', on_delete=models.PROTECT)
     # MRP = models.IntegerField()#ForeignKey(M_MRPMaster, related_name='StockItemMRP', on_delete=models.PROTECT)
     # MRPValue =  models.DecimalField(max_digits=20, decimal_places=2)
@@ -248,7 +270,7 @@ class T_SPOSDeletedInvoices(models.Model):
     ClientSaleID = models.IntegerField()
     InvoiceDate = models.DateField()    
     Party = models.IntegerField()
-    DeletedBy = models.IntegerField()
+    DeletedBy = models.IntegerField(blank=True,null=True)
     DeletedOn = models.DateTimeField(auto_now_add=True)
     ReferenceInvoiceID =models.IntegerField(null=True)
     Invoice = models.ForeignKey(T_SPOSInvoices,related_name='SPOSDeletedInvoiceUploads', on_delete=models.CASCADE) 
@@ -261,6 +283,148 @@ class M_SPOSRateMaster(models.Model):
     EffectiveFrom = models.DateField()
     Rate = models.DecimalField(max_digits=15,decimal_places=2)
     ItemID = models.IntegerField()
+    IsDeleted = models.BooleanField(default=False)
 
     class Meta:
         db_table="M_SPOSRateMaster"
+
+
+# class M_ConsumerMobile(models.Model):    
+#     Mobile = models.CharField(max_length=100)
+#     IsLinkToBill = models.BooleanField(default=False)
+    
+
+#     class Meta:
+#         db_table = "M_ConsumerMobile"
+
+class M_ConsumerMobile(models.Model):    
+    Mobile = models.CharField(max_length=100)
+    IsLinkToBill = models.BooleanField(default=False)
+    MacID   = models.CharField(max_length=200)
+    Party = models.IntegerField()
+    CreatedOn = models.DateTimeField(auto_now_add=True)
+    class Meta:  
+        db_table = "M_ConsumerMobile"        
+
+class M_SweetPOSMachine(models.Model):
+    Party = models.IntegerField()
+    MacID = models.CharField(max_length=200)
+    MachineType = models.CharField(max_length=200,null=True,blank=True )
+    IsServer = models.BooleanField(default=False)
+    ClientID =  models.IntegerField()
+    ServerSequence = models.IntegerField(null=True,blank=True)
+    MachineName = models.CharField(max_length=200,null=True,blank=True)
+    Validity = models.DateField(null=True,blank=True)
+    UploadSaleRecordCount  = models.IntegerField(null=True,blank=True)
+    IsService  = models.BooleanField(default=False)
+    Version = models.CharField(max_length=200 ,null=True,blank=True)
+    IsGiveUpdate = models.BooleanField(default=False)
+    IsAutoUpdate = models.BooleanField(default=False)
+    SeverName = models.CharField(max_length=100,null=True,blank=True)
+    ServerHost = models.CharField(max_length=100,null=True,blank=True)
+    ServerUser = models.CharField(max_length=100,null=True,blank=True)
+    ServerPassWord = models.CharField(max_length=100,null=True,blank=True)
+    ServerDatabase = models.CharField(max_length=100,null=True,blank=True)
+    Invoiceprefix = models.CharField(max_length=100 ,null=True,blank=True)
+    ServiceTimeInterval = models.TimeField(null=True,blank=True)
+    PrimaryUser =   models.IntegerField(null=True,blank=True)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=['Party', 'MacID'], name='unique_Party_MacID')
+        ]
+        db_table = "M_SweetPOSMachine"        
+
+    # class Meta:
+    #     constraints = [
+    #         UniqueConstraint(fields=['Party', 'MacID', 'SeverName', 'ServerHost', 'Invoiceprefix'], name='unique_Party_MacID_SeverName_ServerHost_Invoiceprefix')
+    #     ]
+    #     db_table = "M_SweetPOSMachine"    
+
+class TC_SPOSInvoicesReferences(models.Model):
+    Invoice = models.ForeignKey(T_SPOSInvoices, related_name='SPOSInvoicesReferences', on_delete=models.CASCADE)
+    Order = models.IntegerField()
+    class Meta:
+        db_table = "TC_SPOSInvoicesReferences" 
+
+class M_ServiceSettings(models.Model):
+    Party = models.IntegerField()    
+    ServiceSettingsID=models.IntegerField()
+    Flag=models.BooleanField(default=False)
+    Value=models.CharField(max_length=50,null=True,blank=True )
+    Access=models.BooleanField(default=False)
+    CreatedOn=models.DateTimeField(auto_now_add=True)
+    UpdatedOn=models.DateTimeField(auto_now=True)
+    class Meta:
+        db_table="M_ServiceSettings"
+
+# class M_SchemeMaster(models.Model):
+#     QRData=  models.CharField(max_length=100 )      
+#     SchemeType=models.IntegerField()
+#     Item=models.IntegerField(null=True,blank=True)
+#     Party=models.IntegerField(null=True,blank=True)
+#     IsActive=models.BooleanField(default=False)
+
+class TC_InvoicesSchemes(models.Model):
+    Invoice = models.ForeignKey(T_SPOSInvoices, related_name= 'SPOSInvoicesScheme', on_delete=models.CASCADE)
+    # Scheme = models.ForeignKey('FoodERP.M_Scheme', related_name='SPOSSchemes', on_delete=models.CASCADE )
+    scheme = models.IntegerField()    
+    class Meta:
+        db_table = "TC_InvoicesSchemes"
+
+class M_PosSettings(models.Model):
+    Setting_Key    = models.CharField(max_length=255)
+    Setting_Value  = models.CharField(max_length=255)
+    Description    = models.CharField(max_length=400)
+    Setting_Type   = models.BooleanField(default= False)
+    Is_Disabled    = models.BooleanField(default= False)
+    CreatedOn      = models.DateTimeField(auto_now_add=True)
+    UpdatedOn      = models.DateTimeField(auto_now=True)
+   
+    class Meta:
+        db_table = "M_PosSettings"
+       
+ 
+class MC_PosSettingDetails(models.Model):
+    PosSetting = models.ForeignKey(M_PosSettings, related_name='PosSettingDetails', on_delete=models.CASCADE)
+    Setting_Value = models.CharField(max_length=255)
+    PartyId         = models.IntegerField()
+    Is_Disabled    = models.BooleanField(default= False)
+ 
+    class Meta:
+        db_table = 'MC_PosSettingDetails'   
+
+class M_PhonePeSettings(models.Model):
+       
+    client_id = models.IntegerField()
+    party_id  = models.IntegerField()
+    user_id = models.IntegerField()
+    base_url = models.CharField(max_length=255)
+    merchant_id = models.BinaryField(max_length=255)
+    provider_id = models.BinaryField(max_length=255)
+    salt_key   = models.BinaryField(max_length=255)
+    key_index = models.CharField(max_length=255)
+    store_id = models.CharField(max_length=100)
+    store_name = models.CharField(max_length=255)
+    terminal_id =models.CharField(max_length=100)
+    merchant_name =models.CharField(max_length=255)
+    x_callback_url = models.CharField(max_length=400)
+    is_active  = models.BooleanField(default=True)
+    CreatedOn      = models.DateTimeField(auto_now_add=True)
+    UpdatedOn      = models.DateTimeField(auto_now=True)             
+
+    class Meta:
+        db_table = 'M_PhonePeSettings'  
+
+class M_PaymentModes(models.Model):
+    Payment_Mode = models.CharField(max_length=100)
+ 
+    class Meta:
+        db_table = 'M_PaymentModes'
+ 
+class MC_PaymentModeDetails(models.Model):
+    Paymentmodes = models.ForeignKey(M_PaymentModes, on_delete=models.CASCADE)
+    PartyId      = models.IntegerField()
+ 
+    class Meta:
+        db_table = 'MC_PaymentModeDetails'       

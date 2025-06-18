@@ -15,6 +15,10 @@ class ItemSerializer(serializers.ModelSerializer):
     class Meta:
         model=M_Items
         fields=['id','Name']
+class BOMSerializer(serializers.ModelSerializer):    
+    class Meta:
+        model=M_BillOfMaterial
+        fields=['EstimatedOutputQty']
 
 class H_ProductionSerializerforGET(serializers.ModelSerializer):
     ProductionMaterialIssue=ProductionMaterialIssueSerializer(many=True)
@@ -22,7 +26,7 @@ class H_ProductionSerializerforGET(serializers.ModelSerializer):
     Unit = ItemUnitsSerializerSecond(read_only=True)
     Company = C_CompanySerializer(read_only=True)
     Division = DivisionsSerializer(read_only=True)
-    
+    EstimatedOutputQty = serializers.DecimalField(max_digits=15, decimal_places=2, read_only=True)
     class Meta:
         model = T_Production
         fields = '__all__'
@@ -37,6 +41,7 @@ class H_ProductionSerializerforGET(serializers.ModelSerializer):
         data['UnitName'] = instance.Unit.UnitID.Name
         data['Item'] = instance.Item.id
         data['ItemName'] = instance.Item.Name
+        
        
         return data    
         

@@ -89,10 +89,12 @@ class WorkOrderList(CreateAPIView):
                 WorkOrderdata = JSONParser().parse(request)
                 FromDate = WorkOrderdata['FromDate']
                 ToDate = WorkOrderdata['ToDate']
+                Party=WorkOrderdata['Party']
                 if(FromDate=="" and ToDate=="" ):                    
-                    query = T_WorkOrder.objects.filter(~Q(Status=2))                    
+                    query = T_WorkOrder.objects.filter(~Q(Status=2),Party_id=Party) 
                 else:                    
-                    query = T_WorkOrder.objects.filter( WorkOrderDate__range=[FromDate, ToDate])
+                    query = T_WorkOrder.objects.filter( WorkOrderDate__range=[FromDate, ToDate],Party_id=Party)                    
+                    
                 if query:
                     WorkOrder_serializerdata = WorkOrderSerializerSecond(
                         query, many=True).data
@@ -147,7 +149,7 @@ class WorkOrderList(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': WorkOrderListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class WorkOrderView(CreateAPIView):
@@ -159,7 +161,9 @@ class WorkOrderView(CreateAPIView):
         try:
             with transaction.atomic():
                         
-                        MultipleWorkOrderData = JSONParser().parse(request)  
+                        MultipleWorkOrderData = JSONParser().parse(request) 
+                        a=MaxValueMaster(T_WorkOrder,'CommonID')
+                        jsondata=a.GetMaxValue()  
                         if not isinstance(MultipleWorkOrderData, list):
                             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Expected a list of items', 'Data': []})                      
                         # CustomPrint(MultipleWorkOrderData)
@@ -174,12 +178,13 @@ class WorkOrderView(CreateAPIView):
                             aa=index+a                            
                             WorkOrderData['WorkOrderNumber'] = aa
                             '''Get Order Prifix '''
-                            b = GetPrifix.GetWorkOrderPrifix(Party)
+                            b = GetPrifix.GetWorkOrderPrifix(Party)  
                             WorkOrderData['FullWorkOrderNumber'] = b+""+str(aa)                
                             #=====================================================
                             WorkOrderData['Status']=0
                             WorkOrderData['RemainNumberOfLot']=WorkOrderData['NumberOfLot']
                             WorkOrderData['RemaninQuantity']=WorkOrderData['Quantity'] 
+                            WorkOrderData['CommonID'] = jsondata
                             WorkOrders.append(WorkOrderData)
                             # CustomPrint(WorkOrders)
                         # return JsonResponse({'StatusCode': 200, 'Status': True,   'Data':[WorkOrders] })
@@ -192,7 +197,7 @@ class WorkOrderView(CreateAPIView):
                             transaction.set_rollback(True)
                             return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': WorkOrder_Serializer.errors, 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class WorkOrderViewSecond(RetrieveAPIView):
@@ -288,9 +293,15 @@ class WorkOrderViewSecond(RetrieveAPIView):
         try:
             with transaction.atomic():
                 WorkOrderData = JSONParser().parse(request)
+                
+                
                 WorkOrderDataByID = T_WorkOrder.objects.get(id=id)
+                
+               
                 WorkOrder_Serializer = WorkOrderSerializer(
-                    WorkOrderDataByID, data=WorkOrderData)
+                    WorkOrderDataByID, data=WorkOrderData[0])
+                
+                # print(WorkOrder_Serializer)
                 if WorkOrder_Serializer.is_valid():
                     WorkOrder_Serializer.save()
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Work Order Updated Successfully', 'Data': []})
@@ -298,7 +309,7 @@ class WorkOrderViewSecond(RetrieveAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': WorkOrder_Serializer.errors, 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
     @transaction.atomic()
     def delete(self, request, id=0, Company=0):

@@ -86,45 +86,50 @@ class ItemListView(CreateAPIView):
             if user is not None:
                 
                 query = M_Items.objects.raw(f"""SELECT i.id , i.CItemID AS CItemID, ifnull(i.BarCode,"")BarCode, 
-                ifnull(GSTHsnCodeMaster(i.id, CURDATE(), 3),0) AS HSNCode,i.Name, i.SAPItemCode AS ItemCode,  
-                ifnull(Round(GSTHsnCodeMaster(i.id, CURDATE(), 2),2),0.0)  AS GST,
-                ifnull(Round(GetTodaysDateMRP(i.id, CURDATE(), 2, NULL, NULL),2),0.0) AS Rate,
-                (select EffectiveDate from M_MRPMaster where id=(ifnull(GetTodaysDateMRP(i.id, CURDATE(), 1, NULL, NULL),0.0)))RateEffectiveDate,                          
+                ifnull(GSTHsnCodeMaster(i.id, CURDATE(), 3,0,M_ChannelWiseItems.PartyType_id),0) AS HSNCode,i.Name, i.SAPItemCode AS ItemCode,  
+                ifnull(Round(GSTHsnCodeMaster(i.id, CURDATE(), 2,0,M_ChannelWiseItems.PartyType_id),2),0.0)  AS GST,
+                ifnull(Round(GetTodaysDateMRP(i.id, CURDATE(), 2, 0, 0,M_ChannelWiseItems.PartyType_id),2),0.0) AS Rate,
+                (select EffectiveDate from M_MRPMaster where id=(ifnull(GetTodaysDateMRP(i.id, CURDATE(), 1, 0, 0,M_ChannelWiseItems.PartyType_id),0.0)))RateEffectiveDate,                          
                 ifnull(i.BaseUnitID_id,0) AS UnitID, i.IsFranchisesItem,  
-                ifnull(Round(GetTodaysDateMRP(i.id, CURDATE(), 2, NULL,NULL),2),0.0) AS FoodERPMRP,
-                ifnull(MC_ItemGroupDetails.SubGroup_id,0) AS ItemGroupID,MC_ItemGroupDetails.ItemSequence
+                ifnull(Round(GetTodaysDateMRP(i.id, CURDATE(), 2, 0,0,M_ChannelWiseItems.PartyType_id),2),0.0) AS FoodERPMRP,
+                ifnull(MC_ItemGroupDetails.SubGroup_id,0) AS ItemGroupID,MC_ItemGroupDetails.ItemSequence,
+                i.IsCBMItem ,i.IsMixItem,SweetPOS.SPOSRateMaster(i.id)OnlineRates
                 FROM M_Items AS i
                 left join MC_ItemGroupDetails on MC_ItemGroupDetails.Item_id=i.id and GroupType_id=5
                 LEFT JOIN M_ChannelWiseItems ON i.id = M_ChannelWiseItems.Item_id
                 join MC_PartyItems on MC_PartyItems.Item_id=i.id and MC_PartyItems.party_id={DivisionID}
-                WHERE M_ChannelWiseItems.PartyType_id = 19  """)                  
-                
-               
+                WHERE M_ChannelWiseItems.PartyType_id in (select id from M_PartyType where IsFranchises=1)""")                  
+                # return Response({"status": True, "status_code": 200, "count": "", "data": "" }, status=200)
+                # print(query)
                 count=0
                 item_data=list()
                 for row in query:
+                   
                     count=count+1
                     Ratelist=list()
                     Ratelist.append({
                             "Rate": row.Rate,
-                            "POSRateType": 1,
+                            "POSRateType": 174,
                             "IsChangeRateToDefault": False,
                             "EffectiveFrom":row.RateEffectiveDate
                     })
 
-                    queryforRate =M_SPOSRateMaster.objects.filter(ItemID=row.id)
-                    for RateRow in queryforRate:
+                    # queryforRate =M_SPOSRateMaster.objects.filter(ItemID=row.id,IsDeleted=0)
+                    # for RateRow in queryforRate:
+                    if row.OnlineRates:
+                        OnlineRates=(row.OnlineRates).split(',') 
                         Ratelist.append({	
-                            "Rate": RateRow.Rate,
-                            "POSRateType": RateRow.POSRateType,
-                            "IsChangeRateToDefault": RateRow.IsChangeRateToDefault,
-                            "EffectiveFrom":RateRow.EffectiveFrom
+                            "Rate": float(OnlineRates[0]),
+                            "POSRateType": int(OnlineRates[1]),
+                            "IsChangeRateToDefault": bool(OnlineRates[2]),
+                            "EffectiveFrom":OnlineRates[3]
                         })
                     
                     
                     item_data.append({
                         "FoodERPID": row.id,
                         "CItemID": row.CItemID,
+                        "IsCBMItem" : row.IsCBMItem,
                         "BarCode": row.BarCode,
                         "HSNCode": row.HSNCode,
                         "Name": row.Name,
@@ -138,7 +143,9 @@ class ItemListView(CreateAPIView):
                         "FoodERPMRP": row.FoodERPMRP,
                         "ItemGroupID": row.ItemGroupID,
                         "FranchisesItemCode": "" ,
-                        "DisplayIndex" :  row.ItemSequence  
+                        "DisplayIndex" :  row.ItemSequence,
+                        "IsMixItem" :row.IsMixItem,
+                        
                     } )
                     
                 log_entry = create_transaction_logNew(request, 0, DivisionID,'ItemList',392,0)
@@ -148,4 +155,4 @@ class ItemListView(CreateAPIView):
                 return Response({'status': False, 'status_code': 401, 'message': 'Unauthorized'}, status=401)
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, DivisionID,'ItemList:'+str(e),33,0)
-            return Response({'status': False, 'status_code': 400, 'message': str(e), 'data': []}, status=400)
+            return Response({'status': False, 'status_code': 400, 'message': Exception(e), 'data': []}, status=400)

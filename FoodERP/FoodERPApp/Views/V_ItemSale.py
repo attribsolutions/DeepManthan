@@ -15,18 +15,67 @@ from SweetPOS.models import *
 class ItemSaleReportView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     def post(self, request, id=0):
+        Reportdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Reportdata = JSONParser().parse(request)
                 FromDate = Reportdata['FromDate']
                 ToDate = Reportdata['ToDate']
                 PartyType =Reportdata['PartyType']
                 Party = Reportdata['Party']
                 EmployeeID = Reportdata['Employee']
+                ItemID = Reportdata['ItemID']
+                # CustomerID=Reportdata.get('CustomerID','')
+                # DivisionID=Reportdata.get('DivisionID','')
                 
-                Invoicequery = '''SELECT T_Invoices.id, InvoiceDate, SupPartyType.Name SaleMadeFrom, CustPartyType.Name SaleMadeTo, FullInvoiceNumber,Sup.Name SupplierName, M_Routes.Name RouteName, Cust.Name CustomerName, M_Group.Name GroupName, MC_SubGroup.Name SubGroupName, M_Items.Name ItemName, QtyInKg, QtyInNo, QtyInBox, Rate, BasicAmount, DiscountAmount, GSTPercentage, GSTAmount, Amount, T_Invoices.GrandTotal, RoundOffAmount, TCSAmount, T_GRNs.FullGRNNumber, TC_InvoiceItems.MRPValue, 0 MobileNo, "" CashierName FROM T_Invoices JOIN TC_InvoiceItems ON Invoice_id = T_Invoices.id JOIN M_Parties Cust ON Customer_id = Cust.id JOIN M_Parties Sup ON Party_id = Sup.id JOIN M_PartyType CustPartyType ON Cust.PartyType_id = CustPartyType.id JOIN M_PartyType SupPartyType ON Sup.PartyType_id = SupPartyType.id JOIN M_Items ON Item_id = M_Items.id left JOIN MC_ItemGroupDetails ON TC_InvoiceItems.Item_id = MC_ItemGroupDetails.Item_id AND GroupType_id = 1 JOIN M_Group ON MC_ItemGroupDetails.Group_id = M_Group.ID JOIN MC_SubGroup ON MC_ItemGroupDetails.SubGroup_id = MC_SubGroup.id JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id = Cust.id AND MC_PartySubParty.Party_id = Sup.id LEFT JOIN M_Routes ON MC_PartySubParty.Route_id = M_Routes.id LEFT JOIN TC_GRNReferences ON TC_GRNReferences.Invoice_id = T_Invoices.id LEFT JOIN T_GRNs ON GRN_id = T_GRNs.ID WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s'''
-                            
-                SPOSInvoicequery='''SELECT A.id, A.InvoiceDate, SupPartyType.Name SaleMadeFrom, CustPartyType.Name SaleMadeTo, A.FullInvoiceNumber, Sup.Name SupplierName, M_Routes.Name RouteName, Cust.Name CustomerName, M_Group.Name GroupName, MC_SubGroup.Name SubGroupName, M_Items.Name ItemName, B.QtyInKg, B.QtyInNo, B.QtyInBox, B.Rate, B.BasicAmount, A.DiscountAmount, B.GSTPercentage, B.GSTAmount, B.Amount, A.GrandTotal, A.RoundOffAmount, A.TCSAmount, T_GRNs.FullGRNNumber, B.MRPValue, A.MobileNo , M.LoginName CashierName  FROM SweetPOS.T_SPOSInvoices A 
+                # if DivisionID !='':
+                #         DivisionID=f'AND Sup.id in({DivisionID})'
+                
+                        
+                # if CustomerID !='':
+                #         CustomerID=f'AND Cust.id in ({CustomerID})'
+                
+                
+                Invoicequery = f'''SELECT T_Invoices.id, T_Invoices.InvoiceDate, SupPartyType.Name SaleMadeFrom, CustPartyType.Name SaleMadeTo, T_Invoices.CreatedOn, 
+                                FullInvoiceNumber,Sup.Name SupplierName,Sup.ShortName SupShortName, M_Routes.Name RouteName, Cust.Name CustomerName,Cust.ShortName CustShortName, M_Group.Name GroupName,
+                                MC_SubGroup.Name SubGroupName, M_Items.Name ItemName,  QtyInKg, QtyInNo, QtyInBox, Rate, BasicAmount, 
+                                DiscountAmount, GSTPercentage, GSTAmount, Amount, T_Invoices.GrandTotal, T_Invoices.RoundOffAmount, TCSAmount, 
+                                T_GRNs.FullGRNNumber, TC_InvoiceItems.MRPValue, 0 MobileNo, "" CashierName, FoodERP.M_Units.Name AS BaseUnitName,
+                                 CASE 
+        WHEN FoodERP.M_Units.Name = 'kg' THEN QtyInKg
+        WHEN FoodERP.M_Units.Name = 'No' THEN QtyInNo
+        WHEN FoodERP.M_Units.Name = 'Box' THEN QtyInBox
+        ELSE NULL  -- Default case if no match
+    END AS BaseUnitQuantity
+                                FROM T_Invoices
+                                JOIN TC_InvoiceItems ON Invoice_id = T_Invoices.id 
+                                JOIN M_Parties Cust ON Customer_id = Cust.id 
+                                JOIN M_Parties Sup ON Party_id = Sup.id 
+                                JOIN M_PartyType CustPartyType ON Cust.PartyType_id = CustPartyType.id
+                                JOIN M_PartyType SupPartyType ON Sup.PartyType_id = SupPartyType.id 
+                                JOIN M_Items ON Item_id = M_Items.id 
+                                left JOIN MC_ItemGroupDetails ON TC_InvoiceItems.Item_id = MC_ItemGroupDetails.Item_id AND GroupType_id = 1 
+                                JOIN M_Group ON MC_ItemGroupDetails.Group_id = M_Group.ID 
+                                JOIN MC_SubGroup ON MC_ItemGroupDetails.SubGroup_id = MC_SubGroup.id 
+                                JOIN MC_PartySubParty ON MC_PartySubParty.SubParty_id = Cust.id AND MC_PartySubParty.Party_id = Sup.id 
+                                LEFT JOIN M_Routes ON MC_PartySubParty.Route_id = M_Routes.id 
+                                LEFT JOIN TC_GRNReferences ON TC_GRNReferences.Invoice_id = T_Invoices.id 
+                                LEFT JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.Item_id = M_Items.id AND MC_ItemUnits.IsBase = 1 and MC_ItemUnits.IsDeleted=0
+                                JOIN FoodERP.M_Units ON MC_ItemUnits.UnitID_id = M_Units.id
+                                LEFT JOIN T_GRNs ON GRN_id = T_GRNs.ID WHERE T_Invoices.InvoiceDate BETWEEN %s AND %s '''
+                # print(Invoicequery)            
+                SPOSInvoicequery='''SELECT A.id, A.InvoiceDate, SupPartyType.Name SaleMadeFrom, CustPartyType.Name SaleMadeTo, A.CreatedOn, 
+                                A.FullInvoiceNumber, Sup.Name SupplierName,Sup.ShortName SupShortName, M_Routes.Name RouteName, Cust.Name CustomerName, Cust.ShortName CustShortName,
+                                M_Group.Name GroupName, MC_SubGroup.Name SubGroupName, M_Items.Name ItemName, B.QtyInKg, B.QtyInNo, B.QtyInBox,
+                                B.Rate, B.BasicAmount, B.DiscountAmount, B.GSTPercentage, B.GSTAmount, B.Amount, A.GrandTotal, A.RoundOffAmount,
+                                A.TCSAmount, T_GRNs.FullGRNNumber, B.MRPValue, A.MobileNo , M.LoginName CashierName, FoodERP.M_Units.Name AS BaseUnitName,
+                                CASE 
+        WHEN FoodERP.M_Units.Name = 'kg' THEN QtyInKg
+        WHEN FoodERP.M_Units.Name = 'No' THEN QtyInNo
+        WHEN FoodERP.M_Units.Name = 'Box' THEN QtyInBox
+        ELSE NULL  -- Default case if no match
+    END AS BaseUnitQuantity
+                                
+                                FROM SweetPOS.T_SPOSInvoices A 
                                 JOIN SweetPOS.TC_SPOSInvoiceItems B ON Invoice_id = A.id 
                                 JOIN FoodERP.M_Parties Cust ON A.Customer = Cust.id 
                                 JOIN FoodERP.M_Parties Sup ON A.Party = Sup.id 
@@ -34,22 +83,26 @@ class ItemSaleReportView(CreateAPIView):
                                 JOIN FoodERP.M_PartyType SupPartyType ON Sup.PartyType_id = SupPartyType.id 
                                 JOIN FoodERP.M_Items ON B.Item = M_Items.id  
                                 LEFT JOIN FoodERP.MC_ItemGroupDetails C ON B.Item = C.Item_id AND GroupType_id = 5 
-                                JOIN FoodERP.M_Group ON C.Group_id = M_Group.ID 
+                                left JOIN FoodERP.M_Group ON C.Group_id = M_Group.ID 
                                 LEFT JOIN FoodERP.MC_SubGroup ON C.SubGroup_id = MC_SubGroup.id
                                 left JOIN FoodERP.MC_PartySubParty D ON D.SubParty_id = Cust.id AND D.Party_id = Sup.id
                                 LEFT JOIN FoodERP.M_Routes ON D.Route_id = M_Routes.id 
                                 LEFT JOIN FoodERP.TC_GRNReferences ON TC_GRNReferences.Invoice_id = A.id 
                                 LEFT JOIN FoodERP.T_GRNs ON GRN_id = T_GRNs.ID
-                                JOIN SweetPOS.M_SweetPOSUser M ON M.id = A.CreatedBy
-                                WHERE A.InvoiceDate BETWEEN %s AND %s'''
-                parameters = [FromDate,ToDate]
+                                LEFT JOIN FoodERP.MC_ItemUnits ON MC_ItemUnits.Item_id = M_Items.id AND MC_ItemUnits.IsBase = 1 and MC_ItemUnits.IsDeleted=0
+                                JOIN FoodERP.M_Units ON MC_ItemUnits.UnitID_id = M_Units.id
+                                -- JOIN SweetPOS.M_SweetPOSUser M ON M.id = A.CreatedBy -- Comment For changing M_SweetPOSUser to M_Users
+                                LEFT JOIN FoodERP.M_Users M ON M.id = A.CreatedBy
+                                WHERE A.InvoiceDate BETWEEN %s AND %s and A.IsDeleted=0 '''
+                                
+                
+                parameters = [FromDate,ToDate] 
                 if int(Party) > 0: 
                     Invoicequery += ' AND Sup.id = %s'
                     SPOSInvoicequery += ' AND Sup.id = %s'
                     parameters.append(Party)
                     
                 elif int(PartyType) > 0: 
-                    print('aa')
                     Invoicequery += ' AND Sup.id = %s'
                     SPOSInvoicequery += ' AND Sup.id = %s'
                     parameters.append(PartyType)
@@ -63,11 +116,22 @@ class ItemSaleReportView(CreateAPIView):
                     else:    
                         Invoicequery += ' AND Sup.id = %s'
                         SPOSInvoicequery += ' AND Sup.id = %s'
-
-                q1 = T_Invoices.objects.raw(Invoicequery,parameters)
-                q2 = T_SPOSInvoices.objects.using('sweetpos_db').raw(SPOSInvoicequery,parameters)
+                if ItemID == "0":
+                    Invoicequery += ' '
+                    SPOSInvoicequery += ' '
                     
-                combined_invoices = list(q1) + list(q2)   
+                else:    
+                    Invoicequery += ' AND M_Items.id in %s'
+                    SPOSInvoicequery += ' AND M_Items.id in %s'
+                    Item_values =  ItemID.split(',')
+                    parameters.append(Item_values)
+                
+                q1 = T_Invoices.objects.raw(Invoicequery,parameters)
+              
+                q2 = T_SPOSInvoices.objects.using('sweetpos_db').raw(SPOSInvoicequery,parameters)
+                # print(q2)
+                combined_invoices = list(q1) + list(q2)  
+                # print(combined_invoices) 
                 if combined_invoices:
                     ItemList = list()
                     for a in combined_invoices:
@@ -83,31 +147,38 @@ class ItemSaleReportView(CreateAPIView):
                                 "GroupName":a.GroupName,
                                 "SubGroupName":a.SubGroupName,
                                 "ItemName":a.ItemName,
-                                "QtyInKg":a.QtyInKg,
-                                "QtyInNo" :a.QtyInNo,
-                                "QtyInBox":a.QtyInBox,
-                                "Rate":a.Rate,
-                                "BasicAmount":a.BasicAmount,
-                                "DiscountAmount":a.DiscountAmount,
+                                "QtyInKg":round(float(a.QtyInKg),3),
+                                "QtyInNo" :round(float(a.QtyInNo),3),
+                                "QtyInBox":round(float(a.QtyInBox),3),
+                                "Rate":round(float(a.Rate),2),
+                                "BasicAmount":round(float(a.BasicAmount),2),
+                                "DiscountAmount":round(float(a.DiscountAmount),2),
                                 "GSTPercentage":a.GSTPercentage,
-                                "GSTAmount":a.GSTAmount,
-                                "Amount":a.Amount,
-                                "GrandTotal":a.GrandTotal,
-                                "RoundOffAmount":a.RoundOffAmount,
-                                "TCSAmount":a.TCSAmount,
+                                "GSTAmount":round(float(a.GSTAmount),2),
+                                "Amount":round(float(a.Amount),2),
+                                "GrandTotal":round(float(a.GrandTotal),2),
+                                "RoundOffAmount":round(float(a.RoundOffAmount),2),
+                                "TCSAmount":round(float(a.TCSAmount),2),
                                 "FullGRNNumber":a.FullGRNNumber,
-                                "MRPValue":a.MRPValue,
+                                "MRPValue":round(float(a.MRPValue),2),
                                 "MobileNo": a.MobileNo,
-                                "CashierName": a.CashierName
+                                "CashierName": a.CashierName,
+                                "BaseItemUnitQuantity": round(float(a.BaseUnitQuantity),3),
+                                "BaseItemUnitName": a.BaseUnitName,
+                                "Sup_ShortName":a.SupShortName,
+                                "Cust_ShortName":a.CustShortName,
+                                "CreatedOn": a.CreatedOn
                                 })
+                        
+                        
                     log_entry = create_transaction_logNew(request, Reportdata, Party, 'From:'+FromDate+','+'To:'+ToDate,281,0,FromDate,ToDate,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True,'Message':'', 'Data': ItemList})
                 
                 log_entry = create_transaction_logNew(request, Reportdata, Party, 'Records Not available',281,0,FromDate,ToDate,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available', 'Data': []})  
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'ItemSaleReport:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})      
+            log_entry = create_transaction_logNew(request, Reportdata, 0,'ItemSaleReport:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})      
                                             
                                                                              
                                 
@@ -136,8 +207,8 @@ class ItemSaleSupplierDropdownView(CreateAPIView):
                 log_entry = create_transaction_logNew(request, ItemSaleSupplierSerializer,0,'Parties Not available',282,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Parties Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'ItemSaleSupplierDropdown:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0, 0,'ItemSaleSupplierDropdown:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
         
 class ItemSaleItemDropdownView(CreateAPIView):
@@ -146,9 +217,9 @@ class ItemSaleItemDropdownView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        Itemdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Itemdata = JSONParser().parse(request)
                 Group = Itemdata['Group']
                 SubGroup = Itemdata['SubGroup']
               
@@ -160,16 +231,78 @@ class ItemSaleItemDropdownView(CreateAPIView):
                     query = M_Items.objects.raw('''SELECT M_Items.id,M_Items.Name FROM M_Items''')  
                 if query:
                     Item_serializer = ItemSaleItemSerializer(query, many=True).data
-                    CustomPrint("aaaaa")
+            
                     log_entry = create_transaction_logNew(request, Itemdata,0,'',283,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Item_serializer})
-                CustomPrint("bbbbbbbb")
                 log_entry = create_transaction_logNew(request, Itemdata,0,'Items Not available ',283,0)
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Items Not available ', 'Data': []})
         except Exception as e:
-            CustomPrint("cccc")
-            log_entry = create_transaction_logNew(request, 0, 0,'ItemSaleItemDropdown:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})        
+            log_entry = create_transaction_logNew(request, Itemdata, 0,'ItemSaleItemDropdown:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})  
+               
+        
+class ItemSaleReportForCSS(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    @transaction.atomic()
+    def post(self, request):
+        Reportdata = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                FromDate = Reportdata['FromDate']
+                ToDate = Reportdata['ToDate']                
+                CustomerID=Reportdata['CustomerID']
+                DivisionID=Reportdata['DivisionID']  
+               
+                Customer=""
+                Division=""
+                if CustomerID !="":
+                    Customer = f" AND P1.id IN ({CustomerID}) "                
+                if DivisionID !="":
+                    Division = f" AND P2.id IN ({DivisionID}) "                 
+                saleData=list()
+              
+                query =T_Invoices.objects.raw(f'''SELECT T_Invoices.id, M_Group.Name GroupName, MC_SubGroup.Name SubGroupName, P2.id Sup_id,P2.Name SupplierName, 
+                P1.id Cust_id, P1.Name CustomerName, M_Items.Name ItemName, SUM(Quantity) Quantity, M_Units.Name UnitName,  
+SUM(BasicAmount) BasicAmount, GSTPercentage, SUM(CGST) CGST, SUM(SGST) SGST, SUM(IGST) IGST, SUM(Amount) GrandTotal, avg(Rate) AvgRate
+FROM T_Invoices JOIN TC_InvoiceItems ON Invoice_id = T_Invoices.id
+JOIN M_Parties P1 ON Customer_id = P1.id
+JOIN M_Parties P2 ON Party_id = P2.id
+JOIN M_Items ON Item_id = M_Items.id
+JOIN M_Units ON BaseUnitID_id = M_Units.id
+JOIN MC_ItemGroupDetails ON MC_ItemGroupDetails.Item_id = M_Items.id AND GroupType_id = 1
+JOIN M_Group ON Group_id = M_Group.id
+JOIN MC_SubGroup ON SubGroup_id = MC_SubGroup.id
+WHERE InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}' {Customer} {Division}
+Group By M_Group.Name, MC_SubGroup.Name, P2.Name, P1.Name, M_Items.Name, M_Units.Name, GSTPercentage''')
+                
+                if query:                     
+                    for a in query:                       
+                        saleData.append({
+                                            "id":a.id,
+                                            "GroupName":a.GroupName,
+                                            "SubGroupName":a.SubGroupName,
+                                            "SupplierName":a.SupplierName,
+                                            "CustomerName":a.CustomerName,
+                                            "ItemName":a.ItemName,
+                                            "Quantity":a.Quantity,
+                                            "UnitName":a.UnitName,
+                                            "BasicAmount":a.BasicAmount,
+                                            "GSTPercentage":a.GSTPercentage,
+                                            "CGST":a.CGST,
+                                            "SGST":a.SGST,
+                                            "GrandTotal":a.GrandTotal,
+                                            "AvgRate":a.AvgRate  
+                                        })
+                                                       
+                                              
+                      
+                log_entry = create_transaction_logNew(request, Reportdata, 0, '', 464, 0, FromDate, ToDate, 0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': saleData})  
+            log_entry = create_transaction_logNew(request, Reportdata, 0, "Data Not Available", 464, 0, FromDate, ToDate, 0)
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Data Not Available', 'Data': []}) 
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, Reportdata, 0, 'ItemSaleReportForCSS:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})      
         
         
         

@@ -14,7 +14,7 @@ class WorkOrderSerializer(serializers.ModelSerializer):
     WorkOrderItems = WorkOrderItemsSerializer(many=True)
     class Meta:
         model = T_WorkOrder
-        fields = ['WorkOrderDate','WorkOrderNumber','FullWorkOrderNumber','Item','Unit','Bom','NumberOfLot','Quantity','Company','Party','CreatedBy','UpdatedBy','WorkOrderItems','Status','RemainNumberOfLot','RemaninQuantity']  
+        fields = ['WorkOrderDate','WorkOrderNumber','FullWorkOrderNumber','Item','Unit','Bom','NumberOfLot','Quantity','Company','Party','CreatedBy','UpdatedBy','CommonID','WorkOrderItems','Status','RemainNumberOfLot','RemaninQuantity']  
         
     def create(self, validated_data):
         WorkOrderItems_data = validated_data.pop('WorkOrderItems')

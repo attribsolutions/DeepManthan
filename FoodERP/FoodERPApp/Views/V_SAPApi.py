@@ -1,6 +1,6 @@
 import base64
 import datetime
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 from time import strftime
 from django.contrib.auth import authenticate
@@ -22,6 +22,7 @@ import requests
 import xml.etree.ElementTree as ET
 import xmltodict
 import json
+from django.db.models import Sum, Q
 
 
 class SAPInvoiceView(CreateAPIView):
@@ -73,7 +74,7 @@ class SAPInvoiceView(CreateAPIView):
                                     
                                 # CustomPrint('bbbbbb')   
                                 CustomerMapping = M_Parties.objects.filter(
-                                    SAPPartyCode=aa['CustomerID']).values("id")
+                                    SAPPartyCode=aa['CustomerID']).values("id", "GSTIN")
                                 PartyMapping = M_Parties.objects.filter(
                                     SAPPartyCode=aa['Plant']).values("id")
                                 # CustomPrint('ccccccccc')
@@ -195,9 +196,10 @@ class SAPInvoiceView(CreateAPIView):
                                     "Party": PartyMapping[0]["id"],
                                     "CreatedBy": 30,
                                     "UpdatedBy": 30,
-                                    "TCSAmount" : 0, 
+                                    "TCSAmount" : aa['TCSAmount'], 
                                     "InvoiceDate": InvoiceDate,
-                                    "InvoiceItems": InvoiceItems
+                                    "InvoiceItems": InvoiceItems,
+                                    "CustomerGSTIN": CustomerMapping[0]["GSTIN"]
 
                                 })
                                 # CustomPrint(InvoiceData[0])
@@ -239,20 +241,42 @@ class SAPOrderView(CreateAPIView):
                 OrderID = data["Order"]
                 payload = list()
                 Items =list()
-                query=T_Orders.objects.raw('''select (5000000+T_Orders.id)id ,C.SAPPartyCode CustomerID,T_Orders.OrderDate DocDate,
-                                           M_PartyType.SAPIndicator Indicator,
-TC_OrderItems.id ItemNo,M_Items.SAPItemCode Material,S.SAPPartyCode Plant,M_Units.SAPUnit Unit,
-(case when M_Items.SAPUnitID = 1 then TC_OrderItems.QtyInNo else TC_OrderItems.QtyInKg end)Quantity
-
-from T_Orders 
-join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id
-join M_Parties S on S.id=T_Orders.Supplier_id
-join M_Parties C on C.id=T_Orders.Customer_id
-join M_PartyType on M_PartyType.id=C.PartyType_id
-join M_Items on M_Items.id=TC_OrderItems.Item_id
-join M_Units on M_Units.id=M_Items.SAPUnitID
-where IsDeleted = 0 AND T_Orders.id=%s''',[OrderID])
+                queryforcustomerID=T_Orders.objects.filter(id=OrderID).values('Customer')
                 
+                ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(queryforcustomerID[0]['Customer'],0).split('!')              
+                
+            # ===================================This code sends Deccan and Bajirao orders to SAP. The plantId should be replaced according to the Settings =============
+                PlantID='0'
+                cssOrdersendtosapcondition=M_Settings.objects.filter(id=67).values('DefaultValue') 
+                SettingValues=cssOrdersendtosapcondition[0]['DefaultValue'].split(',')
+                # b = SettingValues.split(',')
+                for i in SettingValues:
+                   c=i.split('-')
+                   
+                   if int(c[0]) == int(queryforcustomerID[0]['Customer']):
+                        D=M_Parties.objects.filter(id=c[1]).values('SAPPartyCode')
+                        PlantID=D[0]['SAPPartyCode']
+                   
+            #============================= 
+                
+                
+                
+                
+                query=T_Orders.objects.raw(f'''select (5000000+T_Orders.id)id ,C.SAPPartyCode CustomerID,T_Orders.OrderDate DocDate,
+                                           M_PartyType.SAPIndicator Indicator,
+                TC_OrderItems.id ItemNo,M_Items.SAPItemCode Material,S.SAPPartyCode Plant,M_Units.SAPUnit Unit,
+                (case when M_Items.SAPUnitID = 1 then TC_OrderItems.QtyInNo else TC_OrderItems.QtyInKg end)Quantity,{ItemsGroupJoinsandOrderby[0]}
+
+                from T_Orders 
+                join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id
+                join M_Parties S on S.id=T_Orders.Supplier_id
+                join M_Parties C on C.id=T_Orders.Customer_id
+                join M_PartyType on M_PartyType.id=C.PartyType_id
+                join M_Items on M_Items.id=TC_OrderItems.Item_id
+                join M_Units on M_Units.id=M_Items.SAPUnitID
+                {ItemsGroupJoinsandOrderby[1]}
+                where IsDeleted = 0 AND T_Orders.id=%s {ItemsGroupJoinsandOrderby[2]}''',[OrderID])                
+                # print(query)
                 for row in query:
                     
                     date_obj = datetime.strptime(str(row.DocDate), '%Y-%m-%d')
@@ -267,9 +291,8 @@ where IsDeleted = 0 AND T_Orders.id=%s''',[OrderID])
                                             "Material": str(row.Material),
                                             "Quantity": str(round(row.Quantity,3)),
                                             "Unit": str(row.Unit),
-                                            "Plant": str(row.Plant),
-                                            "Batch": ""
-                                        
+                                            "Plant": str(PlantID) if str(PlantID) > '0' else str(row.Plant),
+                                            "Batch": ""                                        
                                         })
                 
                 payload.append({
@@ -280,8 +303,7 @@ where IsDeleted = 0 AND T_Orders.id=%s''',[OrderID])
                         "OrderNo": OrderNo,
                         "Stats": "1",
                         "CancelFlag": "",
-                        "OrderItemSet": Items       
-
+                        "OrderItemSet": Items  
 
                 })
                 
@@ -297,8 +319,6 @@ where IsDeleted = 0 AND T_Orders.id=%s''',[OrderID])
                     'Content-Type': 'application/json',
                     'Cookie': 'SAP_SESSIONID_CSP_900=zUHoJ83NYxxPWHzOoQ8TsJOcV2HvGxHtptICAEHiAA8%3d; sap-usercontext=sap-client=900'
                 }
-               
-                
                 
                 response = requests.request("POST", url, headers=headers, data=jsonbody)
                 # Convert XML to OrderedDict
@@ -317,19 +337,19 @@ where IsDeleted = 0 AND T_Orders.id=%s''',[OrderID])
                     # CustomPrint(jsonbody)
                     aa = T_Orders.objects.filter(id=OrderID).update(
                         SAPResponse=data_dict['entry']['content']['m:properties']['d:Stats'])
-                    log_entry = create_transaction_logNew(request, jsonbody, 0, '',321,0)
+                    log_entry = create_transaction_logNew(request, jsonbody, queryforcustomerID[0]['Customer'], OrderID,321,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Order Send Successfully ', 'Data': []})
                 else:
                     index = a.find('error')
                     if index != -1:
-                        log_entry = create_transaction_logNew(request, jsonbody, 0, 'SAPOrderSend:'+str(data_dict['error']['innererror']['errordetails']['errordetail'][0]['message']),322,0)
+                        log_entry = create_transaction_logNew(request, jsonbody,queryforcustomerID[0]['Customer'], 'SAPOrderSend:'+str(data_dict['error']['innererror']['errordetails']['errordetail'][0]['message']),322,0)
                         return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': data_dict['error']['innererror']['errordetails']['errordetail'][0]['message'], 'Data': []})
                     else:
-                        log_entry = create_transaction_logNew(request, jsonbody, 0, '',323,0)
+                        log_entry = create_transaction_logNew(request, jsonbody, queryforcustomerID[0]['Customer'], '',323,0)
                         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': 'Another exception raised from SAP', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0, 'SAPOrderSend:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0, 0, 'SAPOrderSend:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class SAPLedgerView(CreateAPIView):
@@ -337,38 +357,123 @@ class SAPLedgerView(CreateAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        SapLedgerdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                SapLedgerdata = JSONParser().parse(request)
                 FromDate = SapLedgerdata['FromDate']
                 ToDate = SapLedgerdata['ToDate']
                 SAPCode = SapLedgerdata['SAPCode']
 
-                payload = ""
+            OpeningBalanceDate = '2025-04-01'
+            opening_balance = 0.0
 
-                url = f'http://web.chitalebandhu.in:8080/FoodERPWebAPIPOS/api/SAPDataSendToSCM/GetSAPCustomerLedgerList?FromDate={FromDate}&ToDate={ToDate}&SAPCode={SAPCode}'
+            if FromDate == OpeningBalanceDate:
+                # Only use 'O' entry
+                opening_balance = M_SAPCustomerLedger.objects.filter(CustomerCode=SAPCode,DebitCredit='O',FileDate=OpeningBalanceDate).aggregate(total=Sum('Amount'))['total'] or 0.0
 
-                headers = {}
+            elif FromDate > OpeningBalanceDate:
+                # Get opening balance from 1-April 'O' entry
+                opening_balance = M_SAPCustomerLedger.objects.filter(CustomerCode=SAPCode,DebitCredit='O',FileDate=OpeningBalanceDate).aggregate(total=Sum('Amount'))['total'] or 0.0
 
-                response = requests.request(
-                    "GET", url, headers=headers, data=payload)
-                response_json = json.loads(response.text)
-                # Convert XML to OrderedDict
-                # data_dict = xmltodict.parse(response.text)
-                # Convert OrderedDict to JSON string
-                # json_data = json.dumps(data_dict)
-                # # Convert JSON string to Python dictionary
-                # data_dict = json.loads(json_data)
-  
-                if response_json:
-                    log_entry = create_transaction_logNew(request, SapLedgerdata, 0,'From:'+str(FromDate)+','+'To:'+str(ToDate)+','+'SAPCode:'+str(SAPCode),324,0,FromDate,ToDate,0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': response_json})       
-                else:
-                    log_entry = create_transaction_logNew(request, SapLedgerdata, 0, 'SAPLedger:'+'SAPLedger Data Not Found',324,0)
-                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})               
+                # Sum of credits and debits from 1-April to (FromDate-1)
+                day_before = (datetime.strptime(FromDate, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
+                transactions = M_SAPCustomerLedger.objects.filter(FileDate__range=[OpeningBalanceDate, day_before],CustomerCode=SAPCode).exclude(DebitCredit='O')
+
+                total_credit = transactions.filter(DebitCredit='H').aggregate(total=Sum('Amount'))['total'] or 0.0
+                total_debit = transactions.filter(DebitCredit='S').aggregate(total=Sum('Amount'))['total'] or 0.0
+
+                opening_balance = opening_balance + total_credit - total_debit
+
+            # Now fetch transactions in given date range
+            queryset = M_SAPCustomerLedger.objects.filter(FileDate__range=[FromDate, ToDate],CustomerCode=SAPCode
+                        ).exclude(DebitCredit='O').values('CompanyCode', 'DocumentDesc', 'CustomerCode', 'CustomerName',
+                        'DocumentNo','FiscalYear', 'DebitCredit', 'Amount', 'DocumentType','PostingDate', 'ItemText').order_by('PostingDate')
+
+            if queryset.exists():
+                ledger_data = []
+                total_credit = 0.0
+                total_debit = 0.0
+
+                for row in queryset:
+                    amount = row['Amount']
+                    debit_amount = 0.0
+                    credit_amount = 0.0
+
+                    if row['DebitCredit'] == 'H':
+                        credit_amount = amount
+                        total_credit += amount
+                    elif row['DebitCredit'] == 'S':
+                        debit_amount = amount
+                        total_debit += amount
+
+                    ledger_data.append({
+                        "CompanyCode": row['CompanyCode'],
+                        "DocumentDesc": row['DocumentDesc'],
+                        "CustomerNumber": row['CustomerCode'],
+                        "CustomerName": row['CustomerName'],
+                        "DocumentNo": row['DocumentNo'],
+                        "Fiscalyear": row['FiscalYear'],
+                        "DebitCredit": row['DebitCredit'],
+                        "Amount": str(round(amount, 2)),
+                        "DocumentType": row['DocumentType'],
+                        "PostingDate": row['PostingDate'].strftime('%d/%m/%Y %I:%M:%S %p'),
+                        "ItemText": row['ItemText'],
+                        "Debit": round(debit_amount, 2),
+                        "Credit": round(credit_amount, 2)
+                    })
+
+                count = len(ledger_data)
+                closing_balance = opening_balance + total_credit - total_debit
+
+                log_entry = create_transaction_logNew(request, SapLedgerdata, SAPCode, f'OpeningBal:{opening_balance} ClosingBal: {closing_balance}', 324, 0, FromDate, ToDate, 0)
+                return JsonResponse({"StatusCode": 200,"Status": True,"Message": "",
+                                     "Data": {"status": True,"status_code": 200,"count": count,"OpeningBal": round(opening_balance, 2),"ClosingBal": round(closing_balance, 2),"data": ledger_data}})
+            else:
+                log_entry = create_transaction_logNew(request, SapLedgerdata, SAPCode, 'SAPLedger: Data Not Found', 324, 0)
+                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0, 'SAPLedger:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, SapLedgerdata, SAPCode, 'SAPLedger: ' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+
+
+# class SAPLedgerView(CreateAPIView):
+#     permission_classes = ()
+
+#     @transaction.atomic()
+#     def post(self, request):
+#         try:
+#             with transaction.atomic():
+#                 SapLedgerdata = JSONParser().parse(request)
+#                 FromDate = SapLedgerdata['FromDate']
+#                 ToDate = SapLedgerdata['ToDate']
+#                 SAPCode = SapLedgerdata['SAPCode']
+
+#                 payload = ""
+
+#                 url = f'http://web.chitalebandhu.in:8080/FoodERPWebAPIPOS/api/SAPDataSendToSCM/GetSAPCustomerLedgerList?FromDate={FromDate}&ToDate={ToDate}&SAPCode={SAPCode}'
+
+#                 headers = {}
+
+#                 response = requests.request(
+#                     "GET", url, headers=headers, data=payload)
+#                 response_json = json.loads(response.text)
+#                 # Convert XML to OrderedDict
+#                 # data_dict = xmltodict.parse(response.text)
+#                 # Convert OrderedDict to JSON string
+#                 # json_data = json.dumps(data_dict)
+#                 # # Convert JSON string to Python dictionary
+#                 # data_dict = json.loads(json_data)
+  
+#                 if response_json:
+#                     log_entry = create_transaction_logNew(request, SapLedgerdata, 0,'From:'+str(FromDate)+','+'To:'+str(ToDate)+','+'SAPCode:'+str(SAPCode),324,0,FromDate,ToDate,0)
+#                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': response_json})       
+#                 else:
+#                     log_entry = create_transaction_logNew(request, SapLedgerdata, 0, 'SAPLedger:'+'SAPLedger Data Not Found',324,0)
+#                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})               
+#         except Exception as e:
+#             log_entry = create_transaction_logNew(request, 0, 0, 'SAPLedger:'+str(e),33,0)
+#             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
         
 class InvoiceToSCMView(CreateAPIView):

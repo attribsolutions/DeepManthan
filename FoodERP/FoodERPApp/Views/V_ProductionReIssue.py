@@ -73,7 +73,7 @@ class MaterialIssueItemsView(CreateAPIView):
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ItemDetails})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 # class ProductionMaterialIssueItemsView(CreateAPIView):
 
@@ -172,7 +172,7 @@ class ProductionReIssueViewSecond(RetrieveAPIView):
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Material Issue Delete Successfully', 'Data': []})
 
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 class ProductionReIsssueFilter(CreateAPIView):
     permission_classes = (IsAuthenticated,)

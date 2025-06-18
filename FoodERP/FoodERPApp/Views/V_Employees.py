@@ -23,23 +23,34 @@ class M_EmployeesFilterView(CreateAPIView):
                 UserID = Logindata['UserID']
                 RoleID = Logindata['RoleID']
                 CompanyID = Logindata['CompanyID']
-
+                
                 if (RoleID == 1):
-                    query = M_Employees.objects.raw('''SELECT M_Employees.id,M_Employees.Name,M_Employees.Address,M_Employees.Mobile,M_Employees.email,M_Employees.DOB,
-M_Employees.PAN,M_Employees.AadharNo,M_Employees.CreatedBy,M_Employees.CreatedOn,
-M_Employees.UpdatedBy,M_Employees.UpdatedOn,C_Companies.Name CompanyName,
-M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Employees.Company_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id,M_Employees.City_id,M_Employees.PIN, 
-M_Employees.Designation AS DesignationID , M_GeneralMaster.Name AS Designation
-FROM M_Employees
-JOIN C_Companies ON C_Companies.id=M_Employees.Company_id
-JOIN M_EmployeeTypes ON M_EmployeeTypes.id=M_Employees.EmployeeType_id
-JOIN M_States ON M_States.id=M_Employees.State_id
-JOIN M_Districts ON M_Districts.id=M_Employees.District_id
-JOIN M_Cities ON M_Cities.id=M_Employees.City_id
-LEFT JOIN M_GeneralMaster ON M_GeneralMaster.id = M_Employees.Designation 
-''')
-                else:
-                    query = M_Employees.objects.raw('''SELECT M_Employees.id,M_Employees.Name,M_Employees.Address,M_Employees.Mobile,M_Employees.email,M_Employees.DOB,
+                    query = M_Employees.objects.raw(f'''SELECT M_Employees.id,M_Employees.Name,M_Employees.Address,M_Employees.Mobile,M_Employees.email,M_Employees.DOB,
+                    M_Employees.PAN,M_Employees.AadharNo,M_Employees.CreatedBy,M_Employees.CreatedOn,
+                    M_Employees.UpdatedBy,M_Employees.UpdatedOn,C_Companies.Name CompanyName,
+                    M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Employees.Company_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id,M_Employees.City_id,M_Employees.PIN, 
+                    M_Employees.Designation AS DesignationID , M_GeneralMaster.Name AS Designation
+                    FROM M_Employees
+                    JOIN C_Companies ON C_Companies.id=M_Employees.Company_id
+                    JOIN M_EmployeeTypes ON M_EmployeeTypes.id=M_Employees.EmployeeType_id
+                    JOIN M_States ON M_States.id=M_Employees.State_id
+                    JOIN M_Districts ON M_Districts.id=M_Employees.District_id
+                    left JOIN M_Cities ON M_Cities.id=M_Employees.City_id
+                    LEFT JOIN M_GeneralMaster ON M_GeneralMaster.id = M_Employees.Designation                
+                    ''')                
+                else:                   
+                    SettingQuery=M_Settings.objects.filter(id=47).values("DefaultValue")
+                    RoleID_List=str(SettingQuery[0]['DefaultValue'])                    
+                    RoleID_list = [int(x) for x in RoleID_List.split(",")]
+                   
+                    if RoleID in RoleID_list:                        
+                        Clause= f"And M_Employees.CreatedBy={UserID}"
+                    else:
+                        role_ids_str = ','.join(map(str, RoleID_list ))
+                        Clause= f""" AND M_Employees.id not in (SELECT  M_Employees.id FROM M_Employees JOIN MC_RolesEmployeeTypes ON MC_RolesEmployeeTypes.EmployeeType_id = M_Employees.EmployeeType_id 
+                        WHERE MC_RolesEmployeeTypes.Role_id in({role_ids_str})group by M_Employees.id)"""
+                
+                    query = M_Employees.objects.raw(f'''SELECT M_Employees.id,M_Employees.Name,M_Employees.Address,M_Employees.Mobile,M_Employees.email,M_Employees.DOB,
 M_Employees.PAN,M_Employees.AadharNo,M_Employees.CreatedBy,M_Employees.CreatedOn,
 M_Employees.UpdatedBy,M_Employees.UpdatedOn,C_Companies.Name CompanyName,
 M_EmployeeTypes.Name EmployeeTypeName,M_States.Name StateName,M_Districts.Name DistrictName,M_Cities.Name CityName,M_Employees.Company_id,M_Employees.EmployeeType_id,M_Employees.State_id,M_Employees.District_id,M_Employees.City_id,M_Employees.PIN, M_Employees.Designation AS DesignationID, M_GeneralMaster.Name AS Designation
@@ -48,10 +59,10 @@ JOIN C_Companies ON C_Companies.id=M_Employees.Company_id
 JOIN M_EmployeeTypes ON M_EmployeeTypes.id=M_Employees.EmployeeType_id
 JOIN M_States ON M_States.id=M_Employees.State_id
 JOIN M_Districts ON M_Districts.id=M_Employees.District_id
-JOIN M_Cities ON M_Cities.id=M_Employees.City_id
+left JOIN M_Cities ON M_Cities.id=M_Employees.City_id
 LEFT JOIN M_GeneralMaster ON M_GeneralMaster.id = M_Employees.Designation 
-where M_Employees.CreatedBy=%s
-''', [UserID])
+where M_Employees.Company_id=%s {Clause}''', [CompanyID])  
+                # print(query)  
                 if not query:
                     log_entry = create_transaction_logNew(request,Logindata,0,'List Not available',199,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Employees Not available', 'Data': []})
@@ -103,7 +114,7 @@ where M_Employees.CreatedBy=%s
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': EmployeesData})
         except Exception as e:
             log_entry = create_transaction_logNew(request,Logindata,0,'EmployeeList:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class M_EmployeesView(CreateAPIView):
@@ -135,7 +146,7 @@ class M_EmployeesView(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Employees_Serializer.errors, 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request,0,0,'EmplyoeeSave:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class M_EmployeesViewSecond(RetrieveAPIView):
@@ -168,17 +179,49 @@ where M_Employees.id= %s''', [id])
                     GetAllData = list()
 
                     Employeeparties = MC_EmployeeParties.objects.raw(
-                        '''SELECT Party_id as id, M_Parties.Name FROM MC_EmployeeParties join M_Parties on M_Parties.id = MC_EmployeeParties.Party_id where Employee_id=%s''', ([id]))
-                    EmployeepartiesData_Serializer = EmployeepartiesDataSerializer(
-                        Employeeparties, many=True).data
+                        # '''SELECT Party_id as id, M_Parties.Name FROM MC_EmployeeParties join M_Parties on M_Parties.id = MC_EmployeeParties.Party_id where Employee_id=%s''', ([id]))
+                        f'''SELECT  b.Role_id Role,M_Roles.Name AS RoleName,M_Parties.id  ,M_Parties.Name  from 
+                        (SELECT MC_EmployeeParties.id,MC_EmployeeParties.Party_id,'0' RoleID,Employee_id FROM MC_EmployeeParties where Employee_id={id})a 
+                        left join (select MC_UserRoles.Party_id,MC_UserRoles.Role_id,Employee_id FROM MC_UserRoles 
+                        join M_Users on M_Users.id=MC_UserRoles.User_id WHERE M_Users.Employee_id={id})b on a.Party_id=b.Party_id 
+                        left join M_Parties on M_Parties.id=a.Party_id 
+                        Left join M_Roles on M_Roles.id=b.Role_id''')                    
+                    
+                    # EmployeepartiesData_Serializer = EmployeepartiesDataSerializer03(
+                    #     Employeeparties, many=True).data
 
-                    EmployeeParties = list()
-                    for a in EmployeepartiesData_Serializer:
-                        EmployeeParties.append({
-                            'id': a['id'],
-                            'Name': a['Name']
-                        })
+                    # EmployeeParties = list()
+                   
+                    # for a in EmployeepartiesData_Serializer:
+                        
+                    #     EmployeeParties.append({
+                    #         'id': a['id'] if a['id'] is not None else '',
+                    #         'Name': a['Name']if a['Name'] is not None else '',
+                    #         'RoleName':a['RoleName']if a['RoleName'] is not None else ''
+                    #     })     
+                    # CustomPrint(Employeeparties)       
+                    if not Employeeparties:
+                        return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Parties Not available', 'Data': []})
+                    else:
+                        UserSerializer = EmployeepartiesDataSerializer03(Employeeparties, many=True).data   
+                        # CustomPrint(UserSerializer)                                            
+                        User_List = []
+                        party_roles = {}  
+                        for a in UserSerializer:
+                            party_id = a["id"]                       
+                        
+                            if party_id not in party_roles:
+                                party_roles[party_id] = {                               
+                                    "id":a["id"],
 
+
+                                    "Name": a["Name"],  
+                                    "RoleName":a["RoleName"]                                                               
+
+
+                                }                             
+                        User_List = list(party_roles.values())   
+                         
                     GetAllData.append({
                         'id':  M_Employees_Serializer[0]['id'],
                         'Name':  M_Employees_Serializer[0]['Name'],
@@ -205,7 +248,7 @@ where M_Employees.id= %s''', [id])
                         'PIN':  M_Employees_Serializer[0]['PIN'],
                         'DesignationID':  M_Employees_Serializer[0]['DesignationID'],
                         'Designation':  M_Employees_Serializer[0]['Designation'],
-                        'EmployeeParties': EmployeeParties
+                        'EmployeeParties': User_List
                     })
                     log_entry = create_transaction_logNew(request,M_Employees_Serializer,0,'',201,id)
                     return JsonResponse({"StatusCode": 200, "Status": True, "Message": " ", "Data": GetAllData[0]})
@@ -215,10 +258,11 @@ where M_Employees.id= %s''', [id])
 
     @transaction.atomic()
     def put(self, request, id=0):
-        M_Employeesdata = JSONParser().parse(request)
+        M_Employeesdata = JSONParser().parse(request)        
         try:
             with transaction.atomic():
                 M_EmployeesdataByID = M_Employees.objects.get(id=id)
+                # CustomPrint(M_EmployeesdataByID)
                 M_Employees_Serializer = M_EmployeesSerializer(
                     M_EmployeesdataByID, data=M_Employeesdata)
                 if M_Employees_Serializer.is_valid():
@@ -263,8 +307,7 @@ class ManagementEmployeeViewList(CreateAPIView):
                 Company = ManagementEmployeedata['Company']
                 query = M_EmployeeTypes.objects.filter(Company=Company, IsSalesTeamMember=1)
                 if query.exists():
-                    query2 = M_Employees.objects.filter(
-                        Company=Company, EmployeeType__in=query)
+                    query2 = M_Employees.objects.filter(Company=Company, EmployeeType__in=query)
                     Employee_Serializer = M_EmployeesSerializer(
                         query2, many=True)
                     log_entry = create_transaction_logNew(request,ManagementEmployeedata,0,'Company:'+str(Company),204,0)
@@ -273,7 +316,7 @@ class ManagementEmployeeViewList(CreateAPIView):
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Employee Not Available', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request,0,0,'ManagementEmployeeList:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
 class ManagementEmployeePartiesFilterView(CreateAPIView):
@@ -290,15 +333,22 @@ class ManagementEmployeePartiesFilterView(CreateAPIView):
                 ManagementEmpParties_data = JSONParser().parse(request)
                 EmployeeID = ManagementEmpParties_data['Employee']
                 CompanyID = ManagementEmpParties_data['Company']
-                query = M_Parties.objects.raw('''SELECT  a.party id,a.PartyName,a.PartyTypeName,a.StateName,a.DistrictName,b.PartyID from (SELECT M_Parties.id AS Party,M_Parties.Name PartyName,M_PartyType.Name PartyTypeName,M_States.Name StateName,M_Districts.Name DistrictName 
+                query = M_Parties.objects.raw('''SELECT  a.party id,a.PartyName,a.PartyTypeName,a.StateName,a.DistrictName,b.PartyID, a.ClusterName,
+                                              a.SubClusterName
+                                              from (SELECT M_Parties.id AS Party,M_Parties.Name PartyName,M_PartyType.Name PartyTypeName,
+                                              M_States.Name StateName,M_Districts.Name DistrictName,M_Cluster.Name as ClusterName, M_SubCluster.Name as SubClusterName 
                 From M_Parties
                 JOIN M_PartyType ON M_PartyType.id=M_Parties.PartyType_id 
                 JOIN M_States ON M_States.id=M_Parties.State_id
                 JOIN M_Districts ON M_Districts.id=M_Parties.District_id
-                Where  M_PartyType.Company_id=%s AND M_PartyType.IsRetailer=0 OR M_PartyType.IsFranchises =1 )a
+                Left JOIN M_PartyDetails  ON M_Parties.id = M_PartyDetails.Party_id and M_PartyDetails.Group_id is null
+				Left JOIN M_Cluster  ON M_PartyDetails.Cluster_id = M_Cluster.id
+				Left JOIN M_SubCluster ON M_PartyDetails.SubCluster_id = M_SubCluster.id
+                Where  M_PartyType.Company_id=%s AND (M_PartyType.IsRetailer=0 OR (M_PartyType.IsRetailer!=1 and M_PartyType.IsFranchises =1)) )a
                 left join 
                 (select Party_id PartyID from MC_ManagementParties where MC_ManagementParties.Employee_id=%s)b
                 ON  a.Party = b.PartyID''', ([CompanyID], [EmployeeID]))
+                
                 Parties_serializer2 = M_PartiesSerializerFourth(query, many=True).data
                 GetAllData = list()
                 for a in Parties_serializer2:
@@ -308,7 +358,9 @@ class ManagementEmployeePartiesFilterView(CreateAPIView):
                         'PartyType': a['PartyTypeName'],
                         'State': a['StateName'],
                         'District': a['DistrictName'],
-                        'Party': a['PartyID']
+                        'Party': a['PartyID'],
+                        'ClusterName' : a['ClusterName'],
+                        'SubClusterName' : a['SubClusterName']
                     })
                     
                 # q1=M_PartyType.objects.filter(Company=CompanyID,IsRetailer=0,IsSCM=1)
@@ -362,7 +414,7 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': ManagementEmployeesParties_Serializer.errors, 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request,0,0,'ManagementEmpPartiesSave:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
     @transaction.atomic()
     def get(self, request, id=0):
@@ -376,7 +428,7 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
                     query =  ( M_Parties.objects.filter(id__in=query,PartyAddress__IsDefault=1)
                             .annotate(Address=F('PartyAddress__Address'),
                                PartyTypeName=F('PartyType_id__Name'),).values('id', 'Name','SAPPartyCode','Latitude','Longitude','MobileNo',  'Address',
-                                'PartyTypeName'))
+                                   'PartyType_id','PartyTypeName'))
                     CustomPrint(query.query)
                     Partylist = list()
                     for a in query:
@@ -389,12 +441,13 @@ class ManagementEmployeePartiesSaveView(CreateAPIView):
                             'Longitude' : a['Longitude'],
                             'MobileNo' :a['MobileNo'],
                             'Address' :a['Address'],
+                            'PartyTypeID': a['PartyType_id'],
                             'PartyType' :a['PartyTypeName']
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': Partylist})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Parties Not available ', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
         
 
 
@@ -538,4 +591,4 @@ where M_Employees.id={EmployeeID} and M_GeneralMaster.Name in('ASM','GM','MT','N
                 
         except Exception as e:
             # log_entry = create_transaction_logNew(request,0,0,'ManagementEmpPartiesSave:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})

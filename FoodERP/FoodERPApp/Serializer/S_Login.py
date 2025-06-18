@@ -22,16 +22,23 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_Users
         fields = '__all__'
-        extra_kwargs = {'password': {'write_only': True}}
+        extra_kwargs = {
+                        'password': {'write_only': True}
+                        }
 
     def create(self, validated_data):
         Roles_data = validated_data.pop('UserRole')
+        is_login_permissions = validated_data.pop('IsLoginPermissions', True)
         user = M_Users.objects.create_user(**validated_data)
+        user.IsLoginPermissions = is_login_permissions
+        user.save()
+
         for Role_data in Roles_data:
             MC_UserRoles.objects.create(User=user, **Role_data)
         return user
     
     def update(self, instance, validated_data):
+        
         
         # for (key, value) in validated_data.items():
         #     setattr(instance, key, value)
@@ -44,12 +51,16 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             'isLoginUsingMobile', instance.isLoginUsingMobile)
         instance.isLoginUsingEmail = validated_data.get(
             'isLoginUsingEmail', instance.isLoginUsingEmail)
+        instance.IsLoginPermissions = validated_data.get(
+            'IsLoginPermissions', instance.IsLoginPermissions)
         # instance.AdminPassword = validated_data.get(
         #     'password', instance.password)   
         instance.UpdatedBy = validated_data.get(
             'UpdatedBy', instance.UpdatedBy)
         instance.Employee_id = validated_data.get(
-            'Employee_id', instance.Employee_id)                       
+            'Employee_id', instance.Employee_id)
+        instance.POSRateType = validated_data.get(
+            'POSRateType', instance.POSRateType)
         
         # password = validated_data.pop('password', None)
         # if password is not None:
@@ -122,7 +133,7 @@ class UserLoginSerializer(serializers.Serializer):
 class RolesSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_Roles
-        fields= ['id','Name']
+        fields= ['id','Name','IdentifyKey']
 
 class PartySerializer(serializers.ModelSerializer):
     class Meta:
@@ -226,8 +237,14 @@ class SingleGetUserListUserPartiesSerializer(serializers.Serializer):
 class SingleGetUserListUserPartyRoleSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     Role_id = serializers.IntegerField()
-    RoleName=serializers.CharField(max_length=500)    
+    RoleName=serializers.CharField(max_length=500)  
     
+class MultipeRoleForOneUser(serializers.Serializer):  
+    id = serializers.IntegerField()
+    Party_id = serializers.IntegerField()
+    PartyName=serializers.CharField(max_length=500)
+    Role= serializers.IntegerField()
+    RoleName=serializers.CharField(max_length=500)  
 
     
     

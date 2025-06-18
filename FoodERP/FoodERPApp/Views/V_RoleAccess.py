@@ -142,19 +142,17 @@ class RoleAccessView(RetrieveAPIView):
             "Message": " ",
             "Data": Moduledata,
         }
-        log_entry = create_transaction_logNew(request, {'RoleAccessID':id},0,'RoleAccessID:'+str(id),127,0)
+        log_entry = create_transaction_logNew(request, 0,PartyID, f'EmployeeID:{EmployeeID}, CompanyID:{CompanyID}', 127, 0)
         return Response(response)
 
     # Role Access POST Method first delete record on role,company,division and then Insert data
 
     @transaction.atomic()
     def post(self, request):
+        RoleAccessdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                RoleAccessdata = JSONParser().parse(request)
-                
-                RoleAccessSerialize_data = M_RoleAccessSerializer(
-                    data=RoleAccessdata, many=True)
+                RoleAccessSerialize_data = M_RoleAccessSerializer(data=RoleAccessdata, many=True)
                
                 if RoleAccessSerialize_data.is_valid():
                     # return JsonResponse({'Data':RoleAccessSerialize_data.data[0]['Role']})
@@ -165,9 +163,9 @@ class RoleAccessView(RetrieveAPIView):
                     Company=RoleAccessSerialize_data.data[0]['Company']
                     Role=RoleAccessSerialize_data.data[0]['Role']
 
-                    log_entry = create_transaction_logNew(request, RoleAccessSerialize_data,0,'Role:'+str(Role)+','+'Company:'+str(Company),128,0)
+                    log_entry = create_transaction_logNew(request, 0,0,'Role:'+str(Role)+','+'Company:'+str(Company),128,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Role Access Save Successfully', 'Data': []})
-                log_entry = create_transaction_logNew(request, RoleAccessSerialize_data,0,'RoleAccessSave:'+str(RoleAccessSerialize_data.errors),34,0)
+                log_entry = create_transaction_logNew(request, 0,0,'RoleAccessSave:'+str(RoleAccessSerialize_data.errors),34,0)
                 return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': RoleAccessSerialize_data.errors, 'Data': []})
         except Exception as e :
             log_entry = create_transaction_logNew(request,0,0,'RoleAccessSave:'+str(e),33,0)
@@ -181,9 +179,9 @@ class RoleAccessViewList(RetrieveAPIView):
 
     @transaction.atomic()
     def post(self, request):
+        Logindata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Logindata = JSONParser().parse(request)
                 UserID = Logindata['UserID']   
                 RoleID=  Logindata['RoleID']  
                 CompanyID=Logindata['CompanyID'] 
@@ -212,7 +210,7 @@ class RoleAccessViewList(RetrieveAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': M_Items_Serializer})
 
         except Exception as e :
-            log_entry = create_transaction_logNew(request, 0,0,'RoleAccessList:'+str(e),33,0)
+            log_entry = create_transaction_logNew(request, Logindata,0,'RoleAccessList:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  e, 'Data': []})
 
 
@@ -270,6 +268,8 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
             # return JsonResponse({'query':  str(pageaccessquery.query)})
             PageAccessSerializer = M_PageAccessSerializerNewUpdated(pageaccessquery,  many=True).data
             
+            # print(PageAccessSerializer)
+            
             RoleAccess={}
             for x in RolePageAccessSerializer:
                 string = x['Name']
@@ -322,8 +322,8 @@ class RoleAccessViewNewUpdated(RetrieveAPIView):
                 log_entry = create_transaction_logNew(request,{"RoleAccessID":RoleAccessID},0,'RoleAccessID:'+str(RoleAccessID),131,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'RoleAccess Deleted Successfully','Data':[]}) 
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'RoleAccessDelete:'+str(Exception(e)),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': Exception(e), 'Data':[]}) 
+            log_entry = create_transaction_logNew(request, 0,0,'RoleAccessDelete:'+str(e),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]}) 
 
 class RoleAccessViewAddPage(RetrieveAPIView):
     
@@ -340,51 +340,49 @@ class RoleAccessViewAddPage(RetrieveAPIView):
             pageaccessquery =  H_PageAccess.objects.raw('''SELECT H_PageAccess.Name,ifnull(MC_PagePageAccess.Access_id,0) id from H_PageAccess left JOIN MC_PagePageAccess ON MC_PagePageAccess.Access_id=H_PageAccess.id AND MC_PagePageAccess.Page_id=%s order by Sequence''', [pageid])
             # return JsonResponse({'query':  str(pageaccessquery.query)})
             PageAccessSerializer = M_PageAccessSerializerAddPage(pageaccessquery,many=True).data
-            Moduledata.append({
+            
+            PageAccess={}
+            RoleAccess={}
+            for x in PageAccessSerializer:
+                string = x['Name']
+                stringID = x['id']
+                PageAccess[f"PageAccess_{string}"] = stringID 
+                RoleAccess[f"RoleAccess_{string}"] = 0  
+                 
+            Moduledata.append ({
                 "ModuleID": a['moduleid'],
                 "ModuleName": a['ModuleName'],
                 "PageID": a['id'],
                 "RelatedPageID": a['RelatedPageID'],
                 "PageName": a['PageName'],
                 "PageType" : a['PageType'],
-                "RoleAccess_IsShowOnMenu": 0,
-                "RoleAccess_IsSave": 0,
-                "RoleAccess_IsView": 0,
-                "RoleAccess_IsEdit": 0,
-                "RoleAccess_IsDelete": 0,
-                "RoleAccess_IsEditSelf": 0,
-                "RoleAccess_IsDeleteSelf": 0,
-                "RoleAccess_IsPrint": 0,
-                "RoleAccess_IsTopOfTheDivision": 0,
-                "RoleAccess_Pdfdownload": 0,
-                "RoleAccess_Exceldownload": 0,
-                "RoleAccess_IsCopy": 0,
-                "RoleAccess_IsMultipleInvoicePrint":0,
-                "RoleAccess_IsShowOnMenuForList":0,
-                "RoleAccess_IsShowOnMenuForMaster":0,
-                "PageAccess_IsShowOnMenu": PageAccessSerializer[0]['id'],
-                "PageAccess_IsSave": PageAccessSerializer[1]['id'],
-                "PageAccess_IsView": PageAccessSerializer[2]['id'],
-                "PageAccess_IsEdit": PageAccessSerializer[3]['id'],
-                "PageAccess_IsDelete": PageAccessSerializer[4]['id'],
-                "PageAccess_IsEditSelf": PageAccessSerializer[5]['id'],
-                "PageAccess_IsDeleteSelf": PageAccessSerializer[6]['id'],
-                "PageAccess_IsPrint": PageAccessSerializer[7]['id'],
-                "PageAccess_IsTopOfTheDivision": PageAccessSerializer[8]['id'],
-                "PageAccess_Pdfdownload": PageAccessSerializer[9]['id'],
-                "PageAccess_Exceldownload": PageAccessSerializer[10]['id'],
-                "PageAccess_IsCopy": PageAccessSerializer[11]['id'],
-                "PageAccess_IsMultipleInvoicePrint": PageAccessSerializer[12]['id']
-                   
+                # "RoleAccess_IsShowOnMenu": 0,
+                # "RoleAccess_IsSave": 0,
+                # "RoleAccess_IsView": 0,
+                # "RoleAccess_IsEdit": 0,
+                # "RoleAccess_IsDelete": 0,
+                # "RoleAccess_IsEditSelf": 0,
+                # "RoleAccess_IsDeleteSelf": 0,
+                # "RoleAccess_IsPrint": 0,
+                # "RoleAccess_IsTopOfTheDivision": 0,
+                # "RoleAccess_Pdfdownload": 0,
+                # "RoleAccess_Exceldownload": 0,
+                # "RoleAccess_IsCopy": 0,
+                # "RoleAccess_IsMultipleInvoicePrint":0,
+                # "RoleAccess_IsShowOnMenuForList":0,
+                # "RoleAccess_IsShowOnMenuForMaster":0,
+                # "RoleAccess_DeletedUpload":0,
+                **{f"{key}": value for key, value in PageAccess.items()} ,
+                **{f"{key}": value for key, value in RoleAccess.items()}                   
             })
-
+             
         response = {
             "StatusCode": 200,
             "Status": True,
             "Message": " ",
             "Data": Moduledata,
         }
-        log_entry = create_transaction_logNew(request, {'RoleAccessID':a['id']},0,"RoleAccessAddPage",132,0)
+        log_entry = create_transaction_logNew(request, 0,0,"RoleAccessAddPage",132,0)
         return Response(response)    
 
 class RoleAccessGetPagesOnModule(RetrieveAPIView):

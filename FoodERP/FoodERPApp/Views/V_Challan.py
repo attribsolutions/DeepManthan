@@ -10,6 +10,9 @@ from ..Serializer.S_Invoices import *
 from ..Serializer.S_Challan import *
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix
 from ..models import  *
+from django.db.models import Sum, Value,DecimalField
+from django.db.models.functions import Coalesce
+from decimal import Decimal
 
 
 class ChallanItemsView(CreateAPIView):
@@ -22,13 +25,13 @@ class ChallanItemsView(CreateAPIView):
             with transaction.atomic():
                 Company=ChallanitemsData['Company']
                 Query = MC_BillOfMaterialItems.objects.filter(BOM__IsVDCItem=1,BOM__Company=Company).select_related('BOM','Item').values('Item').distinct()
-                CustomPrint(Query.query)
+                
                 ItemList = list()
                 for a in Query:
                     ItemList.append(a['Item'])
                 y=tuple(ItemList)
                 Itemsquery = M_Items.objects.filter(id__in=y,isActive=1)
-                CustomPrint(Itemsquery.query)
+                
                 Itemsdata = M_ItemsSerializer01(Itemsquery,many=True).data    
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '','Data':Itemsdata})      
         except Exception as e:
@@ -94,48 +97,46 @@ class ChallanView(CreateAPIView):
                 # if GRN == "":
                     ChallanDate = Challandata['ChallanDate']
                     Party = Challandata['Party']
-                    a = GetMaxNumber.GetChallanNumber(Party,ChallanDate)
+                    Customer=Challandata['Customer']
+                    IsVDCChallan = Challandata.get('IsVDCChallan', 0)                     
+                    if IsVDCChallan==1:                        
+                        Party=Customer                                       
+                        a = GetMaxNumber.GetVDCChallanNumber(Party,ChallanDate)
+                    else:
+                        a = GetMaxNumber.GetChallanNumber(Party,ChallanDate)                        
+                        
                     Challandata['ChallanNumber'] = a
-                    b = GetPrifix.GetChallanPrifix(Party)
-                    Challandata['FullChallanNumber'] = b+""+str(a)
-                    CustomPrint(Challandata)
+                    b = GetPrifix.GetChallanPrifix(Party) 
+                    b = b.strip() if b else ""                                       
+                    Challandata['FullChallanNumber'] = b+""+str(a)                   
                     ChallanItems = Challandata['ChallanItems']
-                    # CustomPrint(ChallanItems)
-                    # CustomPrint("Shruti")
-                    BatchWiseLiveStockList=list()
-                    CustomPrint(ChallanItems)
+                    
+                    BatchWiseLiveStockList=list()                   
                     for ChallanItem in ChallanItems:
-                        CustomPrint(ChallanItem['Item'])
-                        # CustomPrint(ChallanItem['Quantity'])
-                        # CustomPrint(ChallanItem['BaseUnitQuantity'])
-                        # CustomPrint(ChallanItem['BatchID'])
-                        # CustomPrint(Challandata['Customer'])
-                        # CustomPrint("FFFFFFFF")                                              
+                                                                    
                         BaseUnitQuantity=UnitwiseQuantityConversion(ChallanItem['Item'],ChallanItem['Quantity'],ChallanItem['Unit'],0,0,0,0).GetBaseUnitQuantity()
-                        ChallanItem['BaseUnitQuantity'] =  round(BaseUnitQuantity,3) 
-                        # QtyInNo=UnitwiseQuantityConversion(ChallanItem['Item'],ChallanItem['Quantity'],ChallanItem['Unit'],0,0,1,0).ConvertintoSelectedUnit()
-                        # ChallanItem['QtyInNo'] =  float(QtyInNo)
-                        # QtyInKg=UnitwiseQuantityConversion(ChallanItem['Item'],ChallanItem['Quantity'],ChallanItem['Unit'],0,0,2,0).ConvertintoSelectedUnit()
-                        # ChallanItem['QtyInKg'] =  float(QtyInKg)
-                        # QtyInBox=UnitwiseQuantityConversion(ChallanItem['Item'],ChallanItem['Quantity'],ChallanItem['Unit'],0,0,4,0).ConvertintoSelectedUnit()
-                        # ChallanItem['QtyInBox'] = float(QtyInBox)
-                        BatchWiseLiveStockList.append({
+                        ChallanItem['BaseUnitQuantity'] =  round(BaseUnitQuantity,3)                         
+                        entry = {
                             "Item" : ChallanItem['Item'],
                             "Quantity" : ChallanItem['Quantity'],
                             "BaseUnitQuantity" : ChallanItem['BaseUnitQuantity'],
-                            "LiveBatche" : ChallanItem['BatchID'],                           
-                            "Party" : Party,
+                            "LiveBatche" : ChallanItem['BatchID'], 
+                            # "Party":Party                            
                             # "Customer:":Challandata['Customer'],
-                        })
-                    CustomPrint(BatchWiseLiveStockList)
-                    Challandata.update({"BatchWiseLiveStockGRNID":BatchWiseLiveStockList}) 
-                    # CustomPrint(Challandata)
-                    Challan_serializer = ChallanSerializer(data=Challandata) 
-                    # CustomPrint(Challan_serializer)                  
-                    if Challan_serializer.is_valid():
+                        }                        
+                        if IsVDCChallan==1:
+                                entry["Party"]=Challandata['Customer'] 
+                        else:                          
+                                entry["Party"]=Party
+                        BatchWiseLiveStockList.append(entry)
+                        
+                    Challandata.update({"BatchWiseLiveStockGRNID":BatchWiseLiveStockList})                   
+                    Challan_serializer = ChallanSerializer(data=Challandata)                             
+                    if Challan_serializer.is_valid():                        
                         # return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.data, 'Data':[]})
                         Challan_serializer.save()
-                        return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'IB Sales Order Save Successfully', 'Data':[]})
+                        
+                        return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully', 'Data':[]})
                     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.errors, 'Data':[]})
                 # else:
    
@@ -209,7 +210,7 @@ class ChallanView(CreateAPIView):
                 #         return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Challan Save Successfully', 'Data':[]})
                 #     return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Challan_serializer.errors, 'Data':[]})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':Exception(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':str(e), 'Data': []})
  
  
         
@@ -241,11 +242,10 @@ class ChallanView(CreateAPIView):
             with transaction.atomic():
                 
                 BranchInvoiceQuery = T_Challan.objects.filter(id=id)
-                CustomPrint(BranchInvoiceQuery.query)
                 
                 if BranchInvoiceQuery.exists():
                     BranchInvoiceSerializedata = ChallanSerializerSecond(BranchInvoiceQuery, many=True).data
-                    CustomPrint(BranchInvoiceSerializedata)
+                    
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': BranchInvoiceSerializedata})
                     BranchInvoiceData = list()
                     for a in BranchInvoiceSerializedata:
@@ -323,7 +323,7 @@ class ChallanView(CreateAPIView):
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': BranchInvoiceData[0]})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Branch Invoice Data Not available ', 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})                  
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})                  
 
 
 
@@ -340,26 +340,67 @@ class ChallanListFilterView(CreateAPIView):
                 ToDate = Challandata['ToDate']
                 Customer = Challandata['Customer']
                 Party = Challandata['Party']
-                if(Customer == ''):
-                    query = T_Challan.objects.filter(ChallanDate__range=[FromDate, ToDate], Party=Party)
-                else:
-                    query = T_Challan.objects.filter(ChallanDate__range=[FromDate, ToDate], Customer_id=Customer, Party=Party) 
-                    
+                IsVDCChallan=Challandata['IsVDCChallan']  
+                filters = {
+                    "ChallanDate__range": [FromDate, ToDate],                   
+                }
+                if IsVDCChallan in [0, 1]:  
+                    filters["IsVDCChallan"] = IsVDCChallan  
+                if Party:
+                    filters["Party"] = Party
+                if Customer:
+                    filters["Customer_id"] = Customer
+                query = T_Challan.objects.filter(**filters)               
                 if query:
-                    Challan_serializer = ChallanSerializerList(query, many=True).data
+                    
+                    Challan_serializer = ChallanSerializerList(query, many=True).data  
+                              
+                    challan_ids = [a['id'] for a in Challan_serializer] 
+                    
+                    if challan_ids:
+                        grn_references = {
+                        ref["Challan_id"]: ref["Inward"]
+                        for ref in TC_GRNReferences.objects.filter(Challan_id__in=challan_ids).values("Challan_id", "Inward")
+                        }
+                                                
+                        grn_ids = TC_GRNReferences.objects.filter(Challan_id__in=challan_ids).values_list('GRN_id', flat=True)                        
+                          
+                        
+                        challan_grn_quantities = (TC_GRNItems.objects.filter(GRN_id__in=grn_ids)
+                        .values('GRN_id')  
+                        .annotate(GRNTotalQty=Coalesce(Sum('Quantity'), Value(0, output_field=DecimalField())))  
+                        )                        
+                       
+                        challan_grn_map = {TC_GRNReferences.objects.filter(GRN_id=item['GRN_id']).values_list('Challan_id', flat=True).first(): 
+                            item['GRNTotalQty'] 
+                            for item in challan_grn_quantities
+                        }
+                                    
                     ChallanListData = list()
-                    for a in Challan_serializer:
+                    for a in Challan_serializer:  
+                        challanid = a['id']                          
+                        GRNTotalQty = Decimal(challan_grn_map.get(challanid, 0))                        
+                        
+                        ChallanTotalQty = sum(float(item['Quantity']) for item in a['ChallanItems'])
+                        
+                        GRNTotalRatio = GRNTotalRatio = f"{ChallanTotalQty}/{GRNTotalQty}"
                         ChallanListData.append({
                             "id": a['id'],
                             "ChallanDate": a['ChallanDate'],
                             "FullChallanNumber": a['FullChallanNumber'],
+                            "IsVDCChallan" : a['IsVDCChallan'],
                             "CustomerID": a['Customer']['id'],
                             "Customer": a['Customer']['Name'],
                             "PartyID": a['Party']['id'],
                             "Party": a['Party']['Name'],
                             "GrandTotal": a['GrandTotal'],
                             "CreatedOn": a['CreatedOn'],
-                            "POType":3
+                            "POType":3,
+                            "inward":int(grn_references.get(challanid, 0)),
+                            "GRNTotalQty": GRNTotalQty, 
+                            "ChallanTotalQty": ChallanTotalQty, 
+                            "GRNTotalRatio":GRNTotalRatio
+                            
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ChallanListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
@@ -372,10 +413,9 @@ class DemandDetailsForChallan(CreateAPIView):
     permission_classes = (IsAuthenticated,)   
 
     def post(self, request, id=0):
+        Demanddata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-               
-                Demanddata = JSONParser().parse(request)
                 # CustomPrint(Demanddata)
                 Party = Demanddata['Party']                
                 DemandIDs = Demanddata['OrderIDs']
@@ -479,11 +519,166 @@ class DemandDetailsForChallan(CreateAPIView):
                                 "DemandNumber" : b.FullDemandNumber,
                                 "DemandItemDetails":DemandItemDetails
                             })
+                        
                 log_entry = create_transaction_logNew(request, Demanddata, 0,0,32,0,0,0,Customer)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Demanddata[0]})
         except Exception as e:
-                log_entry = create_transaction_logNew(request, 0, 0,'DemandDetailsForChallan:'+str (Exception(e)),33,0)
-                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})
+                log_entry = create_transaction_logNew(request, 0, 0,'DemandDetailsForChallan:'+str (e),33,0)
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+            
+            
+            
+            
+            
+            
+            
+class BOMItemForChallan(CreateAPIView):
+        
+    permission_classes = (IsAuthenticated,)   
+
+    def post(self, request):
+        Demanddata = JSONParser().parse(request)
+        try:
+            with transaction.atomic():                
+                Party = Demanddata['Party']     
+                ChallanDate=Demanddata['ChallanDate']    
+                BOMItemID=Demanddata['ItemID']                      
+                    
+                 
+                Demanddata = list()
+                BOMItemQuery=M_Items.objects.raw(f'''select  1 id,M_Items.id ItemID,M_Items.Name ItemName ,M_Parties.Name CustomerName,M_Parties.PAN,
+                GSTHsnCodeMaster({BOMItemID},'{ChallanDate}',2,{Party},0) GSTPercentage,
+                GSTHsnCodeMaster({BOMItemID},'{ChallanDate}',3,{Party},0) HSNCode,
+                GetTodaysDateMRP({BOMItemID},'{ChallanDate}',2,0,{Party},0)MRP,
+                GetTodaysDateRate({BOMItemID},'{ChallanDate}',{Party},0,2)Rate,MC_ItemUnits.id Unit_id,M_Units.Name UnitName,MC_ItemUnits.BaseUnitConversion,M_Parties.id CustomerID,M_Parties.GSTIN
+                from M_Items 
+                JOIN MC_PartyItems ON MC_PartyItems.Item_id=M_Items.id
+                JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id
+                JOIN M_Units ON  M_Units.id=M_Items.BaseUnitID_id                 
+                join MC_ItemUnits on MC_ItemUnits.Item_id=M_Items.id and IsBase=1 and IsDeleted=0
+                where M_Items.id={BOMItemID}  and M_Parties.id={Party} ''')
+                    
+                            
+                for b in BOMItemQuery:                    
+                    
+                    
+                    if BOMItemID:     
+                        obatchwisestockquery=  O_BatchWiseLiveStock.objects.raw(f'''SELECT 1 as id ,M_Items.Name ItemName,BatchDate,BaseUnitConversion,BatchCode,SystemBatchDate,SystemBatchCode,
+                        Round(GetTodaysDateRate({BOMItemID},'{ChallanDate}',{Party},0,2),2) AS Rate, O_BatchWiseLiveStock.id, O_BatchWiseLiveStock.Quantity, O_BatchWiseLiveStock.OriginalBaseUnitQuantity, 
+                        O_BatchWiseLiveStock.BaseUnitQuantity, O_BatchWiseLiveStock.IsDamagePieces, O_BatchWiseLiveStock.CreatedBy,
+                        O_BatchWiseLiveStock.CreatedOn,  O_BatchWiseLiveStock.InterBranchInward_id, T_GRNs.id GRNID,T_GRNs.FullGRNNumber,
+                        O_BatchWiseLiveStock.Item_id ItemID, O_BatchWiseLiveStock.LiveBatche_id, O_BatchWiseLiveStock.Party_id, 
+                        O_BatchWiseLiveStock.Production_id, O_BatchWiseLiveStock.PurchaseReturn_id, O_BatchWiseLiveStock.Unit_id,O_LiveBatches.GST_id LiveBatcheGSTID,
+                        O_BatchWiseLiveStock.BaseUnitQuantity ,(case when O_LiveBatches.GST_id is null then O_LiveBatches.GSTPercentage else M_GSTHSNCode.GSTPercentage end )GST
+                        FROM O_BatchWiseLiveStock left  join O_LiveBatches on O_BatchWiseLiveStock.LiveBatche_id=O_LiveBatches.id 
+                        left join MC_ItemUnits on MC_ItemUnits.id=O_BatchWiseLiveStock.Unit_id
+                        left join M_GSTHSNCode on M_GSTHSNCode.id=O_LiveBatches.GST_id
+                        JOIN M_Items ON M_Items.id=O_BatchWiseLiveStock.Item_id 
+                        Left JOIN T_GRNs ON T_GRNs.id= O_BatchWiseLiveStock.GRN_id                       
+                        WHERE O_BatchWiseLiveStock.BaseUnitQuantity > 0 AND O_BatchWiseLiveStock.Item_id = {BOMItemID} AND 
+                        O_BatchWiseLiveStock.Party_id = {Party}''')
+                        DemandItemDetails = list()
+                        # CustomPrint(obatchwisestockquery.query)     
+                        stockDatalist = list()
+                        if not obatchwisestockquery:
+                            stockDatalist =[]
+                        else:   
+                            for d in obatchwisestockquery:
+                                
+                                stockDatalist.append({                                    
+                                    "ItemID":d.ItemID,
+                                    "BatchDate":d.BatchDate,
+                                    "BatchCode":d.BatchCode,
+                                    "SystemBatchDate":d.SystemBatchDate,
+                                    "SystemBatchCode":d.SystemBatchCode,   
+                                    "LiveBatcheGSTID" : d.LiveBatcheGSTID,
+                                    "LiveBatche_id":d.LiveBatche_id,
+                                    "Rate":round(d.Rate,2),                                   
+                                    "GSTPercentage" : d.GST,
+                                    "UnitId":d.Unit_id,
+                                    "UnitName":d.BaseUnitConversion, 
+                                    "BaseUnitQuantity":d.BaseUnitQuantity,
+                                    "Quantity":d.Quantity,    
+                                    "OriginalBaseUnitQuantity":d.OriginalBaseUnitQuantity,  
+                                    "GRNID": d.GRNID,     
+                                    "FullGRNNumber":d.FullGRNNumber                       
+                                    }) 
+                        DemandItemDetails.append({   
+                            "Item": b.ItemID,
+                            "ItemName":b.ItemName,
+                            "Quantity": "",                            
+                            "Rate": b.Rate,
+                            "Unit": b.Unit_id,
+                            "UnitName":b.UnitName,
+                            "DeletedMCUnitsUnitID": "",
+                            "ConversionUnit": "",
+                            "BaseUnitQuantity": "",
+                            "GST": b.GSTPercentage,          
+                            "HSNCode": b.HSNCode,                           
+                            "BasicAmount": "",
+                            "GSTAmount":"",
+                            "CGST":"",
+                            "SGST": "",
+                            "IGST": "",
+                            "CGSTPercentage": "",
+                            "SGSTPercentage":"" ,
+                            "IGSTPercentage": "",
+                            "Amount":"" ,  
+                            "MRP":b.MRP,                         
+                            "UnitDetails":UnitDropdown(BOMItemID,Party,0),
+                            "StockDetails":stockDatalist
+                            })
+                        
+                        Demanddata.append({
+                            
+                            "DemandIDs":"",
+                            "DemandDate" : ChallanDate,
+                            "CustomerName" : b.CustomerName,                        
+                            "CustomerPAN" : b.PAN,
+                            "CustomerGSTIN" :b.GSTIN,
+                            "CustomerID" : b.CustomerID,
+                            "DemandNumber" :"",
+                            "DemandItemDetails":DemandItemDetails                                
+                            })                          
+                    log_entry = create_transaction_logNew(request, Demanddata, 0, 0, 32, 0, 0, 0, Party)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Demanddata[0]})
+                    
+        except Exception as e:
+                log_entry = create_transaction_logNew(request, 0, 0,'DemandDetailsForChallan:'+str (e),33,0)
+                return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+            
+class BOMItemList(CreateAPIView):
+    permission_classes = (IsAuthenticated,)    
+    def post(self, request):
+        BomItemData = JSONParser().parse(request)        
+        try:
+            with transaction.atomic():                
+                Party = BomItemData['Party']               
+                bom_items=M_BillOfMaterial.objects.raw(f'''SELECT M_Items.id , M_Items.Name ItemName,
+                    BaseUnitConversion, Quantity from  M_BillOfMaterial 
+                    JOIN MC_BillOfMaterialItems ON MC_BillOfMaterialItems.BOM_id=M_BillOfMaterial.id
+                    JOIN M_Items ON M_Items.id=MC_BillOfMaterialItems.Item_id 
+                    JOIN MC_PartyItems ON MC_PartyItems.Item_id=M_Items.id 
+                    JOIN M_Parties ON M_Parties.id=MC_PartyItems.Party_id
+                    JOIN MC_ItemUnits ON  MC_ItemUnits.Item_id=M_BillOfMaterial.Item_id and IsBase=1 and IsDelete=0
+                    WHERE IsVDCItem=1 and M_Parties.id={Party}''')            
+                if bom_items:
+                    ItemDetails=[]
+                    for item in bom_items:
+                        ItemDetails.append({                            
+                            'ItemID': item.id, 
+                            'ItemName': item.ItemName
+                        })                    
+                    log_entry = create_transaction_logNew( request, {}, 0, '', 465, 0,0,0,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': ItemDetails})
+               
+                log_entry = create_transaction_logNew( request, {}, 0, 'Data Not Found', 465, 0,0,0,0)           
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
+
+        except Exception as e:
+            log_entry = create_transaction_logNew( request, {}, 0, 'BOMItem:'+str(e), 33,0,0,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+            
             
             
     
