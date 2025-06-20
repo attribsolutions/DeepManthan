@@ -133,7 +133,10 @@ class giftvouchervalidityCheck(CreateAPIView):
             log_entry = create_transaction_logNew(request, giftvoucherData, 0, 'GETVoucherData:' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
     
-    
+
+class giftvouchervalidityCheck_Multiple(CreateAPIView):
+    authentication_classes = [BasicAuthentication, JWTAuthentication]
+    permission_classes = [IsAuthenticated]   
     
     @transaction.atomic()
     def patch(self, request):
@@ -143,10 +146,7 @@ class giftvouchervalidityCheck(CreateAPIView):
 
         try:
             with transaction.atomic():            
-                vouchers_qs = (
-                    M_GiftVoucherCode.objects
-                    .filter(VoucherCode__in=VoucherCodes)                    
-                )
+                vouchers_qs = ( M_GiftVoucherCode.objects.filter(VoucherCode__in=VoucherCodes))
             voucher_map = {v.VoucherCode: v for v in vouchers_qs}
 
             valid_codes, invalid_codes, used_codes = [], [], []
@@ -155,10 +155,10 @@ class giftvouchervalidityCheck(CreateAPIView):
                     if v is None:
                         invalid_codes.append({
                             "VoucherCode": code,
-                            "Message": (
-                                f"Invalid VoucherCode '<b style=\"color:#FF5733;\">{code}</b>'.<br>"
-                                "Do you want to continue saving the bill without using the voucher?"
-                            )
+                            # "Message": (
+                            #     f"Invalid VoucherCode '<b style=\"color:#FF5733;\">{code}</b>'.<br>"
+                            #     "Do you want to continue saving the bill without using the voucher?"
+                            # )
                         })
                         continue
 
@@ -170,26 +170,29 @@ class giftvouchervalidityCheck(CreateAPIView):
 
                         used_codes.append({
                             "VoucherCode": code,
-                            "Message": (
-                                f"The VoucherCode <b style=\"color:#4CAF50;\">'{code}'</b> has already been used.<br>"
-                                "With the following details:<br>"
-                                f"- <span style=\"color:#444\">FranchiseName:</span> "
-                                f"<span style=\"color:#007BFF;\">{party_name}</span><br>"
-                                f"- <span style=\"color:#444\">InvoiceDate:</span> "
-                                f"<span style=\"color:#007BFF;\">{v.InvoiceDate:%Y-%m-%d}</span><br>"
-                                f"- <span style=\"color:#444\">InvoiceNumber:</span> "
-                                f"<span style=\"color:#007BFF;\">{v.InvoiceNumber or 'N/A'}</span><br>"
-                                "<b></br>Would you like to proceed without applying the voucher?</b>"
-                            )
+                            "FranchiseName" : party_name,
+                            "InvoiceDate" : v.InvoiceDate,
+                            "InvoiceNumber" : v.InvoiceNumber
+                            # "Message": (
+                            #     f"The VoucherCode <b style=\"color:#4CAF50;\">'{code}'</b> has already been used.<br>"
+                            #     "With the following details:<br>"
+                            #     f"- <span style=\"color:#444\">FranchiseName:</span> "
+                            #     f"<span style=\"color:#007BFF;\">{party_name}</span><br>"
+                            #     f"- <span style=\"color:#444\">InvoiceDate:</span> "
+                            #     f"<span style=\"color:#007BFF;\">{v.InvoiceDate:%Y-%m-%d}</span><br>"
+                            #     f"- <span style=\"color:#444\">InvoiceNumber:</span> "
+                            #     f"<span style=\"color:#007BFF;\">{v.InvoiceNumber or 'N/A'}</span><br>"
+                            #     "<b></br>Would you like to proceed without applying the voucher?</b>"
+                            # )
                         })
                         continue
                     
                     valid_codes.append({
                         "VoucherCode": code,
-                        "Message": (
-                            f"The VoucherCode <b style=\"color:#4CAF50;\">'{code}'</b> is valid and can be used.<br>"
-                            "Would you like to proceed with applying this voucher?"
-                        )
+                        # "Message": (
+                        #     f"The VoucherCode <b style=\"color:#4CAF50;\">'{code}'</b> is valid and can be used.<br>"
+                        #     "Would you like to proceed with applying this voucher?"
+                        # )
                     })                 
 
             status_code = 200 if valid_codes else 204 if used_codes else 404

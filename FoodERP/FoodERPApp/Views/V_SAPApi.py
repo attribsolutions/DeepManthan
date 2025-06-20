@@ -10,6 +10,8 @@ from rest_framework.parsers import JSONParser
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import BasicAuthentication
+from rest_framework.exceptions import AuthenticationFailed
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.db import transaction
 from ..Views.V_CommFunction import *
 from ..Serializer.S_SAPApi import InvoiceSerializer,InvoiceToSCMSerializer
@@ -353,7 +355,8 @@ class SAPOrderView(CreateAPIView):
 
 
 class SAPLedgerView(CreateAPIView):
-    permission_classes = ()
+    authentication_classes = [BasicAuthentication, JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     @transaction.atomic()
     def post(self, request):
@@ -393,6 +396,8 @@ class SAPLedgerView(CreateAPIView):
                 ledger_data = []
                 total_credit = 0.0
                 total_debit = 0.0
+                
+                balance = opening_balance  # initialize running balance with opening balance
 
                 for row in queryset:
                     amount = row['Amount']
@@ -402,9 +407,11 @@ class SAPLedgerView(CreateAPIView):
                     if row['DebitCredit'] == 'H':
                         credit_amount = amount
                         total_credit += amount
+                        balance += credit_amount 
                     elif row['DebitCredit'] == 'S':
                         debit_amount = amount
                         total_debit += amount
+                        balance -= debit_amount 
 
                     ledger_data.append({
                         "CompanyCode": row['CompanyCode'],
@@ -414,12 +421,13 @@ class SAPLedgerView(CreateAPIView):
                         "DocumentNo": row['DocumentNo'],
                         "Fiscalyear": row['FiscalYear'],
                         "DebitCredit": row['DebitCredit'],
-                        "Amount": str(round(amount, 2)),
+                        "Amount": round(amount, 2),
                         "DocumentType": row['DocumentType'],
                         "PostingDate": row['PostingDate'].strftime('%d/%m/%Y %I:%M:%S %p'),
                         "ItemText": row['ItemText'],
                         "Debit": round(debit_amount, 2),
-                        "Credit": round(credit_amount, 2)
+                        "Credit": round(credit_amount, 2),
+                        "Balance": round(balance, 2) 
                     })
 
                 count = len(ledger_data)
