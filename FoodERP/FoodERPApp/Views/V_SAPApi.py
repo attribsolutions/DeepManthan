@@ -280,7 +280,8 @@ class SAPOrderView(CreateAPIView):
                 where IsDeleted = 0 AND T_Orders.id=%s {ItemsGroupJoinsandOrderby[2]}''',[OrderID])                
                 # print(query)
                 for row in query:
-                    
+                    if  row.Unit is None:
+                          return JsonResponse({'StatusCode': 204,'Status': True,'Message': f"Missing SAP Unit for Item - Code: {row.Material}",'Data': []})
                     date_obj = datetime.strptime(str(row.DocDate), '%Y-%m-%d')
                     Customer  =str(row.CustomerID)
                     
