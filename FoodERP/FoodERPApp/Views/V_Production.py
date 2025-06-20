@@ -11,7 +11,7 @@ from ..Views.V_TransactionNumberfun import SystemBatchCodeGeneration
 from ..Serializer.S_Production import *
 from ..models import *  
 from ..Views.V_TransactionNumberfun import GetMaxNumber, GetPrifix       
-from django.db.models import F, ExpressionWrapper, DecimalField
+from django.db.models import F, ExpressionWrapper, DecimalField,OuterRef, Subquery
 class MaterialIssueDetailsView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     # authentication_class = JSONWebTokenAuthentication
@@ -40,13 +40,13 @@ class ProductionList(CreateAPIView):
                 FromDate = Productiondata['FromDate']
                 ToDate = Productiondata['ToDate']
                 DivisionID=Productiondata['Party']
+                bom_subquery = M_BillOfMaterial.objects.filter(Item_id=OuterRef('Item_id'),IsDelete=0).values('EstimatedOutputQty')
                 query = T_Production.objects.filter(ProductionDate__range=[FromDate,ToDate],Division_id=DivisionID,IsDelete=0).annotate(
                     EstimatedOutputQty=ExpressionWrapper(
-                        F('Item__m_billofmaterial__EstimatedOutputQty') * F('NumberOfLot'),
+                        Subquery(bom_subquery)  * F('NumberOfLot'),
                         output_field=DecimalField(max_digits=15, decimal_places=2)
-                    )
-                )
-
+                    ))
+                # print(query.query)
                 # query = T_Production.objects.raw(f'''SELECT 
                 # T_Production.id,
                 # T_Production.EstimatedQuantity,
