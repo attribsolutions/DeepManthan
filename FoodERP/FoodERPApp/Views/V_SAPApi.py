@@ -278,9 +278,9 @@ class SAPOrderView(CreateAPIView):
                 left join M_Units on M_Units.id=M_Items.SAPUnitID
                 {ItemsGroupJoinsandOrderby[1]}
                 where IsDeleted = 0 AND T_Orders.id=%s {ItemsGroupJoinsandOrderby[2]}''',[OrderID])                
-                print(query)
+                # print(query)
                 for row in query:
-                    print("Unit:{row.unit}")
+                    # print("Unit:{row.unit}")
                     if  row.Unit is None:
                           return JsonResponse({'StatusCode': 204,'Status': True,'Message': f"Missing SAP Unit for SAPItemCode: {row.Material},ItemID:{row.ItemID} and ItemName:{row.ItemName}",'Data': []})
                     date_obj = datetime.strptime(str(row.DocDate), '%Y-%m-%d')
