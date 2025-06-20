@@ -243,6 +243,7 @@ class SAPOrderView(CreateAPIView):
                 OrderID = data["Order"]
                 payload = list()
                 Items =list()
+                missing_units = [] 
                 queryforcustomerID=T_Orders.objects.filter(id=OrderID).values('Customer')
                 
                 ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(queryforcustomerID[0]['Customer'],0).split('!')              
@@ -282,7 +283,8 @@ class SAPOrderView(CreateAPIView):
                 for row in query:
                     # print("Unit:{row.unit}")
                     if  row.Unit is None:
-                          return JsonResponse({'StatusCode': 204,'Status': True,'Message': f"Missing SAP Unit for SAPItemCode: {row.Material},ItemID:{row.ItemID} and ItemName:{row.ItemName}",'Data': []})
+                        #   return JsonResponse({'StatusCode': 204,'Status': True,'Message': f"Missing SAP Unit for SAPItemCode: {row.Material},ItemID:{row.ItemID} and ItemName:{row.ItemName}",'Data': []})
+                        missing_units.append(f"SAPItemCode: {row.Material}, ItemID: {row.ItemID}, ItemName: {row.ItemName}")
                     date_obj = datetime.strptime(str(row.DocDate), '%Y-%m-%d')
                     Customer  =str(row.CustomerID)
                     
@@ -298,7 +300,10 @@ class SAPOrderView(CreateAPIView):
                                             "Plant": str(PlantID) if str(PlantID) > '0' else str(row.Plant),
                                             "Batch": ""                                        
                                         })
-                
+                if missing_units:
+                    message_text = "Missing SAP Unit for the following items:\n" + "\n".join(missing_units)
+                    return JsonResponse({'StatusCode': 204,'Status': True,'Message': message_text,Data': []
+                    })
                 payload.append({
 
                         "Customer": Customer,
