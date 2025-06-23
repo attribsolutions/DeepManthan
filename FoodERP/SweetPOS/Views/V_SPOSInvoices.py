@@ -74,23 +74,6 @@ class SPOSInvoiceView(CreateAPIView):
                         Invoicedata['Driver'] = 0
                         Invoicedata['SaleID'] =0
                         Invoicedata['MobileNo'] =Invoicedata['Mobile']
-                        
-                        if 'VoucherCode' not in Invoicedata:
-                            Invoicedata['VoucherCode'] = None
-                            
-                        if Invoicedata['VoucherCode']:
-                            voucher = M_GiftVoucherCode.objects.filter(VoucherCode=Invoicedata['VoucherCode']).first()
-
-                            if Invoicedata['VoucherCode'] == 'SSCCBM2025':
-                                pass
-                            else : 
-                                if voucher.IsActive == 1:
-                                    voucher.IsActive = 0
-                                    voucher.InvoiceDate = Invoicedata.get('InvoiceDate')
-                                    voucher.InvoiceNumber = Invoicedata.get('InvoiceNumber')
-                                    voucher.InvoiceAmount = Invoicedata.get('GrandTotal')
-                                    voucher.Party = Invoicedata.get('Party')
-                                    voucher.save()
                                             
                         if Invoicedata['CustomerID'] == 0:
                             Invoicedata['Customer'] = 43194
@@ -190,12 +173,65 @@ class SPOSInvoiceView(CreateAPIView):
                             
                             log_entry = create_transaction_logNew(request, inputdata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastIDs),383,0,0,0, 0)    
                             
-                            if 'SchemeID' in Invoicedata and Invoicedata['SchemeID']:
+                          # Process VoucherCodes as list of objects if present
+                            if 'AppliedSchemes' in Invoicedata and Invoicedata['AppliedSchemes']:
+                                for voucher_entry in Invoicedata['AppliedSchemes']:
+                                    voucher_code = voucher_entry.get('VoucherCode', '').strip()
+                                    scheme_id = voucher_entry.get('SchemeID', 'NULL')
+
+                                    if voucher_code and voucher_code != 'SSCCBM2025':
+                                        voucher_obj = M_GiftVoucherCode.objects.filter(VoucherCode=voucher_code).first()
+                                        if voucher_obj and voucher_obj.IsActive == 1:
+                                            voucher_obj.IsActive = 0
+                                            voucher_obj.InvoiceDate = Invoicedata.get('InvoiceDate')
+                                            voucher_obj.InvoiceNumber = Invoicedata.get('InvoiceNumber')
+                                            voucher_obj.InvoiceAmount = Invoicedata.get('GrandTotal')
+                                            voucher_obj.Party = Invoicedata.get('Party')
+                                            voucher_obj.save()
+
+                                    VoucherQuery = f"""
+                                        INSERT INTO SweetPOS.TC_InvoicesSchemes (Invoice_id, scheme, VoucherCode)
+                                        VALUES ({LastInsertId}, {scheme_id}, {'NULL' if not voucher_code else f"'{voucher_code}'"})
+                                    """
+                                    connection.cursor().execute(VoucherQuery)
+
+                            # Process VoucherCode string (comma-separated) + SchemeIDs string (comma-separated)
+                            elif 'VoucherCode' in Invoicedata and Invoicedata['VoucherCode']:
+                                VoucherCodes = Invoicedata['VoucherCode'].split(",")
+                                SchemeIDs = Invoicedata['SchemeID'].split(",") if 'SchemeID' in Invoicedata and Invoicedata['SchemeID'] else []
+
+                                for idx, code in enumerate(VoucherCodes):
+                                    code = code.strip()
+                                    if code == 'SSCCBM2025':
+                                        continue
+
+                                    voucher_obj = M_GiftVoucherCode.objects.filter(VoucherCode=code).first()
+                                    if voucher_obj and voucher_obj.IsActive == 1:
+                                        voucher_obj.IsActive = 0
+                                        voucher_obj.InvoiceDate = Invoicedata.get('InvoiceDate')
+                                        voucher_obj.InvoiceNumber = Invoicedata.get('InvoiceNumber')
+                                        voucher_obj.InvoiceAmount = Invoicedata.get('GrandTotal')
+                                        voucher_obj.Party = Invoicedata.get('Party')
+                                        voucher_obj.save()
+
+                                    # Pick scheme ID if available for this position, else NULL
+                                    scheme_id = SchemeIDs[idx] if idx < len(SchemeIDs) else 'NULL'
+
+                                    VoucherQuery = f"""
+                                        INSERT INTO SweetPOS.TC_InvoicesSchemes (Invoice_id, scheme, VoucherCode)
+                                        VALUES ({LastInsertId}, {scheme_id}, {'NULL' if not code else f"'{code}'"})
+                                    """
+                                    connection.cursor().execute(VoucherQuery)
+
+                            # If only SchemeID provided without VoucherCode
+                            elif 'SchemeID' in Invoicedata and Invoicedata['SchemeID']:
                                 SchemeIDs = Invoicedata['SchemeID'].split(",")
-                                
                                 for scheme_id in SchemeIDs:
-                                    SchemeQuery = f"INSERT INTO SweetPOS.TC_InvoicesSchemes (Invoice_id, scheme) VALUES ({LastInsertId}, {scheme_id})"
-                                    connection.cursor().execute(SchemeQuery) 
+                                    VoucherQuery = f"""
+                                        INSERT INTO SweetPOS.TC_InvoicesSchemes (Invoice_id, scheme, VoucherCode)
+                                        VALUES ({LastInsertId}, {scheme_id}, NULL)
+                                    """
+                                    connection.cursor().execute(VoucherQuery)
                                 log_entry = create_transaction_logNew(request, inputdata, Party, 'SchemeIDs: ' + ", ".join(SchemeIDs), 383, 0) 
 
                         else:
@@ -227,6 +263,7 @@ class SPOSMaxsaleIDView(CreateAPIView):
                     
                     # QueryfordivisionID = M_SweetPOSRoleAccess.objects.filter(Party=DivisionID).values('Party')
                     QueryforSaleRecordCount = M_SweetPOSMachine.objects.filter(Party=DivisionID ,id=ClientID).values('UploadSaleRecordCount')
+                
                     if not QueryforSaleRecordCount:
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'SweetPOSMachine is not mapped', 'Data':[]})
                     if QueryforSaleRecordCount[0]['UploadSaleRecordCount'] == 0:

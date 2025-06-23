@@ -2324,7 +2324,7 @@ join M_Units ON M_Units.id=A.UnitID
 WHERE A.BaseUnitQuantity != COALESCE(B.BaseUnitQuantity, 0)
 ORDER BY  A.PartyName, A.OrderDate''')
 
-                print(DemandVsReportquery.query)  
+                # print(DemandVsReportquery.query)  
                 if DemandVsReportquery:  
                     # print("SHRUR")              
                     for row in DemandVsReportquery:                       
