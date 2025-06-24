@@ -707,8 +707,8 @@ GROUP BY T1.Party, T1.Prefix
                     SELECT 
                         'Credit Note',
                          LEFT(C.FullNoteNumber, LENGTH(C.FullNoteNumber) - LENGTH(CAST(SUBSTRING(C.FullNoteNumber, 5) AS UNSIGNED))) AS Prefix,
-                        MIN(C.FullNoteNumber),
-                        MAX(C.FullNoteNumber),
+                        MIN(C.FullNoteNumber)AS Sr_No_From,
+                        MAX(C.FullNoteNumber) AS Sr_No_To,
                         COUNT(*),
                         0,
                         '2',
@@ -725,8 +725,8 @@ GROUP BY T1.Party, T1.Prefix
                     SELECT 
                         'Debit Note',
                         LEFT(C.FullNoteNumber, LENGTH(C.FullNoteNumber) - LENGTH(CAST(SUBSTRING(C.FullNoteNumber, 5) AS UNSIGNED))) AS Prefix,
-                        MIN(C.FullNoteNumber),
-                        MAX(C.FullNoteNumber),
+                        MIN(C.FullNoteNumber) AS Sr_No_From,
+                        MAX(C.FullNoteNumber) AS Sr_No_To,
                         COUNT(*),
                         0,
                         '3',
