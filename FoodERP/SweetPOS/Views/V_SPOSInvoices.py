@@ -42,6 +42,7 @@ class SPOSInvoiceView(CreateAPIView):
                         Party = Invoicedata['DivisionID']
                         SaleDate = Invoicedata['SaleDate']
                         ClientID = Invoicedata['ClientID']
+                      
                         # queryforParty=M_SweetPOSRoleAccess.objects.using('sweetpos_db').filter(Party=Invoicedata['DivisionID']).values('Party')
                         # CustomPrint(queryforParty)
                         # queryforParty=1
@@ -187,6 +188,8 @@ class SPOSInvoiceView(CreateAPIView):
                                             voucher_obj.InvoiceNumber = Invoicedata.get('InvoiceNumber')
                                             voucher_obj.InvoiceAmount = Invoicedata.get('GrandTotal')
                                             voucher_obj.Party = Invoicedata.get('Party')
+                                            voucher_obj.client = Invoicedata.get('ClientID')   
+                                            voucher_obj.ClientSaleID = Invoicedata.get('ClientSaleID')
                                             voucher_obj.save()
 
                                     VoucherQuery = f"""
@@ -212,6 +215,8 @@ class SPOSInvoiceView(CreateAPIView):
                                         voucher_obj.InvoiceNumber = Invoicedata.get('InvoiceNumber')
                                         voucher_obj.InvoiceAmount = Invoicedata.get('GrandTotal')
                                         voucher_obj.Party = Invoicedata.get('Party')
+                                        voucher_obj.client = Invoicedata.get('ClientID')
+                                        voucher_obj.ClientSaleID = Invoicedata.get('ClientSaleID')
                                         voucher_obj.save()
 
                                     # Pick scheme ID if available for this position, else NULL
