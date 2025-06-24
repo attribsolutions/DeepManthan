@@ -628,23 +628,12 @@ class GSTR1ExcelDownloadView(CreateAPIView):
 #                             FROM T_CreditDebitNotes  
 #                             WHERE T_CreditDebitNotes.NoteType_id = 38 AND Party_id in ({Party}) AND T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s) AS subquery 
 #                             GROUP BY NatureOfDocument, b''', [FromDate, ToDate, FromDate, ToDate, FromDate, ToDate, FromDate, ToDate])
-                Docsquery = T_Invoices.objects.raw(f'''SELECT 1 as id, NatureOfDocument, Sr_No_From, Sr_No_To, TotalNumber, Cancelled, b, PartyID
+                Docsquery = T_Invoices.objects.raw(f'''SELECT 1 as id, NatureOfDocument, Sr_No_From, Sr_No_To, TotalNumber, Cancelled, b, PartyID, Prefix
                 FROM (
                     -- 1. Regular Invoices
                       SELECT'Invoices for outward supply' AS NatureOfDocument,
-                        (SELECT FullInvoiceNumber FROM T_Invoices
-                        WHERE Party_id = T.Party_id
-                        AND InvoiceDate BETWEEN  %s AND  %s
-                        ORDER BY  CAST(REPLACE(SUBSTRING_INDEX(FullInvoiceNumber, '-', 1), 'IN', '') AS UNSIGNED)
-                        LIMIT 1
-                        ) AS Sr_No_From,
-
-                        (SELECT FullInvoiceNumber FROM T_Invoices
-                        WHERE Party_id = T.Party_id
-                        AND InvoiceDate BETWEEN  %s AND  %s
-                        ORDER BY  CAST(REPLACE(SUBSTRING_INDEX(FullInvoiceNumber, '-', -1), 'IN', '') AS UNSIGNED) DESC
-                        LIMIT 1
-                        ) AS Sr_No_To,
+                        MIN(T.FullInvoiceNumber) AS Sr_No_From,
+                        MAX(T.FullInvoiceNumber) AS Sr_No_To,T.Prefix,
                         COUNT(*) AS TotalNumber,
                         (
                             SELECT COUNT(*)
@@ -654,48 +643,70 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                         ) AS Cancelled,
                         '1' AS b,
                         T.Party_id AS PartyID
-                    FROM T_Invoices T
-                    WHERE T.Party_id IN ({Party})
-                    AND T.InvoiceDate BETWEEN  %s AND  %s
-                    GROUP BY T.Party_id
-
+    FROM (
+        SELECT 
+            FullInvoiceNumber,
+            Party_id,
+            InvoiceDate,
+            CASE 
+                WHEN FullInvoiceNumber LIKE '%%/%%' THEN 
+                    LEFT(FullInvoiceNumber, LENGTH(FullInvoiceNumber) - LENGTH(SUBSTRING_INDEX(FullInvoiceNumber, '/', -1)))
+                WHEN FullInvoiceNumber LIKE '%%-%%' THEN 
+                    LEFT(FullInvoiceNumber, LENGTH(FullInvoiceNumber) - LENGTH(SUBSTRING_INDEX(FullInvoiceNumber, '-', -1)))
+                ELSE ''
+            END AS Prefix
+        FROM T_Invoices
+        WHERE Party_id IN ({Party})
+        AND InvoiceDate  BETWEEN %s AND %s
+    ) AS T
+    GROUP BY T.Prefix, T.Party_id
+                    
                     UNION ALL
 
                     -- 2. SPOS Invoices
-                              SELECT
-                        'Invoices for outward supply'AS NatureOfDocument,
-                        (SELECT FullInvoiceNumber FROM SweetPOS.T_SPOSInvoices
-                        WHERE Party = X.Party
-                        AND InvoiceDate BETWEEN %s AND  %s
-                        ORDER BY CAST(SUBSTRING_INDEX(FullInvoiceNumber, '-', 1) AS UNSIGNED)
-                        LIMIT 1
-                        ) AS Sr_No_From,
-
-                        (SELECT FullInvoiceNumber FROM SweetPOS.T_SPOSInvoices
-                        WHERE Party = X.Party
-                        AND InvoiceDate BETWEEN %s AND  %s
-                        ORDER BY CAST(SUBSTRING_INDEX(FullInvoiceNumber, '-', -1)AS UNSIGNED) DESC
-                        LIMIT 1
-                        ) AS Sr_No_To,
-                        COUNT(*) AS TotalNumber,
-                        (
-                            SELECT COUNT(*)
-                            FROM SweetPOS.T_SPOSDeletedInvoices D
-                            WHERE D.Party = X.Party
-                            AND D.InvoiceDate BETWEEN %s AND  %s
-                        )AS Cancelled,
-                        '1'AS b,
-                        X.Party AS PartyID
-                    FROM SweetPOS.T_SPOSInvoices X
-                    WHERE X.Party IN ({Party})
-                    AND X.InvoiceDate BETWEEN %s AND  %s
-                    GROUP BY X.Party
-
+                           SELECT 
+        'Invoices for outward supply' AS NatureOfDocument,  CONCAT(Prefix, LPAD(MIN(SuffixNum), 5, '0')) AS Sr_No_From,
+    CONCAT(Prefix, LPAD(MAX(SuffixNum), 5, '0')) AS Sr_No_To, T1.Prefix,
+    COUNT(*) AS TotalNumber,
+    (
+        SELECT COUNT(*) 
+            FROM SweetPOS.T_SPOSInvoices  D 
+            WHERE D.Party = T1.Party 
+            AND D.InvoiceDate BETWEEN %s AND %s and IsDeleted=1
+    ) AS Cancelled,
+    '1' AS b,
+    T1.Party AS PartyID
+FROM (
+    SELECT 
+        X.FullInvoiceNumber,
+        X.Party,
+        X.InvoiceDate,
+        CASE 
+            WHEN X.FullInvoiceNumber LIKE '%%/%%' THEN 
+                LEFT(X.FullInvoiceNumber, LENGTH(X.FullInvoiceNumber) - LENGTH(SUBSTRING_INDEX(X.FullInvoiceNumber, '/', -1)))
+            WHEN X.FullInvoiceNumber LIKE '%%-%%' THEN 
+                LEFT(X.FullInvoiceNumber, LENGTH(X.FullInvoiceNumber) - LENGTH(SUBSTRING_INDEX(X.FullInvoiceNumber, '-', -1)))
+            ELSE ''
+        END AS Prefix,
+        CAST(
+            CASE 
+                WHEN X.FullInvoiceNumber LIKE '%%/%%' THEN SUBSTRING_INDEX(X.FullInvoiceNumber, '/', -1)
+                WHEN X.FullInvoiceNumber LIKE '%%-%%' THEN SUBSTRING_INDEX(X.FullInvoiceNumber, '-', -1)
+                ELSE '0'
+            END AS UNSIGNED
+        ) AS SuffixNum
+    FROM SweetPOS.T_SPOSInvoices X
+    WHERE X.Party IN ({Party})
+    AND X.InvoiceDate BETWEEN %s AND %s
+) AS T1
+GROUP BY T1.Party, T1.Prefix
+                    
                     UNION ALL
 
                     -- 3. Credit Notes
                     SELECT 
                         'Credit Note',
+                         LEFT(C.FullNoteNumber, LENGTH(C.FullNoteNumber) - LENGTH(CAST(SUBSTRING(C.FullNoteNumber, 5) AS UNSIGNED))) AS Prefix,
                         MIN(C.FullNoteNumber),
                         MAX(C.FullNoteNumber),
                         COUNT(*),
@@ -706,13 +717,14 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     WHERE C.NoteType_id = 37
                     AND C.Party_id IN ({Party})
                     AND C.CRDRNoteDate BETWEEN %s AND %s
-                    GROUP BY C.Party_id
+                    GROUP BY Prefix, C.Party_id
 
                     UNION ALL
 
                     -- 4. Debit Notes
                     SELECT 
                         'Debit Note',
+                        LEFT(C.FullNoteNumber, LENGTH(C.FullNoteNumber) - LENGTH(CAST(SUBSTRING(C.FullNoteNumber, 5) AS UNSIGNED))) AS Prefix,
                         MIN(C.FullNoteNumber),
                         MAX(C.FullNoteNumber),
                         COUNT(*),
@@ -723,9 +735,9 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                     WHERE C.NoteType_id = 38
                     AND C.Party_id IN ({Party})
                     AND C.CRDRNoteDate BETWEEN %s AND %s
-                    GROUP BY C.Party_id
+                    GROUP BY Prefix, C.Party_id
                 ) AS subquery
-                ORDER BY PartyID, b''', [FromDate, ToDate, FromDate, ToDate,FromDate, ToDate, FromDate, ToDate, FromDate, ToDate, FromDate, ToDate,FromDate, ToDate, FromDate, ToDate,FromDate, ToDate, FromDate, ToDate])
+                ORDER BY PartyID, b, Prefix''', [FromDate, ToDate, FromDate, ToDate,FromDate, ToDate, FromDate, ToDate, FromDate, ToDate, FromDate, ToDate])
                 # print(Docsquery)                                         
                 Docs2 = DocsSerializer(Docsquery, many=True).data
             
@@ -750,75 +762,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                                         COUNT(*) AS cnt, (SELECT COUNT(*) FROM SweetPOS.T_SPOSDeletedInvoices WHERE Party in ({Party}) AND T_SPOSDeletedInvoices.InvoiceDate BETWEEN %s AND %s) AS TotalCancelled, '4' AS b
                                     FROM SweetPOS.T_SPOSInvoices X
                                     WHERE X.Party in ({Party}) AND X.InvoiceDate BETWEEN %s AND %s) A''', [FromDate, ToDate, FromDate, ToDate,FromDate, ToDate, FromDate, ToDate, FromDate, ToDate, FromDate, ToDate])
-                # Docsquery2 = T_Invoices.objects.raw(f'''SELECT
-                #                             1 AS id,
-                #                             ''  AS AA,
-                #                             ''  AS bb,
-                #                             ''  AS cc,
-                #                             SUM(A.TotalNumbers)   AS TotalNumbers,
-                #                             SUM(A.TotalCancelled) AS TotalCancelled,
-                #                             A.PartyID
-                #                         FROM (
-                #                             /* 1️⃣  Regular invoices ------------------------------------ */
-                #                             SELECT
-                #                                 T.Party_id           AS PartyID,
-                #                                 COUNT(*)             AS TotalNumbers,
-                #                                 (
-                #                                     SELECT COUNT(*)
-                #                                     FROM T_DeletedInvoices d
-                #                                     WHERE d.Party = T.Party_id
-                #                                     AND d.InvoiceDate BETWEEN %s AND %s
-                #                                 )                    AS TotalCancelled
-                #                             FROM T_Invoices T
-                #                             WHERE T.Party_id IN ({Party})
-                #                             AND T.InvoiceDate BETWEEN %s AND %s
-                #                             GROUP BY T.Party_id
-
-                #                             UNION ALL
-
-                #                             /* 2️⃣  Credit Notes --------------------------------------- */
-                #                             SELECT
-                #                                 C.Party_id,
-                #                                 COUNT(*)                           AS TotalNumbers,
-                #                                 0                                   AS TotalCancelled
-                #                             FROM T_CreditDebitNotes C
-                #                             WHERE C.NoteType_id = 37
-                #                             AND C.Party_id IN ({Party})
-                #                             AND C.CRDRNoteDate BETWEEN %s AND %s
-                #                             GROUP BY C.Party_id
-
-                #                             UNION ALL
-
-                #                             /* 3️⃣  Debit Notes ---------------------------------------- */
-                #                             SELECT
-                #                                 C.Party_id,
-                #                                 COUNT(*),
-                #                                 0
-                #                             FROM T_CreditDebitNotes C
-                #                             WHERE C.NoteType_id = 38
-                #                             AND C.Party_id IN ({Party})
-                #                             AND C.CRDRNoteDate BETWEEN %s AND %s
-                #                             GROUP BY C.Party_id
-
-                #                             UNION ALL
-
-                #                             /* 4️⃣  SweetPOS invoices ---------------------------------- */
-                #                             SELECT
-                #                                 X.Party,
-                #                                 COUNT(*)                           AS TotalNumbers,
-                #                                 (
-                #                                     SELECT COUNT(*)
-                #                                     FROM SweetPOS.T_SPOSDeletedInvoices d
-                #                                     WHERE d.Party = X.Party
-                #                                     AND d.InvoiceDate BETWEEN %s AND %s
-                #                                 )
-                #                             FROM SweetPOS.T_SPOSInvoices X
-                #                             WHERE X.Party IN ({Party})
-                #                             AND X.InvoiceDate BETWEEN %s AND %s
-                #                             GROUP BY X.Party
-                #                         ) A
-                #                         GROUP BY A.PartyID
-                #                         ORDER BY A.PartyID''',[FromDate, ToDate, FromDate, ToDate, FromDate, ToDate, FromDate, ToDate,FromDate, ToDate, FromDate, ToDate])
+                
                 # print(Docsquery2)          
                 Docs1 = Docs2Serializer2(Docsquery2, many=True).data
                 
