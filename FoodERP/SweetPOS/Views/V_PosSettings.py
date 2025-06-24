@@ -3,25 +3,20 @@ from rest_framework.response import Response
 from rest_framework import status
 from ..models import M_PosSettings
 from ..Serializer.S_PosSettings import *
-from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import BasicAuthentication
 from django.db import transaction
-from SweetPOS.Views.V_SweetPosRoleAccess import BasicAuthenticationfunction
 from rest_framework.parsers import JSONParser
-
+from rest_framework.authentication import BasicAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 class PosSettings(APIView):
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = [BasicAuthentication]
+    authentication_classes = [BasicAuthentication, JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         try:
             with transaction.atomic():
-                user = BasicAuthenticationfunction(request)
-
-                if user is not None:
                     settings = M_PosSettings.objects.filter(Is_Disabled=False)
                     serializer = M_PosSettingsListSerializer(settings, many=True)
                     return Response({
@@ -29,12 +24,6 @@ class PosSettings(APIView):
                         "Status": True,
                         "Data": serializer.data
                     }, status=status.HTTP_200_OK)
-
-                return Response({
-                    "StatusCode": 401,
-                    "Status": False,
-                    "Message": "Unauthorized"
-                }, status=status.HTTP_401_UNAUTHORIZED)
 
         except Exception as e:
             return Response({
@@ -46,14 +35,6 @@ class PosSettings(APIView):
     def post(self, request):
         try:
             with transaction.atomic():
-                user = BasicAuthenticationfunction(request)
-                if user is None:
-                    return Response({
-                        "StatusCode": 6001,
-                        "Status": False,
-                        "Message": "Unauthorized"
-                    }, status=status.HTTP_401_UNAUTHORIZED)
-
                 serializer = M_PosSettingsCreateUpdateSerializer(data=request.data)
                 if serializer.is_valid():
                     setting = serializer.save()
@@ -78,16 +59,7 @@ class PosSettings(APIView):
     
     def put(self, request, pk=None):
         try:
-            print("id=",pk)
             with transaction.atomic():
-                user = BasicAuthenticationfunction(request)
-                if user is None:
-                    return Response({
-                        "StatusCode": 401,
-                        "Status": False,
-                        "Message": "Unauthorized"
-                    }, status=status.HTTP_401_UNAUTHORIZED)
-
                 if not pk:
                     return Response({
                         "StatusCode": 400,
@@ -129,14 +101,6 @@ class PosSettings(APIView):
     def delete(self, request, pk=None):
         try:
             with transaction.atomic():
-                user = BasicAuthenticationfunction(request)
-                if user is None:
-                    return Response({
-                        "StatusCode": 401,
-                        "Status": False,
-                        "Message": "Unauthorized"
-                    }, status=status.HTTP_401_UNAUTHORIZED)
-
                 if not pk:
                     return Response({
                         "StatusCode": 400,
