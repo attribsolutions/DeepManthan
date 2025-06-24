@@ -128,7 +128,6 @@ class M_PagesSerializer1(serializers.ModelSerializer):
                 'Icon', instance.Icon)
             instance.ActualPagePath = validated_data.get(
                 'ActualPagePath', instance.ActualPagePath)
-            
             instance.PageType = validated_data.get(
                 'PageType', instance.PageType)
             instance.RelatedPageID = validated_data.get(
@@ -141,6 +140,8 @@ class M_PagesSerializer1(serializers.ModelSerializer):
                 'CountLabel', instance.CountLabel)
             instance.ShowCountLabel = validated_data.get(
                 'ShowCountLabel', instance.ShowCountLabel)
+            instance.Is_New =validated_data.get(
+                'Is_New', instance.Is_New)
             
             # add New Flag IsSweetPOSPage
             instance.IsSweetPOSPage=validated_data.get('IsSweetPOSPage',instance.IsSweetPOSPage)
