@@ -3120,7 +3120,11 @@ class StockAdjustmentReportView(CreateAPIView):
                 ToDate = Data['ToDate']
                 Party = Data['Party']
                 StockAdjustmentData=list()
-              
+                WhereParty=""
+                WherePartySweet=""
+                if Party!="0":
+                    WhereParty= f"AND T1.Party_id IN ({Party})"
+                    WherePartySweet=f"AND T1.Party IN ({Party})"
                 StockAdjustmnetquery =T_Stock.objects.raw(f'''SELECT 1 id, StockDate,ItemName,sum(Quantity) Quantity,Sum(Difference)Difference,Sum(BeforeAdjustment)BeforeAdjustment,PartyName,UnitName from (
                 SELECT T1.StockDate, M_Items.Name AS ItemName,SUM(T1.Quantity)Quantity,Sum(T1.Difference)Difference,Sum(T1.Quantity - T1.Difference) AS BeforeAdjustment,M_Parties.Name PartyName,M_Units.Name UnitName
                 FROM T_Stock T1 
@@ -3129,7 +3133,7 @@ class StockAdjustmentReportView(CreateAPIView):
                 JOIN MC_ItemUnits ON MC_ItemUnits.id=T1.Unit_id
                 JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id   
                 WHERE 
-                    T1.StockDate BETWEEN '{FromDate}' AND '{ToDate}' AND T1.Party_id in ({Party}) AND T1.IsStockAdjustment = 1  Group by T1.Item_id,StockDate,Party_id,StockDate,ItemName,PartyName
+                    T1.StockDate BETWEEN '{FromDate}' AND '{ToDate}' {WhereParty} AND T1.IsStockAdjustment = 1  Group by T1.Item_id,StockDate,Party_id,StockDate,ItemName,PartyName
                 UNION  
                 SELECT  T1.StockDate, M_Items.Name AS ItemName,SUM(T1.Quantity)Quantity,Sum(T1.Difference)Difference,Sum(T1.Quantity - T1.Difference) AS BeforeAdjustment,M_Parties.Name PartyName,M_Units.Name UnitName
                 FROM SweetPOS.T_SPOSStock T1 
@@ -3138,8 +3142,8 @@ class StockAdjustmentReportView(CreateAPIView):
                 JOIN MC_ItemUnits ON MC_ItemUnits.id=T1.Unit
                 JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id
                 WHERE 
-                    T1.StockDate BETWEEN  '{FromDate}' AND '{ToDate}' AND T1.Party in ({Party}) AND T1.IsStockAdjustment = 1 Group by Item,StockDate,Party,StockDate,ItemName,PartyName )A
-                Group By StockDate,ItemName,PartyName ORDER BY StockDate, ItemName,PartyName; ''')
+                    T1.StockDate BETWEEN  '{FromDate}' AND '{ToDate}' {WherePartySweet} AND T1.IsStockAdjustment = 1 Group by Item,StockDate,Party,StockDate,ItemName,PartyName )A
+                Group By StockDate,ItemName,PartyName ORDER BY StockDate, ItemName,PartyName''')
                 if StockAdjustmnetquery:                     
                     for row in StockAdjustmnetquery:                       
                         StockAdjustmentData.append({
