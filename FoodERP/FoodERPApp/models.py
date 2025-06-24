@@ -258,6 +258,7 @@ class MC_PartyAddress(models.Model):
     PIN = models.CharField(max_length=500)
     IsDefault = models.BooleanField(default=False) 
     fssaidocument=models.TextField(null=True,blank=True)
+    fssaidocumenturl = models.FileField(upload_to="Images\FSSAIDocuments",default="",null=True,blank=True)
     Party = models.ForeignKey(M_Parties, related_name='PartyAddress', on_delete=models.CASCADE,null=True,blank=True)
 
     class Meta:
