@@ -3098,7 +3098,7 @@ class BatchTraceabilityReportView(CreateAPIView):
                 CustomerDispatchDetails=to_dict_list(query5,['InvoiceID','FullInvoiceNumber','InvoiceDate','CustomerName','Quantity','BatchCode'])
             
                 
-            log_entry = create_transaction_logNew(request, WorkOrderData, 0, "Success", 481, 0,0,0,0)
+            log_entry = create_transaction_logNew(request, WorkOrderData, 0, "Success", 485, 0,0,0,0)
             return JsonResponse({"StatusCode": 200, "Status": True,"Message": "Success.","Data": {"WorkOrderDetails": BatchDetails,
                     "WorkOrderItems": BillOfMaterial,
                     "MaterialIssues": ActualMaterialIssue,
@@ -3108,5 +3108,57 @@ class BatchTraceabilityReportView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, WorkOrderData, 0, "BatchTrasabilityReport: " + str(e), 33, 0)
             return JsonResponse({"StatusCode": 400,"Status": False,"Message": str(e), "Data": [],})
+        
+class StockAdjustmentReportView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    @transaction.atomic()
+    def post(self, request):
+        Data = JSONParser().parse(request)
+        try:
+            with transaction.atomic():
+                FromDate = Data['FromDate']
+                ToDate = Data['ToDate']
+                Party = Data['Party']
+                StockAdjustmentData=list()
+              
+                StockAdjustmnetquery =T_Stock.objects.raw(f'''SELECT 1 id, StockDate,ItemName,sum(Quantity) Quantity,Sum(Difference)Difference,Sum(BeforeAdjustment)BeforeAdjustment,PartyName,UnitName from (
+                SELECT T1.StockDate, M_Items.Name AS ItemName,SUM(T1.Quantity)Quantity,Sum(T1.Difference)Difference,Sum(T1.Quantity - T1.Difference) AS BeforeAdjustment,M_Parties.Name PartyName,M_Units.Name UnitName
+                FROM T_Stock T1 
+                JOIN M_Items ON M_Items.ID = T1.Item_id
+                JOIN M_Parties ON M_Parties.id=T1.Party_id
+                JOIN MC_ItemUnits ON MC_ItemUnits.id=T1.Unit_id
+                JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id   
+                WHERE 
+                    T1.StockDate BETWEEN '{FromDate}' AND '{ToDate}' AND T1.Party_id in ({Party}) AND T1.IsStockAdjustment = 1  Group by T1.Item_id,StockDate,Party_id,StockDate,ItemName,PartyName
+                UNION  
+                SELECT  T1.StockDate, M_Items.Name AS ItemName,SUM(T1.Quantity)Quantity,Sum(T1.Difference)Difference,Sum(T1.Quantity - T1.Difference) AS BeforeAdjustment,M_Parties.Name PartyName,M_Units.Name UnitName
+                FROM SweetPOS.T_SPOSStock T1 
+                JOIN M_Items ON M_Items.ID = T1.Item
+                JOIN M_Parties ON M_Parties.id=T1.Party
+                JOIN MC_ItemUnits ON MC_ItemUnits.id=T1.Unit
+                JOIN M_Units ON M_Units.id=MC_ItemUnits.UnitID_id
+                WHERE 
+                    T1.StockDate BETWEEN  '{FromDate}' AND '{ToDate}' AND T1.Party in ({Party}) AND T1.IsStockAdjustment = 1 Group by Item,StockDate,Party,StockDate,ItemName,PartyName )A
+                Group By StockDate,ItemName,PartyName ORDER BY StockDate, ItemName,PartyName; ''')
+                if StockAdjustmnetquery:                     
+                    for row in StockAdjustmnetquery:                       
+                        StockAdjustmentData.append({
+                            "id":row.id,
+                            "StockDate":row.StockDate,
+                            "ItemName":row.ItemName,
+                            "Quantity":row.Quantity,
+                            "Difference":row.Difference,
+                            "BeforeAdjustment":row.BeforeAdjustment,
+                            "PartyName":row.PartyName,
+                            "UnitName":row.UnitName
+                                                    
+                        })    
+                log_entry = create_transaction_logNew(request, Data, 0, '', 486, 0, FromDate, ToDate, 0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': StockAdjustmentData})  
+            log_entry = create_transaction_logNew(request, Data, 0, "Data Not Available", 486, 0, FromDate, ToDate, 0)
+            return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Data Not Available', 'Data': []}) 
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, Data, 0, 'StockAdjustmentReport:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
      
