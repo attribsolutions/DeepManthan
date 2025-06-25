@@ -416,11 +416,12 @@ class SAPLedgerView(CreateAPIView):
                     if row['DebitCredit'] == 'H':
                         credit_amount = float(amount)
                         total_credit += float(amount)
-                        balance += float(credit_amount) 
+                        balance -= float(credit_amount)  
                     elif row['DebitCredit'] == 'S':
                         debit_amount = float(amount)
                         total_debit += float(amount)
-                        balance -= float(debit_amount) 
+                        balance += float(debit_amount)  
+                    
 
                     ledger_data.append({
                         "CompanyCode": row['CompanyCode'],
