@@ -1,9 +1,9 @@
-DROP EVENT IF EXISTS delete_old_transaction_logs;
+'''DROP EVENT IF EXISTS delete_old_transaction_logs;
 
 DELIMITER $$
 
 CREATE EVENT delete_old_transaction_logs
-ON SCHEDULE EVERY 1 HOUR
+ON SCHEDULE EVERY 1 DAY
 DO
 BEGIN
   -- Step 1: Delete from child table first
@@ -22,4 +22,4 @@ BEGIN
   
 END$$
 
-DELIMITER ;
+DELIMITER ;'''
