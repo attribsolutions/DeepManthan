@@ -853,8 +853,8 @@ urlpatterns = [
 #BatchtrasabilityReport
               url(r'BatchTraceabilityReport$',BatchTraceabilityReportView.as_view()),          
               
-              
-            
+#StockAdjustment             
+              url(r'StockAdjustmentReport$',StockAdjustmentReportView.as_view()), 
 
 
 
