@@ -1749,10 +1749,9 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                            
                             if PriceListID == 0:
                                 pricelistquery=M_PriceList.objects.raw(f'''SELECT id,Name,ShortName AS PLShortName FROM M_PriceList where Company_id in( {C})  order by Sequence''')
-                            else:
+                            else:                               
                                 all_ids = []
-                                pricelistquery=M_PriceList.objects.raw(f'''SELECT id,Name,ShortName AS PLShortName,CalculationPath FROM M_PriceList where Company_id in( {C}) id  in ({PriceListID}) order by Sequence''')
-                                
+                                pricelistquery=M_PriceList.objects.raw(f'''SELECT id,Name,ShortName AS PLShortName,CalculationPath FROM M_PriceList where Company_id in( {C}) and id  in ({PriceListID}) order by Sequence''')                               
                                 for i in pricelistquery:
                                     pp=(i.CalculationPath).split(',')  
                                     all_ids.extend(pp) 
