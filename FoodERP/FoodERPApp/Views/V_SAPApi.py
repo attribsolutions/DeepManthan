@@ -406,7 +406,7 @@ class SAPLedgerView(CreateAPIView):
                 total_credit = 0.0
                 total_debit = 0.0
                 
-                balance = opening_balance  # initialize running balance with opening balance
+                balance = float(opening_balance)  # initialize running balance with opening balance
 
                 for row in queryset:
                     amount = row['Amount']
@@ -414,13 +414,13 @@ class SAPLedgerView(CreateAPIView):
                     credit_amount = 0.0
 
                     if row['DebitCredit'] == 'H':
-                        credit_amount = amount
-                        total_credit += amount
-                        balance += credit_amount 
+                        credit_amount = float(amount)
+                        total_credit += float(amount)
+                        balance += float(credit_amount) 
                     elif row['DebitCredit'] == 'S':
-                        debit_amount = amount
-                        total_debit += amount
-                        balance -= debit_amount 
+                        debit_amount = float(amount)
+                        total_debit += float(amount)
+                        balance -= float(debit_amount) 
 
                     ledger_data.append({
                         "CompanyCode": row['CompanyCode'],
@@ -430,17 +430,17 @@ class SAPLedgerView(CreateAPIView):
                         "DocumentNo": row['DocumentNo'],
                         "Fiscalyear": row['FiscalYear'],
                         "DebitCredit": row['DebitCredit'],
-                        "Amount": round(amount, 2),
+                        "Amount": float(round(amount, 2)),
                         "DocumentType": row['DocumentType'],
                         "PostingDate": row['PostingDate'].strftime('%d/%m/%Y %I:%M:%S %p'),
                         "ItemText": row['ItemText'],
-                        "Debit": round(debit_amount, 2),
-                        "Credit": round(credit_amount, 2),
-                        "Balance": round(balance, 2) 
+                        "Debit": float(round(debit_amount, 2)),
+                        "Credit": float(round(credit_amount, 2)),
+                        "Balance": float(round(balance, 2)),
                     })
 
                 count = len(ledger_data)
-                closing_balance = opening_balance + total_credit - total_debit
+                closing_balance = float(opening_balance) + float(total_credit) - float(total_debit)
 
                 log_entry = create_transaction_logNew(request, SapLedgerdata, SAPCode, f'OpeningBal:{opening_balance} ClosingBal: {closing_balance}', 324, 0, FromDate, ToDate, 0)
                 return JsonResponse({"StatusCode": 200,"Status": True,"Message": "",
