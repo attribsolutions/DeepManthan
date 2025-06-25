@@ -381,23 +381,23 @@ class SAPLedgerView(CreateAPIView):
 
             if FromDate == OpeningBalanceDate:
                 # Only use 'O' entry
-                opening_balance = M_SAPCustomerLedger.objects.filter(CustomerCode=SAPCode,DebitCredit='O',FileDate=OpeningBalanceDate).aggregate(total=Sum('Amount'))['total'] or 0.0
+                opening_balance = M_SAPCustomerLedger.objects.filter(CustomerCode=SAPCode,DebitCredit='O',PostingDate=OpeningBalanceDate).aggregate(total=Sum('Amount'))['total'] or 0.0
 
             elif FromDate > OpeningBalanceDate:
                 # Get opening balance from 1-April 'O' entry
-                opening_balance = M_SAPCustomerLedger.objects.filter(CustomerCode=SAPCode,DebitCredit='O',FileDate=OpeningBalanceDate).aggregate(total=Sum('Amount'))['total'] or 0.0
+                opening_balance = M_SAPCustomerLedger.objects.filter(CustomerCode=SAPCode,DebitCredit='O',PostingDate=OpeningBalanceDate).aggregate(total=Sum('Amount'))['total'] or 0.0
 
                 # Sum of credits and debits from 1-April to (FromDate-1)
                 day_before = (datetime.strptime(FromDate, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
-                transactions = M_SAPCustomerLedger.objects.filter(FileDate__range=[OpeningBalanceDate, day_before],CustomerCode=SAPCode).exclude(DebitCredit='O')
+                transactions = M_SAPCustomerLedger.objects.filter(PostingDate__range=[OpeningBalanceDate, day_before],CustomerCode=SAPCode).exclude(DebitCredit='O')
 
                 total_credit = transactions.filter(DebitCredit='H').aggregate(total=Sum('Amount'))['total'] or 0.0
                 total_debit = transactions.filter(DebitCredit='S').aggregate(total=Sum('Amount'))['total'] or 0.0
 
-                opening_balance = opening_balance + total_credit - total_debit
+                opening_balance = float(opening_balance) + float(total_credit) - float(total_debit)
 
             # Now fetch transactions in given date range
-            queryset = M_SAPCustomerLedger.objects.filter(FileDate__range=[FromDate, ToDate],CustomerCode=SAPCode
+            queryset = M_SAPCustomerLedger.objects.filter(PostingDate__range=[FromDate, ToDate],CustomerCode=SAPCode
                         ).exclude(DebitCredit='O').values('CompanyCode', 'DocumentDesc', 'CustomerCode', 'CustomerName',
                         'DocumentNo','FiscalYear', 'DebitCredit', 'Amount', 'DocumentType','PostingDate', 'ItemText').order_by('PostingDate')
 
