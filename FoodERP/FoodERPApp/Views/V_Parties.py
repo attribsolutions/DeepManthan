@@ -296,7 +296,7 @@ class M_PartiesView(CreateAPIView):
                     Parties = M_Parties_Serializer.save()
                     LastInsertID = Parties.id
 
-                    log_entry = create_transaction_logNew(request, party_data, party_data['PartySubParty'][0]['Party'], '', 92, LastInsertID )
+                    log_entry = create_transaction_logNew(request, party_data, party_data['PartySubParty'][0]['Party'], party_data_json, 92, LastInsertID )
                     return JsonResponse({'StatusCode': 200,'Status': True,'Message': 'Party Save Successfully','TransactionID': LastInsertID,'Data': []})
 
                 else:
@@ -371,7 +371,7 @@ class M_PartiesViewSecond(CreateAPIView):
                     UpdatedParty = M_Parties_Serializer.save()
                     LastInsertID = UpdatedParty.id
 
-                    log_entry = create_transaction_logNew(request, party_data, id, '', 94, id)
+                    log_entry = create_transaction_logNew(request, party_data, id, party_data_json, 94, id)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Updated Successfully', 'TransactionID': LastInsertID, 'Data': []})
                 else:
                     log_entry = create_transaction_logNew(request, party_data, 0, 'PartyEditMethod:' + str(M_Parties_Serializer.errors), 34, 0)
