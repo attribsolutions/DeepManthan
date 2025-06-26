@@ -41,7 +41,7 @@ class FileDownloadView(View):
             return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'No image found for the given ID.', 'Data': []}, status=404)
 
         image_path = query[0][field_name]
-        image_url = f"{url_prefix}media/{image_path}"
+        image_url = f"{url_prefix}/media/{image_path}"
 
         try:
             response = requests.get(image_url, verify=False)
