@@ -63,8 +63,8 @@ urlpatterns = [
     url(r'SweetPosServiceSettingsImport/([0-9]+)$', SweetPosServiceSettingsImportView.as_view()),
     
     #Pos Settings
-    url(r'PosSettings$',PosSettings.as_view()),
-    url(r'PosSettings/(?P<pk>[0-9]+)/$', PosSettings.as_view()), 
+    url(r'^PosSettings$', PosSettings.as_view()), 
+    url(r'^PosSettings/(?P<pk>[0-9]+)/$', PosSettingsDetail.as_view()),
     url(r'^paymentmodes/(?P<party_id>[0-9]+)/$', PaymentModeAPIView.as_view(), name='payment-modes'),
  
     ]
