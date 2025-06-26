@@ -212,7 +212,7 @@ class PartyAddressSerializerSecond(serializers.ModelSerializer):
     def get_fssaidocumenturl(self, obj):
         if obj.fssaidocumenturl:
             url_prefix = NewURLPrefix()
-            media_url = f"{url_prefix}downloadQr/{obj.id}/4"
+            media_url = f"{url_prefix}/downloadQr/{obj.id}/4"
             return media_url
         return None
 
