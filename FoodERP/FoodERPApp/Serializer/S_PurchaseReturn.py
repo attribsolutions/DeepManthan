@@ -195,7 +195,7 @@ class PurchaseReturnItemImageSerializer2(serializers.ModelSerializer):
     def get_Image(self, obj):
         if obj.Image:
             url_prefix = NewURLPrefix()
-            media_url = f"{url_prefix}downloadQr/{obj.id}/3"
+            media_url = f"{url_prefix}/downloadQr/{obj.id}/3"
             return media_url
         return None
 

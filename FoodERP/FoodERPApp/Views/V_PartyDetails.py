@@ -49,15 +49,6 @@ class FileDownloadView(View):
         
             log_entry = create_transaction_logNew(request, {'TableID':table}, id, 'FileDownloadView image download successful', 467)
 
-        # except requests.exceptions.HTTPError as e:
-        #     log_entry = create_transaction_logNew(request, {'TableID':table}, id, f'FileDownloadView HTTPError: {str(e)}', 33)
-        #     return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'Image not found on remote server.', 'Data': []}, status=404)
-        # except requests.exceptions.ConnectionError as e:
-        #     log_entry = create_transaction_logNew(request, {'TableID':table}, id, f'FileDownloadView ConnectionError: {str(e)}', 33)
-        #     return JsonResponse({'StatusCode': 502, 'Status': False, 'Message': 'Connection error while fetching image.', 'Data': []}, status=502)
-        # except requests.exceptions.RequestException as e:
-        #     log_entry = create_transaction_logNew(request, {'TableID':table}, id, f'FileDownloadView RequestException: {str(e)}', 33)
-        #     return JsonResponse({'StatusCode': 500, 'Status': False, 'Message':  str(e), 'Data': []}, status=500)
         except Exception as e:
             log_entry = create_transaction_logNew(request, {'TableID':table}, id, f'FileDownloadView Unexpected Exception: {str(e)}', 33)
             return JsonResponse({'StatusCode': 500, 'Status': False, 'Message':  str(e),  'Data': []}, status=500)
