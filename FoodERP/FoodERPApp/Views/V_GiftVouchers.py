@@ -195,7 +195,7 @@ class giftvouchervalidityCheck_Multiple(CreateAPIView):
                         # )
                     })                 
 
-            status_code = 200 if valid_codes else 204 if used_codes else 404
+            status_code = 200 if valid_codes else 200 if used_codes else 200
            
             log_entry = create_transaction_logNew(request, 0, 0, '', 468 if status_code == 200 else 0, 0)
             return JsonResponse({"StatusCode": status_code,"Status": bool(valid_codes),"Message": "Gift voucher validation result.",
@@ -268,7 +268,7 @@ class giftvouchervalidityCheck_Multiple(CreateAPIView):
                         "VoucherCode": VoucherCode,
                         "Message": "Voucher updated successfully."})
 
-                status_code = 200 if updated_vouchers else (204 if used_vouchers else 404)
+                status_code = 200 if updated_vouchers else (200 if used_vouchers else 200)
 
                 log_entry = create_transaction_logNew(request, giftvoucherDataList, 0, '', 470 if status_code == 200 else 0, 0)
 

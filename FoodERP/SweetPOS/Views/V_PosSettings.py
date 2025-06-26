@@ -3,10 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from ..models import M_PosSettings
 from ..Serializer.S_PosSettings import *
-from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
-from rest_framework.parsers import JSONParser
 from rest_framework.authentication import BasicAuthentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
@@ -17,21 +15,20 @@ class PosSettings(APIView):
     def get(self, request):
         try:
             with transaction.atomic():
-                    settings = M_PosSettings.objects.filter(Is_Disabled=False)
-                    serializer = M_PosSettingsListSerializer(settings, many=True)
-                    return Response({
-                        "StatusCode": 200,
-                        "Status": True,
-                        "Data": serializer.data
-                    }, status=status.HTTP_200_OK)
-
+                settings = M_PosSettings.objects.all()
+                serializer = M_PosSettingsListSerializer(settings, many=True)
+                return Response({
+                    "StatusCode": 200,
+                    "Status": True,
+                    "Data": serializer.data
+                }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
                 "StatusCode": 500,
                 "Status": False,
                 "Message": str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+
     def post(self, request):
         try:
             with transaction.atomic():
@@ -56,26 +53,38 @@ class PosSettings(APIView):
                 "Status": False,
                 "Message": str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-    def put(self, request, pk=None):
+
+
+class PosSettingsDetail(APIView):
+    authentication_classes = [BasicAuthentication, JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        try:
+            setting = M_PosSettings.objects.get(id=pk)
+            serializer = M_PosSettingsListSerializer(setting)
+            return Response({
+                "StatusCode": 200,
+                "Status": True,
+                "Data": serializer.data
+            }, status=status.HTTP_200_OK)
+        except M_PosSettings.DoesNotExist:
+            return Response({
+                "StatusCode": 404,
+                "Status": False,
+                "Message": "Setting not found"
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                "StatusCode": 500,
+                "Status": False,
+                "Message": str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def put(self, request, pk):
         try:
             with transaction.atomic():
-                if not pk:
-                    return Response({
-                        "StatusCode": 400,
-                        "Status": False,
-                        "Message": "Setting ID is required for update"
-                    }, status=status.HTTP_400_BAD_REQUEST)
-
-                try:
-                    setting = M_PosSettings.objects.get(id=pk)
-                except M_PosSettings.DoesNotExist:
-                    return Response({
-                        "StatusCode": 404,
-                        "Status": False,
-                        "Message": "Setting not found"
-                    }, status=status.HTTP_404_NOT_FOUND)
-
+                setting = M_PosSettings.objects.get(id=pk)
                 serializer = M_PosSettingsCreateUpdateSerializer(setting, data=request.data)
                 if serializer.is_valid():
                     serializer.save()
@@ -90,40 +99,35 @@ class PosSettings(APIView):
                     "Status": False,
                     "Errors": serializer.errors
                 }, status=status.HTTP_400_BAD_REQUEST)
-
+        except M_PosSettings.DoesNotExist:
+            return Response({
+                "StatusCode": 404,
+                "Status": False,
+                "Message": "Setting not found"
+            }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({
                 "StatusCode": 500,
                 "Status": False,
                 "Message": str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-    def delete(self, request, pk=None):
+
+    def delete(self, request, pk):
         try:
             with transaction.atomic():
-                if not pk:
-                    return Response({
-                        "StatusCode": 400,
-                        "Status": False,
-                        "Message": "Setting ID is required for delete"
-                    }, status=status.HTTP_400_BAD_REQUEST)
-
-                try:
-                    setting = M_PosSettings.objects.get(id=pk)
-                except M_PosSettings.DoesNotExist:
-                    return Response({
-                        "StatusCode": 404,
-                        "Status": False,
-                        "Message": "Setting not found"
-                    }, status=status.HTTP_404_NOT_FOUND)
-
+                setting = M_PosSettings.objects.get(id=pk)
                 setting.delete()
                 return Response({
                     "StatusCode": 200,
                     "Status": True,
                     "Message": "Setting deleted successfully"
                 }, status=status.HTTP_200_OK)
-
+        except M_PosSettings.DoesNotExist:
+            return Response({
+                "StatusCode": 404,
+                "Status": False,
+                "Message": "Setting not found"
+            }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({
                 "StatusCode": 500,
