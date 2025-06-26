@@ -167,7 +167,7 @@ class SPOSStockProcessingthoughtcronjobView(CreateAPIView):
                     end_date_str = today
                     PartyTypes=M_Settings.objects.filter( id=56).values('DefaultValue')
                     Partys = M_Parties.objects.filter(PartyType__in=PartyTypes,isActive=1).values('id')
-                    print(Partys)                    
+                    # print(Partys)                    
 
                     log_entry = create_transaction_logNew(request, Orderdata, 0, 'Stock Process start', 209, 0, start_date_str, end_date_str, 0)
                     for Party in Partys:
