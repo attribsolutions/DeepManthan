@@ -29,31 +29,31 @@ class FileDownloadView(View):
 
         model_class, field_name = table_config.get(int(table), (None, None))
         if not model_class:
-            create_transaction_logNew(request, 0, 0, 'Invalid table selection in FileDownloadView', 467, id)
+            # create_transaction_logNew(request, 0, 0, 'Invalid table selection in FileDownloadView', 467, id)
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Invalid table selection.', 'Data': []}, status=400)
 
         query = model_class.objects.filter(id=id).values(field_name)
         if not query.exists():
-            create_transaction_logNew(request, 0, 0, 'Image not found for given ID in FileDownloadView', 467, id)
+            # create_transaction_logNew(request, 0, 0, 'Image not found for given ID in FileDownloadView', 467, id)
             return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'No image found for the given ID.', 'Data': []}, status=404)
 
         image_path = query[0][field_name]
         if not image_path:
-            create_transaction_logNew(request, 0, 0, 'Image path is empty for given ID in FileDownloadView', 467, id)
+            # create_transaction_logNew(request, 0, 0, 'Image path is empty for given ID in FileDownloadView', 467, id)
             return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'No image path found.', 'Data': []}, status=404)
 
         # Full filesystem path
         full_path = os.path.join(settings.MEDIA_ROOT, image_path)
         if not os.path.exists(full_path):
-            create_transaction_logNew(request, 0, 0, f'File not found on disk: {full_path}', 467, id)
+            # create_transaction_logNew(request, 0, 0, f'File not found on disk: {full_path}', 467, id)
             return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'File not found on disk.', 'Data': []}, status=404)
 
         try:
             response = FileResponse(open(full_path, 'rb'), as_attachment=True, filename=os.path.basename(image_path))
-            create_transaction_logNew(request, 0, 0, 'FileDownloadView image download successful', 467, id)
+            # create_transaction_logNew(request, 0, 0, 'FileDownloadView image download successful', 467, id)
             return response
         except Exception as e:
-            create_transaction_logNew(request, 0, 0, f'Unexpected Exception: {str(e)}', 33, id)
+            # create_transaction_logNew(request, 0, 0, f'Unexpected Exception: {str(e)}', 33, id)
             return JsonResponse({'StatusCode': 500, 'Status': False, 'Message': str(e), 'Data': []}, status=500)
 
 
