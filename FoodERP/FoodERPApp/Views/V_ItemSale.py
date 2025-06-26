@@ -45,7 +45,7 @@ class ItemSaleReportView(CreateAPIView):
         WHEN FoodERP.M_Units.Name = 'No' THEN QtyInNo
         WHEN FoodERP.M_Units.Name = 'Box' THEN QtyInBox
         ELSE NULL  -- Default case if no match
-    END AS BaseUnitQuantity
+    END AS BaseUnitQuantity, '' PaymentType
                                 FROM T_Invoices
                                 JOIN TC_InvoiceItems ON Invoice_id = T_Invoices.id 
                                 JOIN M_Parties Cust ON Customer_id = Cust.id 
@@ -73,7 +73,7 @@ class ItemSaleReportView(CreateAPIView):
         WHEN FoodERP.M_Units.Name = 'No' THEN QtyInNo
         WHEN FoodERP.M_Units.Name = 'Box' THEN QtyInBox
         ELSE NULL  -- Default case if no match
-    END AS BaseUnitQuantity
+    END AS BaseUnitQuantity,A.PaymentType
                                 
                                 FROM SweetPOS.T_SPOSInvoices A 
                                 JOIN SweetPOS.TC_SPOSInvoiceItems B ON Invoice_id = A.id 
@@ -167,7 +167,8 @@ class ItemSaleReportView(CreateAPIView):
                                 "BaseItemUnitName": a.BaseUnitName,
                                 "Sup_ShortName":a.SupShortName,
                                 "Cust_ShortName":a.CustShortName,
-                                "CreatedOn": a.CreatedOn
+                                "CreatedOn": a.CreatedOn,
+                                "PaymentType" : a.PaymentType
                                 })
                         
                         
