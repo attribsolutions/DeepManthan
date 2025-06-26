@@ -27,7 +27,7 @@ class FileDownloadView(View):
             1: (M_PartySettingsDetails, 'Image'),
             2: (T_ClaimTrackingEntry, 'CreditNoteUpload'),
             3: (TC_PurchaseReturnItemImages, 'Image'),
-            4: (MC_PartyAddress,'fssaidocumenturl')
+            # 4: (MC_PartyAddress,'fssaidocumenturl')
         }
 
         model_class, field_name = table_config.get(int(table), (None, None))
