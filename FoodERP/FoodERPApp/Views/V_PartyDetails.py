@@ -18,6 +18,44 @@ from django.conf import settings
 
 
 
+class FileDownloadView(View):
+    def get(self, request, id=0, table=0):
+        # Map of table codes to model classes and image field names
+        table_config = {
+            1: (M_PartySettingsDetails, 'Image'),
+            2: (T_ClaimTrackingEntry, 'CreditNoteUpload'),
+            3: (TC_PurchaseReturnItemImages, 'Image'),
+        }
+
+        model_class, field_name = table_config.get(int(table), (None, None))
+        if not model_class:
+            create_transaction_logNew(request, 0, 0, 'Invalid table selection in FileDownloadView', 467, id)
+            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Invalid table selection.', 'Data': []}, status=400)
+
+        query = model_class.objects.filter(id=id).values(field_name)
+        if not query.exists():
+            create_transaction_logNew(request, 0, 0, 'Image not found for given ID in FileDownloadView', 467, id)
+            return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'No image found for the given ID.', 'Data': []}, status=404)
+
+        image_path = query[0][field_name]
+        if not image_path:
+            create_transaction_logNew(request, 0, 0, 'Image path is empty for given ID in FileDownloadView', 467, id)
+            return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'No image path found.', 'Data': []}, status=404)
+
+        # Full filesystem path
+        full_path = os.path.join(settings.MEDIA_ROOT, image_path)
+        if not os.path.exists(full_path):
+            create_transaction_logNew(request, 0, 0, f'File not found on disk: {full_path}', 467, id)
+            return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'File not found on disk.', 'Data': []}, status=404)
+
+        try:
+            response = FileResponse(open(full_path, 'rb'), as_attachment=True, filename=os.path.basename(image_path))
+            create_transaction_logNew(request, 0, 0, 'FileDownloadView image download successful', 467, id)
+            return response
+        except Exception as e:
+            create_transaction_logNew(request, 0, 0, f'Unexpected Exception: {str(e)}', 33, id)
+            return JsonResponse({'StatusCode': 500, 'Status': False, 'Message': str(e), 'Data': []}, status=500)
+
 
 # class FileDownloadView(View):
 #     def get(self, request, id=0, table=0):
@@ -72,58 +110,58 @@ from django.conf import settings
 
 
 
-class FileDownloadView(View):
-    def get(self, request,id=0,table=0):
-        # Imagedata = JSONParser().parse(request)
-        # link = Imagedata['link']
-        # # Replace 'image_url' with the actual URL of the image you want to download.
-        # image_url = link
+# class FileDownloadView(View):
+#     def get(self, request,id=0,table=0):
+#         # Imagedata = JSONParser().parse(request)
+#         # link = Imagedata['link']
+#         # # Replace 'image_url' with the actual URL of the image you want to download.
+#         # image_url = link
         
-        url_prefix = NewURLPrefix()
+#         url_prefix = NewURLPrefix()
         
-        if int(table)==1: #M_PartySettingsDetails table
-            query = M_PartySettingsDetails.objects.filter(id=id).values('Image')
-            Image = query[0]['Image']
+#         if int(table)==1: #M_PartySettingsDetails table
+#             query = M_PartySettingsDetails.objects.filter(id=id).values('Image')
+#             Image = query[0]['Image']
 
-            image_url = f"{url_prefix}media/{Image}"
-            # image_url = f'https://cbmfooderp.com/api/media/{Image}'
+#             image_url = f"{url_prefix}media/{Image}"
+#             # image_url = f'https://cbmfooderp.com/api/media/{Image}'
 
-            # image_url = f'http://192.168.1.114:8000/media/{Image}'
+#             # image_url = f'http://192.168.1.114:8000/media/{Image}'
             
-        elif int(table)==2:  #T_ClaimTrackingEntry
-            query = T_ClaimTrackingEntry.objects.filter(id=id).values('CreditNoteUpload')
-            Image = query[0]['CreditNoteUpload']
-            image_url = f"{url_prefix}media/{Image}"
-            # image_url = f'https://cbmfooderp.com/api/media/{Image}'
-            # image_url = f'http://192.168.1.114:8000/media/{Image}'
+#         elif int(table)==2:  #T_ClaimTrackingEntry
+#             query = T_ClaimTrackingEntry.objects.filter(id=id).values('CreditNoteUpload')
+#             Image = query[0]['CreditNoteUpload']
+#             image_url = f"{url_prefix}media/{Image}"
+#             # image_url = f'https://cbmfooderp.com/api/media/{Image}'
+#             # image_url = f'http://192.168.1.114:8000/media/{Image}'
             
-        else: # 3 TC_PurchaseReturnItemImages
-            '''check serializer PurchaseReturnItemImageSerializer2'''
-            query = TC_PurchaseReturnItemImages.objects.filter(id=id).values('Image')
-            Image = query[0]['Image']
-            image_url = f"{url_prefix}media/{Image}"
-            # image_url = f'https://cbmfooderp.com/api/media/{Image}'
-            # image_url = f'http://192.168.1.114:8000/media/{Image}'  
+#         else: # 3 TC_PurchaseReturnItemImages
+#             '''check serializer PurchaseReturnItemImageSerializer2'''
+#             query = TC_PurchaseReturnItemImages.objects.filter(id=id).values('Image')
+#             Image = query[0]['Image']
+#             image_url = f"{url_prefix}media/{Image}"
+#             # image_url = f'https://cbmfooderp.com/api/media/{Image}'
+#             # image_url = f'http://192.168.1.114:8000/media/{Image}'  
             
-        try:
-            response = requests.get(image_url, verify=False)
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            return HttpResponse(f"Error: {e}", status=500)
+#         try:
+#             response = requests.get(image_url, verify=False)
+#             response.raise_for_status()
+#         except requests.exceptions.RequestException as e:
+#             return HttpResponse(f"Error: {e}", status=500)
 
-        # Set the content type of the response to match the image type (e.g., image/jpeg).
-        content_type = response.headers.get('content-type', 'application/octet-stream')
-        response_headers = {
-            'Content-Type': content_type,
-        }
+#         # Set the content type of the response to match the image type (e.g., image/jpeg).
+#         content_type = response.headers.get('content-type', 'application/octet-stream')
+#         response_headers = {
+#             'Content-Type': content_type,
+#         }
        
-        # Create an HttpResponse and set the filename in the Content-Disposition header.
-        filename = os.path.basename(image_url)
-        response = HttpResponse(response.content, content_type=content_type)
-        # response['Content-Disposition'] = 'attachment; filename="{filename}"'
-        response['Content-Disposition'] = f'attachment; filename="{filename}"'
-        # Return the HttpResponse object.
-        return response   
+#         # Create an HttpResponse and set the filename in the Content-Disposition header.
+#         filename = os.path.basename(image_url)
+#         response = HttpResponse(response.content, content_type=content_type)
+#         # response['Content-Disposition'] = 'attachment; filename="{filename}"'
+#         response['Content-Disposition'] = f'attachment; filename="{filename}"'
+#         # Return the HttpResponse object.
+#         return response   
 
 
 class PartyDetailsView(CreateAPIView):
