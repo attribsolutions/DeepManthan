@@ -944,6 +944,7 @@ class T_Orders(models.Model):
     IsConfirm = models.BooleanField(default=False) 
     MobileAppOrderFlag = models.IntegerField(blank=True,null=True) 
     AdvanceAmount=models.DecimalField(max_digits=20, decimal_places=2)
+    IsOrderClose = models.BooleanField(default=False)
 
     # Inward = models.PositiveSmallIntegerField(default=0)
     class Meta:
@@ -2550,6 +2551,7 @@ class M_Scheme(models.Model):
     Column2 = models.TextField(null=True, blank=True)
     Column3 = models.TextField(null=True, blank=True)
     ShortName = models.CharField(max_length=200)
+    SchemeQuantity= models.DecimalField(max_digits=20, decimal_places=2, default=0, null=True, blank=True)
 
     class Meta:
         db_table = "M_Scheme"
