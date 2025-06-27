@@ -27,7 +27,7 @@ class SchemeView(CreateAPIView):
                                                          FreeItemID, VoucherLimit, SchemeValueUpto,QrPrefix, SchemeTypeName, 
                                                          SchemeTypeID_id, UsageTime, BillAbove, UsageType, BillEffect, Column1, Column2, 
                                                          Column3,IsQrApplicable, M_Scheme.IsActive, concat(SchemeDetails,'',
-                                                         ifnull(M_Parties.SAPPartyCode,'')) SchemeDetails, OverLappingScheme, Message
+                                                         ifnull(M_Parties.SAPPartyCode,'')) SchemeDetails, OverLappingScheme, Message, SchemeQuantity
                                                          FROM M_Scheme 
                                                          JOIN M_SchemeType ON M_Scheme.SchemeTypeID_id = M_SchemeType.id 
                                                          JOIN MC_SchemeParties ON MC_SchemeParties.SchemeID_id = M_Scheme.id
@@ -76,6 +76,7 @@ class SchemeView(CreateAPIView):
                             "SchemeTypeName": Scheme.SchemeTypeName,
                             "SchemeDetails": Scheme.SchemeDetails,
                             "SchemeValue": Scheme.SchemeValue,
+                            "SchemeQuantity" : Scheme.SchemeQuantity,
                             "ValueIn": Scheme.ValueIn,
                             "BillAbove": Scheme.BillAbove,
                             "VoucherLimit": Scheme.VoucherLimit,
@@ -264,7 +265,7 @@ class SchemeDetailsView(CreateAPIView):
                
                     SchemeDetails = M_Scheme.objects.raw(f'''
                     SELECT 
-                        M_Scheme.id, SchemeName, SchemeValue, ValueIn, FromPeriod, ToPeriod, FreeItemID, VoucherLimit, SchemeValueUpto,
+                        M_Scheme.id, SchemeName, SchemeValue, ValueIn, FromPeriod, ToPeriod, FreeItemID, VoucherLimit, SchemeValueUpto, SchemeQuantity,
                         QrPrefix, SchemeTypeName, SchemeTypeID_id, UsageTime, BillAbove, UsageType, BillEffect, Column1, Column2, Column3,
                         IsQrApplicable, M_Scheme.IsActive, 
                         CONCAT(SchemeDetails, '', IFNULL(M_Parties.SAPPartyCode, '')) AS SchemeDetails, OverLappingScheme, Message,
@@ -290,6 +291,7 @@ class SchemeDetailsView(CreateAPIView):
                                 "SchemeId":       row.id,
                                 "SchemeName":     row.SchemeName,
                                 "SchemeValue":    row.SchemeValue,
+                                "SchemeQuantity": row.SchemeQuantity,
                                 "ValueIn":        row.ValueIn,
                                 "FromPeriod":     row.FromPeriod,
                                 "ToPeriod":       row.ToPeriod,
@@ -390,6 +392,7 @@ class SchemeDetailsView(CreateAPIView):
                 scheme = M_Scheme.objects.get(id=id)          
                 scheme.SchemeName = data.get('SchemeName')                
                 scheme.SchemeValue = data.get('SchemeValue')
+                scheme.SchemeQuantity = data.get('SchemeQuantity')
                 scheme.ValueIn = data.get('ValueIn')
                 scheme.FromPeriod = data.get('FromPeriod')
                 scheme.ToPeriod = data.get('ToPeriod')

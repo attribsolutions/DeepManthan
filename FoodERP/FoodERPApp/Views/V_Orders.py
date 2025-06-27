@@ -187,6 +187,7 @@ class OrderListFilterView(CreateAPIView):
                                 "BillingAddress": a['BillingAddress']['Address'],
                                 "ShippingAddress": a['ShippingAddress']['Address'],
                                 "InvoiceCreated": InvoiceCreated,
+                                "InvoiceCount":Count,
                                 "CreatedBy": a['CreatedBy'],
                                 "CreatedByName": CreatedByName,
                                 "CreatedOn": a['CreatedOn'],
