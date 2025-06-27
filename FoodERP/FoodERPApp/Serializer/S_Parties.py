@@ -2,6 +2,7 @@ from ..models import *
 from rest_framework import serializers
 from ..Serializer.S_Routes import  *
 from django.utils import timezone
+import os
 
 class PartiesSerializer(serializers.ModelSerializer):
        
@@ -199,9 +200,8 @@ class M_PartiesSerializer1(serializers.Serializer):
     CreatedOn = serializers.DateTimeField()
     UpdatedBy = serializers.IntegerField(default=False)
     UpdatedOn = serializers.DateTimeField()
-    
-    
-    
+
+
 class PartyAddressSerializerSecond(serializers.ModelSerializer):
     fssaidocumenturl = serializers.SerializerMethodField()
 
@@ -212,10 +212,11 @@ class PartyAddressSerializerSecond(serializers.ModelSerializer):
     def get_fssaidocumenturl(self, obj):
         if obj.fssaidocumenturl:
             url_prefix = NewURLPrefix()
-            media_url = f"{url_prefix}/downloadQr/{obj.id}/4"
+            file_name = os.path.basename(obj.fssaidocumenturl.name) 
+            table_code = 4 
+            media_url = f"{url_prefix}/{file_name}/{obj.id}/{table_code}"
             return media_url
         return None
-
 
 
 class CitiesSerializerSecond(serializers.ModelSerializer):
