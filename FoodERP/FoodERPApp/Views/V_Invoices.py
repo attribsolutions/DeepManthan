@@ -735,7 +735,13 @@ class InvoiceView(CreateAPIView):
                         Invoice = Invoice_serializer.save()
                         LastInsertId = Invoice.id
                         LastIDs.append(Invoice.id)
+                        for order_ref in Invoicedata.get('InvoicesReferences', []):
+                            order_id = order_ref.get('Order')                            
+                            if order_id:
+                                with connection.cursor() as cursor:
+                                    cursor.execute("CALL CloseOrderIfFullyInvoiced(%s)", [order_id])
                         log_entry = create_transaction_logNew(request, Invoicedata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertId)+','+'FullInvoiceNumber:'+Invoicedata['FullInvoiceNumber'],4,LastInsertId,0,0, Invoicedata['Customer'])
+                     
                     else:
                         transaction.set_rollback(True)
                         # CustomPrint(Invoicedata, Party, 'InvoiceSave:'+str(Invoice_serializer.errors),34,0,InvoiceDate,0,Invoicedata['Customer'])

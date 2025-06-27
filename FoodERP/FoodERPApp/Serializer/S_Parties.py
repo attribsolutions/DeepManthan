@@ -199,18 +199,25 @@ class M_PartiesSerializer1(serializers.Serializer):
     CreatedOn = serializers.DateTimeField()
     UpdatedBy = serializers.IntegerField(default=False)
     UpdatedOn = serializers.DateTimeField()
-
+    
+    
+    
 class PartyAddressSerializerSecond(serializers.ModelSerializer):
+    fssaidocumenturl = serializers.SerializerMethodField()
+
     class Meta:
         model = MC_PartyAddress
-        fields = ['id','Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'fssaidocument','fssaidocumenturl'] 
-        
+        fields = ['id', 'Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'fssaidocument', 'fssaidocumenturl']
+
     def get_fssaidocumenturl(self, obj):
         if obj.fssaidocumenturl:
-            request = self.context.get('request')
-            return request.build_absolute_uri(obj.fssaidocumenturl.url)
+            url_prefix = NewURLPrefix()
+            media_url = f"{url_prefix}/downloadQr/{obj.id}/4"
+            return media_url
         return None
-        
+
+
+
 class CitiesSerializerSecond(serializers.ModelSerializer):
     class Meta:
         model =  M_Cities
