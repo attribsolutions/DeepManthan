@@ -21,7 +21,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
                    
                 B2Bquery = T_Invoices.objects.raw(f'''SELECT T_Invoices.id, M_Parties.GSTIN AS GSTIN_UINOfRecipient,
                                                   M_Parties.Name AS ReceiverName, T_Invoices.FullInvoiceNumber AS InvoiceNumber,'Regular' AS InvoiceType,
-                    T_Invoices.InvoiceDate AS InvoiceDate, Sum(TC_InvoiceItems.BasicAmount+TC_InvoiceItems.IGST+TC_InvoiceItems.CGST+TC_InvoiceItems.SGST) AS InvoiceValue,
+                     DATE_FORMAT(T_Invoices.InvoiceDate, '%%d-%%m-%%Y') AS InvoiceDate, Sum(TC_InvoiceItems.BasicAmount+TC_InvoiceItems.IGST+TC_InvoiceItems.CGST+TC_InvoiceItems.SGST) AS InvoiceValue,
                     concat(M_States.StateCode, '-', M_States.Name) AS PlaceOfSupply, 'N' AS ReverseCharge,
                     TC_InvoiceItems.GSTPercentage  AS ApplicableOfTaxRate,  
                      SUM(TC_InvoiceItems.BasicAmount) AS TaxableValue,SUM(TC_InvoiceItems.IGST) AS IGST,SUM(TC_InvoiceItems.CGST) AS CGST,
