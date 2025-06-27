@@ -29,7 +29,7 @@ class PartiesSettingsDetailsListSerializer(serializers.Serializer):
     def get_Image(self, obj):
         if obj.Image:
             url_prefix = NewURLPrefix()
-            media_url = f"{url_prefix}downloadQr/{obj.ImageID}/1"
+            media_url = f"{url_prefix}/downloadQr/{obj.ImageID}/1"
             return media_url
         return None
     

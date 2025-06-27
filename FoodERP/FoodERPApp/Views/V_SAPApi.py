@@ -381,23 +381,23 @@ class SAPLedgerView(CreateAPIView):
 
             if FromDate == OpeningBalanceDate:
                 # Only use 'O' entry
-                opening_balance = M_SAPCustomerLedger.objects.filter(CustomerCode=SAPCode,DebitCredit='O',FileDate=OpeningBalanceDate).aggregate(total=Sum('Amount'))['total'] or 0.0
+                opening_balance = M_SAPCustomerLedger.objects.filter(CustomerCode=SAPCode,DebitCredit='O',PostingDate=OpeningBalanceDate).aggregate(total=Sum('Amount'))['total'] or 0.0
 
             elif FromDate > OpeningBalanceDate:
                 # Get opening balance from 1-April 'O' entry
-                opening_balance = M_SAPCustomerLedger.objects.filter(CustomerCode=SAPCode,DebitCredit='O',FileDate=OpeningBalanceDate).aggregate(total=Sum('Amount'))['total'] or 0.0
+                opening_balance = M_SAPCustomerLedger.objects.filter(CustomerCode=SAPCode,DebitCredit='O',PostingDate=OpeningBalanceDate).aggregate(total=Sum('Amount'))['total'] or 0.0
 
                 # Sum of credits and debits from 1-April to (FromDate-1)
                 day_before = (datetime.strptime(FromDate, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
-                transactions = M_SAPCustomerLedger.objects.filter(FileDate__range=[OpeningBalanceDate, day_before],CustomerCode=SAPCode).exclude(DebitCredit='O')
+                transactions = M_SAPCustomerLedger.objects.filter(PostingDate__range=[OpeningBalanceDate, day_before],CustomerCode=SAPCode).exclude(DebitCredit='O')
 
                 total_credit = transactions.filter(DebitCredit='H').aggregate(total=Sum('Amount'))['total'] or 0.0
                 total_debit = transactions.filter(DebitCredit='S').aggregate(total=Sum('Amount'))['total'] or 0.0
 
-                opening_balance = opening_balance + total_credit - total_debit
+                opening_balance = float(opening_balance) + float(total_credit) - float(total_debit)
 
             # Now fetch transactions in given date range
-            queryset = M_SAPCustomerLedger.objects.filter(FileDate__range=[FromDate, ToDate],CustomerCode=SAPCode
+            queryset = M_SAPCustomerLedger.objects.filter(PostingDate__range=[FromDate, ToDate],CustomerCode=SAPCode
                         ).exclude(DebitCredit='O').values('CompanyCode', 'DocumentDesc', 'CustomerCode', 'CustomerName',
                         'DocumentNo','FiscalYear', 'DebitCredit', 'Amount', 'DocumentType','PostingDate', 'ItemText').order_by('PostingDate')
 
@@ -406,7 +406,7 @@ class SAPLedgerView(CreateAPIView):
                 total_credit = 0.0
                 total_debit = 0.0
                 
-                balance = opening_balance  # initialize running balance with opening balance
+                balance = float(opening_balance)  # initialize running balance with opening balance
 
                 for row in queryset:
                     amount = row['Amount']
@@ -414,13 +414,14 @@ class SAPLedgerView(CreateAPIView):
                     credit_amount = 0.0
 
                     if row['DebitCredit'] == 'H':
-                        credit_amount = amount
-                        total_credit += amount
-                        balance += credit_amount 
+                        credit_amount = float(amount)
+                        total_credit += float(amount)
+                        balance -= float(credit_amount)  
                     elif row['DebitCredit'] == 'S':
-                        debit_amount = amount
-                        total_debit += amount
-                        balance -= debit_amount 
+                        debit_amount = float(amount)
+                        total_debit += float(amount)
+                        balance += float(debit_amount)  
+                    
 
                     ledger_data.append({
                         "CompanyCode": row['CompanyCode'],
@@ -430,17 +431,17 @@ class SAPLedgerView(CreateAPIView):
                         "DocumentNo": row['DocumentNo'],
                         "Fiscalyear": row['FiscalYear'],
                         "DebitCredit": row['DebitCredit'],
-                        "Amount": round(amount, 2),
+                        "Amount": float(round(amount, 2)),
                         "DocumentType": row['DocumentType'],
                         "PostingDate": row['PostingDate'].strftime('%d/%m/%Y %I:%M:%S %p'),
                         "ItemText": row['ItemText'],
-                        "Debit": round(debit_amount, 2),
-                        "Credit": round(credit_amount, 2),
-                        "Balance": round(balance, 2) 
+                        "Debit": float(round(debit_amount, 2)),
+                        "Credit": float(round(credit_amount, 2)),
+                        "Balance": float(round(balance, 2)),
                     })
 
                 count = len(ledger_data)
-                closing_balance = opening_balance + total_credit - total_debit
+                closing_balance = float(opening_balance) + float(total_credit) - float(total_debit)
 
                 log_entry = create_transaction_logNew(request, SapLedgerdata, SAPCode, f'OpeningBal:{opening_balance} ClosingBal: {closing_balance}', 324, 0, FromDate, ToDate, 0)
                 return JsonResponse({"StatusCode": 200,"Status": True,"Message": "",

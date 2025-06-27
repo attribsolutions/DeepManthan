@@ -146,6 +146,6 @@ class ClaimTrackingSerializerSecond(serializers.Serializer):
     def get_CreditNoteUpload(self, obj):
         if obj.CreditNoteUpload:
             url_prefix = NewURLPrefix()
-            media_url = f"{url_prefix}downloadQr/{obj.id}/2"
+            media_url = f"{url_prefix}/downloadQr/{obj.id}/2"
             return media_url
         return None

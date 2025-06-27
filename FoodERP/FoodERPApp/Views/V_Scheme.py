@@ -21,77 +21,99 @@ class SchemeView(CreateAPIView):
             with transaction.atomic():
                 user = BasicAuthenticationfunction(request)
                 Party = PartyData['Party']
-                
+
                 if user is not None:
-                    SchemeDetails = M_Scheme.objects.raw(f'''
-                        SELECT M_Scheme.id, SchemeName, SchemeValue, ValueIn, FromPeriod, ToPeriod, FreeItemID, VoucherLimit, SchemeValueUpto,
-                        QrPrefix, SchemeTypeName, SchemeTypeID_id, UsageTime, BillAbove, UsageType, BillEffect, Column1, Column2, Column3,
-                        IsQrApplicable, M_Scheme.IsActive, concat(SchemeDetails,'',ifnull(M_Parties.SAPPartyCode,'')) SchemeDetails, OverLappingScheme, Message
-                        FROM M_Scheme 
-                        JOIN M_SchemeType ON M_Scheme.SchemeTypeID_id = M_SchemeType.id 
-                        JOIN MC_SchemeParties ON MC_SchemeParties.SchemeID_id = M_Scheme.id
-                        join M_Parties on M_Parties.id=MC_SchemeParties.PartyID_id  
-                        WHERE PartyID_id = {Party} AND M_Scheme.IsActive = 1
-                    ''')
-                    
+                    SchemeDetails = M_Scheme.objects.raw(f'''SELECT M_Scheme.id, SchemeName, SchemeValue, ValueIn, FromPeriod, ToPeriod, 
+                                                         FreeItemID, VoucherLimit, SchemeValueUpto,QrPrefix, SchemeTypeName, 
+                                                         SchemeTypeID_id, UsageTime, BillAbove, UsageType, BillEffect, Column1, Column2, 
+                                                         Column3,IsQrApplicable, M_Scheme.IsActive, concat(SchemeDetails,'',
+                                                         ifnull(M_Parties.SAPPartyCode,'')) SchemeDetails, OverLappingScheme, Message
+                                                         FROM M_Scheme 
+                                                         JOIN M_SchemeType ON M_Scheme.SchemeTypeID_id = M_SchemeType.id 
+                                                         JOIN MC_SchemeParties ON MC_SchemeParties.SchemeID_id = M_Scheme.id
+                                                         JOIN M_Parties ON M_Parties.id = MC_SchemeParties.PartyID_id  
+                                                         WHERE PartyID_id = {Party} AND M_Scheme.IsActive = 1''')
+
                     data = []
-                    for Scheme in SchemeDetails:   
+                    for Scheme in SchemeDetails:
                         qr_codes = MC_SchemeQRs.objects.filter(SchemeID_id=Scheme.id).values('id', 'QRCode')
                         qr_list = [{"QRID": qr['id'], "QRCode": qr['QRCode']} for qr in qr_codes]
 
-                        SchemeItems = MC_SchemeItems.objects.filter(SchemeID=Scheme.id).values('TypeForItem', 'Item')
-                  
-                        ItemsType = {1: [], 2: [], 3: []}
+                        SchemeItems = MC_SchemeItems.objects.filter(SchemeID=Scheme.id).values(
+                            'TypeForItem', 'Item', 'Quantity', 'DiscountValue', 'DiscountType'
+                        )
+
+                        mc_applicable_items = []
+                        mc_not_applicable_items = []
+                        mc_effective_items = []
+
+                        applicable_ids = []
+                        not_applicable_ids = []
+                        effective_ids = []
+
                         for Item in SchemeItems:
-                            ItemsType[Item['TypeForItem']].append(str(Item['Item']))
-                            
-                        applicable_items = ",".join(ItemsType[1]) if ItemsType[1] else ""
-                        non_applicable_items = ",".join(ItemsType[2]) if ItemsType[2] else ""
-                        effective_items = ",".join(ItemsType[3]) if ItemsType[3] else ""
+                            item_data = {
+                                "ItemID": Item['Item'],
+                                "Quantity": Item['Quantity'],
+                                "DiscountValue": Item['DiscountValue'],
+                                "DiscountType": Item['DiscountType']
+                            }
+
+                            if Item['TypeForItem'] == 1:
+                                mc_applicable_items.append(item_data)
+                                applicable_ids.append(str(Item['Item']))
+                            elif Item['TypeForItem'] == 2:
+                                mc_not_applicable_items.append(item_data)
+                                not_applicable_ids.append(str(Item['Item']))
+                            elif Item['TypeForItem'] == 3:
+                                mc_effective_items.append(item_data)
+                                effective_ids.append(str(Item['Item']))
 
                         scheme_data = {
                             "SchemeId": Scheme.id,
                             "SchemeName": Scheme.SchemeName,
-                            "SchemeValue": Scheme.SchemeValue,
-                            "ValueIn": Scheme.ValueIn,
-                            "FromPeriod": Scheme.FromPeriod,
-                            "ToPeriod": Scheme.ToPeriod,
-                            "FreeItemID": Scheme.FreeItemID,
-                            "VoucherLimit": Scheme.VoucherLimit,
-                            "BillAbove": Scheme.BillAbove,
-                            "QrPrefix": Scheme.QrPrefix,
-                            "IsActive": Scheme.IsActive,
                             "SchemeTypeID": Scheme.SchemeTypeID_id,
                             "SchemeTypeName": Scheme.SchemeTypeName,
-                            "UsageTime": Scheme.UsageTime,
+                            "SchemeDetails": Scheme.SchemeDetails,
+                            "SchemeValue": Scheme.SchemeValue,
+                            "ValueIn": Scheme.ValueIn,
+                            "BillAbove": Scheme.BillAbove,
+                            "VoucherLimit": Scheme.VoucherLimit,
+                            "FromPeriod": Scheme.FromPeriod,
+                            "ToPeriod": Scheme.ToPeriod,
                             "UsageType": Scheme.UsageType,
-                            "BillEffect": Scheme.BillEffect,                                     
-                            "IsQrApplicable": Scheme.IsQrApplicable,
-                            "SchemeDetails" : Scheme.SchemeDetails,
+                            "UsageTime": Scheme.UsageTime,
+                            "BillEffect": bool(Scheme.BillEffect),
+                            "IsQrApplicable": bool(Scheme.IsQrApplicable),
+                            "QrPrefix": Scheme.QrPrefix,
+                            "IsActive": Scheme.IsActive,
+                            "FreeItemID": [Scheme.FreeItemID] if Scheme.FreeItemID else [],
+                            "SchemeValueUpto": Scheme.SchemeValueUpto,
                             "OverLappingScheme" : Scheme.OverLappingScheme,
-                            "SchemeValueUpto" : Scheme.SchemeValueUpto,
                             "Message" : Scheme.Message,
-                            "Col1" : Scheme.Column1,
-                            "Col2" : Scheme.Column2,
-                            "Col3" : Scheme.Column3,
+                            "Col1": Scheme.Column1,
+                            "Col2": Scheme.Column2,
+                            "Col3": Scheme.Column3,
                             "QR_Codes": qr_list,
-                            "ItemsApplicable": applicable_items,
-                            "ItemsNotApplicable": non_applicable_items,
-                            "EffectiveItems": effective_items
+                            "ItemsApplicable": ",".join(applicable_ids),
+                            "ItemsNotApplicable": ",".join(not_applicable_ids),
+                            "EffectiveItems": ",".join(effective_ids),
+                            "ApplicableItemsDetails": mc_applicable_items,
+                            "NotApplicableItemsDetails": mc_not_applicable_items,
+                            "EffectiveItemsDetails": mc_effective_items,
                         }
                         data.append(scheme_data)
 
                 if data:
-                    log_entry = create_transaction_logNew(request, data, 0, Party, 433, 0)
+                    create_transaction_logNew(request, data, 0, Party, 433, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': data})
                 else:
-                    log_entry = create_transaction_logNew(request, data, Party, 'Record Not Found', 433, 0)
+                    create_transaction_logNew(request, data, Party, 'Record Not Found', 433, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
 
         except Exception as e:
-            log_entry =  create_transaction_logNew(request, PartyData, 0, 'SchemeDetails:' + str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
-        
+            create_transaction_logNew(request, PartyData, 0, 'SchemeDetails:' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})       
  
 class SchemeListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -102,10 +124,10 @@ class SchemeListView(CreateAPIView):
             with transaction.atomic():
                 Scheme_data = M_Scheme.objects.all()
                 Scheme_data_serializer = SchemeSerializer(Scheme_data,many=True)
-                log_entry = create_transaction_logNew(request, Scheme_data_serializer,0,'',328,0)
+                log_entry = create_transaction_logNew(request, Scheme_data_serializer,0,'',481,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': Scheme_data_serializer.data})
         except  M_Scheme.DoesNotExist:
-            log_entry = create_transaction_logNew(request,0,0,'Scheme Data Does Not Exist',328,0)
+            log_entry = create_transaction_logNew(request,0,0,'Scheme Data Does Not Exist',481,0)
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Scheme Data Not available', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'GETAllSchemes:'+str(e),33,0)
@@ -127,10 +149,10 @@ class SchemeListperMonthView(CreateAPIView):
                                                         AND ToPeriod >= '{FromDate}' ''')
                 # print(Scheme_data)
                 Scheme_data = SchemeSerializer1(Scheme_data,many=True)
-                log_entry = create_transaction_logNew(request, Scheme_data,0,'',328,0)
+                log_entry = create_transaction_logNew(request, Scheme_data,0,'',482,0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': Scheme_data.data})
         except  M_Scheme.DoesNotExist:
-            log_entry = create_transaction_logNew(request,0,0,'Scheme Data Does Not Exist',328,0)
+            log_entry = create_transaction_logNew(request,0,0,'Scheme Data Does Not Exist',482,0)
             return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Scheme Data Not available', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0,'GETAllSchemes:'+str(e),33,0)

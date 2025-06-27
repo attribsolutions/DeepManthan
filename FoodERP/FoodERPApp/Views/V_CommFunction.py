@@ -407,12 +407,12 @@ class DiscountMaster:
 
         D = Q(FromDate__lte=self.EffectiveDate) & Q(
             ToDate__gte=self.EffectiveDate)
-        ItemDiscountdata = M_DiscountMaster.objects.filter(Item_id=self.ItemID, PriceList_id=self.PriceListID, Party=self.PartyID).filter(
+        ItemDiscountdata = M_DiscountMaster.objects.filter(Item_id=self.ItemID, PriceList_id=self.PriceListID, Party=self.PartyID, IsDeleted=0).filter(
             D).filter(P).values("DiscountType", "Discount").order_by('-id')[:1]
     
         if not ItemDiscountdata:
 
-            ItemDiscountdata = M_DiscountMaster.objects.filter(Item_id=self.ItemID, PriceList_id=self.PriceListID, Party=self.PartyID, Customer_id__isnull=True).filter(
+            ItemDiscountdata = M_DiscountMaster.objects.filter(Item_id=self.ItemID, PriceList_id=self.PriceListID, Party=self.PartyID, Customer_id__isnull=True, IsDeleted=0).filter(
                 D).values("DiscountType", "Discount").order_by('-id')[:1]
 
         if ItemDiscountdata:

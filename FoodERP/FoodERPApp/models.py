@@ -258,6 +258,7 @@ class MC_PartyAddress(models.Model):
     PIN = models.CharField(max_length=500)
     IsDefault = models.BooleanField(default=False) 
     fssaidocument=models.TextField(null=True,blank=True)
+    fssaidocumenturl = models.FileField(upload_to="Images\FSSAIDocuments",default="",null=True,blank=True)
     Party = models.ForeignKey(M_Parties, related_name='PartyAddress', on_delete=models.CASCADE,null=True,blank=True)
 
     class Meta:
@@ -2479,7 +2480,7 @@ class M_SAPCustomerLedger(models.Model):
     CustomerCode = models.CharField(max_length=50)
     CustomerName = models.CharField(max_length=100)
     DebitCredit = models.CharField(max_length=20)
-    Amount = models.IntegerField()
+    Amount = models.DecimalField(max_digits=20, decimal_places=2)
     ItemText = models.CharField(max_length=300, null=True)
     CreatedBy = models.IntegerField()
     CreatedOn = models.DateTimeField(auto_now_add=True)

@@ -369,6 +369,7 @@ class TC_InvoicesSchemes(models.Model):
     Invoice = models.ForeignKey(T_SPOSInvoices, related_name= 'SPOSInvoicesScheme', on_delete=models.CASCADE)
     # Scheme = models.ForeignKey('FoodERP.M_Scheme', related_name='SPOSSchemes', on_delete=models.CASCADE )
     scheme = models.IntegerField()    
+    VoucherCode = models.CharField(max_length=50 ,blank=True, null=True)
     class Meta:
         db_table = "TC_InvoicesSchemes"
 
