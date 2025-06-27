@@ -211,8 +211,10 @@ class PartyAddressSerializerSecond(serializers.ModelSerializer):
         fields = ['id', 'Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'fssaidocument', 'fssaidocumenturl', 'filename']
 
     def get_fssaidocumenturl(self, obj):
-        url_prefix = NewURLPrefix()
-        return f"{url_prefix}/downloadQr/{obj.id}/4"
+        if obj.fssaidocumenturl:  # only if file is uploaded
+            url_prefix = NewURLPrefix()
+            return f"{url_prefix}/downloadQr/{obj.id}/4"
+        return None
 
     def get_filename(self, obj):
         if obj.fssaidocumenturl:
