@@ -10,6 +10,8 @@ from rest_framework.parsers import JSONParser
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import BasicAuthentication
+from rest_framework.exceptions import AuthenticationFailed
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.db import transaction
 from ..Views.V_CommFunction import *
 from ..Serializer.S_SAPApi import InvoiceSerializer,InvoiceToSCMSerializer
@@ -241,6 +243,7 @@ class SAPOrderView(CreateAPIView):
                 OrderID = data["Order"]
                 payload = list()
                 Items =list()
+                missing_units = [] 
                 queryforcustomerID=T_Orders.objects.filter(id=OrderID).values('Customer')
                 
                 ItemsGroupJoinsandOrderby = Get_Items_ByGroupandPartytype(queryforcustomerID[0]['Customer'],0).split('!')              
@@ -265,7 +268,7 @@ class SAPOrderView(CreateAPIView):
                 query=T_Orders.objects.raw(f'''select (5000000+T_Orders.id)id ,C.SAPPartyCode CustomerID,T_Orders.OrderDate DocDate,
                                            M_PartyType.SAPIndicator Indicator,
                 TC_OrderItems.id ItemNo,M_Items.SAPItemCode Material,S.SAPPartyCode Plant,M_Units.SAPUnit Unit,
-                (case when M_Items.SAPUnitID = 1 then TC_OrderItems.QtyInNo else TC_OrderItems.QtyInKg end)Quantity,{ItemsGroupJoinsandOrderby[0]}
+                (case when M_Items.SAPUnitID = 1 then TC_OrderItems.QtyInNo else TC_OrderItems.QtyInKg end)Quantity,M_Items.id ItemID,M_Items.Name ItemName,{ItemsGroupJoinsandOrderby[0]}
 
                 from T_Orders 
                 join TC_OrderItems on T_Orders.id=TC_OrderItems.Order_id
@@ -273,12 +276,15 @@ class SAPOrderView(CreateAPIView):
                 join M_Parties C on C.id=T_Orders.Customer_id
                 join M_PartyType on M_PartyType.id=C.PartyType_id
                 join M_Items on M_Items.id=TC_OrderItems.Item_id
-                join M_Units on M_Units.id=M_Items.SAPUnitID
+                left join M_Units on M_Units.id=M_Items.SAPUnitID
                 {ItemsGroupJoinsandOrderby[1]}
                 where IsDeleted = 0 AND T_Orders.id=%s {ItemsGroupJoinsandOrderby[2]}''',[OrderID])                
                 # print(query)
                 for row in query:
-                    
+                    # print("Unit:{row.unit}")
+                    if  row.Unit is None:
+                        # return JsonResponse({'StatusCode': 204,'Status': True,'Message': f"Missing SAP Unit for SAPItemCode: {row.Material},ItemID:{row.ItemID} and ItemName:{row.ItemName}",'Data': []})
+                        missing_units.append(f"SAPItemCode: {row.Material}, ItemID: {row.ItemID}, ItemName: {row.ItemName}")
                     date_obj = datetime.strptime(str(row.DocDate), '%Y-%m-%d')
                     Customer  =str(row.CustomerID)
                     
@@ -294,7 +300,12 @@ class SAPOrderView(CreateAPIView):
                                             "Plant": str(PlantID) if str(PlantID) > '0' else str(row.Plant),
                                             "Batch": ""                                        
                                         })
-                
+                if missing_units:
+                    message_text = "Missing SAP Unit for the following items:\n" + "\n".join(missing_units)
+
+                    return JsonResponse({'StatusCode': 204,'Status': True,'Message': message_text,'Data': []
+                    })
+
                 payload.append({
 
                         "Customer": Customer,
@@ -353,7 +364,8 @@ class SAPOrderView(CreateAPIView):
 
 
 class SAPLedgerView(CreateAPIView):
-    permission_classes = ()
+    authentication_classes = [BasicAuthentication, JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     @transaction.atomic()
     def post(self, request):
@@ -369,23 +381,23 @@ class SAPLedgerView(CreateAPIView):
 
             if FromDate == OpeningBalanceDate:
                 # Only use 'O' entry
-                opening_balance = M_SAPCustomerLedger.objects.filter(CustomerCode=SAPCode,DebitCredit='O',FileDate=OpeningBalanceDate).aggregate(total=Sum('Amount'))['total'] or 0.0
+                opening_balance = M_SAPCustomerLedger.objects.filter(CustomerCode=SAPCode,DebitCredit='O',PostingDate=OpeningBalanceDate).aggregate(total=Sum('Amount'))['total'] or 0.0
 
             elif FromDate > OpeningBalanceDate:
                 # Get opening balance from 1-April 'O' entry
-                opening_balance = M_SAPCustomerLedger.objects.filter(CustomerCode=SAPCode,DebitCredit='O',FileDate=OpeningBalanceDate).aggregate(total=Sum('Amount'))['total'] or 0.0
+                opening_balance = M_SAPCustomerLedger.objects.filter(CustomerCode=SAPCode,DebitCredit='O',PostingDate=OpeningBalanceDate).aggregate(total=Sum('Amount'))['total'] or 0.0
 
                 # Sum of credits and debits from 1-April to (FromDate-1)
                 day_before = (datetime.strptime(FromDate, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
-                transactions = M_SAPCustomerLedger.objects.filter(FileDate__range=[OpeningBalanceDate, day_before],CustomerCode=SAPCode).exclude(DebitCredit='O')
+                transactions = M_SAPCustomerLedger.objects.filter(PostingDate__range=[OpeningBalanceDate, day_before],CustomerCode=SAPCode).exclude(DebitCredit='O')
 
                 total_credit = transactions.filter(DebitCredit='H').aggregate(total=Sum('Amount'))['total'] or 0.0
                 total_debit = transactions.filter(DebitCredit='S').aggregate(total=Sum('Amount'))['total'] or 0.0
 
-                opening_balance = opening_balance + total_credit - total_debit
+                opening_balance = float(opening_balance) + float(total_credit) - float(total_debit)
 
             # Now fetch transactions in given date range
-            queryset = M_SAPCustomerLedger.objects.filter(FileDate__range=[FromDate, ToDate],CustomerCode=SAPCode
+            queryset = M_SAPCustomerLedger.objects.filter(PostingDate__range=[FromDate, ToDate],CustomerCode=SAPCode
                         ).exclude(DebitCredit='O').values('CompanyCode', 'DocumentDesc', 'CustomerCode', 'CustomerName',
                         'DocumentNo','FiscalYear', 'DebitCredit', 'Amount', 'DocumentType','PostingDate', 'ItemText').order_by('PostingDate')
 
@@ -393,6 +405,8 @@ class SAPLedgerView(CreateAPIView):
                 ledger_data = []
                 total_credit = 0.0
                 total_debit = 0.0
+                
+                balance = float(opening_balance)  # initialize running balance with opening balance
 
                 for row in queryset:
                     amount = row['Amount']
@@ -400,11 +414,14 @@ class SAPLedgerView(CreateAPIView):
                     credit_amount = 0.0
 
                     if row['DebitCredit'] == 'H':
-                        credit_amount = amount
-                        total_credit += amount
+                        credit_amount = float(amount)
+                        total_credit += float(amount)
+                        balance -= float(credit_amount)  
                     elif row['DebitCredit'] == 'S':
-                        debit_amount = amount
-                        total_debit += amount
+                        debit_amount = float(amount)
+                        total_debit += float(amount)
+                        balance += float(debit_amount)  
+                    
 
                     ledger_data.append({
                         "CompanyCode": row['CompanyCode'],
@@ -414,16 +431,17 @@ class SAPLedgerView(CreateAPIView):
                         "DocumentNo": row['DocumentNo'],
                         "Fiscalyear": row['FiscalYear'],
                         "DebitCredit": row['DebitCredit'],
-                        "Amount": str(round(amount, 2)),
+                        "Amount": float(round(amount, 2)),
                         "DocumentType": row['DocumentType'],
                         "PostingDate": row['PostingDate'].strftime('%d/%m/%Y %I:%M:%S %p'),
                         "ItemText": row['ItemText'],
-                        "Debit": round(debit_amount, 2),
-                        "Credit": round(credit_amount, 2)
+                        "Debit": float(round(debit_amount, 2)),
+                        "Credit": float(round(credit_amount, 2)),
+                        "Balance": float(round(balance, 2)),
                     })
 
                 count = len(ledger_data)
-                closing_balance = opening_balance + total_credit - total_debit
+                closing_balance = float(opening_balance) + float(total_credit) - float(total_debit)
 
                 log_entry = create_transaction_logNew(request, SapLedgerdata, SAPCode, f'OpeningBal:{opening_balance} ClosingBal: {closing_balance}', 324, 0, FromDate, ToDate, 0)
                 return JsonResponse({"StatusCode": 200,"Status": True,"Message": "",

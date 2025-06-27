@@ -13,6 +13,7 @@ from ..Serializer.S_Orders import *
 import base64
 from io import BytesIO
 from PIL import Image
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 
 class DivisionsView(CreateAPIView):
@@ -272,25 +273,40 @@ class M_PartiesView(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request,0, 0,'AllPartiesList:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
-
+            
     @transaction.atomic()
     def post(self, request):
-        M_Partiesdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                M_Parties_Serializer = M_PartiesSerializer(data=M_Partiesdata)
-            if M_Parties_Serializer.is_valid():
-                Parties = M_Parties_Serializer.save()
-                LastInsertID = Parties.id
-                log_entry = create_transaction_logNew(request, M_Partiesdata,M_Partiesdata['PartySubParty'][0]['Party'],'',92,LastInsertID)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Save Successfully', 'TransactionID':LastInsertID, 'Data': []})
-            else:
-                log_entry = create_transaction_logNew(request, M_Partiesdata, 0,'PartySave:'+str(M_Parties_Serializer.errors),34,0)
-                transaction.set_rollback(True)
-                return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Parties_Serializer.errors, 'Data': []})
+                # Get JSON string from form-data
+                party_data_json = request.POST.get('PartyData')
+                party_data = json.loads(party_data_json) if party_data_json else {}
+
+                # Attach fssaidocument files to corresponding PartyAddress via RowID
+                if 'PartyAddress' in party_data:
+                    for address in party_data['PartyAddress']:
+                        RowID = address.get('RowID')
+                        if RowID:
+                            fssai_file = request.FILES.get(f"fssaidocument_{RowID}")
+                            if fssai_file:
+                                address['fssaidocumenturl'] = fssai_file
+
+                M_Parties_Serializer = M_PartiesSerializer(data=party_data)
+                if M_Parties_Serializer.is_valid():
+                    Parties = M_Parties_Serializer.save()
+                    LastInsertID = Parties.id
+
+                    log_entry = create_transaction_logNew(request, party_data, party_data['PartySubParty'][0]['Party'], party_data_json, 92, LastInsertID )
+                    return JsonResponse({'StatusCode': 200,'Status': True,'Message': 'Party Save Successfully','TransactionID': LastInsertID,'Data': []})
+
+                else:
+                    log_entry = create_transaction_logNew(request, party_data, 0, 'PartySave:' + str(M_Parties_Serializer.errors), 34, 0)
+                    transaction.set_rollback(True)
+                    return JsonResponse({'StatusCode': 406,'Status': True,'Message': M_Parties_Serializer.errors, 'Data': []})
+
         except Exception as e:
-            log_entry = create_transaction_logNew(request, M_Partiesdata, 0,'PartySave:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0, 0, 'PartySave:' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
 
 class M_PartiesViewSecond(CreateAPIView):
@@ -307,8 +323,7 @@ class M_PartiesViewSecond(CreateAPIView):
                     log_entry = create_transaction_logNew(request, {'PartyID':id}, 0, "Party Not available",93,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':  'Records Not available', 'Data': []})
                 else:
-                    M_Parties_serializer = M_PartiesSerializerSecond(
-                        M_Parties_data, many=True).data
+                    M_Parties_serializer = M_PartiesSerializerSecond(M_Parties_data, many=True, context={'request': request}).data
                     query = MC_PartySubParty.objects.filter(SubParty=id)
                     PartySubParty_Serializer = PartySubPartySerializer2(
                         query, many=True).data
@@ -333,28 +348,40 @@ class M_PartiesViewSecond(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request,0, 0,'PartyGETMethod:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
-
+        
     @transaction.atomic()
     def put(self, request, id=0):
-        M_Partiesdata = JSONParser().parse(request)
         try:
             with transaction.atomic():
+                # Parse PartyData from form-data
+                party_data_json = request.POST.get('PartyData')
+                party_data = json.loads(party_data_json) if party_data_json else {}
+
+                # Handle fssaidocument file (if provided)
+                fssai_file = request.FILES.get('fssaidocument')
+                if fssai_file and 'PartyAddress' in party_data:
+                    if isinstance(party_data['PartyAddress'], list) and len(party_data['PartyAddress']) > 0:
+                        party_data['PartyAddress'][0]['fssaidocumenturl'] = fssai_file
+
+                # Get the existing instance
                 M_PartiesdataByID = M_Parties.objects.get(id=id)
-                M_Parties_Serializer = UpdateM_PartiesSerializer(M_PartiesdataByID, data=M_Partiesdata)
-                
+
+                M_Parties_Serializer = UpdateM_PartiesSerializer(M_PartiesdataByID, data=party_data)
                 if M_Parties_Serializer.is_valid():
                     UpdatedParty = M_Parties_Serializer.save()
                     LastInsertID = UpdatedParty.id
-                    log_entry = create_transaction_logNew(request,M_Partiesdata,id,'',94,id)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Updated Successfully','TransactionID':LastInsertID, 'Data': []})
+
+                    log_entry = create_transaction_logNew(request, party_data, id, party_data_json, 94, id)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Party Updated Successfully', 'TransactionID': LastInsertID, 'Data': []})
                 else:
-                    log_entry = create_transaction_logNew(request,M_Partiesdata, 0, 'PartyEditMethod:'+str(M_Parties_Serializer.errors),34,0)
+                    log_entry = create_transaction_logNew(request, party_data, 0, 'PartyEditMethod:' + str(M_Parties_Serializer.errors), 34, 0)
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': M_Parties_Serializer.errors, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request,M_Partiesdata, 0,'PartyEditMethod:'+str(e),33,0)
+            log_entry = create_transaction_logNew(request, 0, 0, 'PartyEditMethod:' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
+    
     @transaction.atomic()
     def delete(self, request, id=0):
         try:

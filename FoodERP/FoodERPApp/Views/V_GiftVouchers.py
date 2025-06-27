@@ -133,7 +133,10 @@ class giftvouchervalidityCheck(CreateAPIView):
             log_entry = create_transaction_logNew(request, giftvoucherData, 0, 'GETVoucherData:' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
     
-    
+
+class giftvouchervalidityCheck_Multiple(CreateAPIView):
+    authentication_classes = [BasicAuthentication, JWTAuthentication]
+    permission_classes = [IsAuthenticated]   
     
     @transaction.atomic()
     def patch(self, request):
@@ -143,10 +146,7 @@ class giftvouchervalidityCheck(CreateAPIView):
 
         try:
             with transaction.atomic():            
-                vouchers_qs = (
-                    M_GiftVoucherCode.objects
-                    .filter(VoucherCode__in=VoucherCodes)                    
-                )
+                vouchers_qs = ( M_GiftVoucherCode.objects.filter(VoucherCode__in=VoucherCodes))
             voucher_map = {v.VoucherCode: v for v in vouchers_qs}
 
             valid_codes, invalid_codes, used_codes = [], [], []
@@ -155,10 +155,10 @@ class giftvouchervalidityCheck(CreateAPIView):
                     if v is None:
                         invalid_codes.append({
                             "VoucherCode": code,
-                            "Message": (
-                                f"Invalid VoucherCode '<b style=\"color:#FF5733;\">{code}</b>'.<br>"
-                                "Do you want to continue saving the bill without using the voucher?"
-                            )
+                            # "Message": (
+                            #     f"Invalid VoucherCode '<b style=\"color:#FF5733;\">{code}</b>'.<br>"
+                            #     "Do you want to continue saving the bill without using the voucher?"
+                            # )
                         })
                         continue
 
@@ -170,46 +170,115 @@ class giftvouchervalidityCheck(CreateAPIView):
 
                         used_codes.append({
                             "VoucherCode": code,
-                            "Message": (
-                                f"The VoucherCode <b style=\"color:#4CAF50;\">'{code}'</b> has already been used.<br>"
-                                "With the following details:<br>"
-                                f"- <span style=\"color:#444\">FranchiseName:</span> "
-                                f"<span style=\"color:#007BFF;\">{party_name}</span><br>"
-                                f"- <span style=\"color:#444\">InvoiceDate:</span> "
-                                f"<span style=\"color:#007BFF;\">{v.InvoiceDate:%Y-%m-%d}</span><br>"
-                                f"- <span style=\"color:#444\">InvoiceNumber:</span> "
-                                f"<span style=\"color:#007BFF;\">{v.InvoiceNumber or 'N/A'}</span><br>"
-                                "<b></br>Would you like to proceed without applying the voucher?</b>"
-                            )
+                            "FranchiseName" : party_name,
+                            "InvoiceDate" : v.InvoiceDate,
+                            "InvoiceNumber" : v.InvoiceNumber
+                            # "Message": (
+                            #     f"The VoucherCode <b style=\"color:#4CAF50;\">'{code}'</b> has already been used.<br>"
+                            #     "With the following details:<br>"
+                            #     f"- <span style=\"color:#444\">FranchiseName:</span> "
+                            #     f"<span style=\"color:#007BFF;\">{party_name}</span><br>"
+                            #     f"- <span style=\"color:#444\">InvoiceDate:</span> "
+                            #     f"<span style=\"color:#007BFF;\">{v.InvoiceDate:%Y-%m-%d}</span><br>"
+                            #     f"- <span style=\"color:#444\">InvoiceNumber:</span> "
+                            #     f"<span style=\"color:#007BFF;\">{v.InvoiceNumber or 'N/A'}</span><br>"
+                            #     "<b></br>Would you like to proceed without applying the voucher?</b>"
+                            # )
                         })
                         continue
                     
                     valid_codes.append({
                         "VoucherCode": code,
-                        "Message": (
-                            f"The VoucherCode <b style=\"color:#4CAF50;\">'{code}'</b> is valid and can be used.<br>"
-                            "Would you like to proceed with applying this voucher?"
-                        )
+                        # "Message": (
+                        #     f"The VoucherCode <b style=\"color:#4CAF50;\">'{code}'</b> is valid and can be used.<br>"
+                        #     "Would you like to proceed with applying this voucher?"
+                        # )
                     })                 
 
-            status_code = 200 if valid_codes else 204 if used_codes else 404
+            status_code = 200 if valid_codes else 200 if used_codes else 200
            
             log_entry = create_transaction_logNew(request, 0, 0, '', 468 if status_code == 200 else 0, 0)
-
-            return JsonResponse({
-                "StatusCode": status_code,
-                "Status": bool(valid_codes),
-                "Message": "Gift voucher validation result.",
-                "Data": {
-                    "Valid": valid_codes,        
-                    "Invalid": invalid_codes,     
-                    "Used": used_codes             
-                }
-            })            
-
+            return JsonResponse({"StatusCode": status_code,"Status": bool(valid_codes),"Message": "Gift voucher validation result.",
+                                "Data": {"Valid": valid_codes,"Invalid": invalid_codes,"Used": used_codes}})            
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'GETVoucherData:' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})  
+    
+    @transaction.atomic()
+    def post(self, request):
+        if not request.user or not request.user.is_authenticated:
+            raise AuthenticationFailed("Authentication failed.")
+
+        giftvoucherDataList = JSONParser().parse(request)
+
+        try:
+            with transaction.atomic():
+                updated_vouchers = []
+                invalid_vouchers = []
+                used_vouchers = []
+
+                for data in giftvoucherDataList:
+                    VoucherCode = data.get('VoucherCode')
+
+                    # fetch voucher
+                    voucher_details = M_GiftVoucherCode.objects.filter(VoucherCode=VoucherCode).first()
+
+                    if not voucher_details:
+                        invalid_vouchers.append({
+                            "VoucherCode": VoucherCode,
+                            "Message": f"Invalid VoucherCode '{VoucherCode}'."
+                        })
+                        continue
+
+                    if voucher_details.IsActive == 0:
+                        PartyName = "N/A"
+                        if voucher_details.Party:
+                            party = M_Parties.objects.filter(id=voucher_details.Party).first()
+                            PartyName = party.Name if party else "N/A"
+
+                        Invoice_Date = voucher_details.InvoiceDate.strftime('%Y-%m-%d') if voucher_details.InvoiceDate else "N/A"
+                        Invoice_Number = voucher_details.InvoiceNumber if voucher_details.InvoiceNumber else "N/A"
+
+                        used_vouchers.append({
+                            "VoucherCode": VoucherCode,
+                            "FranchiseName": PartyName,
+                            "InvoiceDate": Invoice_Date,
+                            "InvoiceNumber": Invoice_Number,
+                            "Message": f"The VoucherCode '{VoucherCode}' has already been used."
+                        })
+                        continue
+
+                    # Special voucher code logic
+                    if VoucherCode == 'SSCCBM2025':
+                        aa = M_GiftVoucherCode.objects.filter(VoucherCode=VoucherCode).values('InvoiceAmount')
+                        new_amount = float(aa[0]['InvoiceAmount']) + 1 if aa and aa[0]['InvoiceAmount'] else 1
+                        voucher_details.InvoiceAmount = new_amount
+                    else:
+                        voucher_details.IsActive = 0
+                        voucher_details.InvoiceDate = data.get('InvoiceDate')
+                        voucher_details.InvoiceNumber = data.get('InvoiceNumber')
+                        voucher_details.InvoiceAmount = data.get('InvoiceAmount')
+                        voucher_details.Party = data.get('Party')
+                        voucher_details.client = data.get('client', 0)
+                        voucher_details.ClientSaleID = data.get('ClientID', 0)
+                      
+                    voucher_details.save()
+
+                    updated_vouchers.append({
+                        "VoucherCode": VoucherCode,
+                        "Message": "Voucher updated successfully."})
+
+                status_code = 200 if updated_vouchers else (200 if used_vouchers else 200)
+
+                log_entry = create_transaction_logNew(request, giftvoucherDataList, 0, '', 470 if status_code == 200 else 0, 0)
+
+                return JsonResponse({'StatusCode': status_code,'Status': bool(updated_vouchers),'Message': 'Gift voucher save process completed.',
+                                    'Data': {'Updated': updated_vouchers,'Invalid': invalid_vouchers,'Used': used_vouchers}})
+
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, giftvoucherDataList, 0, 'SaveMultiVoucherData:' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400,'Status': False,'Message': str(e),'Data': []})
+
         
         
 
