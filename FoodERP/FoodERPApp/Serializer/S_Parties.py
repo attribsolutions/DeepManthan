@@ -204,18 +204,19 @@ class M_PartiesSerializer1(serializers.Serializer):
 
 class PartyAddressSerializerSecond(serializers.ModelSerializer):
     fssaidocumenturl = serializers.SerializerMethodField()
+    filename = serializers.SerializerMethodField()
 
     class Meta:
         model = MC_PartyAddress
-        fields = ['id', 'Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'fssaidocument', 'fssaidocumenturl']
+        fields = ['id', 'Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'fssaidocument', 'fssaidocumenturl', 'filename']
 
     def get_fssaidocumenturl(self, obj):
+        url_prefix = NewURLPrefix()
+        return f"{url_prefix}/downloadQr/{obj.id}/4"
+
+    def get_filename(self, obj):
         if obj.fssaidocumenturl:
-            url_prefix = NewURLPrefix()
-            file_name = os.path.basename(obj.fssaidocumenturl.name) 
-            table_code = 4 
-            media_url = f"{url_prefix}/{file_name}/{obj.id}/{table_code}"
-            return media_url
+            return os.path.basename(obj.fssaidocumenturl.name)
         return None
 
 
