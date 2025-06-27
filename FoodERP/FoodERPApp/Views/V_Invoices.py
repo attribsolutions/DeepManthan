@@ -738,6 +738,7 @@ class InvoiceView(CreateAPIView):
                         for order_ref in Invoicedata.get('InvoicesReferences', []):
                             order_id = order_ref.get('Order')                            
                             if order_id:
+                                # print(order_id)
                                 with connection.cursor() as cursor:
                                     cursor.execute("CALL CloseOrderIfFullyInvoiced(%s)", [order_id])
                         log_entry = create_transaction_logNew(request, Invoicedata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastInsertId)+','+'FullInvoiceNumber:'+Invoicedata['FullInvoiceNumber'],4,LastInsertId,0,0, Invoicedata['Customer'])
@@ -940,6 +941,7 @@ class InvoiceViewSecond(CreateAPIView):
                 row3 = TC_InvoicesReferences.objects.filter(Invoice=id).values('Invoice','Order')
                
                 if row3.exists(): 
+                    OrderIDD=row3[0]['Order']
                     new_row3 = TC_DeletedInvoicesReferences(Invoice=row3[0]['Invoice'],Order=row3[0]['Order'])
                     new_row3.save()
                 else:
@@ -947,6 +949,11 @@ class InvoiceViewSecond(CreateAPIView):
                 
                 Invoicedata = T_Invoices.objects.get(id=id)
                 Invoicedata.delete()
+                if OrderIDD:
+                        # print(OrderIDD)
+                        with connection.cursor() as cursor:
+                            cursor.execute("CALL CloseOrderIfFullyInvoiced(%s)",[OrderIDD])
+                
                 log_entry = create_transaction_logNew(request, {'InvoiceID':id}, 0, 'DeletedInvoiceID:'+str(id),6,id)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Invoice Delete Successfully', 'Data':[]})
         except IntegrityError:
