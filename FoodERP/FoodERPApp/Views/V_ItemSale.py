@@ -287,7 +287,7 @@ Group By M_Group.Name, MC_SubGroup.Name, P2.Name, P1.Name, M_Items.Name, M_Units
                                             "Quantity":a.Quantity,
                                             "UnitName":a.UnitName,
                                             "BasicAmount":a.BasicAmount,
-                                            "GSTPercentage":a.GSTPercentage,
+                                            "GSTRate":a.GSTPercentage,
                                             "CGST":a.CGST,
                                             "SGST":a.SGST,
                                             "GrandTotal":a.GrandTotal,

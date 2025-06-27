@@ -1767,6 +1767,7 @@ join M_PriceList on M_PriceList.id=M_Parties.PriceList_id
 where  M_Parties.id=%s or MC_PartySubParty.Party_id=%s ''',(PartyID,PartyID))
                 
                             else:
+                                all_ids = []
                                 pricelistquery=M_PriceList.objects.raw('''select distinct PriceList_id id,M_PriceList.Name,M_PriceList.CalculationPath,M_PriceList.ShortName AS PLShortName from M_Parties 
 join MC_PartySubParty on MC_PartySubParty.SubParty_id=M_Parties.id 
 join M_PriceList on M_PriceList.id=M_Parties.PriceList_id
