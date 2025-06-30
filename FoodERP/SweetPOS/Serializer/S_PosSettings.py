@@ -1,11 +1,19 @@
 from rest_framework import serializers
 from ..models import M_PosSettings, MC_PosSettingDetails
-
+from FoodERPApp.models import *
 
 class MC_PosSettingDetailsLiteSerializer(serializers.ModelSerializer):
+    PartyName = serializers.SerializerMethodField()
     class Meta:
         model = MC_PosSettingDetails
-        fields = ['id', 'Setting_Value', 'PartyId', 'Is_Disabled']
+        fields = ['id', 'Setting_Value', 'PartyId', 'Is_Disabled','PartyName']
+
+    def get_PartyName(self, obj):
+        try:
+            party = M_Parties.objects.get(id=obj.PartyId)
+            return party.Name
+        except M_Parties.DoesNotExist:
+            return None
 
 
 class M_PosSettingsListSerializer(serializers.ModelSerializer):
