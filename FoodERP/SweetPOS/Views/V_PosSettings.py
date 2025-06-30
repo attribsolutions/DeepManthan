@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from rest_framework.authentication import BasicAuthentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.http import JsonResponse
 
 class PosSettings(APIView):
     authentication_classes = [BasicAuthentication, JWTAuthentication]
@@ -17,17 +18,19 @@ class PosSettings(APIView):
             with transaction.atomic():
                 settings = M_PosSettings.objects.all()
                 serializer = M_PosSettingsListSerializer(settings, many=True)
-                return Response({
+                return JsonResponse({
                     "StatusCode": 200,
                     "Status": True,
+                    "Message": "Settings fetched successfully",
                     "Data": serializer.data
-                }, status=status.HTTP_200_OK)
+                }, status=200)
         except Exception as e:
-            return Response({
+            return JsonResponse({
                 "StatusCode": 500,
                 "Status": False,
-                "Message": str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                "Message": str(e),
+                "Data": []
+            }, status=500)
 
     def post(self, request):
         try:
@@ -35,24 +38,26 @@ class PosSettings(APIView):
                 serializer = M_PosSettingsCreateUpdateSerializer(data=request.data)
                 if serializer.is_valid():
                     setting = serializer.save()
-                    return Response({
+                    return JsonResponse({
                         "StatusCode": 200,
                         "Status": True,
                         "Message": "Setting created successfully",
-                        "SettingID": setting.id
-                    }, status=status.HTTP_201_CREATED)
-
-                return Response({
+                        "Data": {"SettingID": setting.id}
+                    }, status=201)
+                return JsonResponse({
                     "StatusCode": 400,
                     "Status": False,
-                    "Errors": serializer.errors
-                }, status=status.HTTP_400_BAD_REQUEST)
+                    "Message": "Validation errors",
+                    "Data": serializer.errors
+                }, status=400)
         except Exception as e:
-            return Response({
+            return JsonResponse({
                 "StatusCode": 500,
                 "Status": False,
-                "Message": str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                "Message": str(e),
+                "Data": []
+            }, status=500)
+
 
 
 class PosSettingsDetail(APIView):
@@ -63,23 +68,26 @@ class PosSettingsDetail(APIView):
         try:
             setting = M_PosSettings.objects.get(id=pk)
             serializer = M_PosSettingsListSerializer(setting)
-            return Response({
+            return JsonResponse({
                 "StatusCode": 200,
                 "Status": True,
+                "Message": "Setting retrieved successfully",
                 "Data": serializer.data
-            }, status=status.HTTP_200_OK)
+                }, status=200)
         except M_PosSettings.DoesNotExist:
-            return Response({
+            return JsonResponse({
                 "StatusCode": 404,
                 "Status": False,
-                "Message": "Setting not found"
-            }, status=status.HTTP_404_NOT_FOUND)
+                "Message": "Setting not found",
+                "Data": []
+            }, status=404)
         except Exception as e:
-            return Response({
+            return JsonResponse({
                 "StatusCode": 500,
                 "Status": False,
-                "Message": str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                "Message": str(e),
+                "Data": []
+            }, status=500)
 
     def put(self, request, pk):
         try:
@@ -88,49 +96,56 @@ class PosSettingsDetail(APIView):
                 serializer = M_PosSettingsCreateUpdateSerializer(setting, data=request.data)
                 if serializer.is_valid():
                     serializer.save()
-                    return Response({
-                        "StatusCode": 200,
-                        "Status": True,
-                        "Message": "Setting updated successfully"
-                    }, status=status.HTTP_200_OK)
+                    return JsonResponse({
+                            "StatusCode": 200,
+                            "Status": True,
+                            "Message": "Setting updated successfully",
+                            "Data": []
+                        }, status=200)
 
-                return Response({
+                return JsonResponse({
                     "StatusCode": 400,
                     "Status": False,
-                    "Errors": serializer.errors
-                }, status=status.HTTP_400_BAD_REQUEST)
+                    "Message": "Validation errors",
+                    "Data": serializer.errors
+                }, status=400)
         except M_PosSettings.DoesNotExist:
-            return Response({
+            return JsonResponse({
                 "StatusCode": 404,
                 "Status": False,
-                "Message": "Setting not found"
-            }, status=status.HTTP_404_NOT_FOUND)
+                "Message": "Setting not found",
+                "Data": []
+            }, status=404)
         except Exception as e:
-            return Response({
+            return JsonResponse({
                 "StatusCode": 500,
                 "Status": False,
-                "Message": str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                "Message": str(e),
+                "Data": []
+            }, status=500)
 
     def delete(self, request, pk):
         try:
             with transaction.atomic():
                 setting = M_PosSettings.objects.get(id=pk)
                 setting.delete()
-                return Response({
+                return JsonResponse({
                     "StatusCode": 200,
                     "Status": True,
-                    "Message": "Setting deleted successfully"
-                }, status=status.HTTP_200_OK)
+                    "Message": "Setting deleted successfully",
+                    "Data": []
+                }, status=200)
         except M_PosSettings.DoesNotExist:
-            return Response({
+            return JsonResponse({
                 "StatusCode": 404,
                 "Status": False,
-                "Message": "Setting not found"
-            }, status=status.HTTP_404_NOT_FOUND)
+                "Message": "Setting not found",
+                "Data": []
+            }, status=404)
         except Exception as e:
-            return Response({
+            return JsonResponse({
                 "StatusCode": 500,
                 "Status": False,
-                "Message": str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                "Message": str(e),
+                "Data": []
+            }, status=500)
