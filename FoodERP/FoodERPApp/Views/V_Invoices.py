@@ -750,9 +750,8 @@ class InvoiceView(CreateAPIView):
                         return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data':[]})
                         
                 
-            return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully','TransactionID':LastIDs, 'Data':[]})
+            return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Save Successfully','TransactionID':LastIDs, 'GrandTotal':Invoicedata['GrandTotal'], 'Invoice_Identifier_ID': 1, 'Data':[]})
         except Exception as e:
-            
             log_entry = create_transaction_logNew(request, mulInvoicedata, 0,'InvoiceSave:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
     
