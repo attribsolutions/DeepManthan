@@ -79,7 +79,7 @@ class FileDownloadView(View):
             query = M_PartySettingsDetails.objects.filter(id=id).values('Image')
             Image = query[0]['Image']
 
-            image_url = f"{url_prefix}media/{Image}"
+            image_url = f"{url_prefix}/media/{Image}"
             # image_url = f'https://cbmfooderp.com/api/media/{Image}'
 
             # image_url = f'http://192.168.1.114:8000/media/{Image}'
@@ -87,7 +87,7 @@ class FileDownloadView(View):
         elif int(table)==2:  #T_ClaimTrackingEntry
             query = T_ClaimTrackingEntry.objects.filter(id=id).values('CreditNoteUpload')
             Image = query[0]['CreditNoteUpload']
-            image_url = f"{url_prefix}media/{Image}"
+            image_url = f"{url_prefix}/media/{Image}"
             # image_url = f'https://cbmfooderp.com/api/media/{Image}'
             # image_url = f'http://192.168.1.114:8000/media/{Image}'
             
@@ -95,7 +95,7 @@ class FileDownloadView(View):
             '''check serializer PurchaseReturnItemImageSerializer2'''
             query = TC_PurchaseReturnItemImages.objects.filter(id=id).values('Image')
             Image = query[0]['Image']
-            image_url = f"{url_prefix}media/{Image}"
+            image_url = f"{url_prefix}/media/{Image}"
             # image_url = f'https://cbmfooderp.com/api/media/{Image}'
             # image_url = f'http://192.168.1.114:8000/media/{Image}'  
             
