@@ -49,8 +49,9 @@ class GRNListFilterView(CreateAPIView):
                     # query = T_GRNs.objects.filter(
                     #     GRNDate__range=[FromDate, ToDate], Customer_id=Customer, Party_id=Supplier)
                 # print('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')    
-                query =T_GRNs.objects.raw(f''' select G.id,  G.GRNDate, G.Customer_id, G.GRNNumber, G.FullGRNNumber,G.InvoiceNumber,G.GrandTotal, G.Party_id, G.CreatedBy, G.UpdatedBy,G.CreatedOn, G.UpdatedOn, G.Comment
-                                            ,party.Name PartyName,cust.Name customerName,cust.id customerid,T_Invoices.InvoiceNumber,
+                query =T_GRNs.objects.raw(f''' select G.id,  G.GRNDate, G.Customer_id, G.GRNNumber, G.FullGRNNumber,G.InvoiceNumber,
+                                          G.GrandTotal, G.Party_id, G.CreatedBy, G.UpdatedBy,G.CreatedOn, G.UpdatedOn,G.Comment,
+                                          G.PostingDate,party.Name PartyName,cust.Name customerName,cust.id customerid,T_Invoices.InvoiceNumber,
                                           T_Invoices.InvoiceDate,party.id PartyID,T_Invoices.id InvoiceID,T_Invoices.FullInvoiceNumber, G.IsSave,G.TotalExpenses
                                           from T_GRNs G
 
@@ -116,7 +117,8 @@ where GRNDate between %s and %s and G.Customer_id= %s and IsGRNType={IsGRNType} 
                                 "CreatedOn" : a.UpdatedOn,
                                 "POType":POType,
                                 "IsSave" : a.IsSave,
-                                "TotalExpenses":a.TotalExpenses
+                                "TotalExpenses":a.TotalExpenses,
+                                "PostingDate": a.PostingDate if a.PostingDate else "" 
 
                             })
                     # print(GRNListData)
@@ -417,6 +419,7 @@ class T_GRNViewSecond(CreateAPIView):
                     "UpdatedBy": a['UpdatedBy'],
                     "Comment" : a['Comment'],
                     "IsSave" : a['IsSave'],
+                    "PostingDate" : a['PostingDate'],
                     "GRNReferences": GRNReferencesData,
                     "GRNItems": GRNItemListData
                 })
@@ -955,7 +958,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
             log_entry = create_transaction_logNew(request, 0, 0,'MakeOrdersGrn:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
     
-#GRN Save for CSS
+#Check GRN Validation for CSS
 
 class GRNSaveforCSSView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
