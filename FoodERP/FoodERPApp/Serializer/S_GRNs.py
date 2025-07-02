@@ -52,7 +52,7 @@ class T_GRNSerializer(serializers.ModelSerializer):
     GRNExpenses = TC_GRNExpensesSerializer(many=True, required=False)
     class Meta:
         model = T_GRNs
-        fields = ['GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber','InvoiceNumber','InvoiceDate','GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy', 'IsSave', 'Comment','IsGRNType', 'GRNItems','O_LiveBatchesList','GRNReferences','GRNExpenses','AccountingGRNStatus','RoundOffAmount']
+        fields = ['GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber','InvoiceNumber','InvoiceDate','GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy', 'IsSave', 'Comment','IsGRNType', 'GRNItems','O_LiveBatchesList','GRNReferences','GRNExpenses','AccountingGRNStatus','RoundOffAmount', 'PostingDate']
        
     def create(self, validated_data):
        
@@ -110,6 +110,7 @@ class T_GRNSerializer(serializers.ModelSerializer):
         instance.IsSave = validated_data.get('IsSave', instance.IsSave)
         instance.RoundOffAmount = validated_data.get('RoundOffAmount', instance.RoundOffAmount)
         instance.AccountingGRNStatus = validated_data.get('AccountingGRNStatus', instance.AccountingGRNStatus)
+        instance.PostingDate = validated_data.get('PostingDate', instance.PostingDate)
       
         if instance.IsTallySave is None:
             instance.IsTallySave = False
@@ -215,7 +216,7 @@ class T_GRNSerializerForGET(serializers.ModelSerializer):
     
     class Meta:
         model = T_GRNs
-        fields = ['id', 'GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber','InvoiceDate','InvoiceNumber','GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy','CreatedOn', 'Comment', 'IsSave', 'GRNReferences','RoundOffAmount', 'GRNItems']
+        fields = ['id', 'GRNDate', 'Customer', 'GRNNumber', 'FullGRNNumber','InvoiceDate','InvoiceNumber','GrandTotal', 'Party', 'CreatedBy', 'UpdatedBy','CreatedOn', 'Comment', 'IsSave', 'GRNReferences','RoundOffAmount', 'GRNItems','PostingDate']
 
     def get_PriceList_id(self, obj):
         return obj.PriceList_id
