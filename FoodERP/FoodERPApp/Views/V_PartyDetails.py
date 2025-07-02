@@ -15,106 +15,109 @@ from ..Views.V_CommFunction import *
 
 
 
-class FileDownloadView(View):
-    permission_classes = (IsAuthenticated,)
-    # authentication__Class = JSONWebTokenAuthentication
+# class FileDownloadView(View):
+#     permission_classes = (IsAuthenticated,)
+#     # authentication__Class = JSONWebTokenAuthentication
     
-    def get(self, request, id=0, table=0):
+#     def get(self, request, id=0, table=0):
+#         url_prefix = NewURLPrefix()
+
+#         # Map of table codes to model classes and image field names
+#         table_config = {
+#             1: (M_PartySettingsDetails, 'Image'),
+#             2: (T_ClaimTrackingEntry, 'CreditNoteUpload'),
+#             3: (TC_PurchaseReturnItemImages, 'Image'),
+#             4: (MC_PartyAddress,'fssaidocumenturl')
+#         }
+
+#         model_class, field_name = table_config.get(int(table), (None, None))
+#         if not model_class:
+#             log_entry = create_transaction_logNew(request, {'TableID':table},id, 'Invalid table selection in FileDownloadView', 467)
+#             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Invalid table selection.', 'Data': []}, status=400)
+
+#         query = model_class.objects.filter(id=id).values(field_name)
+#         if not query.exists():
+#             log_entry = create_transaction_logNew(request, {'TableID':table},id, 'Image not found for given ID in FileDownloadView', 467)
+#             return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'No image found for the given ID.', 'Data': []}, status=404)
+
+#         image_path = query[0][field_name]
+#         image_url = f"{url_prefix}/media/{image_path}"
+
+#         try:
+#             response = requests.get(image_url, verify=False, timeout=60)
+#             response.raise_for_status()
+        
+#             log_entry = create_transaction_logNew(request, {'TableID':table}, id, 'FileDownloadView image download successful', 467)
+
+#         except requests.exceptions.Timeout:
+#             log_entry = create_transaction_logNew(request, {'TableID':table}, id, 'FileDownloadView Timeout Error', 33)
+#             return JsonResponse({'StatusCode': 504, 'Status': False, 'Message': 'Connection timed out while downloading file.', 'Data': []}, status=504)
+#         except requests.exceptions.RequestException as e:
+#             log_entry = create_transaction_logNew(request, {'TableID':table}, id, f'FileDownloadView Request Exception: {str(e)}', 33)
+#             return JsonResponse({'StatusCode': 500, 'Status': False, 'Message': str(e), 'Data': []}, status=500)
+
+#         content_type = response.headers.get('Content-Type', 'application/octet-stream')
+#         filename = os.path.basename(image_url)
+
+#         http_response = HttpResponse(response.content, content_type=content_type)
+#         http_response['Content-Disposition'] = f'attachment; filename="{filename}"'
+#         return http_response
+
+
+
+
+class FileDownloadView(View):
+    def get(self, request,id=0,table=0):
+        # Imagedata = JSONParser().parse(request)
+        # link = Imagedata['link']
+        # # Replace 'image_url' with the actual URL of the image you want to download.
+        # image_url = link
+        
         url_prefix = NewURLPrefix()
+        
+        if int(table)==1: #M_PartySettingsDetails table
+            query = M_PartySettingsDetails.objects.filter(id=id).values('Image')
+            Image = query[0]['Image']
 
-        # Map of table codes to model classes and image field names
-        table_config = {
-            1: (M_PartySettingsDetails, 'Image'),
-            2: (T_ClaimTrackingEntry, 'CreditNoteUpload'),
-            3: (TC_PurchaseReturnItemImages, 'Image'),
-            4: (MC_PartyAddress,'fssaidocumenturl')
-        }
+            image_url = f"{url_prefix}media/{Image}"
+            # image_url = f'https://cbmfooderp.com/api/media/{Image}'
 
-        model_class, field_name = table_config.get(int(table), (None, None))
-        if not model_class:
-            log_entry = create_transaction_logNew(request, {'TableID':table},id, 'Invalid table selection in FileDownloadView', 467)
-            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Invalid table selection.', 'Data': []}, status=400)
-
-        query = model_class.objects.filter(id=id).values(field_name)
-        if not query.exists():
-            log_entry = create_transaction_logNew(request, {'TableID':table},id, 'Image not found for given ID in FileDownloadView', 467)
-            return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'No image found for the given ID.', 'Data': []}, status=404)
-
-        image_path = query[0][field_name]
-        image_url = f"{url_prefix}/media/{image_path}"
-
+            # image_url = f'http://192.168.1.114:8000/media/{Image}'
+            
+        elif int(table)==2:  #T_ClaimTrackingEntry
+            query = T_ClaimTrackingEntry.objects.filter(id=id).values('CreditNoteUpload')
+            Image = query[0]['CreditNoteUpload']
+            image_url = f"{url_prefix}media/{Image}"
+            # image_url = f'https://cbmfooderp.com/api/media/{Image}'
+            # image_url = f'http://192.168.1.114:8000/media/{Image}'
+            
+        else: # 3 TC_PurchaseReturnItemImages
+            '''check serializer PurchaseReturnItemImageSerializer2'''
+            query = TC_PurchaseReturnItemImages.objects.filter(id=id).values('Image')
+            Image = query[0]['Image']
+            image_url = f"{url_prefix}media/{Image}"
+            # image_url = f'https://cbmfooderp.com/api/media/{Image}'
+            # image_url = f'http://192.168.1.114:8000/media/{Image}'  
+            
         try:
             response = requests.get(image_url, verify=False)
             response.raise_for_status()
-        
-            log_entry = create_transaction_logNew(request, {'TableID':table}, id, 'FileDownloadView image download successful', 467)
+        except requests.exceptions.RequestException as e:
+            return HttpResponse(f"Error: {e}", status=500)
 
-        except Exception as e:
-            log_entry = create_transaction_logNew(request, {'TableID':table}, id, f'FileDownloadView Unexpected Exception: {str(e)}', 33)
-            return JsonResponse({'StatusCode': 500, 'Status': False, 'Message':  str(e),  'Data': []}, status=500)
-
-        content_type = response.headers.get('Content-Type', 'application/octet-stream')
-        filename = os.path.basename(image_url)
-
-        http_response = HttpResponse(response.content, content_type=content_type)
-        http_response['Content-Disposition'] = f'attachment; filename="{filename}"'
-        return http_response
-
-
-
-
-# class FileDownloadView(View):
-#     def get(self, request,id=0,table=0):
-#         # Imagedata = JSONParser().parse(request)
-#         # link = Imagedata['link']
-#         # # Replace 'image_url' with the actual URL of the image you want to download.
-#         # image_url = link
-        
-#         url_prefix = NewURLPrefix()
-        
-#         if int(table)==1: #M_PartySettingsDetails table
-#             query = M_PartySettingsDetails.objects.filter(id=id).values('Image')
-#             Image = query[0]['Image']
-
-#             image_url = f"{url_prefix}media/{Image}"
-#             # image_url = f'https://cbmfooderp.com/api/media/{Image}'
-
-#             # image_url = f'http://192.168.1.114:8000/media/{Image}'
-            
-#         elif int(table)==2:  #T_ClaimTrackingEntry
-#             query = T_ClaimTrackingEntry.objects.filter(id=id).values('CreditNoteUpload')
-#             Image = query[0]['CreditNoteUpload']
-#             image_url = f"{url_prefix}media/{Image}"
-#             # image_url = f'https://cbmfooderp.com/api/media/{Image}'
-#             # image_url = f'http://192.168.1.114:8000/media/{Image}'
-            
-#         else: # 3 TC_PurchaseReturnItemImages
-#             '''check serializer PurchaseReturnItemImageSerializer2'''
-#             query = TC_PurchaseReturnItemImages.objects.filter(id=id).values('Image')
-#             Image = query[0]['Image']
-#             image_url = f"{url_prefix}media/{Image}"
-#             # image_url = f'https://cbmfooderp.com/api/media/{Image}'
-#             # image_url = f'http://192.168.1.114:8000/media/{Image}'  
-            
-#         try:
-#             response = requests.get(image_url, verify=False)
-#             response.raise_for_status()
-#         except requests.exceptions.RequestException as e:
-#             return HttpResponse(f"Error: {e}", status=500)
-
-#         # Set the content type of the response to match the image type (e.g., image/jpeg).
-#         content_type = response.headers.get('content-type', 'application/octet-stream')
-#         response_headers = {
-#             'Content-Type': content_type,
-#         }
+        # Set the content type of the response to match the image type (e.g., image/jpeg).
+        content_type = response.headers.get('content-type', 'application/octet-stream')
+        response_headers = {
+            'Content-Type': content_type,
+        }
        
-#         # Create an HttpResponse and set the filename in the Content-Disposition header.
-#         filename = os.path.basename(image_url)
-#         response = HttpResponse(response.content, content_type=content_type)
-#         # response['Content-Disposition'] = 'attachment; filename="{filename}"'
-#         response['Content-Disposition'] = f'attachment; filename="{filename}"'
-#         # Return the HttpResponse object.
-#         return response   
+        # Create an HttpResponse and set the filename in the Content-Disposition header.
+        filename = os.path.basename(image_url)
+        response = HttpResponse(response.content, content_type=content_type)
+        # response['Content-Disposition'] = 'attachment; filename="{filename}"'
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        # Return the HttpResponse object.
+        return response   
 
 
 class PartyDetailsView(CreateAPIView):
