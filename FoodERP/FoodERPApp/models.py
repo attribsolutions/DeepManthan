@@ -1001,7 +1001,7 @@ class O_LiveBatches(models.Model):
     BatchCode = models.CharField(max_length=500)
     SystemBatchDate = models.DateField()
     SystemBatchCode = models.CharField(max_length=500)
-    Rate = models.DecimalField(max_digits=20, decimal_places=2,null=True)
+    Rate = models.DecimalField(max_digits=20, decimal_places=3,null=True)
     ItemExpiryDate=models.DateField()
     OriginalBatchBaseUnitQuantity = models.DecimalField(max_digits=15, decimal_places=3)
     GST = models.ForeignKey(M_GSTHSNCode, related_name='ObatchwiseItemGst',null=True,on_delete=models.PROTECT)
