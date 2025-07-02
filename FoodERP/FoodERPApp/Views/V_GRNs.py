@@ -519,8 +519,9 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                             "Unit": c['id'],
                                             "UnitName": c['BaseUnitConversion'],
                                         })
-                                            
+                                Rate=M_RateMaster.objects.raw(f'''select 1 as id ,Round(GetTodaysDateRate({Item}, '{date.today()}',{OrderSerializedata[0]['CustomerID']},0,2),3) AS VRate ''')            
                                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data':Unitdata})
+                                print(Rate)
                                 OrderItemDetails.append({
                                     "id": b['id'],
                                     "Item": b['Item']['id'],
@@ -528,7 +529,7 @@ class GetOrderDetailsForGrnView(CreateAPIView):
                                     "Quantity": b['Quantity'],
                                     "MRP": b['MRP']['id'],
                                     "MRPValue": b['MRP']['MRP'],
-                                    "Rate": b['Rate'],
+                                    "Rate":Rate[0].VRate,
                                     "Unit": b['Unit']['id'],
                                     "UnitName": b['Unit']['BaseUnitConversion'],
                                     "BaseUnitQuantity": b['BaseUnitQuantity'],
