@@ -2,6 +2,7 @@ from ..models import *
 from rest_framework import serializers
 from ..Serializer.S_Routes import  *
 from django.utils import timezone
+import os
 
 class PartiesSerializer(serializers.ModelSerializer):
        
@@ -199,23 +200,26 @@ class M_PartiesSerializer1(serializers.Serializer):
     CreatedOn = serializers.DateTimeField()
     UpdatedBy = serializers.IntegerField(default=False)
     UpdatedOn = serializers.DateTimeField()
-    
-    
-    
+
+
 class PartyAddressSerializerSecond(serializers.ModelSerializer):
     fssaidocumenturl = serializers.SerializerMethodField()
+    filename = serializers.SerializerMethodField()
 
     class Meta:
         model = MC_PartyAddress
-        fields = ['id', 'Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'fssaidocument', 'fssaidocumenturl']
+        fields = ['id', 'Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'fssaidocument', 'fssaidocumenturl', 'filename']
 
     def get_fssaidocumenturl(self, obj):
-        if obj.fssaidocumenturl:
+        if obj.fssaidocumenturl:  # only if file is uploaded
             url_prefix = NewURLPrefix()
-            media_url = f"{url_prefix}/downloadQr/{obj.id}/4"
-            return media_url
+            return f"{url_prefix}/downloadQr/{obj.id}/4"
         return None
 
+    def get_filename(self, obj):
+        if obj.fssaidocumenturl:
+            return os.path.basename(obj.fssaidocumenturl.name)
+        return None
 
 
 class CitiesSerializerSecond(serializers.ModelSerializer):
