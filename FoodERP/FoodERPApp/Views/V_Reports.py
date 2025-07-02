@@ -3150,9 +3150,9 @@ class StockAdjustmentReportView(CreateAPIView):
                             "id":row.id,
                             "StockDate":row.StockDate,
                             "ItemName":row.ItemName,
-                            "Quantity":row.Quantity,
-                            "Difference":row.Difference,
-                            "BeforeAdjustment":row.BeforeAdjustment,
+                            "Quantity":round(float(row.Quantity),3),
+                            "Difference":round(float(row.Difference),3),
+                            "BeforeAdjustment":round(float(row.BeforeAdjustment),3),
                             "PartyName":row.PartyName,
                             "UnitName":row.UnitName
                                                     

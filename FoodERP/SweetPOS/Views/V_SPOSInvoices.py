@@ -315,8 +315,8 @@ SPOSIU.EInvoiceIsCancel, SPOSIU.EwayBillIsCancel,c.name as CompanyName,u.LoginNa
 FROM SweetPOS.T_SPOSInvoices SPOSInv
 join FoodERP.M_Parties cust on cust.id=SPOSInv.Customer
 join FoodERP.M_Parties party on party.id=SPOSInv.Party 
-left join FoodERP.M_Drivers on M_Drivers.Party_id=SPOSInv.Party
-left join FoodERP.M_Vehicles on M_Vehicles.Party_id=SPOSInv.Party
+left join FoodERP.M_Drivers on M_Drivers.id=SPOSInv.Driver
+left join FoodERP.M_Vehicles on M_Vehicles.id=SPOSInv.Vehicle
 left join FoodERP.MC_PartyAddress partyaddr  on partyaddr.Party_id=SPOSInv.Party and partyaddr.IsDefault=1
 left join FoodERP.MC_PartyAddress custaddr on custaddr.Party_id=SPOSInv.Customer and custaddr.IsDefault=1
 left join FoodERP.MC_PartyBanks on MC_PartyBanks.Party_id=SPOSInv.Party and MC_PartyBanks.IsSelfDepositoryBank=1 and MC_PartyBanks.IsDefault=1
@@ -427,7 +427,7 @@ WHERE SPOSInv.Invoice_id = {a.id}''')
                         })
 
                         InvoiceUploads=list()
-                        if a.AckNo :
+                        if (a.AckNo or a.EwayBillNo):
                             InvoiceUploads.append({
                                 "AckNo" : a.AckNo,
                                 "Irn": a.Irn,
