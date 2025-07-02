@@ -493,23 +493,64 @@ WHERE SPOSInv.Invoice_id = {a.id}''')
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'SingleInvoice:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})        
-        
+
 
 class UpdateCustomerVehiclePOSInvoiceView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    # authentication_class = JSONWebTokenAuthentication
-    
+
     @transaction.atomic()
     def post(self, request):
         CustomerVehicledata = JSONParser().parse(request)
         try:
             with transaction.atomic():
                 VehicleUpdate = T_SPOSInvoices.objects.using('sweetpos_db').filter(id=CustomerVehicledata['InvoiceID']).update(Vehicle=CustomerVehicledata['vehicle'],Customer=CustomerVehicledata['Customer'])
-                log_entry = create_transaction_logNew(request,CustomerVehicledata,0, {'POSInvoiceID':id},67,0)
-                return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': ' Customer and Vehicle No Updated Against Invoice Successfully ', 'Data':[]})
+            
+                Get_Invoice = T_SPOSInvoices.objects.using('sweetpos_db').get(id=CustomerVehicledata['InvoiceID'])
+                Get_PartyID = M_Parties.objects.using('default').filter(id=Get_Invoice.Party).first()  
+                Get_CustomerID = M_Parties.objects.using('default').filter(id=Get_Invoice.Customer).first()
+                Party_GSTIN = Get_PartyID.GSTIN if Get_PartyID and Get_PartyID.GSTIN else ''
+                Customer_GSTIN = Get_CustomerID.GSTIN if Get_CustomerID and Get_CustomerID.GSTIN else ''
+                Party_StateCode = str(Party_GSTIN)[:2] if Party_GSTIN else ''
+                Customer_StateCode = str(Customer_GSTIN)[:2] if Customer_GSTIN else ''
+                
+                if (not Party_GSTIN and not Customer_GSTIN):
+                    same_state = True
+                elif (Party_GSTIN and not Customer_GSTIN) or (not Party_GSTIN and Customer_GSTIN):
+                    same_state = True
+                elif (Party_GSTIN and Customer_GSTIN and Party_StateCode == Customer_StateCode):
+                    same_state = True
+                else:
+                    same_state = False
+
+                items = TC_SPOSInvoiceItems.objects.using('sweetpos_db').filter(Invoice_id=CustomerVehicledata['InvoiceID'])
+
+                for item in items:
+                    gst_amount = item.GSTAmount or 0
+                    gst_percentage = item.GSTPercentage or 0 
+
+                    if same_state:
+                        item.CGST = round(gst_amount / 2, 2)
+                        item.SGST = round(gst_amount / 2, 2)
+                        item.CGSTPercentage = round(gst_percentage / 2, 2)
+                        item.SGSTPercentage = round(gst_percentage / 2, 2)
+                        item.IGST = 0
+                        item.IGSTPercentage = 0
+                    else:
+                        item.CGST = 0
+                        item.SGST = 0
+                        item.CGSTPercentage = 0
+                        item.SGSTPercentage = 0
+                        item.IGST = gst_amount
+                        item.IGSTPercentage = gst_percentage
+                    item.save(using='sweetpos_db')
+
+                log_entry = create_transaction_logNew(request, CustomerVehicledata, 0, {'POSInvoiceID': CustomerVehicledata['InvoiceID']}, 67, 0)
+                return JsonResponse({'StatusCode': 200,'Status': True,'Message': 'Customer, Vehicle Number updated and GST adjusted successfully.','Data': []})
+
         except Exception as e:
-            log_entry = create_transaction_logNew(request, CustomerVehicledata, 0,'UpdateCustomerVehiclePOSInvoice:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})        
+            log_entry = create_transaction_logNew(request, CustomerVehicledata, 0, 'UpdateCustomerVehiclePOSInvoice: ' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400,'Status': False,'Message': str(e),'Data': []})
+
         
 class DeleteInvoiceView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
