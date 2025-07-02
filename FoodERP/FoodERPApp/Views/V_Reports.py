@@ -2169,13 +2169,13 @@ class DemandVsSupplyReportView(CreateAPIView):
                 # print(FromDate,ToDate,Party)
                 if Party==0:
                     party_result = MC_EmployeeParties.objects.filter(Employee_id=EmployeeID).values_list('Party_id', flat=True)
-
-                    # print(party_result)
+                    
                     if party_result:                       
                         PartyList = list(party_result)
                         Party = ','.join(str(p) for p in PartyList)                        
                     else:
                         Party = ""
+                        return JsonResponse({'StatusCode': 204,'Status': False,'Message': "Party not assigned to this employee.",'Data': []})
                                     
                 PartyDetails=""
                 SupplierDetails=""
