@@ -2168,14 +2168,14 @@ class DemandVsSupplyReportView(CreateAPIView):
                 DemandVsSupplyData = []                
                 # print(FromDate,ToDate,Party)
                 if Party==0:
-                    party_result = M_Employees.objects.raw(f'''SELECT 1 id ,EmployeeParties({EmployeeID}) Party''')
-                    if party_result:
-                        party_string = party_result[0].Party  # example: "32584,32585"
-                        PartyList = [int(p.strip()) for p in party_string.split(',') if p.strip().isdigit()]
-                        Party = ','.join(str(p) for p in PartyList)
-                        print(Party)
+                    party_result = MC_EmployeeParties.objects.filter(Employee_id=EmployeeID).values_list('Party_id', flat=True)
+                    
+                    if party_result:                       
+                        PartyList = list(party_result)
+                        Party = ','.join(str(p) for p in PartyList)                        
                     else:
                         Party = ""
+                        return JsonResponse({'StatusCode': 204,'Status': False,'Message': "Party not assigned to this employee.",'Data': []})
                                     
                 PartyDetails=""
                 SupplierDetails=""
@@ -3150,9 +3150,9 @@ class StockAdjustmentReportView(CreateAPIView):
                             "id":row.id,
                             "StockDate":row.StockDate,
                             "ItemName":row.ItemName,
-                            "Quantity":row.Quantity,
-                            "Difference":row.Difference,
-                            "BeforeAdjustment":row.BeforeAdjustment,
+                            "Quantity":round(float(row.Quantity),3),
+                            "Difference":round(float(row.Difference),3),
+                            "BeforeAdjustment":round(float(row.BeforeAdjustment),3),
                             "PartyName":row.PartyName,
                             "UnitName":row.UnitName
                                                     

@@ -1151,6 +1151,7 @@ class T_GRNs(models.Model):
     IsGRNType = models.BooleanField(default=False)
     TotalExpenses = models.DecimalField(max_digits=20, decimal_places=2,null=True,blank=True)
     AccountingGRNStatus = models.IntegerField() 
+    PostingDate = models.DateField(null=True,blank=True)
     class Meta:
         db_table = "T_GRNs"
 
@@ -1160,8 +1161,8 @@ class TC_GRNItems(models.Model):
     Quantity = models.DecimalField(max_digits=20, decimal_places=3)
     BaseUnitQuantity = models.DecimalField(max_digits=20, decimal_places=3,validators=[MaxValueValidator(9999999999.999),MinValueValidator(-9999999999.999)])
     MRP = models.ForeignKey(M_MRPMaster, related_name='GRNItemMRP', on_delete=models.PROTECT,null=True,blank=True)
-    ReferenceRate = models.DecimalField(max_digits=15, decimal_places=2, null=True)
-    Rate = models.DecimalField(max_digits=20, decimal_places=2)
+    ReferenceRate = models.DecimalField(max_digits=15, decimal_places=3, null=True)
+    Rate = models.DecimalField(max_digits=20, decimal_places=3)
     BasicAmount = models.DecimalField(max_digits=20, decimal_places=2)
     TaxType = models.CharField(max_length=500)
     GSTAmount = models.DecimalField(max_digits=20, decimal_places=2)
@@ -2451,7 +2452,7 @@ class M_FinancialYearFirstTransactionLog(models.Model):
 class M_RateMaster(models.Model):
     
     EffectiveDate = models.DateField()
-    Rate = models.DecimalField(max_digits=20, decimal_places=2)
+    Rate = models.DecimalField(max_digits=20, decimal_places=3)
     CommonID = models.IntegerField(null=True,blank=True)
     IsDeleted = models.BooleanField(default=False)
     CreatedBy = models.IntegerField()
