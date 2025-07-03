@@ -17,7 +17,7 @@ from ..models import *
 from datetime import datetime, timedelta
 from django.db.models import Sum
 
-#In ManPwerReport-> a.fssaidocumenturl is just a string path in raw sql query, not a FileField.So if you directly pass it to get_uploaded_filename() as it is now, you’ll getAttributeError: 'str' object has no attribute 'name'
+# Changes by Pratiksha : In ManPowerReport-> a.fssaidocumenturl is just a string path in raw sql query, not a FileField.So if you directly pass it to get_uploaded_filename() as it is now, you’ll getAttributeError: 'str' object has no attribute 'name'
 class DummyFile:
     def __init__(self, name):
         self.name = name
