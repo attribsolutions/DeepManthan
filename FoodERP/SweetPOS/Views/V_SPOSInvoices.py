@@ -32,6 +32,7 @@ class SPOSInvoiceView(CreateAPIView):
         inputdata = mulInvoicedata
         try:
             with transaction.atomic():
+                print(inputdata)
                 
                 LastIDs=[]
                 user=BasicAuthenticationfunction(request)
