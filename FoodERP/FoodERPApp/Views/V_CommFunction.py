@@ -20,6 +20,7 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 import base64
+import os
 from rest_framework import status
 
 
@@ -920,3 +921,14 @@ def BasicAuthenticationfunction(request):
         user = authenticate(request, username=username, password=password)
     return user
 
+
+def get_uploaded_filename(file_field):
+    """
+    Returns the filename from a Django FileField or ImageField.
+    If no file is uploaded, returns None. 
+    Args: file_field: The FileField or ImageField instance.
+    Returns: str or None: The base filename or None if no file is uploaded.
+    """
+    if file_field:
+        return os.path.basename(file_field.name)
+    return None
