@@ -298,6 +298,8 @@ class SchemeDetailsView(CreateAPIView):
                                 "FreeItemID":     row.FreeItemID,
                                 "VoucherLimit":   row.VoucherLimit,
                                 "SchemeValueUpto": getattr(row, 'SchemeValueUpto', None),
+                                "SchemeDetails" : row.SchemeDetails,
+                                "OverLappingScheme" : row.OverLappingScheme,
                                 "BillAbove":      row.BillAbove,
                                 "QrPrefix":       row.QrPrefix,
                                 "IsActive":       row.IsActive,
