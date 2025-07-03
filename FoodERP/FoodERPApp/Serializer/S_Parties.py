@@ -220,11 +220,6 @@ class PartyAddressSerializerSecond(serializers.ModelSerializer):
     def get_filename(self, obj):
         return get_uploaded_filename(obj.fssaidocumenturl)
 
-    # def get_filename(self, obj):
-    #     if obj.fssaidocumenturl:
-    #         return os.path.basename(obj.fssaidocumenturl.name)
-    #     return None
-
 
 class CitiesSerializerSecond(serializers.ModelSerializer):
     class Meta:
