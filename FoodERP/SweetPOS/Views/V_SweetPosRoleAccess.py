@@ -323,7 +323,7 @@ class MachineTypeUpdateView(CreateAPIView):
     def put(self, request):
         MachineType_Data = JSONParser().parse(request)
         try:
-            query = M_SweetPOSMachine.objects.filter(Party=MachineType_Data['Party'],MacID=MachineType_Data['MacID'])
+            query = M_SweetPOSMachine.objects.filter(Party=MachineType_Data['Party'],id=MachineType_Data['id'])
             if not query:
                 log_entry = create_transaction_logNew(request, MachineType_Data, MachineType_Data['Party'], 'Machine Type not available', 418, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True,'Message': 'Record Not Found', 'TransactionID': 0, 'Data': []})

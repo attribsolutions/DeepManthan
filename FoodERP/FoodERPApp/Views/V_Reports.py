@@ -17,6 +17,12 @@ from ..models import *
 from datetime import datetime, timedelta
 from django.db.models import Sum
 
+#In ManPwerReport-> a.fssaidocumenturl is just a string path in raw sql query, not a FileField.So if you directly pass it to get_uploaded_filename() as it is now, you’ll getAttributeError: 'str' object has no attribute 'name'
+class DummyFile:
+    def __init__(self, name):
+        self.name = name
+
+
 class PartyLedgerReportView(CreateAPIView):  
     permission_classes = (IsAuthenticated,)
 
@@ -1535,13 +1541,14 @@ class ManPowerReportView(CreateAPIView):
                     p=row.id
                 PartyIDs = p.split(",")
                 
-                query = MC_PartySubParty.objects.raw(f'''SELECT  MC_PartySubParty.id,A.SAPPartyCode AS SAPCode, A.id AS FEParty_id, A.NAME AS PartyName,  A.isActive AS PartyActive, A.CreatedOn AS PartyCreation,
-M_PartyType.Name AS PartyType, A.Email, A.PAN, MC_PartySubParty.Party_id AS SS_id, B.NAME AS SSName, M_Users.LoginName AS LoginID, "India" AS country,
- C.Address, M_States.Name AS State, M_Districts.Name AS District, A.ClosingDate AS PartyClosingDate,
+                query = MC_PartySubParty.objects.raw(f'''SELECT  MC_PartySubParty.id,A.SAPPartyCode AS SAPCode, 
+A.id AS FEParty_id, A.NAME AS PartyName,  A.isActive AS PartyActive, A.CreatedOn AS PartyCreation,
+M_PartyType.Name AS PartyType, A.Email, A.PAN, MC_PartySubParty.Party_id AS SS_id, B.NAME AS SSName, M_Users.LoginName AS LoginID,
+"India" AS country, C.Address, M_States.Name AS State, M_Districts.Name AS District, A.ClosingDate AS PartyClosingDate,
 M_Cities.Name AS City, C.PIN AS PIN, A.MobileNo AS Mobile, M_Employees.Name AS OwnerName,
-A.Latitude, A.Longitude, C.FSSAINo AS FSSAINo, 
-C.FSSAIExipry AS FSSAIExpiry, A.GSTIN AS GSTIN, M_Employees_GM.Name AS GM, M_Employees_NH.Name AS NSM,
- M_Employees_RH.Name AS RSM, M_Employees_ASM.Name AS ASM,M_Employees_SE.Name AS SE,M_Employees_SO.Name AS SO, M_Employees_SR.Name AS SR, M_Employees_MT.Name AS MT,  M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
+A.Latitude, A.Longitude, C.FSSAINo AS FSSAINo, C.FSSAIExipry AS FSSAIExpiry, C.fssaidocumenturl, A.GSTIN AS GSTIN, M_Employees_GM.Name AS GM, 
+M_Employees_NH.Name AS NSM, M_Employees_RH.Name AS RSM, M_Employees_ASM.Name AS ASM,M_Employees_SE.Name AS SE,M_Employees_SO.Name AS SO,
+M_Employees_SR.Name AS SR, M_Employees_MT.Name AS MT, M_Cluster.Name AS Cluster, M_SubCluster.Name AS SubCluster
 FROM MC_PartySubParty 
 LEFT JOIN M_Parties A ON A.id = MC_PartySubParty.SubParty_id and A.id in %s
 LEFT JOIN M_Parties B ON B.id = MC_PartySubParty.Party_id
@@ -1612,7 +1619,9 @@ WHERE M_PartyType.id IN(9,10,15,17,19)  ''',[PartyIDs])
                             "SO": a.SO,
                             "SR": a.SR,
                             "MT": a.MT,
-                            # "fssaidocument" :a.fssaidocument
+                            "FSSAIDocument": a.fssaidocumenturl,
+                            "FSSAIDocumentFilename": get_uploaded_filename(DummyFile(a.fssaidocumenturl)) if a.fssaidocumenturl else None
+
                             
                             })
                     log_entry = create_transaction_logNew(request, query, 0, '', 219, 0)
@@ -3150,9 +3159,9 @@ class StockAdjustmentReportView(CreateAPIView):
                             "id":row.id,
                             "StockDate":row.StockDate,
                             "ItemName":row.ItemName,
-                            "Quantity":row.Quantity,
-                            "Difference":row.Difference,
-                            "BeforeAdjustment":row.BeforeAdjustment,
+                            "Quantity":round(float(row.Quantity),3),
+                            "Difference":round(float(row.Difference),3),
+                            "BeforeAdjustment":round(float(row.BeforeAdjustment),3),
                             "PartyName":row.PartyName,
                             "UnitName":row.UnitName
                                                     
