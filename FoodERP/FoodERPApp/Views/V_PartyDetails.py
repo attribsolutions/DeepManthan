@@ -65,67 +65,8 @@ class FileDownloadView(View):
         except Exception as e:
             create_transaction_logNew(request, {'TableID': table}, id, f'FileDownloadView Exception: {str(e)}', 33)
             return JsonResponse({'StatusCode': 500, 'Status': False, 'Message': str(e), 'Data': []}, status=500)
-
-
-
-
-# class FileDownloadView(View):
-#     permission_classes = (IsAuthenticated,)
-#     # authentication__Class = JSONWebTokenAuthentication
-    
-#     def get(self, request, id=0, table=0):
-#         url_prefix = NewURLPrefix()
-
-#         # Map of table codes to model classes and image field names
-#         table_config = {
-#             1: (M_PartySettingsDetails, 'Image'),
-#             2: (T_ClaimTrackingEntry, 'CreditNoteUpload'),
-#             3: (TC_PurchaseReturnItemImages, 'Image'),
-#             4: (MC_PartyAddress,'fssaidocumenturl')
-#         }
-
-#         model_class, field_name = table_config.get(int(table), (None, None))
-#         if not model_class:
-#             log_entry = create_transaction_logNew(request, {'TableID':table},id, 'Invalid table selection in FileDownloadView', 467)
-#             return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Invalid table selection.', 'Data': []}, status=400)
-
-#         query = model_class.objects.filter(id=id).values(field_name)
-#         if not query.exists():
-#             log_entry = create_transaction_logNew(request, {'TableID':table},id, 'Image not found for given ID in FileDownloadView', 467)
-#             return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'No image found for the given ID.', 'Data': []}, status=404)
-
-#         image_path = query[0][field_name]
-#         image_url = f"{url_prefix}/media/{image_path}"
-
-#         try:
-#             response = requests.get(image_url, verify=False, timeout=60)
-#             response.raise_for_status()
         
-#             log_entry = create_transaction_logNew(request, {'TableID':table}, id, 'FileDownloadView image download successful', 467)
-
-#         except requests.exceptions.Timeout:
-#             log_entry = create_transaction_logNew(request, {'TableID':table}, id, 'FileDownloadView Timeout Error', 33)
-#             return JsonResponse({'StatusCode': 504, 'Status': False, 'Message': 'Connection timed out while downloading file.', 'Data': []}, status=504)
-#         except requests.exceptions.RequestException as e:
-#             log_entry = create_transaction_logNew(request, {'TableID':table}, id, f'FileDownloadView Request Exception: {str(e)}', 33)
-#             return JsonResponse({'StatusCode': 500, 'Status': False, 'Message': str(e), 'Data': []}, status=500)
-
-#         content_type = response.headers.get('Content-Type', 'application/octet-stream')
-#         print(content_type)
-#         print("aaaaaaaaa")
-#         filename = os.path.basename(image_url)
-#         print(filename)
-#         print("bbbbbbbbbbbb")
-
-#         http_response = HttpResponse(response.content, content_type=content_type)
-#         print(http_response)
-#         print("cccccccccccccc")
-#         http_response['Content-Disposition'] = f'attachment; filename="{filename}"'
-#         return http_response
-
-
-
-
+# OLD API -> REMOVE THIS CODE AFTER SOME DAYS OF PROPER EXECUTION OF ABOVE NEW API CODE
 # class FileDownloadView(View):
 #     def get(self, request,id=0,table=0):
 #         # Imagedata = JSONParser().parse(request)
