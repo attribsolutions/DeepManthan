@@ -273,13 +273,12 @@ class SchemeDetailsView(CreateAPIView):
                         M_Items.id AS item_id, M_Items.Name AS item_name,DiscountType,DiscountValue,Quantity,TypeForItem
                     FROM M_Scheme 
                     JOIN M_SchemeType ON M_Scheme.SchemeTypeID_id = M_SchemeType.id 
-                    JOIN MC_SchemeParties ON MC_SchemeParties.SchemeID_id = M_Scheme.id
-                    JOIN M_Parties ON M_Parties.id = MC_SchemeParties.PartyID_id  
+                    LEFT JOIN MC_SchemeParties ON MC_SchemeParties.SchemeID_id = M_Scheme.id
+                    LEFT JOIN M_Parties ON M_Parties.id = MC_SchemeParties.PartyID_id  
                     LEFT JOIN MC_SchemeItems ON MC_SchemeItems.SchemeID_id = M_Scheme.id
                     LEFT JOIN M_Items ON M_Items.id = MC_SchemeItems.Item	                                
-                    WHERE M_Scheme.id = {SchemeID} AND M_Scheme.IsActive = 1
-                ''')
-
+                    WHERE M_Scheme.id = {SchemeID} AND M_Scheme.IsActive = 1''')
+                
                     data = []
                     scheme_cache = {}
 
@@ -298,6 +297,8 @@ class SchemeDetailsView(CreateAPIView):
                                 "FreeItemID":     row.FreeItemID,
                                 "VoucherLimit":   row.VoucherLimit,
                                 "SchemeValueUpto": getattr(row, 'SchemeValueUpto', None),
+                                "SchemeDetails" : row.SchemeDetails,
+                                "OverLappingScheme" : row.OverLappingScheme,
                                 "BillAbove":      row.BillAbove,
                                 "QrPrefix":       row.QrPrefix,
                                 "IsActive":       row.IsActive,
