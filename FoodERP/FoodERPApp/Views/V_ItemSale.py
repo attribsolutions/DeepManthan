@@ -291,6 +291,7 @@ Group By M_Group.Name, MC_SubGroup.Name, P2.Name, P1.Name, M_Items.Name, M_Units
                                             "GSTRate":a.GSTPercentage,
                                             "CGST":a.CGST,
                                             "SGST":a.SGST,
+                                            "IGST":a.IGST,
                                             "GrandTotal":a.GrandTotal,
                                             "AvgRate":a.AvgRate  
                                         })
