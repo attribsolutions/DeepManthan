@@ -125,7 +125,7 @@ class OrderListFilterView(CreateAPIView):
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': Order_serializer})
                     OrderListData = list()
                     for a in Order_serializer:
-                       
+                        # print(a)
                         SubPartyFlagquery = MC_PartySubParty.objects.filter(Party=a['Supplier']['id'],SubParty=a['Customer']['id']).values('SubParty')
 
                         if SubPartyFlagquery:
@@ -157,14 +157,31 @@ class OrderListFilterView(CreateAPIView):
                                    
                             PartyTypeID = a['Supplier']['PartyType']['id'] if a['Supplier']['PartyType'] else None                  
                            
+                            # if PartyTypeID == 19:
+                            #     Count = TC_SPOSInvoicesReferences.objects.filter(Order=a['id']).count() 
+                            #     # InvoiceIDs = TC_SPOSInvoicesReferences.objects.filter(Order=a['id']).values_list('Invoice_id', flat=True)
+                            #     # DeletedInvoiceCount = T_SPOSInvoices.objects.filter(id__in=InvoiceIDs, IsDeleted=1).count()
+                            # else:
+                            #     Count = TC_InvoicesReferences.objects.filter(Order=a['id']).count()
+                            #     # DeletedInvoiceCount = TC_DeletedInvoicesReferences.objects.filter(Order=a['id']).count()
+                            # if Count == 0 
+                            #     InvoiceCreated = False
+                            # else:
+                            #     InvoiceCreated = True     
                             if PartyTypeID == 19:
-                                Count = TC_SPOSInvoicesReferences.objects.filter(Order=a['id']).count()   
+      
+                                InvoiceIDs = list(TC_SPOSInvoicesReferences.objects.filter(Order=a['id']).values_list('Invoice_id', flat=True))
+                                
+                                DeletedCount = T_SPOSInvoices.objects.filter(id__in=InvoiceIDs, IsDeleted=1).count()
                             else:
-                                Count = TC_InvoicesReferences.objects.filter(Order=a['id']).count()
-                            if Count == 0 :
-                                InvoiceCreated = False
-                            else:
-                                InvoiceCreated = True                           
+                                InvoiceIDs = list(TC_InvoicesReferences.objects.filter(Order=a['id']).values_list('Invoice_id', flat=True))
+                                DeletedCount = TC_DeletedInvoicesReferences.objects.filter(Invoice__in=InvoiceIDs).count()
+
+                            TotalCount = len(InvoiceIDs)
+
+
+                            InvoiceDeleted = TotalCount > 0 and DeletedCount == TotalCount
+                            InvoiceCreated = TotalCount > 0 and DeletedCount < TotalCount                      
                             OrderListData.append({
                                 "id": a['id'],
                                 "OrderDate": a['OrderDate'],
@@ -186,8 +203,9 @@ class OrderListFilterView(CreateAPIView):
                                 "POType": a['POType']['Name'],
                                 "BillingAddress": a['BillingAddress']['Address'],
                                 "ShippingAddress": a['ShippingAddress']['Address'],
-                                "InvoiceCreated": InvoiceCreated,
-                                "InvoiceCount":Count,
+                                "InvoiceCreated":InvoiceCreated,
+                                "InvoiceCount":TotalCount,
+                                "InvoiceDeleted":InvoiceDeleted,
                                 "CreatedBy": a['CreatedBy'],
                                 "CreatedByName": CreatedByName,
                                 "CreatedOn": a['CreatedOn'],
@@ -198,6 +216,7 @@ class OrderListFilterView(CreateAPIView):
                                 "MobileAppOrderFlag" : a['MobileAppOrderFlag'],
                                 "AdvanceAmount": a['AdvanceAmount'],
                                 "SubPartyFlag": SubPartyFlag,
+                                "IsOrderClose":a['IsOrderClose'],
                                 
                                 
                             })
