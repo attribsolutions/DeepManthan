@@ -714,27 +714,33 @@ on aaa.prefix=bbb.prefix and  aaa.Party_id=bbb.Party_id )''')
                 # print(Docsquery)                                         
                 Docs2 = DocsSerializer(Docsquery, many=True).data
             
-                Docsquery2 = T_Invoices.objects.raw(f'''SELECT 1 as id, '' AA, '' bb, '' cc, SUM(A.cnt) AS TotalNumbers, SUM(A.TotalCancelled) AS TotalCancelled
-                                    FROM (SELECT 1 as id, 'Invoices for outward supply' AS a,MIN(T_Invoices.InvoiceNumber) AS MINID,
-                                        MAX(T_Invoices.InvoiceNumber) AS MAXID, COUNT(*) AS cnt,
-                                        (SELECT COUNT(*) FROM T_DeletedInvoices WHERE Party in ({Party}) AND T_DeletedInvoices.InvoiceDate BETWEEN %s AND %s) AS TotalCancelled, '1' AS b
-                                    FROM T_Invoices  
-                                    WHERE Party_id in ({Party}) AND T_Invoices.InvoiceDate BETWEEN %s AND %s
-                                    UNION 
-                                    SELECT 1 as id, 'Credit Note' AS a, MIN(T_CreditDebitNotes.FullNoteNumber) AS MINID,
-                                        MAX(T_CreditDebitNotes.FullNoteNumber) AS MAXID, COUNT(*) AS TotalNumbers, '0' AS TotalCancelled, '2' AS b
-                                    FROM T_CreditDebitNotes
-                                    WHERE T_CreditDebitNotes.NoteType_id = 37 AND Party_id in ({Party}) AND T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s
-                                    UNION 
-                                    SELECT 1 as id, 'Debit Note' AS a, MIN(T_CreditDebitNotes.FullNoteNumber) AS MINID,
-                                        MAX(T_CreditDebitNotes.FullNoteNumber) AS MAXID, COUNT(*) AS TotalNumbers, '0' AS TotalCancelled, '3' AS b
-                                    FROM T_CreditDebitNotes  
-                                    WHERE T_CreditDebitNotes.NoteType_id = 38 AND Party_id in ({Party}) AND T_CreditDebitNotes.CRDRNoteDate BETWEEN %s AND %s
-                                    UNION
-                                    SELECT 1 as id, 'Invoices for outward supply' AS a, MIN(X.InvoiceNumber) AS MINID, MAX(X.InvoiceNumber) AS MAXID,
-                                        COUNT(*) AS cnt, (SELECT COUNT(*) FROM SweetPOS.T_SPOSDeletedInvoices WHERE Party in ({Party}) AND T_SPOSDeletedInvoices.InvoiceDate BETWEEN %s AND %s) AS TotalCancelled, '4' AS b
-                                    FROM SweetPOS.T_SPOSInvoices X
-                                    WHERE X.Party in ({Party}) AND X.InvoiceDate BETWEEN %s AND %s) A''', [FromDate, ToDate, FromDate, ToDate,FromDate, ToDate, FromDate, ToDate, FromDate, ToDate, FromDate, ToDate])
+                Docsquery2 = T_Invoices.objects.raw(f'''SELECT 1 as id,SUM(A.cnt) AS TotalNumbers, SUM(A.TotalCancelled) AS TotalCancelled
+                                    FROM 
+                                    (SELECT  COUNT(*) AS cnt, '0' AS TotalCancelled FROM T_Invoices  
+                                    WHERE Party_id in ({Party}) AND T_Invoices.InvoiceDate between '{FromDate}' and '{ToDate}'
+							UNION 
+                                    SELECT  COUNT(*) AS cnt, '0' AS TotalCancelled FROM T_CreditDebitNotes
+                                    WHERE T_CreditDebitNotes.NoteType_id in(37,39) AND Party_id in ({Party}) AND T_CreditDebitNotes.CRDRNoteDate between '{FromDate}' and '{ToDate}' and IsDeleted=0
+							UNION 
+                                    SELECT  COUNT(*) AS cnt, '0' AS TotalCancelled FROM T_CreditDebitNotes  
+                                    WHERE T_CreditDebitNotes.NoteType_id in(38,40) AND Party_id in ({Party}) AND T_CreditDebitNotes.CRDRNoteDate between '{FromDate}' and '{ToDate}' and IsDeleted=0
+							UNION
+                                    SELECT COUNT(*) AS cnt, '0' AS TotalCancelled FROM SweetPOS.T_SPOSInvoices X
+                                    WHERE X.Party in ({Party}) AND X.InvoiceDate between '{FromDate}' and '{ToDate}' and IsDeleted=0
+                            UNION     
+									SELECT  '0' cnt , COUNT(*) TotalCancelled  FROM T_DeletedInvoices  
+                                    WHERE Party in ({Party}) AND T_DeletedInvoices.InvoiceDate between '{FromDate}' and '{ToDate}'
+                            UNION
+                                    SELECT  '0' cnt , COUNT(*) TotalCancelled FROM SweetPOS.T_SPOSInvoices X
+                                    WHERE X.Party in ({Party}) AND X.InvoiceDate between '{FromDate}' and '{ToDate}' and IsDeleted=1     
+                            UNION 
+                                    SELECT  '0' cnt , COUNT(*) TotalCancelled  FROM T_CreditDebitNotes
+                                    WHERE T_CreditDebitNotes.NoteType_id in(37,39) AND Party_id in ({Party}) AND T_CreditDebitNotes.CRDRNoteDate between '{FromDate}' and '{ToDate}' and IsDeleted=1
+							UNION 
+                                    SELECT  '0' cnt , COUNT(*) TotalCancelled  FROM T_CreditDebitNotes  
+                                    WHERE T_CreditDebitNotes.NoteType_id in(38,40) AND Party_id in ({Party}) AND T_CreditDebitNotes.CRDRNoteDate between '{FromDate}' and '{ToDate}' and IsDeleted=1        
+                                    
+                                    ) A''')
                 
                 # print(Docsquery2)          
                 Docs1 = Docs2Serializer2(Docsquery2, many=True).data
