@@ -456,7 +456,7 @@ class SchemeDetailsView(CreateAPIView):
 
                 # Delete the Scheme itself
                 scheme.delete()
-                log_entry = create_transaction_logNew(request, {}, 0, id ,'Scheme deleted successfully', 479, 0)
+                log_entry = create_transaction_logNew(request, 0,0,'Deleted SchemeID:'+str(id),479,0)
                 return Response({"message": "Scheme deleted successfully."}, status=status.HTTP_200_OK)
 
         except M_Scheme.DoesNotExist:
