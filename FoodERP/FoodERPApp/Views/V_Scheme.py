@@ -464,7 +464,7 @@ class SchemeDetailsView(CreateAPIView):
             return Response({'StatusCode': 204, 'Status': True,'Message': 'Scheme not found.', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, id, 479, 0)
-            return Response({'StatusCode': 204, 'Status': True, 'Message': 'Scheme used in another table', 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})  
         
         
 
