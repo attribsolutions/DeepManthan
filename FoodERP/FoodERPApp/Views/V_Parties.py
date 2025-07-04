@@ -13,6 +13,7 @@ from ..Serializer.S_Orders import *
 import base64
 from io import BytesIO
 from PIL import Image
+from ..Views.V_CommFunction import *
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
 

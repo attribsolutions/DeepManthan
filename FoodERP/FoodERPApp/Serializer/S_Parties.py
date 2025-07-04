@@ -3,6 +3,7 @@ from rest_framework import serializers
 from ..Serializer.S_Routes import  *
 from django.utils import timezone
 import os
+from ..Views.V_CommFunction import *
 
 class PartiesSerializer(serializers.ModelSerializer):
        
@@ -215,11 +216,9 @@ class PartyAddressSerializerSecond(serializers.ModelSerializer):
             url_prefix = NewURLPrefix()
             return f"{url_prefix}/downloadQr/{obj.id}/4"
         return None
-
+    
     def get_filename(self, obj):
-        if obj.fssaidocumenturl:
-            return os.path.basename(obj.fssaidocumenturl.name)
-        return None
+        return get_uploaded_filename(obj.fssaidocumenturl)
 
 
 class CitiesSerializerSecond(serializers.ModelSerializer):
