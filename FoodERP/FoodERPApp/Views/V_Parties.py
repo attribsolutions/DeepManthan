@@ -358,15 +358,17 @@ class M_PartiesViewSecond(CreateAPIView):
                 party_data_json = request.POST.get('PartyData')
                 party_data = json.loads(party_data_json) if party_data_json else {}
 
-                # Handle fssaidocument file (if provided)
-                fssai_file = request.FILES.get('fssaidocument')
-                if fssai_file and 'PartyAddress' in party_data:
-                    if isinstance(party_data['PartyAddress'], list) and len(party_data['PartyAddress']) > 0:
-                        party_data['PartyAddress'][0]['fssaidocumenturl'] = fssai_file
+                # Attach each file to its corresponding PartyAddress entry via RowID
+                if 'PartyAddress' in party_data:
+                    for addr in party_data['PartyAddress']:
+                        row_id = addr.get('RowID')
+                        file_key = f"fssaidocument_{row_id}"
+                        fssai_file = request.FILES.get(file_key)
+                        if fssai_file:
+                            addr['fssaidocumenturl'] = fssai_file
 
                 # Get the existing instance
                 M_PartiesdataByID = M_Parties.objects.get(id=id)
-
                 M_Parties_Serializer = UpdateM_PartiesSerializer(M_PartiesdataByID, data=party_data)
                 if M_Parties_Serializer.is_valid():
                     UpdatedParty = M_Parties_Serializer.save()
@@ -382,7 +384,6 @@ class M_PartiesViewSecond(CreateAPIView):
             log_entry = create_transaction_logNew(request, 0, 0, 'PartyEditMethod:' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
 
-    
     @transaction.atomic()
     def delete(self, request, id=0):
         try:
