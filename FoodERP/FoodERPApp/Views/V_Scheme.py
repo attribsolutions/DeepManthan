@@ -179,7 +179,7 @@ class SchemeTypeView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  SchemeTypedata_Serializer.errors, 'Data':[]})
         except Exception as e:
-                log_entry = create_transaction_logNew(request,0,0,'SchemeTypeSave:'+str(Exception(e)),33,0)
+                log_entry = create_transaction_logNew(request,0,0,'SchemeTypeSave:'+str(e),33,0)
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
             
             
@@ -200,7 +200,7 @@ class SchemeTypeView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message': SchemeTypedata_Serializer.errors, 'Data':[]})
         except Exception as e:
-                log_entry = create_transaction_logNew(request,0,0,Exception(e),33,0)
+                log_entry = create_transaction_logNew(request,0,0,str(e),33,0)
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
             
            
@@ -273,13 +273,12 @@ class SchemeDetailsView(CreateAPIView):
                         M_Items.id AS item_id, M_Items.Name AS item_name,DiscountType,DiscountValue,Quantity,TypeForItem
                     FROM M_Scheme 
                     JOIN M_SchemeType ON M_Scheme.SchemeTypeID_id = M_SchemeType.id 
-                    JOIN MC_SchemeParties ON MC_SchemeParties.SchemeID_id = M_Scheme.id
-                    JOIN M_Parties ON M_Parties.id = MC_SchemeParties.PartyID_id  
+                    LEFT JOIN MC_SchemeParties ON MC_SchemeParties.SchemeID_id = M_Scheme.id
+                    LEFT JOIN M_Parties ON M_Parties.id = MC_SchemeParties.PartyID_id  
                     LEFT JOIN MC_SchemeItems ON MC_SchemeItems.SchemeID_id = M_Scheme.id
                     LEFT JOIN M_Items ON M_Items.id = MC_SchemeItems.Item	                                
-                    WHERE M_Scheme.id = {SchemeID} AND M_Scheme.IsActive = 1
-                ''')
-
+                    WHERE M_Scheme.id = {SchemeID} AND M_Scheme.IsActive = 1''')
+                
                     data = []
                     scheme_cache = {}
 
@@ -352,7 +351,7 @@ class SchemeDetailsView(CreateAPIView):
 
         except Exception as e:
             create_transaction_logNew(request, {}, 0, 'SchemeDetails: ' + str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
         
 
     
@@ -371,7 +370,7 @@ class SchemeDetailsView(CreateAPIView):
                     transaction.set_rollback(True)
                     return JsonResponse({'StatusCode': 406, 'Status': True, 'Message':  serializer.errors, 'Data':[]})
         except Exception as e:
-                log_entry = create_transaction_logNew(request,0,0,'SchemeSave:'+str(Exception(e)),33,0)
+                log_entry = create_transaction_logNew(request,0,0,'SchemeSave:'+str(e),33,0)
                 return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
@@ -414,7 +413,7 @@ class SchemeDetailsView(CreateAPIView):
                 scheme.save()
             except M_Scheme.DoesNotExist:
                 log_entry = create_transaction_logNew(request, data, id, 'Scheme Not Found', 478, 0)
-                return JsonResponse({'StatusCode': 404, 'Status': False, 'Message': 'Scheme Not Found', 'Data': []})
+                return JsonResponse({'StatusCode': 404, 'Status': True, 'Message': 'Scheme Not Found', 'Data': []})
 
             # Clear old Parties and Items
             MC_SchemeItems.objects.filter(SchemeID=id).delete()
@@ -443,7 +442,7 @@ class SchemeDetailsView(CreateAPIView):
 
         except Exception as e:
             log_entry = create_transaction_logNew(request, data, 0, 'Scheme Update Error: ' + str(e), 478, 0)
-            return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': str(e), 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
         
         
     def delete(self,request,id=0):
@@ -457,7 +456,7 @@ class SchemeDetailsView(CreateAPIView):
 
                 # Delete the Scheme itself
                 scheme.delete()
-                log_entry = create_transaction_logNew(request, {}, 0, id ,'Scheme deleted successfully', 479, 0)
+                log_entry = create_transaction_logNew(request, 0,0,'Deleted SchemeID:'+str(id),479,0)
                 return Response({"message": "Scheme deleted successfully."}, status=status.HTTP_200_OK)
 
         except M_Scheme.DoesNotExist:
