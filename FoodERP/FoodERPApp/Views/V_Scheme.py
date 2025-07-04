@@ -456,14 +456,16 @@ class SchemeDetailsView(CreateAPIView):
 
                 # Delete the Scheme itself
                 scheme.delete()
-                log_entry = create_transaction_logNew(request, 0,0,'Deleted SchemeID:'+str(id),479,0)
-                return Response({"message": "Scheme deleted successfully."}, status=status.HTTP_200_OK)
+                log_entry = create_transaction_logNew(request, 0,0,'Deleted SchemeID:'+str(id),479,0)               
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'Scheme Deleted Successfully', 'Data':[]})
 
         except M_Scheme.DoesNotExist:
-            log_entry = create_transaction_logNew(request, {}, 0, id,'Scheme not found', 479, 0)
-            return Response({"error": "Scheme not found."}, status=status.HTTP_404_NOT_FOUND)
+            log_entry = create_transaction_logNew(request, {'SchemeID':id}, 0, id,'Scheme not found', 479, 0)
+            return Response({'StatusCode': 204, 'Status': True,'Message': 'Scheme not found.', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, {}, 0, id, 479, 0)
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            log_entry = create_transaction_logNew(request, 0, 0, id, 479, 0)
+            return Response({'StatusCode': 204, 'Status': True, 'Message': 'Scheme used in another table', 'Data': []})
+        
+        
 
 
