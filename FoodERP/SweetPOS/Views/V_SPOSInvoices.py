@@ -172,12 +172,12 @@ class SPOSInvoiceView(CreateAPIView):
                             LastInsertId = Invoice.id
                             LastIDs.append(Invoice.id)
                             
-                            log_entry = create_transaction_logNew(request, inputdata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastIDs),383,0,0,0, 0)    
+                            
                             
                           # Process VoucherCodes as list of objects if present
                             if 'AppliedSchemes' in Invoicedata and Invoicedata['AppliedSchemes']:
                                 for voucher_entry in Invoicedata['AppliedSchemes']:
-                                    voucher_code = voucher_entry.get('VoucherCode', '').strip()
+                                    voucher_code = (voucher_entry.get('VoucherCode') or '').strip()
                                     scheme_id = voucher_entry.get('SchemeID', 'NULL')
 
                                     if voucher_code and voucher_code != 'SSCCBM2025':
@@ -200,8 +200,8 @@ class SPOSInvoiceView(CreateAPIView):
 
                             # Process VoucherCode string (comma-separated) + SchemeIDs string (comma-separated)
                             elif 'VoucherCode' in Invoicedata and Invoicedata['VoucherCode']:
-                                VoucherCodes = Invoicedata['VoucherCode'].split(",")
-                                SchemeIDs = Invoicedata['SchemeID'].split(",") if 'SchemeID' in Invoicedata and Invoicedata['SchemeID'] else []
+                                VoucherCodes = (Invoicedata.get('VoucherCode') or '').split(",")
+                                SchemeIDs = (Invoicedata.get('SchemeID') or '').split(",") if Invoicedata.get('SchemeID') else []
 
                                 for idx, code in enumerate(VoucherCodes):
                                     code = code.strip()
@@ -227,6 +227,7 @@ class SPOSInvoiceView(CreateAPIView):
                                         VALUES ({LastInsertId}, {scheme_id}, {'NULL' if not code else f"'{code}'"})
                                     """
                                     connection.cursor().execute(VoucherQuery)
+                               
 
                             # If only SchemeID provided without VoucherCode
                             elif 'SchemeID' in Invoicedata and Invoicedata['SchemeID']:
@@ -237,13 +238,12 @@ class SPOSInvoiceView(CreateAPIView):
                                         VALUES ({LastInsertId}, {scheme_id}, NULL)
                                     """
                                     connection.cursor().execute(VoucherQuery)
-                                log_entry = create_transaction_logNew(request, inputdata, Party, 'SchemeIDs: ' + ", ".join(SchemeIDs), 383, 0) 
 
                         else:
                             log_entry = create_transaction_logNew(request, inputdata, Party, str(Invoice_serializer.errors),34,0,0,0,0)
                             transaction.set_rollback(True)
                             return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': Invoice_serializer.errors, 'Data':[]})
-                            
+                           
                 log_entry = create_transaction_logNew(request, inputdata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastIDs),383,0,0,0, 0)    
                 return JsonResponse({'status_code': 200, 'Success': True,  'Message': 'Invoice Save Successfully','TransactionID':LastIDs,'Data':[]})
         except Exception as e:
