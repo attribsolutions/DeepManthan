@@ -167,21 +167,38 @@ class OrderListFilterView(CreateAPIView):
                             # if Count == 0 
                             #     InvoiceCreated = False
                             # else:
-                            #     InvoiceCreated = True     
+                            #     InvoiceCreated = True  
+                             
                             if PartyTypeID == 19:
-      
-                                InvoiceIDs = list(TC_SPOSInvoicesReferences.objects.filter(Order=a['id']).values_list('Invoice_id', flat=True))
-                                
-                                DeletedCount = T_SPOSInvoices.objects.filter(id__in=InvoiceIDs, IsDeleted=1).count()
+                                InvoiceIDs = list(
+                                    TC_SPOSInvoicesReferences.objects.filter(Order=a['id'])
+                                    .values_list('Invoice_id', flat=True)
+                                )
+                                DeletedInvoiceIDs = list(
+                                    T_SPOSInvoices.objects.filter(id__in=InvoiceIDs, IsDeleted=1)
+                                    .values_list('id', flat=True)
+                                )
                             else:
-                                InvoiceIDs = list(TC_InvoicesReferences.objects.filter(Order=a['id']).values_list('Invoice_id', flat=True))
-                                DeletedCount = TC_DeletedInvoicesReferences.objects.filter(Invoice__in=InvoiceIDs).count()
+                                InvoiceIDs = list(
+                                    TC_InvoicesReferences.objects.filter(Order=a['id'])
+                                    .values_list('Invoice_id', flat=True)
+                                )
+                                DeletedInvoiceIDs = list(
+                                    TC_DeletedInvoicesReferences.objects.filter(Order=a['id'])
+                                    .values_list('Invoice', flat=True)
+                                )
 
-                            TotalCount = len(InvoiceIDs)
+                            AllInvoices = set(InvoiceIDs)
+                            DeletedInvoices = set(DeletedInvoiceIDs)
+                            ActiveInvoices = AllInvoices - DeletedInvoices
+
+                            InvoiceCount = len(ActiveInvoices)
+                            InvoiceCreated = InvoiceCount > 0
 
 
-                            InvoiceDeleted = TotalCount > 0 and DeletedCount == TotalCount
-                            InvoiceCreated = TotalCount > 0 and DeletedCount < TotalCount                      
+                            InvoiceDeleted = (
+                                len(DeletedInvoices) > 0 and len(ActiveInvoices) == 0
+                            )
                             OrderListData.append({
                                 "id": a['id'],
                                 "OrderDate": a['OrderDate'],
@@ -204,7 +221,7 @@ class OrderListFilterView(CreateAPIView):
                                 "BillingAddress": a['BillingAddress']['Address'],
                                 "ShippingAddress": a['ShippingAddress']['Address'],
                                 "InvoiceCreated":InvoiceCreated,
-                                "InvoiceCount":TotalCount,
+                                "InvoiceCount":InvoiceCount,
                                 "InvoiceDeleted":InvoiceDeleted,
                                 "CreatedBy": a['CreatedBy'],
                                 "CreatedByName": CreatedByName,
