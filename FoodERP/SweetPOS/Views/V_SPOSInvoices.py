@@ -172,7 +172,7 @@ class SPOSInvoiceView(CreateAPIView):
                             LastInsertId = Invoice.id
                             LastIDs.append(Invoice.id)
                             
-                            log_entry = create_transaction_logNew(request, inputdata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastIDs),383,0,0,0, 0)    
+                            # log_entry = create_transaction_logNew(request, inputdata,Party ,'InvoiceDate:'+Invoicedata['InvoiceDate']+','+'Supplier:'+str(Party)+','+'TransactionID:'+str(LastIDs),383,0,0,0, 0)    
                             
                           # Process VoucherCodes as list of objects if present
                             if 'AppliedSchemes' in Invoicedata and Invoicedata['AppliedSchemes']:
