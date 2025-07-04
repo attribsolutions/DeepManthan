@@ -237,7 +237,6 @@ class SPOSInvoiceView(CreateAPIView):
                                         VALUES ({LastInsertId}, {scheme_id}, NULL)
                                     """
                                     connection.cursor().execute(VoucherQuery)
-                                log_entry = create_transaction_logNew(request, inputdata, Party, 'SchemeIDs: ' + ", ".join(SchemeIDs), 383, 0) 
 
                         else:
                             log_entry = create_transaction_logNew(request, inputdata, Party, str(Invoice_serializer.errors),34,0,0,0,0)
