@@ -866,21 +866,22 @@ class FranchiseSaleWithBillCountView(CreateAPIView):
                 FromDate = DailySale['FromDate']
                 ToDate = DailySale['ToDate']
  
-                query = T_SPOSInvoices.objects.raw('''SELECT M_Parties.id, Name, Count(*) Bills, SUM(GrandTotal) GrandTotal
+                query = T_SPOSInvoices.objects.raw('''SELECT M_Parties.id, Name, Count(*) Bills, SUM(GrandTotal) GrandTotal,T_SPOSInvoices.ClientID, 
+                                                    MAX(T_SPOSInvoices.CreatedOn) AS LastBillTime
                                                     FROM SweetPOS.T_SPOSInvoices
                                                     JOIN FoodERP.M_Parties on Party = M_Parties.id
                                                     WHERE InvoiceDate BETWEEN %s AND %s
                                                     AND Party IN (select Party_id from FoodERP.MC_ManagementParties WHERE Employee_id = %s)
-                                                    Group By M_Parties.id, Name
-                                                    Order By GrandTotal Desc''',[FromDate,ToDate,EmployeeID])
-                
+                                                    Group By M_Parties.id, M_Parties.Name,T_SPOSInvoices.ClientID
+                                                    Order By GrandTotal Desc''',[FromDate,ToDate,EmployeeID]) 
                 DailySaleDataList = list()
                 for a in query:
                     DailySaleDataList.append({
                         "id": a.id,
                         "Name": a.Name,
                         "Bills": a.Bills,
-                        "GrandTotal": a.GrandTotal
+                        "GrandTotal": a.GrandTotal,
+                        "LastBillTime": a.LastBillTime
                     })
                 if DailySaleDataList:
                     log_entry = create_transaction_logNew(request, DailySale, 0, 'FranchiseSaleWithBillCount', 428, 0)
