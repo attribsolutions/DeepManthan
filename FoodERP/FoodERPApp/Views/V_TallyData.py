@@ -31,14 +31,14 @@ class TallyDataListView(CreateAPIView):
                 if Mode == "Purchase":
                     query=(f''' select * from  
 
-(SELECT GRN.id , CONCAT(GRN.InvoiceNumber, ' (', COALESCE(GRN.FullGRNNumber, ''), ')') AS InvoiceNumber,
+(SELECT GRN.id , CONCAT(GRN.InvoiceNumber, ' (', COALESCE(GRN.FullGRNNumber, ''), ')') AS InvoiceNumber,GRN.InvoiceNumber ActualInvoiceNo,
                            GRN.InvoiceDate,P.id AS PartyCode,P.Name AS PartyName,CASE AccountingGRNStatus
 
                         WHEN 0 THEN 'Created'
                         WHEN 1 THEN 'Canceled'
                         ELSE 'Edited'END AS Statuss,U2.LoginName AS User, 
-                        GRN.RoundOffAmount RoundOff,GRN.TotalExpenses ,
-                        GRN.GrandTotal
+                        GRN.RoundOffAmount RoundOff,ifnull(GRN.TotalExpenses,0)TotalExpenses ,
+                        GRN.GrandTotal,GRN.PostingDate 
                         FROM T_GRNs GRN
 						JOIN M_Users U2 ON GRN.CreatedBy = U2.id
                         JOIN M_Parties P ON GRN.Party_id = P.id
@@ -78,7 +78,8 @@ select E.GRN_id,NULL AS ItemCode,L.Name AS ItemName,
                                                                 TI.Quantity,  M_Units.Name as UnitName, TI.DiscountType, TI.Discount AS DiscountPercentage,
                                                                 TI.DiscountAmount, TI.BasicAmount AS TaxableValue, TI.CGSTPercentage, TI.CGST, TI.SGSTPercentage,
                                                                 TI.SGST, TI.IGSTPercentage, TI.IGST, TI.GSTPercentage, TI.GSTAmount, TI.Amount AS TotalValue,
-                                                                0 AS TCSTaxAmount, T_Invoices.GrandTotal, 'Created' AS Statuss, M_Users.LoginName AS User,T_Invoices.RoundOffAmount RoundOff,0 as TotalExpenses
+                                                                0 AS TCSTaxAmount, T_Invoices.GrandTotal, 'Created' AS Statuss, M_Users.LoginName AS User,T_Invoices.RoundOffAmount RoundOff,0 as TotalExpenses,
+                                                                T_Invoices.InvoiceDate PostingDate,T_Invoices.FullInvoiceNumber ActualInvoiceNo
                                                                 FROM T_Invoices 
                                                                 JOIN TC_InvoiceItems TI ON T_Invoices.id = TI.Invoice_id
                                                                 JOIN MC_ItemUnits ON TI.Unit_id = MC_ItemUnits.id
@@ -98,6 +99,7 @@ select E.GRN_id,NULL AS ItemCode,L.Name AS ItemName,
                                                                 TI.DiscountAmount, TI.BasicAmount AS TaxableValue, TI.CGSTPercentage, TI.CGST, TI.SGSTPercentage,
                                                                 TI.SGST, TI.IGSTPercentage, TI.IGST, TI.GSTPercentage, TI.GSTAmount, TI.Amount AS TotalValue,
                                                                 0 AS TCSTaxAmount, T_DeletedInvoices.GrandTotal, 'Canceled' AS Statuss, M_Users.LoginName AS User,T_DeletedInvoices.RoundOffAmount RoundOff,0 as TotalExpenses
+                                                                , T_DeletedInvoices.InvoiceDate PostingDate,T_DeletedInvoices.FullInvoiceNumber ActualInvoiceNo
                                                                 FROM T_DeletedInvoices 
                                                                 JOIN TC_DeletedInvoiceItems TI ON T_DeletedInvoices.Invoice = TI.Invoice
                                                                 JOIN MC_ItemUnits ON TI.Unit = MC_ItemUnits.id
@@ -110,14 +112,15 @@ select E.GRN_id,NULL AS ItemCode,L.Name AS ItemName,
                     ID = "SaleID"
                 else:
                     return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Invalid Mode', 'Data': []})
-                
+                # print(tallyquery)
                 if tallyquery:
                     for row in tallyquery:
                         InvoiceDate = row.InvoiceDate.strftime('%d-%m-%Y') if row.InvoiceDate else None
+                        PostingDate = row.PostingDate.strftime('%d-%m-%Y') if row.PostingDate else None
                         TallyDetails.append({
                             ID: row.id,
                             "InvoiceNumber": row.InvoiceNumber,
-                            "InvoiceDate": InvoiceDate,
+                            "InvoiceDate": PostingDate,
                             "PartyCode": row.PartyCode,
                             "PartyName": row.PartyName,
                             "ItemCode": row.ItemCode,
@@ -143,7 +146,10 @@ select E.GRN_id,NULL AS ItemCode,L.Name AS ItemName,
                             "GrandTotal": round((row.GrandTotal+row.TotalExpenses),2),
                             "RoundOff" : row.RoundOff,
                             "Status": row.Statuss,
-                            "User": row.User
+                            "User": row.User,
+                            "ActualInvoiceNumber" : row.ActualInvoiceNo,
+                            "ActualInvoiceDate" : InvoiceDate 
+
                         })
                     log_entry = create_transaction_logNew(request, {"ResponseData": TallyDetails}, 0, {"RequestData": TallyData}, 451, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': TallyDetails})  
