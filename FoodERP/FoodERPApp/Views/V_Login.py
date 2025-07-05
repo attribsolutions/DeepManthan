@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.http import JsonResponse
 from ..Serializer.S_Companies import C_CompanySerializer
 from ..Serializer.S_Employees import *
@@ -73,9 +74,9 @@ class UserListView(CreateAPIView):
                 
                 
                 if (RoleID == 2):
-                    employees = M_Employees.objects.filter(Company_id=CompanyID).values_list('id',flat=True)                
-                    Usersdata = M_Users.objects.filter(Employee__in=employees)
-                     
+                    employees = M_Employees.objects.filter(Company_id=CompanyID).values_list('id',flat=True)              
+                    Usersdata = M_Users.objects.filter(Q(Employee__in=employees) & (Q(POSRateType=0) | Q(POSRateType__isnull=True)))
+                  
                 else:                
                     Usersdata = M_Users.objects.raw(f'''SELECT M_Users.id, M_Users.password, M_Users.last_login, M_Users.LoginName, M_Users.isActive, 
                     M_Users.isSendOTP, M_Users.isLoginUsingMobile, M_Users.isLoginUsingEmail, M_Users.AdminPassword, M_Users.OTP, 
