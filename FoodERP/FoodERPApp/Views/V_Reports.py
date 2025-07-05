@@ -2896,9 +2896,11 @@ class BillDeletedSummaryReportView(CreateAPIView):
                 Party = BillData['Party']
                 CashierID =BillData['Cashier']
                 BillDeletedSummaryData = [] 
-                query = f'''SELECT SweetPOS.T_SPOSInvoices.id, InvoiceDate, FullInvoiceNumber, GrandTotal, FoodERP.M_Users.LoginName AS UserName 
+                query = f'''SELECT SweetPOS.T_SPOSInvoices.id, InvoiceDate, FullInvoiceNumber, GrandTotal, 
+                            FoodERP.M_Users.LoginName AS UserName,  FoodERP.M_Parties.Name AS PartyName
                             FROM SweetPOS.T_SPOSInvoices
                             LEFT JOIN FoodERP.M_Users ON T_SPOSInvoices.CreatedBy = M_Users.id
+                            LEFT JOIN FoodERP.M_Parties ON T_SPOSInvoices.Party = M_Parties.id
                             WHERE IsDeleted = 1 AND InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}' '''
 
                 if Party > 0:
@@ -2916,7 +2918,8 @@ class BillDeletedSummaryReportView(CreateAPIView):
                         "InvoiceDate": bill.InvoiceDate,
                         "FullInvoiceNumber": bill.FullInvoiceNumber,
                         "GrandTotal": bill.GrandTotal,
-                        "UserName":bill.UserName                       
+                        "UserName":bill.UserName,
+                        "PartyName": bill.PartyName                      
                     })
                 if BillDeletedSummaryData:
                     log_entry = create_transaction_logNew(request, BillData, Party, "BillDeletedSummaryReport", 462, 0, FromDate, ToDate, 0)
