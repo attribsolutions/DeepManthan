@@ -75,7 +75,7 @@ class UserListView(CreateAPIView):
                 
                 if (RoleID == 2):
                     employees = M_Employees.objects.filter(Company_id=CompanyID).values_list('id',flat=True)              
-                    Usersdata = M_Users.objects.filter(Employee__in=employees).filter(Q(POSRateType=0) | Q(POSRateType__isnull=True))
+                    Usersdata = M_Users.objects.filter(Q(Employee__in=employees) & (Q(POSRateType=0) | Q(POSRateType__isnull=True)))
                   
                 else:                
                     Usersdata = M_Users.objects.raw(f'''SELECT M_Users.id, M_Users.password, M_Users.last_login, M_Users.LoginName, M_Users.isActive, 
