@@ -676,7 +676,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                                 "ImportFromExcel": a['ImportFromExcel'],
                                 "DataRecovery": a['DataRecovery'],
                                 "MobileNo":a['MobileNo'],
-                                "IsDeleted" : a['IsDeleted'] if a['IsDeleted'] else False,
+                                "IsRecordDeleted" : a['IsDeleted'] if a['IsDeleted'] else False,
                                 "IsSendToFTPSAP":a.get('IsSendToFTPSAP', None), 
                                 
                             }) 
