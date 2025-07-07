@@ -639,10 +639,10 @@ class DeleteInvoiceView(CreateAPIView):
                             ss.save()
                         
                         InvoiceIDs.append(DeleteInvoicedata['ClientSaleID'])
-                    log_entry = create_transaction_logNew(request,DeleteInvoicedatas,0, {'POSDeletedInvoiceID':InvoiceIDs}, 388,0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'POSInvoice Update Successfully ', 'Data':[]})
+                    log_entry = create_transaction_logNew(request,DeleteInvoicedatas,0, {'DeletedInvoiceID':InvoiceIDs}, 388,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Delete Successfully ', 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, DeleteInvoicedatas, 0,'UpdatePOSInvoiceUpdate:'+str(e),33,0)
+            log_entry = create_transaction_logNew(request, DeleteInvoicedatas, 0,'UpdateInvoiceDeleteFlag:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})             
         
 
