@@ -42,9 +42,9 @@ class M_MarginsView(CreateAPIView):
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 
-class GETMarginDetails(CreateAPIView): 
+class GETMarginDetails(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    # authentication__Class = JSONWebTokenAuthentication
+
     @transaction.atomic()
     def post(self, request):
         try:
@@ -52,34 +52,52 @@ class GETMarginDetails(CreateAPIView):
                 PriceListID = request.data['PriceList']
                 PartyID = request.data['Party']
                 EffectiveDate = request.data['EffectiveDate']
-                # query = M_Items.objects.all().filter(IsFranchisesItem=0) 
-                query = M_Items.objects.filter(Company_id=2)  
-                if not query:
-                    log_entry = create_transaction_logNew(request, 0, 0, "Margin Details Not available",116,0)
-                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
+                
+                pricelist = M_PriceList.objects.filter(id=PriceListID).first()
+                
+                if pricelist:
+                    PLPartyTypeID = pricelist.PLPartyType_id
                 else:
-                    Items_Serializer = M_ItemsSerializer01(query, many=True).data
-                    ItemList = list()
-                    for a in Items_Serializer:
-                        Item= a['id']
-                        b = MarginMaster(Item,PriceListID,PartyID,EffectiveDate)
-                        TodaysMargin=b.GetTodaysDateMargin()
-                        EffectiveDateMargin=b.GetEffectiveDateMargin()
-                        ID = b.GetEffectiveDateMarginID()
-                        ItemList.append({
-                            "id": ID,
-                            "Item": Item,
-                            "Name": a['Name'],
-                            "CurrentMargin": TodaysMargin[0]["TodaysMargin"],
-                            "CurrentDate":TodaysMargin[0]["Date"],
-                            "Margin":EffectiveDateMargin,
-                           
-                        })
-                    log_entry = create_transaction_logNew(request, Items_Serializer, 0,'EffectiveDate:'+EffectiveDate+','+'Supplier:'+str(PartyID),116,0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data':ItemList})
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Invalid PriceList ID', 'Data': []})
+
+                available_item_ids = M_ChannelWiseItems.objects.filter(PartyType_id=PLPartyTypeID).values_list('Item_id', flat=True)
+
+                if not available_item_ids:
+                    log_entry = create_transaction_logNew(request, 0, 0, "No available items for this party type", 116, 0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Items not available for this PartyType', 'Data': [] })
+
+                query = M_Items.objects.filter(id__in=available_item_ids, Company_id=2)
+
+                if not query.exists():
+                    log_entry = create_transaction_logNew(request, 0, 0, "Items not available", 116, 0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Items not available', 'Data': []})
+
+                Items_Serializer = M_ItemsSerializer01(query, many=True).data
+
+                ItemList = []
+                for a in Items_Serializer:
+                    Item = a['id']
+                    b = MarginMaster(Item, PriceListID, PartyID, EffectiveDate)
+                    TodaysMargin = b.GetTodaysDateMargin()
+                    EffectiveDateMargin = b.GetEffectiveDateMargin()
+                    ID = b.GetEffectiveDateMarginID()
+
+                    ItemList.append({
+                        "id": ID,
+                        "Item": Item,
+                        "Name": a['Name'],
+                        "CurrentMargin": TodaysMargin[0]["TodaysMargin"],
+                        "CurrentDate": TodaysMargin[0]["Date"],
+                        "Margin": EffectiveDateMargin,
+                    })
+
+                log_entry = create_transaction_logNew(request, Items_Serializer, 0,'EffectiveDate:' + EffectiveDate + ', Supplier:' + str(PartyID), 116, 0)
+                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': ItemList})
+
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0,0,'MarginDetails:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+            log_entry = create_transaction_logNew(request, 0, 0, 'MarginDetails:' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True,'Message': str(e), 'Data': []})
+
 
 ''' MRP Master List Delete Api Depend on ID '''
 
