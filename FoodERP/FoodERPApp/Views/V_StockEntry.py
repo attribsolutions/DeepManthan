@@ -493,7 +493,8 @@ class M_GetStockEntryList(CreateAPIView):
                 if not Party:
                     return JsonResponse({'StatusCode': 400, 'Status': False, 'Message': 'Party is required', 'Data': []})
 
-                query = '''SELECT 1 as id, s.StockDate,  p.Name as PartyName, s.Party_id,  NULL as ClientID, COUNT(*) as ItemCount
+                query = '''SELECT 1 as id, s.StockDate,  p.Name as PartyName, s.Party_id,  NULL as ClientID,
+                        COUNT(CASE WHEN s.Quantity <> 0 THEN 1 END) as ItemCount
                         FROM T_Stock as s
                         JOIN M_Parties as p ON s.Party_id = p.id
                         WHERE s.StockDate BETWEEN %s AND %s AND s.party_id = %s AND s.IsStockAdjustment = 0
@@ -501,7 +502,8 @@ class M_GetStockEntryList(CreateAPIView):
 
                         UNION
 
-                        SELECT 1 as id,s.StockDate, p.Name as PartyName, s.Party, s.ClientID, COUNT(*) as ItemCount
+                        SELECT 1 as id,s.StockDate, p.Name as PartyName, s.Party, s.ClientID,
+                        COUNT(CASE WHEN s.Quantity <> 0 THEN 1 END) as ItemCount
                         FROM SweetPOS.T_SPOSStock as s
                         JOIN M_Parties as p ON s.Party = p.id
                         WHERE s.StockDate BETWEEN %s AND %s AND s.Party = %s AND s.IsStockAdjustment = 0
