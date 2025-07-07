@@ -3159,7 +3159,7 @@ class StockAdjustmentReportView(CreateAPIView):
                 if StockAdjustmnetquery:                     
                     for row in StockAdjustmnetquery:                       
                         StockAdjustmentData.append({
-                            "id":row.id,
+                            # "id":row.id,
                             "StockDate":row.StockDate,
                             "ItemName":row.ItemName,
                             "Quantity":round(float(row.Quantity),3),
