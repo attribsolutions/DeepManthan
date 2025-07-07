@@ -76,6 +76,7 @@ def phonepe_callback(request, body_data):
         # print(response_data,"************")
         code = response_data.get("code")
         transaction_data = response_data.get("data", {})
+        print(transaction_data)
         transaction_id = transaction_data.get("transactionId")
         amount = transaction_data.get("amount")
         payment_state = transaction_data.get("paymentState")
