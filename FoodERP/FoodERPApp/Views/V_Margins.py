@@ -66,7 +66,7 @@ class GETMarginDetails(CreateAPIView):
                     log_entry = create_transaction_logNew(request, 0, 0, "No available items for this party type", 116, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Items not available for this PartyType', 'Data': [] })
 
-                query = M_Items.objects.filter(id__in=available_item_ids, Company_id=2)
+                query = M_Items.objects.filter(id__in=available_item_ids)
 
                 if not query.exists():
                     log_entry = create_transaction_logNew(request, 0, 0, "Items not available", 116, 0)

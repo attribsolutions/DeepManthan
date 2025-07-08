@@ -93,3 +93,27 @@ class SchemeDetailsSerializer(serializers.ModelSerializer):
         MC_SchemeParties.objects.bulk_create(scheme_parties)
 
         return scheme
+    
+    
+class SchemeListSerializerSecond(serializers.Serializer):
+    id = serializers.IntegerField()
+    SchemeName = serializers.CharField(max_length=100)
+    SchemeTypeID_id = serializers.IntegerField()
+    SchemeValue = serializers.DecimalField(max_digits=20, decimal_places=3)
+    ValueIn = serializers.CharField(max_length=100)
+    FromPeriod = serializers.DateField()
+    ToPeriod = serializers.DateField()
+    FreeItemID = serializers.IntegerField()
+    VoucherLimit = serializers.IntegerField()
+    QRPrefix = serializers.CharField(max_length=100)
+    IsActive = serializers.BooleanField()
+    BillAbove = serializers.DecimalField(max_digits=20, decimal_places=3)
+    SchemeDetails = serializers.CharField(max_length=100)
+    Message = serializers.CharField(max_length=500) 
+    OverLappingScheme = serializers.BooleanField()
+    SchemeValueUpto = serializers.DecimalField(max_digits=20, decimal_places=3)
+    Column1 = serializers.CharField(max_length=100)
+    Column2 = serializers.CharField(max_length=100)
+    Column3 = serializers.CharField(max_length=100)
+    ShortName = serializers.CharField(max_length=500) 
+    SchemeQuantity = serializers.DecimalField(max_digits=20, decimal_places=3)
