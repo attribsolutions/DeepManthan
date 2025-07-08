@@ -437,7 +437,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     filter_args['id__in'] = invoices_in_range.filter(
                         ~Exists(tc_spos_invoice_uploads_not_in)
                     ).values_list('id', flat=True)                         
-                    
+#===============================================T_Invoice========================================================== 
                 Invoices_query = T_Invoices.objects.filter(**filter_args).select_related('Party', 'Customer', 'Driver','Vehicle').annotate(
                     PartiesCustomerGSTIN=F('Customer__GSTIN'),
                     CustomerPAN=F('Customer__PAN'),
@@ -447,12 +447,13 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     DriverName=F('Driver__Name'),
                     VehicleNo=F('Vehicle__VehicleNumber'),
                     MobileNo=Value(0, output_field=IntegerField()),
-                    PaymentType=Value(0,output_field=IntegerField())
+                    PaymentType=Value(0,output_field=IntegerField()),
+                    IsDeleted = Value(0, output_field=IntegerField()),
                 ).values(
                     'id','PaymentType','InvoiceDate', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal',
                     'RoundOffAmount', 'CreatedBy','CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id',
                     'Party_id', 'Vehicle_id', 'TCSAmount', 'Hide', 'ImportFromExcel', 'PartyName', 'CustomerName','VehicleNo',
-                    'DeletedFromSAP', 'DataRecovery', 'PartiesCustomerGSTIN', 'CustomerPAN', 'CustomerPartyType', 'DriverName','MobileNo','IsSendToFTPSAP').order_by('-InvoiceDate')
+                    'DeletedFromSAP', 'DataRecovery', 'PartiesCustomerGSTIN', 'CustomerPAN', 'CustomerPartyType', 'DriverName','MobileNo','IsSendToFTPSAP','IsDeleted').order_by('-InvoiceDate')
                 
                 user_role_ids = list(MC_UserRoles.objects.filter(User_id=request.user.id).values_list('Role_id', flat=True))                
                 RoleID=M_Settings.objects.filter(id=55).values("DefaultValue")
@@ -465,14 +466,14 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     SPOS_filter_args = {
                             'InvoiceDate__range': (FromDate, ToDate),
                             'Party': Party,
-                            'IsDeleted': 0,
+                            # 'IsDeleted': 0,
                             'ClientID':0
                         }
                 else:
                     SPOS_filter_args = {
                             'InvoiceDate__range': (FromDate, ToDate),
                             'Party': Party,
-                            'IsDeleted': 0
+                            # 'IsDeleted': 0
                             
                         }
                 if Customer:
@@ -566,8 +567,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         ~Exists(tc_spos_invoice_uploads_not_in)
                     ).values_list('id', flat=True)
 
-              
-                # **Final Query Execution**                  
+# ===================================Final Query Execution(T_SPOSInvoices)======================================================               
                 SposInvoices_query = (
                     T_SPOSInvoices.objects.using('sweetpos_db')
                     .filter(**SPOS_filter_args)
@@ -581,7 +581,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     .values(
                         'id', 'InvoiceDate', 'PaymentType', 'InvoiceNumber', 'FullInvoiceNumber', 'GrandTotal',
                         'RoundOffAmount', 'CreatedOn', 'UpdatedBy', 'UpdatedOn', 'Customer_id', 'Party_id',
-                        'Vehicle_id', 'TCSAmount', 'Hide', 'MobileNo', 'CreatedBy', 'PartiesCustomerGSTIN'
+                        'Vehicle_id', 'TCSAmount', 'Hide', 'MobileNo', 'CreatedBy', 'IsDeleted','PartiesCustomerGSTIN'
                     )
                 )
                 
@@ -608,6 +608,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     b['CreatedBy'] = b['CreatedBy']
                     b['CreatedByName'] = CPartyName[0]['LoginName']
                     b['Identify_id'] = 2
+                   
                     b['VehicleNo'] = vehicle[0]['VehicleNumber'] if vehicle else ''
                     Spos_Invoices.append(b) 
                     
@@ -675,6 +676,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                                 "ImportFromExcel": a['ImportFromExcel'],
                                 "DataRecovery": a['DataRecovery'],
                                 "MobileNo":a['MobileNo'],
+                                "IsRecordDeleted" : a['IsDeleted'] if a['IsDeleted'] else False,
                                 "IsSendToFTPSAP":a.get('IsSendToFTPSAP', None), 
                                 
                             }) 
