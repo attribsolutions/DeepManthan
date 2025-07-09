@@ -529,7 +529,7 @@ class UpdateCustomerVehiclePOSInvoiceView(CreateAPIView):
                     gst_percentage = item.GSTPercentage or 0 
 
                     if same_state:
-                        if Get_CustomerID and Get_CustomerID.IsSEZ:
+                        if Get_PartyID and Get_PartyID.IsSEZ:
                             item.CGST = 0
                             item.SGST = 0
                             item.CGSTPercentage = 0
