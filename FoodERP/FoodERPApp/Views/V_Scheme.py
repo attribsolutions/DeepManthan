@@ -145,9 +145,9 @@ class SchemeListView(CreateAPIView):
                 for scheme in SchemeData_Serializer:
                     to_period = scheme['ToPeriod']
                     if to_period and to_period < ToDate:
-                        scheme['IsSchemeActive'] = 0  
+                        scheme['IsSchemeActive'] = False  
                     else:
-                        scheme['IsSchemeActive'] = 1  
+                        scheme['IsSchemeActive'] = True 
                         
                 log_entry = create_transaction_logNew(request, SchemeData_Serializer, 0, 'Scheme List', 481, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SchemeData_Serializer})
