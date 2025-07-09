@@ -9,7 +9,7 @@ from ..Serializer.S_WorkOrder import *
 from ..Serializer.S_MaterialIssue import *
 from ..models import *
 from datetime import datetime, timedelta
-
+from django.db.models import Sum
 
 
 class WorkOrderDetailsView(CreateAPIView):
@@ -29,20 +29,36 @@ class WorkOrderDetailsView(CreateAPIView):
                 GetQuantity = WorkOrderDetailsdata['Quantity']
                 # NoOfLots=WorkOrderDetailsdata['NoOfLots']
                 # CustomPrint(NoOfLots)
-                
+                today = datetime.now().date()
                 Query = T_WorkOrder.objects.filter(
-                    id=WorkOrderID, Item_id=ItemID, Company_id=CompanyID, Party_id=PartyID)
+                    id=WorkOrderID, Item_id=ItemID, Company_id=CompanyID, Party_id=PartyID)  
                 # CustomPrint(Query.query)
                 # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': str(Query.query)})
                 if Query.exists():
                     WorkOrder_Serializer = WorkOrderSerializerSecond(
                         Query, many=True).data                    
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': WorkOrder_Serializer})
+                    # print(WorkOrder_Serializer)
+                    productionQty = (T_Production.objects.filter(Item=ItemID, ProductionDate=today)
+                                    .aggregate(total=Sum('ActualQuantity'))['total'] or 0
+                                )
                     for a in WorkOrder_Serializer:
                         MaterialDetails = list()
-                        workorderqty = a['Quantity']                        
+                        workorderqty = a['Quantity'] 
+                        unit_id=a['Unit']['UnitID']['id']                       
+                        query3 = O_DateWiseLiveStock.objects.filter(
+                        StockDate=today, Party=PartyID, Item=ItemID).values('ClosingBalance', 'Unit_id')                        
+                        if query3:
+
+                            ClosingBalance = UnitwiseQuantityConversion(
+                                ItemID, query3[0]['ClosingBalance'], 0, query3[0]['Unit_id'], 0, unit_id, 0).ConvertintoSelectedUnit() 
+                            
+                            
+                        else:
+                            ClosingBalance = 0.00
+                            
                         for b in a['WorkOrderItems']:
-                            # print(b)
+                            
                             Item = b['Item']['id']
                             # print(Item)
                             Child_Item_BOM_id= list(M_BillOfMaterial.objects.filter(Item_id=Item,IsDelete=0).values('id'))
@@ -86,6 +102,7 @@ class WorkOrderDetailsView(CreateAPIView):
                                         # "Qty":p
                                         "Qty": ""                                        
                                     })
+                            
                             MaterialDetails.append({
                                 "id": b['id'],
                                 "Item": b['Item']['id'],
@@ -94,6 +111,8 @@ class WorkOrderDetailsView(CreateAPIView):
                                 "UnitName": b['Unit']['BaseUnitConversion'],
                                 "Quantity": round(ActualQty, 3),
                                 "OriginalWorkOrderQty":b['Quantity'],
+                                "ProductionQty":productionQty,
+                                "StockQty":ClosingBalance,
                                 "Bom_id":Child_Item_BOM,
                                 "BatchesData": stockDatalist 
                                                              
@@ -117,6 +136,7 @@ class MaterialIsssueList(CreateAPIView):
                 FromDate = MaterialIsssuedata['FromDate']
                 ToDate = MaterialIsssuedata['ToDate'] 
                 Party=MaterialIsssuedata['Party']
+                today = datetime.now().date()
                 if(FromDate=="" and ToDate=="" ): 
                     query = T_MaterialIssue.objects.filter(~Q(Status=2),Party_id=Party,IsDelete=0) 
                 else: 
@@ -159,6 +179,23 @@ class MaterialIsssueList(CreateAPIView):
                         
                         Productionquery1 = T_MaterialIssue.objects.filter(Item_id=a['Item']['id']).values('id')                
                         BatchCode = SystemBatchCodeGeneration.GetGrnBatchCode(a['Item']['id'], a['Party']['id'], Productionquery1.count())                     
+                        productionQty = (T_Production.objects.filter(Item=a['Item']['id'], ProductionDate=today)
+                                    .aggregate(total=Sum('ActualQuantity'))['total'] or 0
+                                )
+                        UnitID = MC_ItemUnits.objects.filter(id=a['Unit']['id']).values('UnitID_id')                        
+                        unit_id=UnitID[0]['UnitID_id']    
+                        # print(unit_id)                   
+                        query3 = O_DateWiseLiveStock.objects.filter(
+                        StockDate=today, Party=Party, Item=a['Item']['id']).values('ClosingBalance', 'Unit_id')                        
+                        if query3:
+
+                            ClosingBalance = UnitwiseQuantityConversion(
+                                a['Item']['id'], query3[0]['ClosingBalance'], 0, query3[0]['Unit_id'], 0, unit_id, 0).ConvertintoSelectedUnit() 
+                            # print(ClosingBalance)
+                            
+                        else:
+                            ClosingBalance = 0.00
+                        
                         MaterialIsssueListData.append({
                             "id": a['id'],
                             "MaterialIssueDate": a['MaterialIssueDate'],
@@ -176,6 +213,8 @@ class MaterialIsssueList(CreateAPIView):
                             "PartyName": a['Party']['Name'],
                             "CreatedOn": a['CreatedOn'],
                             "Status":a['Status'],
+                            "ProductionQty":productionQty,
+                            "StockQty":ClosingBalance,
                             "PrintedBatchCode":BatchCode,
                             "Percentage":Percentage ,
                             "ShelfDate":shelf_date                       
