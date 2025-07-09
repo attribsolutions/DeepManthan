@@ -639,10 +639,10 @@ class DeleteInvoiceView(CreateAPIView):
                             ss.save()
                         
                         InvoiceIDs.append(DeleteInvoicedata['ClientSaleID'])
-                    log_entry = create_transaction_logNew(request,DeleteInvoicedatas,0, {'POSDeletedInvoiceID':InvoiceIDs}, 388,0)
-                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'POSInvoice Update Successfully ', 'Data':[]})
+                    log_entry = create_transaction_logNew(request,DeleteInvoicedatas,0, {'DeletedInvoiceID':InvoiceIDs}, 388,0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True,  'Message': 'Invoice Delete Successfully ', 'Data':[]})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, DeleteInvoicedatas, 0,'UpdatePOSInvoiceUpdate:'+str(e),33,0)
+            log_entry = create_transaction_logNew(request, DeleteInvoicedatas, 0,'UpdateInvoiceDeleteFlag:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})             
         
 
@@ -866,21 +866,22 @@ class FranchiseSaleWithBillCountView(CreateAPIView):
                 FromDate = DailySale['FromDate']
                 ToDate = DailySale['ToDate']
  
-                query = T_SPOSInvoices.objects.raw('''SELECT M_Parties.id, Name, Count(*) Bills, SUM(GrandTotal) GrandTotal
+                query = T_SPOSInvoices.objects.raw('''SELECT M_Parties.id, Name, Count(*) Bills, SUM(GrandTotal) GrandTotal,T_SPOSInvoices.ClientID, 
+                                                    MAX(T_SPOSInvoices.CreatedOn) AS LastBillTime
                                                     FROM SweetPOS.T_SPOSInvoices
                                                     JOIN FoodERP.M_Parties on Party = M_Parties.id
                                                     WHERE InvoiceDate BETWEEN %s AND %s
                                                     AND Party IN (select Party_id from FoodERP.MC_ManagementParties WHERE Employee_id = %s)
-                                                    Group By M_Parties.id, Name
-                                                    Order By GrandTotal Desc''',[FromDate,ToDate,EmployeeID])
-                
+                                                    Group By M_Parties.id, M_Parties.Name,T_SPOSInvoices.ClientID
+                                                    Order By GrandTotal Desc''',[FromDate,ToDate,EmployeeID]) 
                 DailySaleDataList = list()
                 for a in query:
                     DailySaleDataList.append({
                         "id": a.id,
                         "Name": a.Name,
                         "Bills": a.Bills,
-                        "GrandTotal": a.GrandTotal
+                        "GrandTotal": a.GrandTotal,
+                        "LastBillTime": a.LastBillTime
                     })
                 if DailySaleDataList:
                     log_entry = create_transaction_logNew(request, DailySale, 0, 'FranchiseSaleWithBillCount', 428, 0)

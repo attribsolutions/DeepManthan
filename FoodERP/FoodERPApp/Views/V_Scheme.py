@@ -115,24 +115,47 @@ class SchemeView(CreateAPIView):
         except Exception as e:
             create_transaction_logNew(request, PartyData, 0, 'SchemeDetails:' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})       
- 
+        
+
 class SchemeListView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    
+
     @transaction.atomic()
-    def get(self, request ):
+    def post(self, request):
+        SchemeData = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                Scheme_data = M_Scheme.objects.all()
-                Scheme_data_serializer = SchemeSerializer(Scheme_data,many=True)
-                log_entry = create_transaction_logNew(request, Scheme_data_serializer,0,'',481,0)
-                return JsonResponse({'StatusCode': 200, 'Status': True,'Message': '', 'Data': Scheme_data_serializer.data})
-        except  M_Scheme.DoesNotExist:
-            log_entry = create_transaction_logNew(request,0,0,'Scheme Data Does Not Exist',481,0)
-            return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Scheme Data Not available', 'Data': []})
+                FromDate = SchemeData['FromDate']
+                ToDate = SchemeData['ToDate']
+     
+                query = '''SELECT M_Scheme.id,SchemeName,SchemeTypeID_id,SchemeValue,ValueIn,FromPeriod,ToPeriod,FreeItemID,
+                            VoucherLimit,QRPrefix,IsActive,BillAbove,SchemeDetails,Message,OverLappingScheme,SchemeValueUpto,
+                            Column1, Column2,Column3,ShortName,SchemeQuantity
+                            FROM M_Scheme
+                            WHERE M_Scheme.FromPeriod >= %s AND M_Scheme.ToPeriod <= %s'''
+
+                SchemeList = M_Scheme.objects.raw(query, [FromDate, ToDate])
+
+                if not list(SchemeList):
+                    log_entry = create_transaction_logNew(request, 0, 0, "Scheme List Not Available", 481, 0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Scheme List Not Available', 'Data': []})
+
+                SchemeData_Serializer = SchemeListSerializerSecond(SchemeList, many=True).data
+                
+                for scheme in SchemeData_Serializer:
+                    to_period = scheme['ToPeriod']
+                    if to_period and to_period < ToDate:
+                        scheme['IsSchemeActive'] = False  
+                    else:
+                        scheme['IsSchemeActive'] = True 
+                        
+                log_entry = create_transaction_logNew(request, SchemeData_Serializer, 0, 'Scheme List', 481, 0)
+                return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SchemeData_Serializer})
+
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,'GETAllSchemes:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data':[]})
+            log_entry = create_transaction_logNew(request, 0, 0, 'SchemeList:' + str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+
         
 class SchemeListperMonthView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -464,7 +487,7 @@ class SchemeDetailsView(CreateAPIView):
             return Response({'StatusCode': 204, 'Status': True,'Message': 'Scheme not found.', 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, id, 479, 0)
-            return Response({'StatusCode': 204, 'Status': True, 'Message': 'Scheme used in another table', 'Data': []})
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data':[]})  
         
         
 

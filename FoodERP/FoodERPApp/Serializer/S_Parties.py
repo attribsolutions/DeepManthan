@@ -209,7 +209,7 @@ class PartyAddressSerializerSecond(serializers.ModelSerializer):
 
     class Meta:
         model = MC_PartyAddress
-        fields = ['id', 'Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'fssaidocument', 'fssaidocumenturl', 'filename']
+        fields = ['id', 'Address', 'FSSAINo', 'FSSAIExipry', 'PIN', 'IsDefault', 'fssaidocumenturl', 'filename']
 
     def get_fssaidocumenturl(self, obj):
         if obj.fssaidocumenturl:  # only if file is uploaded
@@ -426,14 +426,22 @@ class UpdateM_PartiesSerializer(serializers.ModelSerializer):
                     'IsDefault': address_data['IsDefault']
                 }
                 if fssai_doc:
-                    update_fields['fssaidocumenturl'] = fssai_doc
-
-                MC_PartyAddress.objects.filter(id=address_id, Party=instance).update(**update_fields)
+                    address_instance = MC_PartyAddress.objects.get(id=address_id, Party=instance)
+                    address_instance.fssaidocumenturl.save(fssai_doc.name, fssai_doc, save=True)
+                    MC_PartyAddress.objects.filter(id=address_id, Party=instance).update(**update_fields)
+                else:
+                    MC_PartyAddress.objects.filter(id=address_id, Party=instance).update(**update_fields)
 
             else:
                 # Create new
                 address_data.pop('id', None)
-                MC_PartyAddress.objects.create(Party=instance, **address_data)
+                fssai_doc = address_data.pop('fssaidocumenturl', None)
+
+                new_address = MC_PartyAddress.objects.create(Party=instance, **address_data)
+
+                if fssai_doc:
+                    new_address.fssaidocumenturl.save(fssai_doc.name, fssai_doc, save=True)
+
 
         # 3️⃣ Update M_PartyDetails Cluster/SubCluster
         query = M_PartyType.objects.filter(id=instance.PartyType.id).values('IsVendor', 'IsRetailer').first()
