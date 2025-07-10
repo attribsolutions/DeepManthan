@@ -529,12 +529,20 @@ class UpdateCustomerVehiclePOSInvoiceView(CreateAPIView):
                     gst_percentage = item.GSTPercentage or 0 
 
                     if same_state:
-                        item.CGST = round(gst_amount / 2, 2)
-                        item.SGST = round(gst_amount / 2, 2)
-                        item.CGSTPercentage = round(gst_percentage / 2, 2)
-                        item.SGSTPercentage = round(gst_percentage / 2, 2)
-                        item.IGST = 0
-                        item.IGSTPercentage = 0
+                        if Get_CustomerID and Get_CustomerID.IsSEZ:
+                            item.CGST = 0
+                            item.SGST = 0
+                            item.CGSTPercentage = 0
+                            item.SGSTPercentage = 0
+                            item.IGST = gst_amount
+                            item.IGSTPercentage = gst_percentage
+                        else:
+                            item.CGST = round(gst_amount / 2, 2)
+                            item.SGST = round(gst_amount / 2, 2)
+                            item.CGSTPercentage = round(gst_percentage / 2, 2)
+                            item.SGSTPercentage = round(gst_percentage / 2, 2)
+                            item.IGST = 0
+                            item.IGSTPercentage = 0
                     else:
                         item.CGST = 0
                         item.SGST = 0
@@ -549,7 +557,7 @@ class UpdateCustomerVehiclePOSInvoiceView(CreateAPIView):
 
         except Exception as e:
             log_entry = create_transaction_logNew(request, CustomerVehicledata, 0, 'UpdateCustomerVehiclePOSInvoice: ' + str(e), 33, 0)
-            return JsonResponse({'StatusCode': 400,'Status': False,'Message': str(e),'Data': []})
+            return JsonResponse({'StatusCode': 400,'Status': True,'Message': str(e),'Data': []})
 
         
 class DeleteInvoiceView(CreateAPIView):
@@ -866,23 +874,34 @@ class FranchiseSaleWithBillCountView(CreateAPIView):
                 FromDate = DailySale['FromDate']
                 ToDate = DailySale['ToDate']
  
-                query = T_SPOSInvoices.objects.raw('''SELECT M_Parties.id, Name, Count(*) Bills, SUM(GrandTotal) GrandTotal,T_SPOSInvoices.ClientID, 
-                                                    MAX(T_SPOSInvoices.CreatedOn) AS LastBillTime
+                query = T_SPOSInvoices.objects.raw('''SELECT M_Parties.id, Name, Count(*) Bills, SUM(GrandTotal) GrandTotal,
+                                                   T_SPOSInvoices.ClientID, MAX(T_SPOSInvoices.CreatedOn) AS LastBillTime
                                                     FROM SweetPOS.T_SPOSInvoices
-                                                    JOIN FoodERP.M_Parties on Party = M_Parties.id
+                                                    left JOIN FoodERP.M_Parties on Party = M_Parties.id
                                                     WHERE InvoiceDate BETWEEN %s AND %s
                                                     AND Party IN (select Party_id from FoodERP.MC_ManagementParties WHERE Employee_id = %s)
                                                     Group By M_Parties.id, M_Parties.Name,T_SPOSInvoices.ClientID
                                                     Order By GrandTotal Desc''',[FromDate,ToDate,EmployeeID]) 
-                DailySaleDataList = list()
+            
+                DailySaleDataDict = {}
                 for a in query:
-                    DailySaleDataList.append({
-                        "id": a.id,
-                        "Name": a.Name,
+                    party_id = a.id
+                    if party_id not in DailySaleDataDict:
+                        DailySaleDataDict[party_id] = {
+                            "id": a.id,
+                            "Name": a.Name,
+                            "BillDetails": []
+                        }
+
+                    DailySaleDataDict[party_id]["BillDetails"].append({
+                        "ClientID": a.ClientID,
                         "Bills": a.Bills,
                         "GrandTotal": a.GrandTotal,
                         "LastBillTime": a.LastBillTime
                     })
+                    # Convert to list for JSON response
+                DailySaleDataList = list(DailySaleDataDict.values())
+
                 if DailySaleDataList:
                     log_entry = create_transaction_logNew(request, DailySale, 0, 'FranchiseSaleWithBillCount', 428, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': DailySaleDataList})
