@@ -132,7 +132,7 @@ class SchemeListView(CreateAPIView):
                             VoucherLimit,QRPrefix,IsActive,BillAbove,SchemeDetails,Message,OverLappingScheme,SchemeValueUpto,
                             Column1, Column2,Column3,ShortName,SchemeQuantity
                             FROM M_Scheme
-                            WHERE M_Scheme.FromPeriod >= %s AND M_Scheme.ToPeriod <= %s'''
+                            WHERE M_Scheme.FromPeriod <= %s AND M_Scheme.ToPeriod >= %s'''
 
                 SchemeList = M_Scheme.objects.raw(query, [FromDate, ToDate])
 
