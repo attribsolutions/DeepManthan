@@ -46,10 +46,12 @@ class PhonePayReceiveMsg(APIView):
 # Callback Handler
 def phonepe_callback(request, body_data):
     try:
-        SALT_KEY = '5b9db5b7-a553-45ed-a20c-ee04c4b1014f'
+        # SALT_KEY = '5b9db5b7-a553-45ed-a20c-ee04c4b1014f'
+        SALT_KEY = '4bf62e39-c62e-4236-ae8e-c8befd1ec243'
         SALT_INDEX = '1'
         # print('*****')
         x_verify_header = request.headers.get('x-verify')
+        print(x_verify_header)
         base64_response = body_data.get('response')
         print(base64_response)
         if not base64_response:
@@ -74,6 +76,7 @@ def phonepe_callback(request, body_data):
         # print(response_data,"************")
         code = response_data.get("code")
         transaction_data = response_data.get("data", {})
+        print(transaction_data)
         transaction_id = transaction_data.get("transactionId")
         amount = transaction_data.get("amount")
         payment_state = transaction_data.get("paymentState")

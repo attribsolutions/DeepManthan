@@ -9,7 +9,7 @@ class PartiesSerializer(serializers.ModelSerializer):
        
     class Meta:
         model = M_Parties
-        fields = ['id','Name','GSTIN','PAN','Email','MobileNo','PartyType']       
+        fields = ['id','Name','GSTIN','PAN','Email','MobileNo','PartyType','IsSEZ']       
 
 class Partyaddress(serializers.ModelSerializer):
     class Meta:
@@ -120,7 +120,7 @@ class M_PartiesSerializer(serializers.ModelSerializer):
             'MobileNo', 'AlternateContactNo', 'Country', 'State', 'District', 'City', 'SAPPartyCode',
              'Latitude', 'Longitude', 'GSTIN', 'isActive', 'CreatedBy', 'CreatedOn', 'UpdatedBy', 'UpdatedOn',
             'IsApprovedParty', 'IsDivision', 'MkUpMkDn', 'SkyggeID', 'UploadSalesDatafromExcelParty',
-            'ClosingDate', 'PartyAddress', 'PartyPrefix', 'PartySubParty', 'Cluster', 'SubCluster'
+            'ClosingDate', 'IsSEZ', 'PartyAddress', 'PartyPrefix', 'PartySubParty', 'Cluster', 'SubCluster'
         ]
         
         
