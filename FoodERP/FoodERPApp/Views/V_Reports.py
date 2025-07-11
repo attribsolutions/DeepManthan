@@ -2539,7 +2539,7 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                                 JOIN SweetPOS.TC_SPOSInvoiceItems AS aa ON I.id = aa.Invoice_id
                                 join SweetPOS.TC_InvoicesSchemes InS on InS.Invoice_id=I.id
                                 where I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss1}
-                                GROUP BY I.InvoiceDate,I.FullInvoiceNumber,I.Party,InS.scheme)
+                                GROUP BY I.InvoiceDate,I.FullInvoiceNumber,I.Party)
                 
                                 select M_Scheme.id,M_Scheme.SchemeName,M_Scheme.FromPeriod,M_Scheme.ToPeriod ,M_Scheme.SchemeValue,M_Parties.Name PartyName,I.VoucherCode,I.InvoiceDate,
                                 I.InvoiceAmount,I.InvoiceNumber,
