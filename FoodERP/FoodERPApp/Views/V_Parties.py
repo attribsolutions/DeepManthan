@@ -172,7 +172,7 @@ class M_PartiesFilterView2(CreateAPIView):
                 IsRetailer = Logindata['IsRetailer']
                 EmployeeID = Logindata['EmployeeID']
 
-                qq='''SELECT M_Parties.id,M_Parties.Name,M_PartyType.Name PartyTypeName,C_Companies.Name CompanyName ,M_PriceList.Name PriceListName,M_States.Name StatesName
+                qq='''SELECT M_Parties.id,M_Parties.Name, M_Parties.IsSEZ, M_PartyType.Name PartyTypeName,C_Companies.Name CompanyName ,M_PriceList.Name PriceListName,M_States.Name StatesName
 FROM M_Parties
 join C_Companies on C_Companies.id=M_Parties.Company_id
 join M_PartyType on M_PartyType.id=M_Parties.PartyType_id
@@ -236,7 +236,8 @@ join M_PriceList on M_PriceList.id=M_Parties.PriceList_id'''
                         "PartyType": PartyData.PartyTypeName,
                         "Company": PartyData.CompanyName,
                         "PriceList" : PartyData.PriceListName,
-                        "State" : PartyData.StatesName
+                        "State" : PartyData.StatesName,
+                        "IsSEZ" : PartyData.IsSEZ
                     })
                 
                 if not PartyQuery:

@@ -239,6 +239,7 @@ class M_Parties(models.Model):
     Country = models.ForeignKey(M_Country, related_name='PartiesCountry',on_delete=models.PROTECT,null=True, blank=True)
     ShortName = models.CharField(max_length=100,null=True, blank=True)
     ClosingDate = models.DateTimeField(blank=True, null=True)
+    IsSEZ = models.BooleanField(default=False)
     class Meta:
         db_table = 'M_Parties'
         constraints = [

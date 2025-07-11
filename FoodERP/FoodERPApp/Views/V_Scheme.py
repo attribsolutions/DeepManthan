@@ -127,34 +127,36 @@ class SchemeListView(CreateAPIView):
             with transaction.atomic():
                 FromDate = SchemeData['FromDate']
                 ToDate = SchemeData['ToDate']
-     
-                query = '''SELECT M_Scheme.id,SchemeName,SchemeTypeID_id,SchemeValue,ValueIn,FromPeriod,ToPeriod,FreeItemID,
-                            VoucherLimit,QRPrefix,IsActive,BillAbove,SchemeDetails,Message,OverLappingScheme,SchemeValueUpto,
-                            Column1, Column2,Column3,ShortName,SchemeQuantity
-                            FROM M_Scheme
-                            WHERE M_Scheme.FromPeriod >= %s AND M_Scheme.ToPeriod <= %s'''
 
-                SchemeList = M_Scheme.objects.raw(query, [FromDate, ToDate])
+                query = '''SELECT  M_Scheme.id, SchemeName, SchemeTypeID_id, SchemeValue, ValueIn, FromPeriod, ToPeriod,
+                            FreeItemID, VoucherLimit, QRPrefix, IsActive, BillAbove, SchemeDetails, Message, OverLappingScheme, 
+                            SchemeValueUpto, Column1, Column2, Column3, ShortName,SchemeQuantity
+                            FROM M_Scheme
+                            WHERE M_Scheme.FromPeriod <= %s AND M_Scheme.ToPeriod >= %s'''
+
+                # Pass ToDate first, then FromDate as per query placeholders
+                SchemeList = M_Scheme.objects.raw(query, [ToDate, FromDate])
 
                 if not list(SchemeList):
                     log_entry = create_transaction_logNew(request, 0, 0, "Scheme List Not Available", 481, 0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Scheme List Not Available', 'Data': []})
 
                 SchemeData_Serializer = SchemeListSerializerSecond(SchemeList, many=True).data
-                
+
                 for scheme in SchemeData_Serializer:
                     to_period = scheme['ToPeriod']
                     if to_period and to_period < ToDate:
-                        scheme['IsSchemeActive'] = False  
+                        scheme['IsSchemeActive'] = False
                     else:
-                        scheme['IsSchemeActive'] = True 
-                        
+                        scheme['IsSchemeActive'] = True
+
                 log_entry = create_transaction_logNew(request, SchemeData_Serializer, 0, 'Scheme List', 481, 0)
                 return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': SchemeData_Serializer})
 
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'SchemeList:' + str(e), 33, 0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': str(e), 'Data': []})
+
 
         
 class SchemeListperMonthView(CreateAPIView):
