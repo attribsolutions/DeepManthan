@@ -122,6 +122,10 @@ class M_ItemsFilterView(CreateAPIView):
                                                {ItemsGroupJoinsandOrderby[2]}''') 
                     # CustomPrint(query.query)  
                 else:
+                    if CompanyID==4 and IsBOM==1:
+                        IsMixItem= f"And M_Items.IsMixItem=0"
+                    else:
+                        IsMixItem= f"And M_Items.IsMixItem=1"
                     # query = M_Items.objects.select_related().filter(Company=CompanyID).order_by('Sequence')
                     query= M_Items.objects.raw(f'''SELECT M_Items.id,M_Items.Name, M_Items.ShortName, M_Items.Sequence, 
                                                M_Items.BarCode, M_Items.SAPItemCode, M_Items.isActive, M_Items.IsSCM,
@@ -136,9 +140,9 @@ class M_ItemsFilterView(CreateAPIView):
                                                JOIN M_Units ON M_Units.id=M_Items.BaseUnitID_id 
                                                JOIN C_Companies ON C_Companies.id = M_Items.Company_id 
                                                {ItemsGroupJoinsandOrderby[1]}
-                                               WHERE M_Items.Company_id=%s 
+                                               WHERE M_Items.Company_id=%s {IsMixItem}
                                                {ItemsGroupJoinsandOrderby[2]}''',([CompanyID]))
-
+                
                 if not query:
                     log_entry = create_transaction_logNew(request, Logindata, x, "Items Not available",102,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message':  'Items Not available', 'Data': []})
