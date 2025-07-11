@@ -878,7 +878,7 @@ class FranchiseSaleWithBillCountView(CreateAPIView):
                                                    T_SPOSInvoices.ClientID, MAX(T_SPOSInvoices.CreatedOn) AS LastBillTime
                                                     FROM SweetPOS.T_SPOSInvoices
                                                     left JOIN FoodERP.M_Parties on Party = M_Parties.id
-                                                    WHERE InvoiceDate BETWEEN %s AND %s
+                                                    WHERE InvoiceDate BETWEEN %s AND %s and IsDeleted=0
                                                     AND Party IN (select Party_id from FoodERP.MC_ManagementParties WHERE Employee_id = %s)
                                                     Group By M_Parties.id, M_Parties.Name,T_SPOSInvoices.ClientID
                                                     Order By GrandTotal Desc''',[FromDate,ToDate,EmployeeID]) 
