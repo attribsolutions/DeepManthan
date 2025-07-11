@@ -1211,10 +1211,12 @@ class MaterialRegisterDownloadView(CreateAPIView):
                 ToDate = Reportdata['ToDate']
                 Party = Reportdata['Party']
                 Item = Reportdata['Item']
-                Unit = Reportdata['Unit']
-
+                Unit = Reportdata['Unit']               
+                    
                 q1 = M_Items.objects.filter(id=Item).values('BaseUnitID_id')
-                BaseUnitID = q1[0]['BaseUnitID_id']
+                BaseUnitID = q1[0]['BaseUnitID_id']                
+                if Unit==0:
+                    Unit=BaseUnitID                    
                 q2 = M_Settings.objects.filter(id=14).values('DefaultValue')
                 DefaultValues = q2[0]['DefaultValue']
 
