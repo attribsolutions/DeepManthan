@@ -150,7 +150,7 @@ class T_GRNSerializer(serializers.ModelSerializer):
 class Partiesserializer(serializers.ModelSerializer):
     class Meta:
         model = M_Parties
-        fields = ['id', 'Name', 'PriceList_id']
+        fields = ['id', 'Name', 'PriceList_id','IsSEZ']
 class InvoiceDateserializer(serializers.ModelSerializer):
     class Meta:
         model = T_Invoices
