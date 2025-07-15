@@ -504,7 +504,8 @@ class ItemSerializerThird(serializers.Serializer):
     BaseUnitID_id = serializers.IntegerField()
     Company_id =serializers.IntegerField()
     CompanyName = serializers.CharField(max_length=200)
-    BaseUnitName = serializers.CharField(max_length=200)   
+    BaseUnitName = serializers.CharField(max_length=200) 
+    IsMixItem = serializers.IntegerField()
         
         
 class ItemWiseUpdateSerializer(serializers.Serializer): 
