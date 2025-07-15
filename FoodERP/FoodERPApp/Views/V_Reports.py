@@ -2570,12 +2570,12 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                                 where UsageType= 'offline' 
                                 and I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss1} ''')
                 
-                print(CouponCodeRedemptionQuery)
+                # print(CouponCodeRedemptionQuery)
                 
                 i=1
                 for CouponCode in CouponCodeRedemptionQuery:
                 
-                    print(CouponCode.DiscountAmount,CouponCode.InvoiceNumber)
+                    # print(CouponCode.DiscountAmount,CouponCode.InvoiceNumber)
                     CouponCodeRedemptionData.append({
                         "id": i,
                         "VoucherTypeID": CouponCode.VoucherType_id,
