@@ -42,7 +42,8 @@ class SwiggyZomatoClaimListView(CreateAPIView):
                             JOIN FoodERP.M_Parties cust ON cust.id = I.Customer
                             WHERE I.InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}'
                         '''                    
-                if PartyID:
+                
+                if PartyID and PartyID != "0":
                     PartyIDs_list = PartyID.split(',')
                     PartyIDs_in_query = ','.join(str(pid) for pid in PartyIDs_list)
                     query += f' AND I.Party IN ({PartyIDs_in_query})'
