@@ -41,11 +41,11 @@ class SwiggyZomatoClaimListView(CreateAPIView):
                             JOIN FoodERP.M_Parties ON M_Parties.id = I.Party
                             JOIN FoodERP.M_Parties cust ON cust.id = I.Customer
                             WHERE I.InvoiceDate BETWEEN '{FromDate}' AND '{ToDate}'
-                        '''
-
-                # Add Party filter only if PartyID > 0
-                if PartyID > 0:
-                    query += f' AND I.Party = {PartyID}'
+                        '''                    
+                if PartyID:
+                    PartyIDs_list = PartyID.split(',')
+                    PartyIDs_in_query = ','.join(str(pid) for pid in PartyIDs_list)
+                    query += f' AND I.Party IN ({PartyIDs_in_query})'
 
                 query += ' GROUP BY M_Parties.id, cust.id, M_Users.id'
 
@@ -61,12 +61,12 @@ class SwiggyZomatoClaimListView(CreateAPIView):
                     })
 
                 if SZClaimListData:
-                    log_entry = create_transaction_logNew(request, ClaimData, PartyID, "SwiggyZomatoClaimData", 487, 0, FromDate, ToDate, 0)
+                    log_entry = create_transaction_logNew(request, ClaimData, 0, "SwiggyZomatoClaimData", 487, 0, FromDate, ToDate, 0)
                     return JsonResponse({"StatusCode": 200, "Status": True, "Message": "SwiggyZomatoClaimData", "Data": SZClaimListData})
 
-                log_entry = create_transaction_logNew(request, ClaimData, PartyID, "No SwiggyZomatoClaimData found", 487, 0, FromDate, ToDate, 0)
+                log_entry = create_transaction_logNew(request, ClaimData, 0, "No SwiggyZomatoClaimData found", 487, 0, FromDate, ToDate, 0)
                 return JsonResponse({"StatusCode": 204, "Status": True, "Message": "No SwiggyZomatoClaimData found.", "Data": []})
 
         except Exception as e:
-            log_entry = create_transaction_logNew(request, ClaimData, PartyID, "SwiggyZomatoClaimData Error: " + str(e), 33, 0)
+            log_entry = create_transaction_logNew(request, ClaimData, 0, "SwiggyZomatoClaimData Error: " + str(e), 33, 0)
             return JsonResponse({"StatusCode": 400, "Status": False, "Message": str(e), "Data": []})
