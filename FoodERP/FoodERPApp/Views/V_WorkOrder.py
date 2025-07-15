@@ -10,6 +10,7 @@ from ..Serializer.S_Orders import *
 from ..Serializer.S_Bom import *
 from ..Serializer.S_WorkOrder import *
 from ..models import *
+from datetime import datetime, timedelta
 
 
 class BomDetailsView(CreateAPIView):
@@ -90,6 +91,7 @@ class WorkOrderList(CreateAPIView):
                 FromDate = WorkOrderdata['FromDate']
                 ToDate = WorkOrderdata['ToDate']
                 Party=WorkOrderdata['Party']
+                today = datetime.now().date()
                 if(FromDate=="" and ToDate=="" ):                    
                     query = T_WorkOrder.objects.filter(~Q(Status=2),Party_id=Party) 
                 else:                    
@@ -102,6 +104,21 @@ class WorkOrderList(CreateAPIView):
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':'','Data': WorkOrder_serializerdata})
                     WorkOrderListData = list()
                     for a in WorkOrder_serializerdata:
+                        ItemID=a['Item']['id']                        
+                        productionQty = (T_Production.objects.filter(Item=ItemID, ProductionDate=today)
+                                    .aggregate(total=Sum('ActualQuantity'))['total'] or 0
+                                )
+                        unit_id=a['Unit']['UnitID']['id']                                             
+                        query3 = O_DateWiseLiveStock.objects.filter(
+                        StockDate=today, Party=Party, Item=ItemID).values('ClosingBalance', 'Unit_id')                                               
+                        if query3:
+                           
+                            ClosingBalance = UnitwiseQuantityConversion(
+                                ItemID, query3[0]['ClosingBalance'], 0, query3[0]['Unit_id'], 0, unit_id, 0).ConvertintoSelectedUnit() 
+                            
+                            
+                        else:
+                            ClosingBalance = 0.00
                         Percentage = 0
                         RemaningQty = a["RemaninQuantity"]
                         NumberOFLots =a['RemainNumberOfLot'] 
@@ -145,6 +162,8 @@ class WorkOrderList(CreateAPIView):
                             "CreatedOn": a['CreatedOn'],
                             "CreatedBy": a['CreatedBy'],
                             "Status":a['Status'],
+                            "PproductionQty":productionQty,
+                            "StockQty":ClosingBalance
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': WorkOrderListData})
                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Record Not Found', 'Data': []})
