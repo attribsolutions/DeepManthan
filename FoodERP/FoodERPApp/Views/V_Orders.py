@@ -675,6 +675,7 @@ class T_OrdersPrintView(CreateAPIView):
                             "CustomerSAPCode": a['Customer']['SAPPartyCode'],
                             "CustomerName": a['Customer']['Name'],
                             "CustomerGSTIN":a['Customer']['GSTIN'],
+                            "IsSEZ":a['Customer']['IsSEZ'],
                             "Supplier": a['Supplier']['id'],
                             "SupplierSAPCode": a['Supplier']['SAPPartyCode'],
                             "SupplierName": a['Supplier']['Name'],
