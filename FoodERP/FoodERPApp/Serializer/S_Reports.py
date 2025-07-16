@@ -334,9 +334,11 @@ class MaterialRegisterSerializerView(serializers.Serializer):
     CreatedOn = serializers.DateTimeField()
     TransactionNumber = serializers.CharField(max_length=500)
     Name = serializers.CharField(max_length=500)
-    QtyInBox=serializers.DecimalField(max_digits=10, decimal_places=2)
-    QtyInKg =serializers.DecimalField(max_digits=10, decimal_places=2)
-    QtyInNo =serializers.DecimalField(max_digits=10, decimal_places=2)
+    # QtyInBox=serializers.DecimalField(max_digits=10, decimal_places=2)
+    # QtyInKg =serializers.DecimalField(max_digits=10, decimal_places=2)
+    # QtyInNo =serializers.DecimalField(max_digits=10, decimal_places=2)
+    Quantity =serializers.DecimalField(max_digits=10, decimal_places=2)
+    # UnitName=serializers.CharField(max_length=500)
     
     
     
