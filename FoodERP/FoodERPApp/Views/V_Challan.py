@@ -388,6 +388,7 @@ class ChallanListFilterView(CreateAPIView):
                             "id": a['id'],
                             "ChallanDate": a['ChallanDate'],
                             "FullChallanNumber": a['FullChallanNumber'],
+                            "FullInvoiceNumber": a['FullChallanNumber'],    '''extra field for Dashboard Invoices For GRN panel '''
                             "IsVDCChallan" : a['IsVDCChallan'],
                             "CustomerID": a['Customer']['id'],
                             "Customer": a['Customer']['Name'],
