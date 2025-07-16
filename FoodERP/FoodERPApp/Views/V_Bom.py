@@ -28,7 +28,7 @@ class BOMListFilterView(CreateAPIView):
                 Item=BillOfMaterialdata['ItemID']
                 Category = BillOfMaterialdata['Category']
                 IsVDCItem=BillOfMaterialdata['IsVDCItem']
-                PartyTypeID=BillOfMaterialdata['PartyTypeID']
+                # PartyTypeID=BillOfMaterialdata['PartyTypeID']
                 if IsVDCItem==0:
                     IsVDC=f"and IsVDCItem={IsVDCItem}"
                 else:
@@ -45,7 +45,11 @@ class BOMListFilterView(CreateAPIView):
                     Ccondition= f"AND MC_ItemCategoryDetails.CategoryType_id = {Category}"
                 PartyItems=""
                 PartyId=""
-                if PartyTypeID==19:
+                q1=M_Parties.objects.filter(id=Party).values('PartyType_id')
+                PartyTypeID=q1[0]['PartyType_id']
+                q2 = M_Settings.objects.filter(id=56).values('DefaultValue')
+                DefaultValues = q2[0]['DefaultValue']
+                if PartyTypeID==DefaultValues:
                         PartyItems=f"join MC_PartyItems on MC_PartyItems.Item_id=M_BillOfMaterial.Item_id and MC_PartyItems.Party_id={Party}"
                         PartyId=f" Party_id= {Party} and "
                 # old query by shruti
