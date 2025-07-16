@@ -305,7 +305,7 @@ class SPOSInvoiceViewSecond(CreateAPIView):
                 # CustomPrint(characters)
                 # CustomPrint(id)
                 InvoiceQuery = T_SPOSInvoices.objects.raw(f'''SELECT SPOSInv.id,InvoiceDate,InvoiceNumber,FullInvoiceNumber,AdvanceAmount,TCSAmount,GrandTotal,RoundOffAmount,Customer,
-                                                          cust.Name CustomerName,cust.GSTIN CustomerGSTIN,cust.MobileNo CustomerMobileNo,
+                                                          cust.Name CustomerName,cust.GSTIN CustomerGSTIN, cust.IsSEZ, cust.MobileNo CustomerMobileNo,
 Party,party.Name PartyName,party.GSTIN PartyGSTIN,party.MobileNo PartyMobileNo,M_Drivers.Name DriverName,M_Vehicles.VehicleNumber,
 SPOSInv.CreatedOn,custaddr.FSSAINo CustomerFSSAI ,custaddr.Address CustomerAddress, partyaddr.FSSAINo PartyFSSAI,
 partyaddr.Address PartyAddress,MC_PartyBanks.BranchName,MC_PartyBanks.IFSC,MC_PartyBanks.AccountNo,M_Bank.Name BankName,MC_PartyBanks.IsDefault,custstate.Name CustState,partystate.Name PartyState,
@@ -458,6 +458,7 @@ WHERE SPOSInv.Invoice_id = {a.id}''')
                             "Customer": a.Customer,
                             "CustomerName": a.CustomerName,
                             "CustomerGSTIN": a.CustomerGSTIN,
+                            "IsSEZ" : a.IsSEZ,
                             "CustomerMobileNo": a.CustomerMobileNo,
                             "Party": a.Party,
                             "PartyName": a.PartyName,
