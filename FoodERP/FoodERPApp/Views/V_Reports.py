@@ -1217,61 +1217,74 @@ class MaterialRegisterDownloadView(CreateAPIView):
                 BaseUnitID = q1[0]['BaseUnitID_id']                
                 if Unit==0:
                     Unit=BaseUnitID                    
+                q3 =  M_Units.objects.filter(id=Unit).values('Name')
+                UnitName=q3[0]['Name']                
                 q2 = M_Settings.objects.filter(id=14).values('DefaultValue')
                 DefaultValues = q2[0]['DefaultValue']
 
-                query = T_PurchaseReturn.objects.raw(f'''SELECT 1 as id,a.* from (SELECT 1 Sequence, T_GRNs.GRNDate TransactionDate,T_GRNs.CreatedOn,T_GRNs.FullGRNNumber TransactionNumber,M_Parties.Name,QtyInBox,QtyInKg,QtyInNo FROM T_GRNs 
+                query = T_PurchaseReturn.objects.raw(f'''SELECT 1 as id,a.* from (SELECT 1 Sequence, T_GRNs.GRNDate TransactionDate,T_GRNs.CreatedOn,T_GRNs.FullGRNNumber TransactionNumber,M_Parties.Name,
+                UnitwiseQuantityConversion({Item},Quantity,TC_GRNItems.Unit_id,0,0,{Unit},0)Quantity,TC_GRNItems.Unit_id  FROM T_GRNs 
 JOIN TC_GRNItems ON TC_GRNItems.GRN_id=T_GRNs.id
 JOIN M_Parties ON M_Parties.id = T_GRNs.Party_id
 WHERE GRNDate Between %s AND %s AND Customer_id=%s and TC_GRNItems.Item_id=%s and T_GRNs.IsGRNType=1
 
 UNION ALL
 
-SELECT 2 Sequence, T_PurchaseReturn.ReturnDate TransactionDate,T_PurchaseReturn.CreatedOn ,T_PurchaseReturn.FullReturnNumber TransactionNumber,M_Parties.Name,UnitwiseQuantityConversion(%s,Quantity,0,1,0,4,0)QtyInBox,UnitwiseQuantityConversion(%s,Quantity,0,1,0,2,0)QtyInKg,UnitwiseQuantityConversion(%s,Quantity,0,1,0,1,0)QtyInNo   FROM T_PurchaseReturn 
+SELECT 2 Sequence, T_PurchaseReturn.ReturnDate TransactionDate,T_PurchaseReturn.CreatedOn ,
+T_PurchaseReturn.FullReturnNumber TransactionNumber,M_Parties.Name,
+UnitwiseQuantityConversion({Item},Quantity,TC_PurchaseReturnItems.Unit_id,0,0,{Unit},0)Quantity,TC_PurchaseReturnItems.Unit_id  FROM T_PurchaseReturn 
 JOIN TC_PurchaseReturnItems ON TC_PurchaseReturnItems.PurchaseReturn_id=T_PurchaseReturn.id
 JOIN M_Parties ON M_Parties.id = T_PurchaseReturn.Customer_id
 WHERE ReturnDate Between %s AND  %s AND Party_id=%s AND TC_PurchaseReturnItems.Item_id=%s AND TC_PurchaseReturnItems.ItemReason_id IN (%s)
 
 UNION ALL
 
-SELECT 3 Sequence, StockDate TransactionDate,CreatedOn, FullReturnNumber TransactionNumber, Name, UnitwiseQuantityConversion(%s,QStock,0,%s,0,4,0)QtyInBox,UnitwiseQuantityConversion(%s,QStock,0,%s,0,2,0)QtyInKg,UnitwiseQuantityConversion(%s,QStock,0,%s,0,1,0)QtyInNo 
-FROM (SELECT 3 Sequence,T_Stock.StockDate,T_Stock.CreatedOn ,'STOCK' FullReturnNumber,M_Parties.Name, '' QtyInBox,'' QtyInKg,''QtyInNo, SUM(T_Stock.BaseUnitQuantity) QStock 
+SELECT 3 Sequence, StockDate TransactionDate,CreatedOn, FullReturnNumber TransactionNumber, Name, 
+UnitwiseQuantityConversion({Item},QStock,Unit_id,0,0,{Unit},0)Quantity,Unit_id
+FROM (SELECT 3 Sequence,T_Stock.StockDate,T_Stock.CreatedOn ,'STOCK' FullReturnNumber,M_Parties.Name, ''Quantity, SUM(T_Stock.BaseUnitQuantity) QStock,Unit_id 
 From T_Stock
  JOIN M_Parties ON M_Parties.id=T_Stock.Party_id  
- WHERE StockDate Between %s AND %s AND Party_id=%s  AND  T_Stock.Item_id=%s and IsStockAdjustment=0 GROUP BY 3 ,T_Stock.StockDate, FullReturnNumber,M_Parties.Name, QtyInBox, QtyInKg,QtyInNo)AA
+ WHERE StockDate Between %s AND %s AND Party_id=%s  AND  T_Stock.Item_id=%s and IsStockAdjustment=0 GROUP BY 3 ,T_Stock.StockDate, FullReturnNumber,M_Parties.Name,Quantity)AA
 
 UNION ALL
 
-SELECT 6 Sequence, StockDate TransactionDate,CreatedOn, FullReturnNumber TransactionNumber, Name, UnitwiseQuantityConversion(%s,QStock,0,%s,0,4,0)QtyInBox,UnitwiseQuantityConversion(%s,QStock,0,%s,0,2,0)QtyInKg,UnitwiseQuantityConversion(%s,QStock,0,%s,0,1,0)QtyInNo 
-FROM (SELECT 3 Sequence,T_Stock.StockDate,T_Stock.CreatedOn ,'Stock Adjustment' FullReturnNumber,M_Parties.Name, '' QtyInBox,'' QtyInKg,''QtyInNo, SUM(T_Stock.Difference) QStock 
+SELECT 6 Sequence, StockDate TransactionDate,CreatedOn, FullReturnNumber TransactionNumber, Name, UnitwiseQuantityConversion({Item},QStock,Unit_id,0,0,{Unit},0)Quantity,Unit_id
+FROM (SELECT 3 Sequence,T_Stock.StockDate,T_Stock.CreatedOn ,'Stock Adjustment' FullReturnNumber,M_Parties.Name, '' Quantity, SUM(T_Stock.Difference) QStock,Unit_id 
 From T_Stock
  JOIN M_Parties ON M_Parties.id=T_Stock.Party_id  
- WHERE StockDate Between %s AND %s AND Party_id=%s  AND  T_Stock.Item_id=%s and IsStockAdjustment =1 GROUP BY 3 ,T_Stock.StockDate, FullReturnNumber,M_Parties.Name, QtyInBox, QtyInKg,QtyInNo)AA
+ WHERE StockDate Between %s AND %s AND Party_id=%s  AND  T_Stock.Item_id=%s and IsStockAdjustment =1 GROUP BY 3 ,T_Stock.StockDate, FullReturnNumber,M_Parties.Name,Quantity)AA
 
 UNION ALL
 
-SELECT 4 Sequence, T_Invoices.InvoiceDate TransactionDate,T_Invoices.CreatedOn,T_Invoices.FullInvoiceNumber TransactionNumber,M_Parties.Name,QtyInBox,QtyInKg,QtyInNo FROM T_Invoices 
+SELECT 4 Sequence, T_Invoices.InvoiceDate TransactionDate,T_Invoices.CreatedOn,
+T_Invoices.FullInvoiceNumber TransactionNumber,M_Parties.Name,
+UnitwiseQuantityConversion({Item},Quantity,TC_InvoiceItems.Unit_id,0,0,{Unit},0)Quantity,TC_InvoiceItems.Unit_id FROM T_Invoices 
 JOIN TC_InvoiceItems ON TC_InvoiceItems.Invoice_id=T_Invoices.id
 JOIN M_Parties ON M_Parties.id = T_Invoices.Customer_id
 WHERE InvoiceDate Between %s AND %s AND Party_id=%s AND  TC_InvoiceItems.Item_id=%s
 
 UNION ALL
 
-SELECT 5 Sequence, T_PurchaseReturn.ReturnDate TransactionDate,T_PurchaseReturn.CreatedOn,T_PurchaseReturn.FullReturnNumber TransactionNumber,M_Parties.Name,UnitwiseQuantityConversion(%s,Quantity,0,1,0,4,0)QtyInBox,UnitwiseQuantityConversion(%s,Quantity,0,1,0,2,0)QtyInKg,UnitwiseQuantityConversion(%s,Quantity,0,1,0,1,0)QtyInNo  FROM T_PurchaseReturn 
+SELECT 5 Sequence, T_PurchaseReturn.ReturnDate TransactionDate,T_PurchaseReturn.CreatedOn,
+T_PurchaseReturn.FullReturnNumber TransactionNumber,M_Parties.Name,
+UnitwiseQuantityConversion({Item},Quantity,TC_PurchaseReturnItems.Unit_id,0,0,{Unit},0)Quantity,TC_PurchaseReturnItems.Unit_id FROM T_PurchaseReturn 
 JOIN TC_PurchaseReturnItems ON TC_PurchaseReturnItems.PurchaseReturn_id=T_PurchaseReturn.id
 JOIN M_Parties ON M_Parties.id = T_PurchaseReturn.Party_id
 WHERE ReturnDate Between %s AND %s AND Customer_id=%s AND TC_PurchaseReturnItems.Item_id=%s and ((TC_PurchaseReturnItems.ItemReason_id IN (SELECT DefaultValue FROM M_Settings WHERE id = 14) and T_PurchaseReturn.Mode =3) OR(T_PurchaseReturn.Mode =2))
                                                      
 UNION ALL
 
-select 7 Sequence,ProductionDate TransactionDate,T_Production.CreatedOn,T_Production.FullProductionNumber TransactionNumber,M_Parties.Name,ActualQuantity QtyInBox,ActualQuantity QtyInKg,ActualQuantity QtyInNo 
+select 7 Sequence,ProductionDate TransactionDate,T_Production.CreatedOn,
+T_Production.FullProductionNumber TransactionNumber,M_Parties.Name,
+UnitwiseQuantityConversion({Item},ActualQuantity,T_Production.Unit_id,0,0,{Unit},0)Quantity,T_Production.Unit_id
  from T_Production 
  JOIN M_Parties ON M_Parties.id = T_Production.Division_id
  where ProductionDate Between %s AND %s AND Division_id ={Party}  and Item_id={Item}
  
 union all
  
-select 8 Sequence ,C.ChallanDate TransactionDate,C.CreatedOn,C.FullChallanNumber TransactionNumber,M_Parties.Name,CI.BaseUnitQuantity QtyInBox,CI.BaseUnitQuantity QtyInKg,CI.BaseUnitQuantity QtyInNo  
+select 8 Sequence ,C.ChallanDate TransactionDate,C.CreatedOn,C.FullChallanNumber TransactionNumber,
+M_Parties.Name,UnitwiseQuantityConversion({Item},CI.Quantity,CI.Unit_id,0,0,{Unit},0)Quantity ,CI.Unit_id
  from T_Challan C
  join TC_ChallanItems CI on C.id=CI.Challan_id
  JOIN M_Parties ON M_Parties.id = C.Party_id
@@ -1279,20 +1292,22 @@ select 8 Sequence ,C.ChallanDate TransactionDate,C.CreatedOn,C.FullChallanNumber
  
 union all
  
-SELECT 9 Sequence, T_GRNs.GRNDate TransactionDate,T_GRNs.CreatedOn,T_GRNs.FullGRNNumber TransactionNumber,M_Parties.Name,QtyInBox,QtyInKg,QtyInNo FROM T_GRNs 
+SELECT 9 Sequence, T_GRNs.GRNDate TransactionDate,T_GRNs.CreatedOn,T_GRNs.FullGRNNumber TransactionNumber,
+M_Parties.Name,UnitwiseQuantityConversion({Item},Quantity,TC_GRNItems.Unit_id,0,0,{Unit},0)Quantity,TC_GRNItems.Unit_id FROM T_GRNs 
  JOIN TC_GRNItems ON TC_GRNItems.GRN_id=T_GRNs.id
  JOIN M_Parties ON M_Parties.id = T_GRNs.Party_id
  WHERE GRNDate Between %s AND %s AND Customer_id={Party} and TC_GRNItems.Item_id={Item} and T_GRNs.IsGRNType=0
 
  union all
 
-select 10 Sequence,MI.MaterialIssueDate TransactionDate,MI.CreatedOn,MI.FullMaterialIssueNumber TransactionNumber,M_Parties.Name,MII.IssueQuantity QtyInBox,MII.IssueQuantity QtyInKg,MII.IssueQuantity  QtyInNo
+select 10 Sequence,MI.MaterialIssueDate TransactionDate,MI.CreatedOn,MI.FullMaterialIssueNumber TransactionNumber,
+M_Parties.Name,UnitwiseQuantityConversion({Item},MII.IssueQuantity,MII.Unit_id,0,0,{Unit},0)Quantity,MII.Unit_id
 from T_MaterialIssue MI 
 join TC_MaterialIssueItems MII on MII.MaterialIssue_id=MI.id
 JOIN M_Parties ON M_Parties.id = MI.Party_id
 where MI.MaterialIssueDate Between %s AND %s and Party_id={Party} and MII.Item_id={Item}                                                                                                         
                                                      
-                                )a order by TransactionDate, CreatedOn ''', ([FromDate, ToDate, Party, Item, Item, Item, Item, FromDate, ToDate, Party, Item, DefaultValues, Item, BaseUnitID, Item, BaseUnitID, Item, BaseUnitID, FromDate, ToDate, Party, Item, Item, BaseUnitID, Item, BaseUnitID, Item, BaseUnitID, FromDate, ToDate, Party, Item, FromDate, ToDate, Party, Item, Item, Item, Item, FromDate, ToDate, Party, Item, FromDate, ToDate, FromDate, ToDate, FromDate, ToDate, FromDate, ToDate]))
+                                )a  order by TransactionDate, CreatedOn ''', ([FromDate, ToDate, Party, Item,  FromDate, ToDate, Party, Item, DefaultValues,  FromDate, ToDate, Party, Item,  FromDate, ToDate, Party, Item, FromDate, ToDate, Party, Item,FromDate, ToDate, Party, Item, FromDate, ToDate, FromDate, ToDate, FromDate, ToDate, FromDate, ToDate]))
                 # print(query)
                 if query:
                     MaterialRegisterList = MaterialRegisterSerializerView(
@@ -1322,7 +1337,7 @@ where MI.MaterialIssueDate Between %s AND %s and Party_id={Party} and MII.Item_i
                         # log_entry = create_transaction_logNew(request,Reportdata,Party,'Stock Processing Needed',215,0,FromDate,ToDate,0)
                         # return JsonResponse({'StatusCode': 204, 'Status': True,'Message':'Stock Processing Needed', 'Data': []})
                     MaterialRegisterList.append(
-                        {"OpeningBalance": OpeningBalance, "ClosingBalance": ClosingBalance})
+                        {"OpeningBalance": OpeningBalance, "ClosingBalance": ClosingBalance,"UnitName":UnitName})
                     log_entry = create_transaction_logNew(request, Reportdata, Party, 'From:'+str(FromDate)+','+'To:'+str(ToDate), 215, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': MaterialRegisterList})
                 else:
