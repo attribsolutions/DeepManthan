@@ -2567,12 +2567,14 @@ class M_GiftVoucherCode(models.Model):
     Scheme  = models.ForeignKey(M_Scheme, related_name='GiftVoucherSchemeID', on_delete=models.PROTECT)
     class Meta:
         db_table = "M_GiftVoucherCode"
+        constraints = [
+            UniqueConstraint(fields=['VoucherCode', 'Scheme'], name='unique_vouchercode_scheme')
+        ]
         indexes = [
             models.Index(fields=['client', 'ClientSaleID']),
             models.Index(fields=['Party', 'InvoiceDate','InvoiceNumber']),
             models.Index(fields=['Party', 'InvoiceDate','InvoiceNumber','client', 'ClientSaleID']),
             models.Index(fields=['Party', 'InvoiceDate','VoucherCode']),
-            
         ] 
 
 class MC_SchemeQRs(models.Model):
