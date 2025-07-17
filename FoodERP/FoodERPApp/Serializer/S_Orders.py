@@ -244,7 +244,7 @@ class T_OrderSerializerSecond(serializers.ModelSerializer):
 class PartiesSerializerThird(serializers.ModelSerializer):
     class Meta:
         model = M_Parties
-        fields = ['id','Name','SAPPartyCode','GSTIN','PartyType']
+        fields = ['id','Name','SAPPartyCode','GSTIN','PartyType','IsSEZ']
 
 
 class UnitSerializerThird(serializers.ModelSerializer):
