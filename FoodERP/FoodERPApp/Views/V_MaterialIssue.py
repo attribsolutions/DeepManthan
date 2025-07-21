@@ -29,7 +29,7 @@ class WorkOrderDetailsView(CreateAPIView):
                 GetQuantity = WorkOrderDetailsdata['Quantity']
                 # NoOfLots=WorkOrderDetailsdata['NoOfLots']
                 # CustomPrint(NoOfLots)
-                today = datetime.now().date()
+                # today = datetime.now().date()
                 Query = T_WorkOrder.objects.filter(
                     id=WorkOrderID, Item_id=ItemID, Company_id=CompanyID, Party_id=PartyID)  
                 # CustomPrint(Query.query)
@@ -39,23 +39,23 @@ class WorkOrderDetailsView(CreateAPIView):
                         Query, many=True).data                    
                     # return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': WorkOrder_Serializer})
                     # print(WorkOrder_Serializer)
-                    productionQty = (T_Production.objects.filter(Item=ItemID, ProductionDate=today)
-                                    .aggregate(total=Sum('ActualQuantity'))['total'] or 0
-                                )
+                    # productionQty = (T_Production.objects.filter(Item=ItemID, ProductionDate=today)
+                    #                 .aggregate(total=Sum('ActualQuantity'))['total'] or 0
+                    #             )
                     for a in WorkOrder_Serializer:
                         MaterialDetails = list()
                         workorderqty = a['Quantity'] 
-                        unit_id=a['Unit']['UnitID']['id']                       
-                        query3 = O_DateWiseLiveStock.objects.filter(
-                        StockDate=today, Party=PartyID, Item=ItemID).values('ClosingBalance', 'Unit_id')                        
-                        if query3:
+                        # unit_id=a['Unit']['UnitID']['id']                       
+                        # query3 = O_DateWiseLiveStock.objects.filter(
+                        # StockDate=today, Party=PartyID, Item=ItemID).values('ClosingBalance', 'Unit_id')                        
+                        # if query3:
 
-                            ClosingBalance = UnitwiseQuantityConversion(
-                                ItemID, query3[0]['ClosingBalance'], 0, query3[0]['Unit_id'], 0, unit_id, 0).ConvertintoSelectedUnit() 
+                        #     ClosingBalance = UnitwiseQuantityConversion(
+                        #         ItemID, query3[0]['ClosingBalance'], 0, query3[0]['Unit_id'], 0, unit_id, 0).ConvertintoSelectedUnit() 
                             
                             
-                        else:
-                            ClosingBalance = 0.00
+                        # else:
+                        #     ClosingBalance = 0.00
                             
                         for b in a['WorkOrderItems']:
                             
@@ -111,8 +111,8 @@ class WorkOrderDetailsView(CreateAPIView):
                                 "UnitName": b['Unit']['BaseUnitConversion'],
                                 "Quantity": round(ActualQty, 3),
                                 "OriginalWorkOrderQty":b['Quantity'],
-                                "ProductionQty":productionQty,
-                                "StockQty":ClosingBalance,
+                                # "ProductionQty":productionQty,
+                                # "StockQty":ClosingBalance,
                                 "Bom_id":Child_Item_BOM,
                                 "BatchesData": stockDatalist 
                                                              

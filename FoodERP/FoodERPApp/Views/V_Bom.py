@@ -28,6 +28,7 @@ class BOMListFilterView(CreateAPIView):
                 Item=BillOfMaterialdata['ItemID']
                 Category = BillOfMaterialdata['Category']
                 IsVDCItem=BillOfMaterialdata['IsVDCItem']
+                # PartyTypeID=BillOfMaterialdata['PartyTypeID']
                 if IsVDCItem==0:
                     IsVDC=f"and IsVDCItem={IsVDCItem}"
                 else:
@@ -42,7 +43,15 @@ class BOMListFilterView(CreateAPIView):
                     Ccondition= ""
                 else:
                     Ccondition= f"AND MC_ItemCategoryDetails.CategoryType_id = {Category}"
-                        
+                PartyItems=""
+                PartyId=""
+                q1=M_Parties.objects.filter(id=Party).values('PartyType_id')
+                PartyTypeID=q1[0]['PartyType_id']
+                q2 = M_Settings.objects.filter(id=56).values('DefaultValue')
+                DefaultValues = q2[0]['DefaultValue']
+                if PartyTypeID==DefaultValues:
+                        PartyItems=f"join MC_PartyItems on MC_PartyItems.Item_id=M_BillOfMaterial.Item_id and MC_PartyItems.Party_id={Party}"
+                        PartyId=f" Party_id= {Party} and "
                 # old query by shruti
                 # SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty,
                             #                 M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, 
@@ -66,15 +75,16 @@ ifnull(UnitwiseQuantityConversion(a.Item_id ,b.StockQuantity ,0 ,BaseUnitID_id ,
                                             M_BillOfMaterial.Unit_id, MC_ItemUnits.BaseUnitConversion,  
                                             M_Items.Name AS ItemName, M_Items.BaseUnitID_id
                             FROM M_BillOfMaterial
-                            join MC_PartyItems on MC_PartyItems.Item_id=M_BillOfMaterial.Item_id and MC_PartyItems.Party_id={Party}
+                            {PartyItems}
                             JOIN MC_ItemCategoryDetails ON MC_ItemCategoryDetails.Item_id = M_BillOfMaterial.Item_id
                             JOIN M_Items ON M_Items.id = M_BillOfMaterial.Item_id
                             JOIN MC_ItemUnits ON MC_ItemUnits.Item_id = M_BillOfMaterial.Item_id  and IsBase=1
                             WHERE M_BillOfMaterial.IsDelete = 0 AND M_BillOfMaterial.Company_id ={Company} {IsVDC} {Icondition} {Ccondition} )a
                             left join 
-                            (select sum(BaseUnitQuantity) StockQuantity,Item_id from O_BatchWiseLiveStock where Party_id= {Party} and IsDamagePieces=0 group by Item_id )b
+                            (select sum(BaseUnitQuantity) StockQuantity,Item_id from O_BatchWiseLiveStock where {PartyId}  IsDamagePieces=0 group by Item_id )b
                             on a.Item_id=b.Item_id
 ''')
+                
                 # print(query)
                 BomListData = []
                 for a in query:
