@@ -2542,7 +2542,7 @@ class M_Scheme(models.Model):
     ToPeriod=models.DateField(null=True,blank=True)
     FreeItemID=models.IntegerField(null=True,blank=True)
     VoucherLimit=models.IntegerField(null=True,blank=True)
-    QRPrefix=models.CharField(max_length=50)
+    QRPrefix=models.CharField(max_length=50,null=True,blank=True)
     IsActive=models.BooleanField(default=False)
     BillAbove = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True) 
     SchemeDetails = models.CharField(max_length=500, null=True, blank=True)

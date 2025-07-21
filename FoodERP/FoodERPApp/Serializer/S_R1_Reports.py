@@ -89,7 +89,7 @@ class B2CSSerializer(serializers.Serializer):
     InvoiceValue=FloatDecimalField()
     # ECommerceGSTIN=serializers.CharField(max_length=100)
     # Rate=FloatDecimalField()
-    TaxableValue=serializers.IntegerField()
+    TaxableValue=FloatDecimalField()
     IGST=FloatDecimalField()
     CGST=FloatDecimalField()
     SGST=FloatDecimalField()
