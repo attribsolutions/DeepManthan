@@ -186,7 +186,8 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
         FSSAINo=F('SubParty__PartyAddress__FSSAINo'),
         FSSAIExipry=F('SubParty__PartyAddress__FSSAIExipry'),
         IsSEZ=F('SubParty__IsSEZ')
-    ).values('PartyId','PartyName','GSTIN','PAN','PartyTypeID','IsTCSParty','SkyggeID','FSSAINo','FSSAIExipry')
+    ).values('PartyId','PartyName','GSTIN','PAN','PartyTypeID','IsTCSParty','SkyggeID','FSSAINo','FSSAIExipry','IsSEZ')
+                    
                     
                 elif (Type==4):
                     Query = MC_PartySubParty.objects.filter(~Q(id=id)).filter(
