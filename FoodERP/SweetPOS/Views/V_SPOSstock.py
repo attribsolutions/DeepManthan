@@ -112,7 +112,7 @@ class StockView(CreateAPIView):
                     "Quantity": round(float(a['Quantity']), 3),
                     "Unit": Unit,
                     "BaseUnitQuantity": round(float(BaseUnitQuantity),3),
-                    "MRPValue": round(float(a['MRPValue']), 2),
+                    "MRPValue": round(float(a.get('MRPValue', 0) or 0), 2),
                     "MRP": MRP,
                     "Party": Party,
                     "CreatedBy":CreatedBy,
