@@ -350,16 +350,27 @@ class SchemeDetailsView(CreateAPIView):
                         # Item Details
                         iid = getattr(row, 'item_id', None)
                         iname = getattr(row, 'item_name', '')
-                        if iid and iid not in sc["ItemDetails"]:
-                            sc["ItemDetails"][iid] = {
-                                "ItemID": iid,
-                                "ItemName": iname,
-                                "DiscountType": row.DiscountType,
-                                "DiscountValue": row.DiscountValue,
-                                "Quantity": row.Quantity,
-                                "TypeForItem": row.TypeForItem,
+                        if iid:
+                            if iid not in sc["ItemDetails"]:
+                                sc["ItemDetails"][iid] = {
+                                    "ItemID": iid,
+                                    "ItemName": iname,
+                                    "DiscountType": row.DiscountType,
+                                    "DiscountValue": row.DiscountValue,
+                                    "Quantity": row.Quantity,
+                                    "ApplicableItem": 0,
+                                    "NotApplicableItem": 0,
+                                    "EffectiveItem": 0,
+                                }
 
-                            }
+                            # Set the appropriate flag
+                            if row.TypeForItem == 1:
+                                sc["ItemDetails"][iid]["ApplicableItem"] = 1
+                            elif row.TypeForItem == 2:
+                                sc["ItemDetails"][iid]["NotApplicableItem"] = 1
+                            elif row.TypeForItem == 3:
+                                sc["ItemDetails"][iid]["EffectiveItem"] = 1
+
 
                     data = []
                     for sc in scheme_cache.values():
