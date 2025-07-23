@@ -175,6 +175,7 @@ from .Views.V_CommonMaster import GetNewPageEntry
 from .Views.V_TallyLedger import *
 from .Views.V_FTP import *
 from .Views.V_PhonePay import*
+from .Views.V_Server import*
 
 
 urlpatterns = [
@@ -855,8 +856,8 @@ urlpatterns = [
               
 #StockAdjustment             
               url(r'StockAdjustmentReport$',StockAdjustmentReportView.as_view()), 
-
-
+              url(r'CurrentServerDateTime$',CurrentServerDateTimeView.as_view()),
+              
 
 
 ]
