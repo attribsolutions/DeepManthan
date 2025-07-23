@@ -2592,7 +2592,7 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                 i=1
                 for CouponCode in CouponCodeRedemptionQuery:
                 
-
+                    # print(CouponCode.DiscountAmount,CouponCode.InvoiceNumber)
                     CouponCodeRedemptionData.append({
                         "id": i,
                         "VoucherTypeID": CouponCode.VoucherType_id,
