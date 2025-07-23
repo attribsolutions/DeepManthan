@@ -630,13 +630,13 @@ class GSTR1ExcelDownloadView(CreateAPIView):
 #                             GROUP BY NatureOfDocument, b''', [FromDate, ToDate, FromDate, ToDate, FromDate, ToDate, FromDate, ToDate])
                 Docsquery = T_Invoices.objects.raw(f'''-- =======================================T_SPOSInvoice=======================================================
 select 1 as id, 'Invoices for outward supply' AS NatureOfDocument, concat(a.prefix,a.minInvoiceNumber)Sr_No_From,concat(a.prefix,a.maxInvoiceNumber)Sr_No_To,
-ifnull(a.total,0)TotalNumber,ifnull(b.total,0)Cancelled  
+ifnull(a.total-b.total,0)TotalNumber,ifnull(b.total,0)Cancelled  
 from (
 (SELECT 
     LEFT(FullInvoiceNumber, LENGTH(FullInvoiceNumber) - LENGTH(InvoiceNumber)) AS prefix,
     COUNT(*) AS total, min(InvoiceNumber)minInvoiceNumber,max(InvoiceNumber)maxInvoiceNumber,Party
 FROM SweetPOS.T_SPOSInvoices
-where Party IN ({Party}) and InvoiceDate between '{FromDate}' and '{ToDate}' and IsDeleted =0
+where Party IN ({Party}) and InvoiceDate between '{FromDate}' and '{ToDate}'
 GROUP BY LEFT(FullInvoiceNumber, LENGTH(FullInvoiceNumber) - LENGTH(InvoiceNumber)),Party
 )a
 left join
@@ -690,7 +690,7 @@ where Party_id IN ({Party}) and CRDRNoteDate between '{FromDate}' and '{ToDate}'
 GROUP BY LEFT(FullNoteNumber, LENGTH(FullNoteNumber) - LENGTH(NoteNo)),Party_id
 )bbb
 on aaa.prefix=bbb.prefix and  aaa.Party_id=bbb.Party_id )
--- =======================================creditNote=======================================================
+-- =======================================debitNote=======================================================
 union all
 SELECT 1 as id, 'Debit Note' AS NatureOfDocument, concat(aaa.prefix,aaa.minInvoiceNumber)Sr_No_From,concat(aaa.prefix,aaa.maxInvoiceNumber)Sr_No_To,
 ifnull(aaa.total,0)TotalNumber,ifnull(bbb.total,0)Cancelled  
