@@ -358,18 +358,18 @@ class SchemeDetailsView(CreateAPIView):
                                     "DiscountType": row.DiscountType,
                                     "DiscountValue": row.DiscountValue,
                                     "Quantity": row.Quantity,
-                                    "ApplicableItem": 0,
-                                    "NotApplicableItem": 0,
-                                    "EffectiveItem": 0,
+                                    "applicable": 0,
+                                    "not_applicable": 0,
+                                    "effective": 0,
                                 }
 
                             # Set the appropriate flag
                             if row.TypeForItem == 1:
-                                sc["ItemDetails"][iid]["ApplicableItem"] = 1
+                                sc["ItemDetails"][iid]["applicable"] = 1
                             elif row.TypeForItem == 2:
-                                sc["ItemDetails"][iid]["NotApplicableItem"] = 1
+                                sc["ItemDetails"][iid]["not_applicable"] = 1
                             elif row.TypeForItem == 3:
-                                sc["ItemDetails"][iid]["EffectiveItem"] = 1
+                                sc["ItemDetails"][iid]["effective"] = 1
 
 
                     data = []
