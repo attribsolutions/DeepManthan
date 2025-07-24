@@ -48,6 +48,7 @@ class M_EmployeesFilterView(CreateAPIView):
                     else:
                         role_ids_str = ','.join(map(str, RoleID_list ))
                         Clause= f""" AND M_Employees.id not in (SELECT  M_Employees.id FROM M_Employees JOIN MC_RolesEmployeeTypes ON MC_RolesEmployeeTypes.EmployeeType_id = M_Employees.EmployeeType_id 
+                        join M_Roles on   MC_RolesEmployeeTypes.Role_id=M_Roles.id and M_Roles.IdentifyKey != 0  
                         WHERE MC_RolesEmployeeTypes.Role_id in({role_ids_str})group by M_Employees.id)"""
                 
                     query = M_Employees.objects.raw(f'''SELECT M_Employees.id,M_Employees.Name,M_Employees.Address,M_Employees.Mobile,M_Employees.email,M_Employees.DOB,
@@ -62,7 +63,7 @@ JOIN M_Districts ON M_Districts.id=M_Employees.District_id
 left JOIN M_Cities ON M_Cities.id=M_Employees.City_id
 LEFT JOIN M_GeneralMaster ON M_GeneralMaster.id = M_Employees.Designation 
 where M_Employees.Company_id=%s {Clause}''', [CompanyID])  
-                # print(query)  
+                print(query)  
                 if not query:
                     log_entry = create_transaction_logNew(request,Logindata,0,'List Not available',199,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Employees Not available', 'Data': []})
