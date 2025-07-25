@@ -271,6 +271,7 @@ class RetailerDataExportSerializer(serializers.Serializer):
 class ReturnReportSerializer(serializers.Serializer):
     id=serializers.IntegerField()
     ReturnDate = serializers.DateField()
+    CustomerID = serializers.IntegerField()
     CustomerName = serializers.CharField(max_length=500)
     CustomerType = serializers.CharField(max_length=500)
     CompanyName=serializers.CharField(max_length=100)
