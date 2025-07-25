@@ -389,7 +389,7 @@ class T_MobileAppOrdersDeleteView(CreateAPIView):
             log_entry = create_transaction_logNew(request, 0,0,'This Order is used in another Transaction ',163,0)
             return JsonResponse({'StatusCode': 226, 'Status': True, 'Message': 'This Order is used in another Transaction'})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, data, 0,str(e),163,0)
+            log_entry = create_transaction_logNew(request, data, 0,str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
 class NewProductSendToMobileAppView(CreateAPIView):
@@ -461,15 +461,15 @@ where M_Items.id=%s''',([today],[today],[id]))
                 
                 # CustomPrint('==============================',response_json['success'])
                 if(response_json['success'] == True):
-                    log_entry = create_transaction_logNew(request, payload_json_data, 0,response_json,152,0)
+                    log_entry = create_transaction_logNew(request,{"RequestBody": payload_json_data,"Response": response_json},0,response_json['message'],152,0)
                     for a in response_json['data']:
                         query = M_Items.objects.filter(id=id).update(SkyggeProductID =a['productId'])
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': payload_json_data})
                 else:
-                    log_entry = create_transaction_logNew(request, payload_json_data, 0,response_json['message'],164,0)
+                    log_entry = create_transaction_logNew(request,{"RequestBody": payload_json_data,"Response": response_json},0,response_json['message'],164,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message':response_json, 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0,response_json,164,0)
+            log_entry = create_transaction_logNew(request, 0, 0,response_json,33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})            
         
     @transaction.atomic()
@@ -491,26 +491,26 @@ left JOIN M_GroupType ON M_GroupType.id = MC_ItemGroupDetails.GroupType_id
 left JOIN M_Group ON M_Group.id  = MC_ItemGroupDetails.Group_id 
 left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
 where M_Items.id in %s''',([today],[today],ProductID_list))
-                # CustomPrint(q0)
+                # print(q0)
                 for row in q0:
                     RetaileRate=RateCalculationFunction(0,row.id,0,0,1,0,3).RateWithGST() 
                     DistributorRate=RateCalculationFunction(0,row.id,0,0,1,0,2).RateWithGST()
                     SuperStockistRate=RateCalculationFunction(0,row.id,0,0,1,0,1).RateWithGST() 
-                    # ItemData.append({
-                    #         "FoodERPItemID": str(row.id),
-                    #         "FoodERPCategoryId":1,
-                    #         "FoodERPFamilyId":row.FoodERPFamilyId,
-                    #         "FoodERPTypeId":1,
-                    #         "FoodERPUomId":row.BaseUnitID_id,
-                    #         "ItemName":row.ItemName,
-                    #         "MRP":float(row.MRPValue),
-                    #         "RetailerRate":float(RetaileRate[0]['RateWithoutGST']),
-                    #         "DistributorRate":float(DistributorRate[0]['RateWithoutGST']),
-                    #         "SuperStockistRate":float(SuperStockistRate[0]['RateWithoutGST']),
-                    #         "ProductHSN":row.HSNCode,
-                    #         "IsActive":row.isActive
+                    ItemData.append({
+                            "FoodERPItemID": str(row.id),
+                            "FoodERPCategoryId":1,
+                            "FoodERPFamilyId":row.FoodERPFamilyId,
+                            "FoodERPTypeId":1,
+                            "FoodERPUomId":row.BaseUnitID_id,
+                            "ItemName":row.ItemName,
+                            "MRP":float(row.MRPValue),
+                            "RetailerRate":float(RetaileRate[0]['RateWithoutGST']),
+                            "DistributorRate":float(DistributorRate[0]['RateWithoutGST']),
+                            "SuperStockistRate":float(SuperStockistRate[0]['RateWithoutGST']),
+                            "ProductHSN":row.HSNCode,
+                            "IsActive":row.isActive
                             
-                    #     })
+                        })
 
                 payload={
                     "products" : ItemData
@@ -529,15 +529,15 @@ where M_Items.id in %s''',([today],[today],ProductID_list))
                 response_json=json.loads(response.text)
                 
                 if(response_json['success'] == True):
-                    log_entry = create_transaction_logNew(request, Productdata, 0,response_json['message'],153,0)
+                    log_entry = create_transaction_logNew(request,{"RequestBody": Productdata,"Response": response_json},0,response_json['message'],153,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
                 else:
                     # CustomPrint('aaaaaaaaaaaaaaaaa')
-                    log_entry = create_transaction_logNew(request, Productdata, 0,response_json['message'],165,0)
+                    log_entry = create_transaction_logNew(request,{"RequestBody": Productdata,"Response": response_json},0,response_json['message'],165,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message':response_json['message'], 'Data': []})
 
         except Exception as e:
-            log_entry = create_transaction_logNew(request,Productdata, 0,'ProductSendToMobileAppUpdate:'+str(e),165,0)
+            log_entry = create_transaction_logNew(request,Productdata, 0,'ProductSendToMobileAppUpdate:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})                
         
     @transaction.atomic()
