@@ -5,7 +5,7 @@ from ..models import M_PaymentModes,MC_PaymentModeDetails
 class M_PaymentModesSerializer(serializers.ModelSerializer):
     class Meta:
         model = M_PaymentModes
-        fields = ['id', 'Payment_Mode','TenderCode']
+        fields = ['id', 'Payment_Mode','TenderCode','Description']
 
 class MC_PaymentModeDetailsSerializer(serializers.ModelSerializer):
     Paymentmodes = M_PaymentModesSerializer(read_only=True)
