@@ -1,4 +1,4 @@
-from rest_framework.views import APIView
+from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework import status
 from ..models import M_PaymentModes, MC_PaymentModeDetails
@@ -10,7 +10,7 @@ from django.db import transaction
 from FoodERPApp.models import *
 from django.http import JsonResponse
 
-class PaymentModeAPIView(APIView):
+class PaymentModeAPIView(CreateAPIView):
     authentication_classes = [BasicAuthentication, JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
