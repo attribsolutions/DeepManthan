@@ -418,6 +418,7 @@ class M_PhonePeSettings(models.Model):
         db_table = 'M_PhonePeSettings'  
 
 class M_PaymentModes(models.Model):
+    Description  = models.CharField(max_length=100)
     Payment_Mode = models.CharField(max_length=50)
     TenderCode =models.CharField(max_length=50,blank=True, null=True)
     class Meta:
