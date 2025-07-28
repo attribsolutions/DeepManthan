@@ -1,4 +1,4 @@
-from rest_framework.generics import CreateAPIView
+from rest_framework.views import APIView
 from django.http import JsonResponse
 from ..models import M_ERPUrls, MC_ERPUrlsDetails
 from rest_framework.authentication import BasicAuthentication
@@ -8,7 +8,7 @@ from FoodERPApp.models import *
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 
-class ERPUrlsByPartyView(CreateAPIView):
+class ERPUrlsByPartyView(APIView):
     authentication_classes = [BasicAuthentication, JWTAuthentication]
     permission_classes = [IsAuthenticated]
     
