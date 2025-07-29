@@ -45,18 +45,18 @@ class BOMListFilterView(CreateAPIView):
                     Ccondition= f"AND MC_ItemCategoryDetails.CategoryType_id = {Category}"
                 PartyItems=""
                 PartyId=""
-                Party_ID=""
+                # Party_ID=""
                 q1=M_Parties.objects.filter(id=Party).values('PartyType_id')
                 PartyTypeID=q1[0]['PartyType_id']
                 # print(PartyTypeID)
                 q2 = M_Settings.objects.filter(id=56).values('DefaultValue')
                 DefaultValues = q2[0]['DefaultValue']
                 # print(DefaultValues)
-                if int(PartyTypeID)==int(DefaultValues):
+                if PartyTypeID==DefaultValues:
                         # print("ss")
                         PartyItems=f"join MC_PartyItems on MC_PartyItems.Item_id=M_BillOfMaterial.Item_id and MC_PartyItems.Party_id={Party}"
                         PartyId=f"Party_id= {Party} and "
-                        Party_ID=f"and M_BillOfMaterial.Party_id= {Party}"
+                        # Party_ID=f"and M_BillOfMaterial.Party_id= {Party}"
                         # print(PartyItems)
                         # print(PartyId)
                 # old query by shruti
@@ -86,7 +86,7 @@ ifnull(UnitwiseQuantityConversion(a.Item_id ,b.StockQuantity ,0 ,BaseUnitID_id ,
                             JOIN MC_ItemCategoryDetails ON MC_ItemCategoryDetails.Item_id = M_BillOfMaterial.Item_id
                             JOIN M_Items ON M_Items.id = M_BillOfMaterial.Item_id
                             JOIN MC_ItemUnits ON MC_ItemUnits.Item_id = M_BillOfMaterial.Item_id  and IsBase=1
-                            WHERE M_BillOfMaterial.IsDelete = 0 AND M_BillOfMaterial.Company_id ={Company} {IsVDC} {Icondition} {Ccondition} {Party_ID} )a
+                            WHERE M_BillOfMaterial.IsDelete = 0 AND M_BillOfMaterial.Company_id ={Company} {IsVDC} {Icondition} {Ccondition} )a
                             left join 
                             (select sum(BaseUnitQuantity) StockQuantity,Item_id from O_BatchWiseLiveStock where {PartyId}  IsDamagePieces=0 group by Item_id )b
                             on a.Item_id=b.Item_id
