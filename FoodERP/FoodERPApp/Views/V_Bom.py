@@ -47,22 +47,17 @@ class BOMListFilterView(CreateAPIView):
                     Ccondition= ""
                 else:
                     Ccondition= f"AND MC_ItemCategoryDetails.CategoryType_id = {Category}"
-                # PartyItems=""
-                # PartyId=""
-                # Party_ID=""
+                
                 q1=M_Parties.objects.filter(id=Party).values('PartyType_id')
                 PartyTypeID=q1[0]['PartyType_id']
-                print(PartyTypeID)
+                # print(PartyTypeID)
            
-
                 # q2 = M_Settings.objects.filter(id=56).values('DefaultValue')
                 # DefaultValues = q2[0]['DefaultValue']
             
-                #Check the IsFranchises flag from M_PartyType
                 party_type_data = M_PartyType.objects.filter(id=PartyTypeID).values('IsFranchises').first()
                 is_franchise = party_type_data['IsFranchises'] if party_type_data else False
 
-                # Apply party-specific filtering only if IsFranchises is True
                 if is_franchise:
                     PartyItems = f"JOIN MC_PartyItems ON MC_PartyItems.Item_id = M_BillOfMaterial.Item_id AND MC_PartyItems.Party_id = {Party}"
                     PartyId = f"Party_id = {Party} AND "
@@ -101,8 +96,7 @@ ifnull(UnitwiseQuantityConversion(a.Item_id ,b.StockQuantity ,0 ,BaseUnitID_id ,
                             WHERE M_BillOfMaterial.IsDelete = 0 AND M_BillOfMaterial.Company_id ={Company} {IsVDC} {Icondition} {Ccondition} {Party_ID} )a
                             left join 
                             (select sum(BaseUnitQuantity) StockQuantity,Item_id from O_BatchWiseLiveStock where {PartyId}  IsDamagePieces=0 group by Item_id )b
-                            on a.Item_id=b.Item_id
-''')
+                            on a.Item_id=b.Item_id''')
                 
                 # print(query)
                 BomListData = []
@@ -118,7 +112,6 @@ ifnull(UnitwiseQuantityConversion(a.Item_id ,b.StockQuantity ,0 ,BaseUnitID_id ,
                                 "ItemID": c.Item.id,
                                 "ItemName": c.Item.Name,
                                 "UnitID": c.Unit.id,
-                                # "UnitName": c.Unit.Unit.Name if a.Unit.Unit else "",
                                 "Quantity": round(float(c.Quantity), 3),
                                 "IsReprocess": c.IsReprocess
                             })
