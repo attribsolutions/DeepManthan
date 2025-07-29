@@ -3,6 +3,8 @@ from django.http import JsonResponse
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+from rest_framework.authentication import BasicAuthentication, TokenAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.db import IntegrityError, transaction
 from rest_framework.parsers import JSONParser
 from ..Serializer.S_Orders import *
@@ -14,7 +16,8 @@ from ..models import *
 
 class BOMListFilterView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    # authentication__Class = JSONWebTokenAuthentication
+    authentication_classes = [BasicAuthentication, TokenAuthentication, JWTAuthentication]
+    # authentication_class = JSONWebTokenAuthentication
 
     @transaction.atomic()
     def post(self, request,id=0):
@@ -28,6 +31,7 @@ class BOMListFilterView(CreateAPIView):
                 Item=BillOfMaterialdata['ItemID']
                 Category = BillOfMaterialdata['Category']
                 IsVDCItem=BillOfMaterialdata['IsVDCItem']
+                Mode = BillOfMaterialdata.get('Mode', 1)
                 # PartyTypeID=BillOfMaterialdata['PartyTypeID']
                 if IsVDCItem==0:
                     IsVDC=f"and IsVDCItem={IsVDCItem}"
@@ -43,22 +47,30 @@ class BOMListFilterView(CreateAPIView):
                     Ccondition= ""
                 else:
                     Ccondition= f"AND MC_ItemCategoryDetails.CategoryType_id = {Category}"
-                PartyItems=""
-                PartyId=""
+                # PartyItems=""
+                # PartyId=""
                 # Party_ID=""
                 q1=M_Parties.objects.filter(id=Party).values('PartyType_id')
                 PartyTypeID=q1[0]['PartyType_id']
-                # print(PartyTypeID)
-                q2 = M_Settings.objects.filter(id=56).values('DefaultValue')
-                DefaultValues = q2[0]['DefaultValue']
-                # print(DefaultValues)
-                if PartyTypeID==DefaultValues:
-                        # print("ss")
-                        PartyItems=f"join MC_PartyItems on MC_PartyItems.Item_id=M_BillOfMaterial.Item_id and MC_PartyItems.Party_id={Party}"
-                        PartyId=f"Party_id= {Party} and "
-                        # Party_ID=f"and M_BillOfMaterial.Party_id= {Party}"
-                        # print(PartyItems)
-                        # print(PartyId)
+                print(PartyTypeID)
+           
+
+                # q2 = M_Settings.objects.filter(id=56).values('DefaultValue')
+                # DefaultValues = q2[0]['DefaultValue']
+            
+                #Check the IsFranchises flag from M_PartyType
+                party_type_data = M_PartyType.objects.filter(id=PartyTypeID).values('IsFranchises').first()
+                is_franchise = party_type_data['IsFranchises'] if party_type_data else False
+
+                # Apply party-specific filtering only if IsFranchises is True
+                if is_franchise:
+                    PartyItems = f"JOIN MC_PartyItems ON MC_PartyItems.Item_id = M_BillOfMaterial.Item_id AND MC_PartyItems.Party_id = {Party}"
+                    PartyId = f"Party_id = {Party} AND "
+                    Party_ID = f"AND M_BillOfMaterial.Party_id = {Party}"
+                else:
+                    PartyItems = ""
+                    PartyId = ""
+                    Party_ID = ""
                 # old query by shruti
                 # SELECT M_BillOfMaterial.id, M_BillOfMaterial.BomDate, M_BillOfMaterial.EstimatedOutputQty,
                             #                 M_BillOfMaterial.Comment, M_BillOfMaterial.IsActive, M_BillOfMaterial.IsDelete, 
@@ -86,7 +98,7 @@ ifnull(UnitwiseQuantityConversion(a.Item_id ,b.StockQuantity ,0 ,BaseUnitID_id ,
                             JOIN MC_ItemCategoryDetails ON MC_ItemCategoryDetails.Item_id = M_BillOfMaterial.Item_id
                             JOIN M_Items ON M_Items.id = M_BillOfMaterial.Item_id
                             JOIN MC_ItemUnits ON MC_ItemUnits.Item_id = M_BillOfMaterial.Item_id  and IsBase=1
-                            WHERE M_BillOfMaterial.IsDelete = 0 AND M_BillOfMaterial.Company_id ={Company} {IsVDC} {Icondition} {Ccondition} )a
+                            WHERE M_BillOfMaterial.IsDelete = 0 AND M_BillOfMaterial.Company_id ={Company} {IsVDC} {Icondition} {Ccondition} {Party_ID} )a
                             left join 
                             (select sum(BaseUnitQuantity) StockQuantity,Item_id from O_BatchWiseLiveStock where {PartyId}  IsDamagePieces=0 group by Item_id )b
                             on a.Item_id=b.Item_id
@@ -98,15 +110,27 @@ ifnull(UnitwiseQuantityConversion(a.Item_id ,b.StockQuantity ,0 ,BaseUnitID_id ,
                     # Stock = float(GetO_BatchWiseLiveStock(a.Item_id, Party))
                     # StockintoSelectedUnit = UnitwiseQuantityConversion(a.Item_id, Stock, 0, 0, a.Unit_id, 0, 1
                     # ).ConvertintoSelectedUnit()
-                    
+                    BOMItems = []
+                    if Mode == 2: # for POS and (mode == 1 is for CSS)
+                        BOM_ItemsQuery = MC_BillOfMaterialItems.objects.filter(BOM_id=a.id).select_related('Item', 'Unit')
+                        for c in BOM_ItemsQuery:
+                            BOMItems.append({
+                                "ItemID": c.Item.id,
+                                "ItemName": c.Item.Name,
+                                "UnitID": c.Unit.id,
+                                # "UnitName": c.Unit.Unit.Name if a.Unit.Unit else "",
+                                "Quantity": round(float(c.Quantity), 3),
+                                "IsReprocess": c.IsReprocess
+                            })
+
                     BomListData.append({
                         "id": a.id,
                         "BomDate": a.BomDate,
                         "Item": a.Item_id,
-                        "ItemName": a.ItemName, 
+                        "ItemName": a.ItemName,
                         "Unit": a.Unit_id,
                         "UnitName": a.BaseUnitConversion,
-                        "StockQty": round(a.StockQuantity,3),
+                        "StockQty": round(a.StockQuantity, 3),
                         "EstimatedOutputQty": a.EstimatedOutputQty,
                         "Comment": a.Comment,
                         "IsActive": a.IsActive,
@@ -116,8 +140,10 @@ ifnull(UnitwiseQuantityConversion(a.Item_id ,b.StockQuantity ,0 ,BaseUnitID_id ,
                         "CreatedOn": a.CreatedOn,
                         "CreatedBy": a.CreatedBy,
                         "IsRecordDeleted": a.IsDelete,
-                        # "UserName": a.LoginName  
-                    }) 
+                        # "UserName": a.LoginName 
+                        "BOMItems": BOMItems  # only populated when Mode==2
+                    })
+ 
                 if BomListData:
                     log_entry = create_transaction_logNew(request, BillOfMaterialdata,Party,'Bill Of Material Data',453,0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': BomListData})
