@@ -585,6 +585,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         'Vehicle_id', 'TCSAmount', 'Hide', 'MobileNo', 'CreatedBy', 'IsDeleted','PartiesCustomerGSTIN'
                     )
                 )
+                # print(SposInvoices_query.query)
                 
                 Spos_Invoices = []
                 for b in SposInvoices_query:
@@ -594,6 +595,11 @@ class InvoiceListFilterViewSecond(CreateAPIView):
 
                     # CPartyName = M_SweetPOSUser.objects.using('sweetpos_db').filter(id=b['CreatedBy']).values('LoginName') 
                     CPartyName = M_Users.objects.filter(id=b['CreatedBy']).values('LoginName') 
+                    if CPartyName.exists():
+                        b['CreatedByName'] = CPartyName[0]['LoginName']
+                    else:
+                        b['CreatedBy'] = 0
+                        b['CreatedByName'] = ""
                     
                     party = Party
                     customer = customers[0]['id']
@@ -607,7 +613,6 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     b['CustomerPAN'] = customers[0]['PAN'] 
                     b['CustomerPartyType'] = customers[0]['PartyType'] 
                     b['CreatedBy'] = b['CreatedBy']
-                    b['CreatedByName'] = CPartyName[0]['LoginName']
                     b['Identify_id'] = 2
                    
                     b['VehicleNo'] = vehicle[0]['VehicleNumber'] if vehicle else ''
