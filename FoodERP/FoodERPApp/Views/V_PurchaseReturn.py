@@ -264,6 +264,7 @@ class PurchaseReturnView(CreateAPIView):
                     "UpdatedBy" : request.POST.get('UpdatedBy'),
                     "IsApproved" : request.POST.get('IsApproved'),
                     "Mode" : request.POST.get('Mode'),
+                    "Vehicle":request.POST.get('Vehicle'),
                     "PurchaseReturnReferences" : purchase_return_references,
                     "ReturnItems" : return_items
                 } 
@@ -383,6 +384,7 @@ class PurchaseReturnView(CreateAPIView):
               
                 PurchaseReturndata.update({"O_LiveBatchesList":O_LiveBatchesList}) 
                 PurchaseReturn_Serializer = PurchaseReturnSerializer(data=PurchaseReturndata)
+                # print(PurchaseReturn_Serializer)
                 if PurchaseReturn_Serializer.is_valid():
                     PurchaseReturn = PurchaseReturn_Serializer.save()
                     LastInsertID = PurchaseReturn.id
@@ -701,7 +703,14 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                     StockDatalist = list()
                     
                     for ad in StockQtySerialize_data:
-                        Rate=RateCalculationFunction(ad['LiveBatche']['id'],ad['Item']['id'],CustomerID,0,1,0,0).RateWithGST()
+                        # Rate=RateCalculationFunction(ad['LiveBatche']['id'],ad['Item']['id'],CustomerID,0,1,0,0).RateWithGST()
+                        with connection.cursor() as cursor:
+                            cursor.execute(f'''
+                                SELECT ROUND(RateCalculationFunction1({ad['LiveBatche']['id']}, {ad['Item']['id']}, {CustomerID}, 0, 1, 0, 0), 2) AS RateWithoutGST
+                            ''')
+                            row = cursor.fetchone()
+                        Rate = row[0] if row else 0.00
+
                         # CustomPrint(Rate)
 
                         if(ad['LiveBatche']['MRP']['id'] is None):
@@ -726,7 +735,7 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                             "LiveBatche" : ad['LiveBatche']['id'],
                             "LiveBatcheMRPID" : ad['LiveBatche']['MRP']['id'],
                             "LiveBatcheGSTID" : ad['LiveBatche']['GST']['id'],
-                            "Rate":round(Rate[0]["NoRatewithOutGST"],2),
+                            "Rate": round(Rate, 2),
                             "MRP" : MRPValue,
                             "GST" : GSTPercentage,
                             "BaseUnitQuantity":QtyInNo,
@@ -737,11 +746,18 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                     query = TC_GRNItems.objects.filter(Item=ItemID,BatchCode=BatchCode).order_by('id')[:1]                    
                     if query:
                         GRNItemsdata = TC_GRNItemsSerializerSecond(query, many=True).data
-                        Rate=RateCalculationFunction(0,Itemquery[0]["id"],CustomerID,0,1,0,0).RateWithGST()
+                        # Rate=RateCalculationFunction(0,Itemquery[0]["id"],CustomerID,0,1,0,0).RateWithGST()
+                        with connection.cursor() as cursor:
+                            cursor.execute(f'''
+                                SELECT ROUND(RateCalculationFunction1(0, {Itemquery[0]["id"]}, {CustomerID}, 0, 1, 0, 0), 2) AS RateWithoutGST
+                            ''')
+                            row = cursor.fetchone()
+                        Rate = row[0] if row else 0.00
+
                         for a in GRNItemsdata:
                             MRP = a['MRP']["id"]
                             MRPValue= a['MRPValue']
-                            Rate= round(float(Rate[0]["NoRatewithOutGST"]),2)
+                            Rate = round(float(Rate), 2)
                             GST= a['GST']["id"]
                             GSTPercentage= a['GSTPercentage']
                             BatchCode= a['BatchCode']
@@ -1120,5 +1136,9 @@ class ReturnImageUpdate(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0,0,'ReturnImagedata:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        
+        
+        
+
     
           

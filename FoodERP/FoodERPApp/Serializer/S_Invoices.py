@@ -354,7 +354,9 @@ class InvoiceEditStockSerializer(serializers.Serializer):
     GSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
     UnitID_id = serializers.IntegerField()
     BaseUnitConversion = serializers.CharField(max_length=100) 
-    BaseUnitQuantity=serializers.DecimalField(max_digits=10, decimal_places=2)      
+    BaseUnitQuantity=serializers.DecimalField(max_digits=10, decimal_places=2)
+    Rate = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
+      
          
 class InvoiceEditItemSerializer(serializers.Serializer):
     id=serializers.IntegerField()

@@ -348,7 +348,7 @@ urlpatterns = [
             url(r'InvoiceHide$', InvoiceHideView.as_view()),
             url(r'InvoiceBulkDelete$', InvoiceBulkDeleteView.as_view()),
             
-                
+             
 #Loading Sheet All APIs
             url(r'LoadingSheet/([0-9]+)$', LoadingSheetView.as_view()),
             url(r'LoadingSheet$', LoadingSheetView.as_view()),
@@ -640,7 +640,9 @@ urlpatterns = [
             url(r'ReturnItemApprove$', SalesReturnItemApproveView.as_view()),
             url(r'PurchaseReturnPrint/([0-9]+)$', PurchaseReturnPrintView.as_view()),
             url(r'ReturnImageUpdate/([0-9]+)$', ReturnImageUpdate.as_view()),
-            
+#PurchaseReturn EwayBill
+              url(r'PurchaseReturnUploaded_EwayBill/([0-9]+)/([0-9]+)$', PurchaseReturnUploaded_EwayBill.as_view()),  
+              url(r'PurchaseReturnCancel_EwayBill/([0-9]+)/([0-9]+)$', PurchaseReturnCancel_EwayBill.as_view()),         
                     
 # Single Invoice details view api for Sales Return, CreditDebitnot
             url(r'InvoiceReturnCRDR/([0-9]+)$', InvoiceViewThird.as_view()),
@@ -858,6 +860,7 @@ urlpatterns = [
               url(r'StockAdjustmentReport$',StockAdjustmentReportView.as_view()), 
               url(r'CurrentServerDateTime$',CurrentServerDateTimeView.as_view()),
               
+
 
 
 ]
