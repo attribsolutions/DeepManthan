@@ -264,6 +264,7 @@ class PurchaseReturnView(CreateAPIView):
                     "UpdatedBy" : request.POST.get('UpdatedBy'),
                     "IsApproved" : request.POST.get('IsApproved'),
                     "Mode" : request.POST.get('Mode'),
+                    "Vehicle":request.POST.get('Vehicle'),
                     "PurchaseReturnReferences" : purchase_return_references,
                     "ReturnItems" : return_items
                 } 
@@ -383,6 +384,7 @@ class PurchaseReturnView(CreateAPIView):
               
                 PurchaseReturndata.update({"O_LiveBatchesList":O_LiveBatchesList}) 
                 PurchaseReturn_Serializer = PurchaseReturnSerializer(data=PurchaseReturndata)
+                # print(PurchaseReturn_Serializer)
                 if PurchaseReturn_Serializer.is_valid():
                     PurchaseReturn = PurchaseReturn_Serializer.save()
                     LastInsertID = PurchaseReturn.id
@@ -1120,5 +1122,9 @@ class ReturnImageUpdate(CreateAPIView):
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0,0,'ReturnImagedata:'+str(Exception(e)),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data':[]})
+        
+        
+        
+
     
           
