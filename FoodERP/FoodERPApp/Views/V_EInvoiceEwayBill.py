@@ -1202,4 +1202,273 @@ class Cancel_CreditDebitNotes_EInvoice(CreateAPIView):
                 else:
                     return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})            
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})   
+        
+        
+        
+class PurchaseReturnUploaded_EwayBill(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def get(self, request, id=0,userID=0):
+        try:
+            with transaction.atomic():
+                
+                Query=T_PurchaseReturn.objects.filter(id=id).values('Vehicle')
+                
+                  
+                if (Query[0]['Vehicle']) is None:
+                    log_entry = create_transaction_logNew(request,0,0,'Vehicle Number is required',363,0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Vehicle Number is required', 'Data':id })
+                else:
+                   
+                   
+                    access_token = generate_Access_Token()
+                    aa=access_token.split('!')
+                    
+    # =======================================================================================
+                    
+                    if(aa[0] == '1'):
+                        
+                        access_token=aa[1]
+                       
+                        PurchaseReturnQuery=T_PurchaseReturn.objects.raw(f'''SELECT P.Name PartyName,PA.Address selleraddress,PA.PIN sellerpin,PS.Name PartyState,P.GSTIN PartyGSTIN,
+       C.Name CustomerName,CA.Address buyeraddress,CA.PIN buyerpin,CS.Name CustomerState,C.GSTIN CustomerGSTIN,
+       PR.id,PR.ReturnDate,PR.GrandTotal,vehic.VehicleNumber VehicleNumber,CC.Name CustomerCity,P.Email PartyEmail ,
+       PR.FullReturnNumber
+FROM FoodERP.T_PurchaseReturn PR
+join FoodERP.M_Parties P on P.id=PR.Party_id
+join FoodERP.M_Parties C on C.id=PR.Customer_id
+left join FoodERP.MC_PartyAddress PA on PA.Party_id=P.id and PA.IsDefault=1
+left join FoodERP.MC_PartyAddress CA on CA.Party_id=C.id and CA.IsDefault=1
+left join FoodERP.M_States PS on PS.id=P.State_id
+left join FoodERP.M_States CS on CS.id=C.State_id
+left join FoodERP.M_Cities CC on CC.id=C.City_id
+left join FoodERP.M_Vehicles vehic on PR.Vehicle_id=vehic.id = {id}''')
+                        
+                        
+                        PurchaseReturnData = list()
+                        PurchaseReturnItemDetails = list()
+                        Total_assessable_value = 0
+                        total_PurchaseReturn_value = 0
+                        total_cgst_value = 0
+                        total_sgst_value = 0
+                        total_igst_value = 0
+                        total_discount = 0
+                        
+                        for PR in PurchaseReturnQuery:
+                           
+                            user_gstin = PR.PartyGSTIN
+                            sellerpin = PR.sellerpin
+                            buyerpin = PR.buyerpin
+                           
+                #====================================Distance Calculate API====================================================            
+                            Calculate_Distance_URL = f"https://pro.mastersindia.co/distance?access_token={access_token}&fromPincode={sellerpin}&toPincode={buyerpin}"
+                            headers = {'Content-Type': 'application/json',}
+                            response = requests.request("GET", Calculate_Distance_URL, headers=headers)
+
+                            distance_dict = json.loads(response.text)
+                           
+                #===============================================================================================================           
+                            if(distance_dict['results']['status']== 'Success' and distance_dict['results']['code']== 200):
+                                
+                                Itemquery=TC_PurchaseReturnItems.objects.raw(f'''	SELECT item.id,item.Name ItemName,gsthsn.HSNCode,
+	TC_PurchaseReturnItems.Quantity,units.EwayBillUnit,TC_PurchaseReturnItems.SGSTPercentage,
+	TC_PurchaseReturnItems.CGSTPercentage,TC_PurchaseReturnItems.IGSTPercentage,
+	TC_PurchaseReturnItems.BasicAmount, TC_PurchaseReturnItems.CGST,TC_PurchaseReturnItems.SGST,TC_PurchaseReturnItems.IGST,
+	TC_PurchaseReturnItems.Amount,TC_PurchaseReturnItems.DiscountAmount
+	FROM FoodERP.T_PurchaseReturn 
+	join FoodERP.TC_PurchaseReturnItems  on T_PurchaseReturn.id=TC_PurchaseReturnItems.PurchaseReturn_id
+	join FoodERP.M_Items item on item.id=TC_PurchaseReturnItems.Item_id
+	join FoodERP.MC_ItemUnits itemunit on itemunit.id=TC_PurchaseReturnItems.Unit_id
+	join FoodERP.M_Units units on units.id=itemunit.UnitID_id
+	join FoodERP.M_GSTHSNCode gsthsn on gsthsn.id=TC_PurchaseReturnItems.GST_id
+	where PurchaseReturn_id={PR.id}''')
+                                
+                                
+                                for a in Itemquery:
+
+                                    
+                                    Total_assessable_value = float(
+                                        Total_assessable_value) + float(a.BasicAmount)
+                                    total_PurchaseReturn_value = float(
+                                        total_PurchaseReturn_value) + float(a.Amount)
+                                    total_cgst_value = float(
+                                        total_cgst_value) + float(a.CGST)
+                                    total_sgst_value = float(
+                                        total_sgst_value) + float(a.SGST)
+                                    total_igst_value = float(
+                                        total_igst_value) + float(a.IGST)
+                                    total_discount = float(
+                                        total_discount) + float(a.DiscountAmount)
+
+                                    PurchaseReturnItemDetails.append({
+                                        "product_name": a.ItemName,
+                                        "product_description": a.ItemName,
+                                        "hsn_code": a.HSNCode,
+                                        "quantity": float(a.Quantity),
+                                        "unit_of_product": a.EwayBillUnit,
+                                        "cgst_rate": float(a.SGSTPercentage),
+                                        "sgst_rate": float(a.SGSTPercentage),
+                                        "igst_rate": float(a.IGSTPercentage),
+                                        "cess_rate": 0,
+                                        "cessNonAdvol": 0,
+                                        "taxable_amount": float(a.BasicAmount),
+                                    })
+
+                                
+
+                                PurchaseReturnData.append({
+
+                                    'access_token': access_token,
+                                    'userGstin': PR.PartyGSTIN,
+                                    'supply_type': "outward",
+                                    'sub_supply_type': "Supply",
+                                    'sub_supply_description': " ",
+                                    'document_type': "PurchaseReturn",
+                                    'document_number': PR.FullReturnNumber,
+                                    'document_date': str(PR.ReturnDate),
+                                    'gstin_of_consignor': PR.PartyGSTIN,
+                                    'legal_name_cosignor': PR.PartyName,
+                                    'address1_of_consignor': PR.selleraddress,
+                                    'address2_of_consignor': '',
+                                    'pincode_of_consignor': sellerpin,
+                                    'state_of_consignor': PR.PartyState,
+                                    'actual_from_state_name': PR.PartyState,
+                                    'gstin_of_consignee': PR.CustomerGSTIN,
+                                    'legal_name_of_consignee': PR.CustomerName,
+                                    'address1_of_consignee': PR.buyeraddress,
+                                    'address2_of_consignee': "",
+                                    'place_of_consignee': PR.CustomerCity,
+                                    'pincode_of_consignee': buyerpin,
+                                    'state_of_supply': PR.CustomerState,
+                                    'actual_to_state_name': PR.CustomerState,
+                                    'other_value': '0',
+                                    'total_invoice_value': float(PR.GrandTotal),
+                                    'taxable_amount': float(Total_assessable_value),
+                                    'cgst_amount': float(total_cgst_value),
+                                    'sgst_amount': float(total_sgst_value),
+                                    'igst_amount': float(total_igst_value),
+                                    'cess_amount': '0',
+                                    'cess_nonadvol_value': '0',
+                                    'transporter_id': "",
+                                    'transporter_document_number': "",
+                                    'transporter_document_date': "",
+                                    'transportation_mode': "road",
+                                    'transportation_distance': 0,
+                                    'vehicle_number': 0,
+                                    'transporter_name': "",
+                                    'vehicle_type': "Regular",
+                                    'data_source': "erp",
+                                    'user_ref': "1232435466sdsf234",
+                                    'eway_bill_status': "Y",
+                                    'auto_print': "Y",
+                                    'email' : PR.PartyEmail,
+                                    'itemList': PurchaseReturnItemDetails,
+                                })
+                                # print(InvoiceData[0])
+                                E_Way_Bill_URL = 'https://pro.mastersindia.co/ewayBillsGenerate'
+                                
+                               
+                                payload = json.dumps(PurchaseReturnData[0])
+                                
+                                headers = {
+                                    'Content-Type': 'application/json',
+                                }
+                                
+                            
+                                response = requests.request(
+                                    "POST", E_Way_Bill_URL, headers=headers, data=payload)
+
+                                data_dict = json.loads(response.text)
+                                
+                                if(data_dict['results']['status']== 'Success' and data_dict['results']['code']== 200):
+                                   
+                                    Query=TC_PurchaseReturnUploads.objects.filter(PurchaseReturn_id=id)                                    
+                                    
+                                    if(Query.count() > 0):
+                                        StatusUpdates=TC_PurchaseReturnUploads.objects.filter(PurchaseReturn_id=id).update(EwayBillUrl=data_dict['results']['message']['url'],EwayBillNo=data_dict['results']['message']['ewayBillNo'],EwayBillCreatedBy=userID,EwayBillCreatedOn=datetime.now())
+                                        
+                                        log_entry = create_transaction_logNew(request,payload,0,'E-WayBill Upload Successfully',488,0 )
+                                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-WayBill Upload Successfully', 'Data': PurchaseReturnData[0] })
+                                    else:
+                                       
+                                        PurchaseReturnID=T_PurchaseReturn.objects.get(id=id)
+                                        Statusinsert=TC_PurchaseReturnUploads.objects.create(PurchaseReturn_id=PurchaseReturnID,user_gstin=user_gstin,EwayBillUrl=data_dict['results']['message']['url'],EwayBillNo=data_dict['results']['message']['ewayBillNo'],EwayBillCreatedBy=userID,EwayBillCreatedOn=datetime.now())        
+                                    
+                                        log_entry = create_transaction_logNew(request,payload,0,f'E-WayBill Upload Successfully  of PurchaseReturnID: {PurchaseReturnID}',488,0 )
+                                        return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-WayBill Upload Successfully', 'Data': PurchaseReturnData[0] })
+                                else:
+                                    # CustomPrint('hhhhhhh')
+                                    log_entry = create_transaction_logNew(request, payload,0, data_dict['results'], 488,0)
+                                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': data_dict['results'], 'Data': PurchaseReturnData[0] })
+                            else:
+                                log_entry = create_transaction_logNew(request, payload,0, distance_dict['results'], 488,0)
+                                return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': distance_dict['results'], 'Data': [] })     
+                            
+                    else:
+                        log_entry = create_transaction_logNew(request,payload,0, aa[1],488,0) 
+                        return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0, 'E-WayBill Upload:'+str((e)),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})           
+
+class PurchaseReturnCancel_EwayBill(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def get(self, request, id=0,userID=0):
+        try:
+            with transaction.atomic():
+
+                access_token = generate_Access_Token()
+                aa=access_token.split('!')
+                # return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': access_token})
+# =======================================================================================
+                PurchaseReturndetaillist=list()
+                if(aa[0] == '1'):
+                    access_token=aa[1]
+                   
+                    PurchaseReturnUploadsData=TC_PurchaseReturnUploads.objects.filter(PurchaseReturn_id=id).values("user_gstin","EwayBillNo")                 
+                  
+                    PurchaseReturndetaillist.append({
+                            "access_token" : access_token,
+                            "userGstin" : PurchaseReturnUploadsData[0]["user_gstin"],
+                            "eway_bill_number" : PurchaseReturnUploadsData[0]["EwayBillNo"],
+                            "reason_of_cancel" : "Others",
+                            "cancel_remark" : "Data Entry Mistake",
+                            "data_source" : 'erp'
+
+                    })
+                    EWayBillCancel_URL = 'https://pro.mastersindia.co/ewayBillCancel'
+                    payload = json.dumps(PurchaseReturndetaillist[0])
+                    
+                    headers = {
+                        'Content-Type': 'application/json',
+                    }
+
+                    response = requests.request(
+                        "POST", EWayBillCancel_URL, headers=headers, data=payload)
+
+                    data_dict = json.loads(response.text)
+                  
+                    if(data_dict['results']['status']== 'Success' and data_dict['results']['code']== 200):                       
+                        Query=TC_PurchaseReturnUploads.objects.filter(PurchaseReturn_id=id)                        
+                        
+                        if(Query.count() > 0):                            
+                            StatusUpdates=TC_PurchaseReturnUploads.objects.filter(PurchaseReturn_id=id).update(EwayBillIsCancel=1,EwayBillCanceledBy=userID,EwayBillCanceledOn=datetime.now())
+                            
+                            log_entry = create_transaction_logNew(request,0,0,'E-WayBill Cancel Successfully',489,0 )
+                            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-WayBill Cancel Successfully', 'Data': [] })
+                        else:
+                            log_entry = create_transaction_logNew(request,0,0,'E-WayBill Data Invalid',489,0 ) 
+                            return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-WayBill Data Invalid', 'Data': [] })
+                    else:
+                        log_entry = create_transaction_logNew(request, 0,0, data_dict['results']['message'], 489,0)
+                        return JsonResponse({'StatusCode': data_dict['results']['code'], 'Status': True, 'Message': data_dict['results']['message'], 'Data': [] })
+                else:
+                    log_entry = create_transaction_logNew(request,0,0, aa[1],364,0) 
+                    return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
+        except Exception as e:
+            log_entry = create_transaction_logNew(request, 0, 0, 'E-WayBill Cancel:'+str((e)),33,0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
