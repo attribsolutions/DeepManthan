@@ -145,6 +145,7 @@ class InvoiceDataExportSerializer(serializers.Serializer):
     EwayBillNo = serializers.CharField(max_length=500)
     GroupName = serializers.CharField(max_length=500)
     SubGroupName = serializers.CharField(max_length=500)
+    NoRate = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
     def to_representation(self, instance):
         a = super().to_representation(instance)
         Discount_Type = a['DiscountType']
@@ -271,6 +272,7 @@ class RetailerDataExportSerializer(serializers.Serializer):
 class ReturnReportSerializer(serializers.Serializer):
     id=serializers.IntegerField()
     ReturnDate = serializers.DateField()
+    CustomerID = serializers.IntegerField()
     CustomerName = serializers.CharField(max_length=500)
     CustomerType = serializers.CharField(max_length=500)
     CompanyName=serializers.CharField(max_length=100)
@@ -387,6 +389,7 @@ class CreditDebitDataExportSerializer(serializers.Serializer):
     Irn = serializers.CharField(max_length=500)
     AckNo = serializers.CharField(max_length=500)
     EwayBillNo = serializers.CharField(max_length=500)
+    NoRate = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
     
 
     def to_representation(self, instance):

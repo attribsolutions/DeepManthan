@@ -388,6 +388,7 @@ class ChallanListFilterView(CreateAPIView):
                             "id": a['id'],
                             "ChallanDate": a['ChallanDate'],
                             "FullChallanNumber": a['FullChallanNumber'],
+                            "FullInvoiceNumber": a['FullChallanNumber'],    '''extra field for Dashboard Invoices For GRN panel '''
                             "IsVDCChallan" : a['IsVDCChallan'],
                             "CustomerID": a['Customer']['id'],
                             "Customer": a['Customer']['Name'],
@@ -433,7 +434,7 @@ class DemandDetailsForChallan(CreateAPIView):
                     TC_DemandItems.GST_id,M_GSTHSNCode.HSNCode,M_MRPMaster.MRP ItemMRP,
                     TC_DemandItems.GSTAmount,TC_DemandItems.CGST,TC_DemandItems.SGST,TC_DemandItems.IGST,TC_DemandItems.CGSTPercentage,TC_DemandItems.SGSTPercentage,
                     TC_DemandItems.IGSTPercentage,TC_DemandItems.Amount,TC_DemandItems.BasicAmount, 
-                    M_Parties.Name CustomerName,M_Parties.PAN,
+                    M_Parties.Name CustomerName,M_Parties.PAN, M_Parties.IsSEZ,
                     T_Demands.DemandDate,M_Parties.id CustomerID,M_Parties.GSTIN,T_Demands.FullDemandNumber FROM  TC_DemandItems
                     JOIN T_Demands ON T_Demands.id=TC_DemandItems.Demand_id
                     JOIN M_Parties on M_Parties.id=T_Demands.Customer_id
@@ -516,6 +517,7 @@ class DemandDetailsForChallan(CreateAPIView):
                                 "CustomerPAN" : b.PAN,
                                 "CustomerGSTIN" : b.GSTIN,
                                 "CustomerID" : Customer,
+                                "IsSEZ" : b.IsSEZ,
                                 "DemandNumber" : b.FullDemandNumber,
                                 "DemandItemDetails":DemandItemDetails
                             })

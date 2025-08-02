@@ -185,7 +185,9 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
         SkyggeID=F('SubParty__SkyggeID'),
         FSSAINo=F('SubParty__PartyAddress__FSSAINo'),
         FSSAIExipry=F('SubParty__PartyAddress__FSSAIExipry'),
-    ).values('PartyId','PartyName','GSTIN','PAN','PartyTypeID','IsTCSParty','SkyggeID','FSSAINo','FSSAIExipry')
+        IsSEZ=F('SubParty__IsSEZ')
+    ).values('PartyId','PartyName','GSTIN','PAN','PartyTypeID','IsTCSParty','SkyggeID','FSSAINo','FSSAIExipry','IsSEZ')
+                    
                     
                 elif (Type==4):
                     Query = MC_PartySubParty.objects.filter(~Q(id=id)).filter(
@@ -253,19 +255,23 @@ class GetVendorSupplierCustomerListView(CreateAPIView):
                 
                 if Query:
                     ListData = list()
-                    for a in Query: 
-                        # CustomPrint(a)
-                        ListData.append({
+                    for a in Query:
+                        party_data = {
                             "id": a['PartyId'],
                             "Name": a['PartyName'],
                             "GSTIN": a['GSTIN'],
-                            "PAN":a['PAN'],
-                            "FSSAINo" : a['FSSAINo'],
-                            "FSSAIExipry" : a['FSSAIExipry'],
-                            "IsTCSParty":a['IsTCSParty'],
-                            "SkyggeID": a['SkyggeID'], 
-                            "PartyTypeID":a['PartyTypeID'],
-                            })
+                            "PAN": a['PAN'],
+                            "FSSAINo": a['FSSAINo'],
+                            "FSSAIExipry": a['FSSAIExipry'],
+                            "IsTCSParty": a['IsTCSParty'],
+                            "SkyggeID": a['SkyggeID'],
+                            "PartyTypeID": a['PartyTypeID'],
+                        }
+
+                        if Type == 3:
+                            party_data["IsSEZ"] = a.get('IsSEZ', False) 
+
+                        ListData.append(party_data)
                         
                         
                     log_entry = create_transaction_logNew(request, Partydata,id,'',177,0)

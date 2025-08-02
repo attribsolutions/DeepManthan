@@ -13,11 +13,12 @@ from .Views.V_SweetPoSItemGroup import *
 from .Views.V_SweetPoSUsers import *
 
 from .Views.V_SPOSstock import *
-
+from  .Views.V_ERPUrls import *
 from .Views.V_SPOSRate import *
 from .Views.V_SPOSServicesSettings import *
 from .Views.V_PosSettings import *
 from .Views.V_PaymentMode import *
+from .Views.V_SPOSClaim import *
 
 urlpatterns = [
     
@@ -65,6 +66,11 @@ urlpatterns = [
     #Pos Settings
     url(r'^PosSettings$', PosSettings.as_view()), 
     url(r'^PosSettings/(?P<pk>[0-9]+)$', PosSettingsDetail.as_view()),
-    url(r'^paymentmodes/(?P<party_id>[0-9]+)/$', PaymentModeAPIView.as_view(), name='payment-modes'),
- 
+    url(r'^paymentmodes/(?P<party_id>[0-9]+)$', PaymentModeAPIView.as_view(), name='payment-modes'),
+
+    #Claims
+    url(r'^SwiggyZomatoClaimList$', SwiggyZomatoClaimListView.as_view()), 
+    
+    #Pos ERPUrls
+    url(r'^erpurls/(?P<party_id>[0-9]+)$', ERPUrlsByPartyView.as_view(), name='erp-urls-by-party'),
     ]

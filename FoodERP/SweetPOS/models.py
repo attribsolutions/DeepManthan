@@ -418,8 +418,9 @@ class M_PhonePeSettings(models.Model):
         db_table = 'M_PhonePeSettings'  
 
 class M_PaymentModes(models.Model):
-    Payment_Mode = models.CharField(max_length=100)
- 
+    Description  = models.CharField(max_length=100)
+    Payment_Mode = models.CharField(max_length=50)
+    TenderCode =models.CharField(max_length=50,blank=True, null=True)
     class Meta:
         db_table = 'M_PaymentModes'
  
@@ -429,3 +430,18 @@ class MC_PaymentModeDetails(models.Model):
  
     class Meta:
         db_table = 'MC_PaymentModeDetails'       
+
+class M_ERPUrls(models.Model):
+    Name = models.CharField(max_length=150)
+    Urls = models.CharField(max_length=400)
+
+    class Meta:
+        db_table = "M_ERPUrls"
+
+class MC_ERPUrlsDetails(models.Model):
+    PartyId = models.IntegerField()
+    ERPUrls = models.ForeignKey(M_ERPUrls,on_delete=models.CASCADE)
+    Urls    = models.CharField(max_length=400)
+
+    class Meta:
+        db_table = 'MC_ERPUrlsDetails'

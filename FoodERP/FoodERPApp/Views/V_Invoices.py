@@ -55,7 +55,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                                     MC_ItemUnits.BaseUnitConversion,MC_ItemUnits.UnitID_id MUnitID,MC_ItemUnits.BaseUnitQuantity ConversionUnit,TC_OrderItems.BaseUnitQuantity,
                                     TC_OrderItems.GST_id,M_GSTHSNCode.HSNCode,TC_OrderItems.GSTPercentage,M_MarginMaster.id MarginID,M_MarginMaster.Margin,TC_OrderItems.BasicAmount,
                                     TC_OrderItems.GSTAmount,TC_OrderItems.CGST,TC_OrderItems.SGST,TC_OrderItems.IGST,TC_OrderItems.CGSTPercentage,TC_OrderItems.SGSTPercentage,
-                                    TC_OrderItems.IGSTPercentage,TC_OrderItems.Amount,M_Parties.Name CustomerName,M_Parties.PAN,MC_PartySubParty.IsTCSParty,
+                                    TC_OrderItems.IGSTPercentage,TC_OrderItems.Amount,M_Parties.Name CustomerName, M_Parties.IsSEZ, M_Parties.PAN,MC_PartySubParty.IsTCSParty,
                                     T_Orders.OrderDate,T_Orders.AdvanceAmount,M_Parties.id CustomerID,M_Parties.GSTIN,T_Orders.FullOrderNumber,(select BaseUnitQuantity from MC_ItemUnits where IsDeleted=0  and UnitID_id=2 and Item_id=ItemID)Weightage,
                                     (Select PartyType_id from M_Parties where M_Parties.id={Party})PartyTypeID
                                     ,TC_OrderItems.Discount,TC_OrderItems.DiscountType
@@ -210,6 +210,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                                 "CustomerName" : CustomerName,
                                 "IsTCSParty" : b.IsTCSParty,
                                 "CustomerPAN" : b.PAN,
+                                "IsSEZ" : b.IsSEZ,
                                 "CustomerGSTIN" : b.GSTIN,
                                 "CustomerID" : Customer,
                                 "OrderNumber" : b.FullOrderNumber,
@@ -584,6 +585,7 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                         'Vehicle_id', 'TCSAmount', 'Hide', 'MobileNo', 'CreatedBy', 'IsDeleted','PartiesCustomerGSTIN'
                     )
                 )
+                # print(SposInvoices_query.query)
                 
                 Spos_Invoices = []
                 for b in SposInvoices_query:
@@ -593,6 +595,11 @@ class InvoiceListFilterViewSecond(CreateAPIView):
 
                     # CPartyName = M_SweetPOSUser.objects.using('sweetpos_db').filter(id=b['CreatedBy']).values('LoginName') 
                     CPartyName = M_Users.objects.filter(id=b['CreatedBy']).values('LoginName') 
+                    if CPartyName.exists():
+                        b['CreatedByName'] = CPartyName[0]['LoginName']
+                    else:
+                        b['CreatedBy'] = 0
+                        b['CreatedByName'] = ""
                     
                     party = Party
                     customer = customers[0]['id']
@@ -606,7 +613,6 @@ class InvoiceListFilterViewSecond(CreateAPIView):
                     b['CustomerPAN'] = customers[0]['PAN'] 
                     b['CustomerPartyType'] = customers[0]['PartyType'] 
                     b['CreatedBy'] = b['CreatedBy']
-                    b['CreatedByName'] = CPartyName[0]['LoginName']
                     b['Identify_id'] = 2
                    
                     b['VehicleNo'] = vehicle[0]['VehicleNumber'] if vehicle else ''
@@ -875,6 +881,7 @@ class InvoiceViewSecond(CreateAPIView):
                             "CustomerName": a['Customer']['Name'],
                             "CustomerGSTIN": a['Customer']['GSTIN'],
                             "CustomerMobileNo": a['Customer']['MobileNo'],
+                            "IsSEZ": a['Customer']['IsSEZ'],
                             "Party": a['Party']['id'],
                             "PartyName": a['Party']['Name'],
                             "PartyGSTIN": a['Party']['GSTIN'],
@@ -1296,7 +1303,9 @@ class InvoiceViewEditView(CreateAPIView):
                         batchquery = TC_InvoiceItems.objects.filter(Item=item_id,Invoice = id).values('LiveBatch_id')
                         LiveBatchIDlist = list(batchquery.values_list('LiveBatch_id', flat=True))
                         # CustomPrint(LiveBatchIDlist)
-                        stockquery=O_LiveBatches.objects.raw('''SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,O_LiveBatches.BatchDate,O_LiveBatches.BatchCode,O_LiveBatches.SystemBatchDate,O_LiveBatches.SystemBatchCode,O_LiveBatches.id As LiveBatchID,TC_InvoiceItems.MRP_id,TC_InvoiceItems.GST_id,TC_InvoiceItems.MRPValue,TC_InvoiceItems.GSTPercentage,MC_ItemUnits.UnitID_id,MC_ItemUnits.BaseUnitConversion,TC_InvoiceItems.BaseUnitQuantity FROM O_LiveBatches JOIN O_BatchWiseLiveStock ON O_BatchWiseLiveStock.LiveBatche_id =O_LiveBatches.id JOIN MC_ItemUnits ON MC_ItemUnits.id = O_BatchWiseLiveStock.Unit_id JOIN TC_InvoiceItems ON TC_InvoiceItems.LiveBatch_id = O_LiveBatches.id WHERE  TC_InvoiceItems.Invoice_id=%s AND O_BatchWiseLiveStock.LiveBatche_id IN %s  ''',(id,LiveBatchIDlist))
+                        stockquery=O_LiveBatches.objects.raw('''SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,O_LiveBatches.BatchDate,O_LiveBatches.BatchCode,O_LiveBatches.SystemBatchDate,O_LiveBatches.SystemBatchCode,O_LiveBatches.id As LiveBatchID,TC_InvoiceItems.MRP_id,TC_InvoiceItems.GST_id,TC_InvoiceItems.MRPValue,TC_InvoiceItems.GSTPercentage,MC_ItemUnits.UnitID_id,MC_ItemUnits.BaseUnitConversion,TC_InvoiceItems.BaseUnitQuantity, 
+                                                             FoodERP.RateCalculationFunction1(O_LiveBatches.id, O_BatchWiseLiveStock.Item_id, %s, MC_ItemUnits.UnitID_id, 0, 0, 0, 1) AS Rate
+                                                             FROM O_LiveBatches JOIN O_BatchWiseLiveStock ON O_BatchWiseLiveStock.LiveBatche_id =O_LiveBatches.id JOIN MC_ItemUnits ON MC_ItemUnits.id = O_BatchWiseLiveStock.Unit_id JOIN TC_InvoiceItems ON TC_InvoiceItems.LiveBatch_id = O_LiveBatches.id WHERE  TC_InvoiceItems.Invoice_id=%s AND O_BatchWiseLiveStock.LiveBatche_id IN %s  ''',(Customer,id,LiveBatchIDlist))
                 
                         InvocieEditStock=InvoiceEditStockSerializer(stockquery,many=True).data
                         stockDatalist = list()
@@ -1304,7 +1313,7 @@ class InvoiceViewEditView(CreateAPIView):
                         quantity_sum = queryset.get('Quantity', 0)
 
                         for d in InvocieEditStock:
-                            Rate=RateCalculationFunction(d['LiveBatchID'],d['Item_id'],Customer,0,d["UnitID_id"],0,0).RateWithGST()
+                            # Rate=RateCalculationFunction(d['LiveBatchID'],d['Item_id'],Customer,0,d["UnitID_id"],0,0).RateWithGST()
 
                             stockDatalist.append({
                                     "id": d['id'],
@@ -1316,7 +1325,7 @@ class InvoiceViewEditView(CreateAPIView):
                                     "LiveBatche" : d['LiveBatchID'],
                                     "LiveBatcheMRPID" : d['MRP_id'],
                                     "LiveBatcheGSTID" : d['GST_id'],
-                                    "Rate":Rate[0]["NoRatewithOutGST"],
+                                    "Rate": round(float(d['Rate']), 2),
                                     "MRP" : d['MRPValue'],
                                     "GST" : d['GSTPercentage'],
                                     "UnitName":d['BaseUnitConversion'], 

@@ -305,7 +305,7 @@ class SPOSInvoiceViewSecond(CreateAPIView):
                 # CustomPrint(characters)
                 # CustomPrint(id)
                 InvoiceQuery = T_SPOSInvoices.objects.raw(f'''SELECT SPOSInv.id,InvoiceDate,InvoiceNumber,FullInvoiceNumber,AdvanceAmount,TCSAmount,GrandTotal,RoundOffAmount,Customer,
-                                                          cust.Name CustomerName,cust.GSTIN CustomerGSTIN,cust.MobileNo CustomerMobileNo,
+                                                          cust.Name CustomerName,cust.GSTIN CustomerGSTIN, cust.IsSEZ, cust.MobileNo CustomerMobileNo,
 Party,party.Name PartyName,party.GSTIN PartyGSTIN,party.MobileNo PartyMobileNo,M_Drivers.Name DriverName,M_Vehicles.VehicleNumber,
 SPOSInv.CreatedOn,custaddr.FSSAINo CustomerFSSAI ,custaddr.Address CustomerAddress, partyaddr.FSSAINo PartyFSSAI,
 partyaddr.Address PartyAddress,MC_PartyBanks.BranchName,MC_PartyBanks.IFSC,MC_PartyBanks.AccountNo,M_Bank.Name BankName,MC_PartyBanks.IsDefault,custstate.Name CustState,partystate.Name PartyState,
@@ -458,6 +458,7 @@ WHERE SPOSInv.Invoice_id = {a.id}''')
                             "Customer": a.Customer,
                             "CustomerName": a.CustomerName,
                             "CustomerGSTIN": a.CustomerGSTIN,
+                            "IsSEZ" : a.IsSEZ,
                             "CustomerMobileNo": a.CustomerMobileNo,
                             "Party": a.Party,
                             "PartyName": a.PartyName,
@@ -586,7 +587,9 @@ class DeleteInvoiceView(CreateAPIView):
                             invoice_instance = T_SPOSInvoices.objects.get(id=InvoiceDeleteUpdate[0]['id'])
                             InvoiceItems = DeleteInvoicedata['UpdatedInvoiceDetails'][0]['SaleItems']
                             AdvanceAmountValue = DeleteInvoicedata['UpdatedInvoiceDetails'][0].get('AdvanceAmount', 0)
-                            InvoiceUpdate=T_SPOSInvoices.objects.filter(id=InvoiceDeleteUpdate[0]['id']).update(GrandTotal=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['RoundedAmount'],DiscountAmount=DeleteInvoicedata['UpdatedInvoiceDetails'][0] ['DiscountAmount'],TotalAmount=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['TotalAmount'], RoundOffAmount=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['RoundOffAmount'], NetAmount=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['NetAmount'], AdvanceAmount=AdvanceAmountValue, UpdatedBy=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['UpdatedBy'])
+                            InvoiceUpdate=T_SPOSInvoices.objects.filter(id=InvoiceDeleteUpdate[0]['id']).update(GrandTotal=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['RoundedAmount'],DiscountAmount=DeleteInvoicedata['UpdatedInvoiceDetails'][0] ['DiscountAmount'],TotalAmount=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['TotalAmount'], RoundOffAmount=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['RoundOffAmount'], NetAmount=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['NetAmount'], AdvanceAmount=AdvanceAmountValue, PaymentType=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['PaymentType'], UpdatedBy=DeleteInvoicedata['UpdatedInvoiceDetails'][0]['UpdatedBy'])
+                            
+                            
                             DeleteItemsData=TC_SPOSInvoiceItems.objects.filter(Invoice=InvoiceDeleteUpdate[0]['id']).delete()
 
                             # return JsonResponse({'StatusCode': 406, 'Status': True,  'Message': 'ERPItemId is not mapped.', 'Data':InvoiceItems})
@@ -878,7 +881,7 @@ class FranchiseSaleWithBillCountView(CreateAPIView):
                                                    T_SPOSInvoices.ClientID, MAX(T_SPOSInvoices.CreatedOn) AS LastBillTime
                                                     FROM SweetPOS.T_SPOSInvoices
                                                     left JOIN FoodERP.M_Parties on Party = M_Parties.id
-                                                    WHERE InvoiceDate BETWEEN %s AND %s
+                                                    WHERE InvoiceDate BETWEEN %s AND %s and IsDeleted=0
                                                     AND Party IN (select Party_id from FoodERP.MC_ManagementParties WHERE Employee_id = %s)
                                                     Group By M_Parties.id, M_Parties.Name,T_SPOSInvoices.ClientID
                                                     Order By GrandTotal Desc''',[FromDate,ToDate,EmployeeID]) 

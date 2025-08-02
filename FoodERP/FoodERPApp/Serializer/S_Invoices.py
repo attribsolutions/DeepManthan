@@ -37,7 +37,7 @@ class PartiesSerializerSecond(serializers.ModelSerializer):
     # MCSubParty=MCPartySubPartySerializer(many=True) # code by ankita 
     class Meta:
         model = M_Parties
-        fields = ['id','Name','GSTIN','PAN','Email','PartyAddress','State','MobileNo','PartyType_id'] 
+        fields = ['id','Name','GSTIN','PAN','Email','PartyAddress','State','MobileNo','PartyType_id','IsSEZ'] 
 
 class UnitSerializerThird(serializers.ModelSerializer):
     class Meta:
@@ -354,7 +354,9 @@ class InvoiceEditStockSerializer(serializers.Serializer):
     GSTPercentage=serializers.DecimalField(max_digits=10, decimal_places=2)
     UnitID_id = serializers.IntegerField()
     BaseUnitConversion = serializers.CharField(max_length=100) 
-    BaseUnitQuantity=serializers.DecimalField(max_digits=10, decimal_places=2)      
+    BaseUnitQuantity=serializers.DecimalField(max_digits=10, decimal_places=2)
+    Rate = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
+      
          
 class InvoiceEditItemSerializer(serializers.Serializer):
     id=serializers.IntegerField()
