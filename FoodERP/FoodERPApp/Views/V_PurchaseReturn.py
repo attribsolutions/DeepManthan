@@ -706,7 +706,7 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                         # Rate=RateCalculationFunction(ad['LiveBatche']['id'],ad['Item']['id'],CustomerID,0,1,0,0).RateWithGST()
                         with connection.cursor() as cursor:
                             cursor.execute(f'''
-                                SELECT ROUND(RateCalculationFunction1({ad['LiveBatche']['id']}, {ad['Item']['id']}, {CustomerID}, 0, 1, 0, 0), 2) AS RateWithoutGST
+                                SELECT ROUND(RateCalculationFunction1({ad['LiveBatche']['id']}, {ad['Item']['id']}, {CustomerID}, 0, 1, 0, 0,0), 2) AS RateWithoutGST
                             ''')
                             row = cursor.fetchone()
                         Rate = row[0] if row else 0.00
@@ -735,7 +735,7 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                             "LiveBatche" : ad['LiveBatche']['id'],
                             "LiveBatcheMRPID" : ad['LiveBatche']['MRP']['id'],
                             "LiveBatcheGSTID" : ad['LiveBatche']['GST']['id'],
-                            "Rate": round(Rate, 2),
+                            "Rate": round(Rate if Rate is not None else 0.00, 2),
                             "MRP" : MRPValue,
                             "GST" : GSTPercentage,
                             "BaseUnitQuantity":QtyInNo,
@@ -749,7 +749,7 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                         # Rate=RateCalculationFunction(0,Itemquery[0]["id"],CustomerID,0,1,0,0).RateWithGST()
                         with connection.cursor() as cursor:
                             cursor.execute(f'''
-                                SELECT ROUND(RateCalculationFunction1(0, {Itemquery[0]["id"]}, {CustomerID}, 0, 1, 0, 0), 2) AS RateWithoutGST
+                                SELECT ROUND(RateCalculationFunction1(0, {Itemquery[0]["id"]}, {CustomerID}, 0, 1, 0, 0,0), 2) AS RateWithoutGST
                             ''')
                             row = cursor.fetchone()
                         Rate = row[0] if row else 0.00
@@ -757,7 +757,7 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                         for a in GRNItemsdata:
                             MRP = a['MRP']["id"]
                             MRPValue= a['MRPValue']
-                            Rate = round(float(Rate), 2)
+                            Rate = round(float(Rate if Rate is not None else 0.00), 2)
                             GST= a['GST']["id"]
                             GSTPercentage= a['GSTPercentage']
                             BatchCode= a['BatchCode']

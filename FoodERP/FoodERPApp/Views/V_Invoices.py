@@ -168,6 +168,12 @@ class OrderDetailsForInvoice(CreateAPIView):
                                 DiscountType = b.DiscountType
                                 Discount = b.Discount
                                 
+                            InvoiceIDs = TC_InvoicesReferences.objects.filter(Order_id=b.Order_id).values_list('Invoice_id', flat=True)
+
+                            InvoiceData = TC_InvoiceItems.objects.filter(Invoice_id__in=InvoiceIDs, Item_id=b.ItemID ).aggregate(TotalInvoicedQuantity=Sum('BaseUnitQuantity') )
+
+                            InvoiceQuantity = InvoiceData['TotalInvoicedQuantity'] or 0
+                                
                             OrderItemDetails.append({
                                 
                                 "id": b.id,
@@ -183,6 +189,7 @@ class OrderDetailsForInvoice(CreateAPIView):
                                 "DeletedMCUnitsUnitID": b.MUnitID,
                                 "ConversionUnit": b.ConversionUnit,
                                 "BaseUnitQuantity": b.BaseUnitQuantity,
+                                "InvoiceQuantity": round(InvoiceQuantity, 2),
                                 "GST": b.GST_id,
                                 "HSNCode": b.HSNCode,
                                 "GSTPercentage": b.GSTPercentage,
