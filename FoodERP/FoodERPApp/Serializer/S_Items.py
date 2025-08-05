@@ -289,12 +289,17 @@ class PriceListSerializerSecond(serializers.ModelSerializer):
         fields = ['id','Name']
     
 
+class PartyTypeSerializerSecond(serializers.ModelSerializer):
+     class Meta:
+        model = M_PartyType
+        fields = ['id','Name']
 
         
 class PartiesSerializerSecond(serializers.ModelSerializer):
+    PartyType = PartyTypeSerializerSecond(read_only=True, allow_null = True)
     class Meta:
         model = M_Parties
-        fields = ['id','Name','SAPPartyCode'] 
+        fields = ['id','Name','SAPPartyCode','PartyType'] 
                       
 class ItemMarginSerializerSecond(serializers.ModelSerializer):
     Company = CompanySerializerSecond(read_only=True)
