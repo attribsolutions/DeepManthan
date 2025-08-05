@@ -329,6 +329,8 @@ class M_ItemsViewSecond(CreateAPIView):
                                     "MRP": g['MRP'],
                                     "Party": g['Party']['id'],
                                     "PartyName": g['Party']['Name'],
+                                    "PartyType" : g['Party'].get('PartyType', {}).get('id') if g['Party'].get('PartyType') else None,
+                                    "PartyTypeName" : g['Party'].get('PartyType', {}).get('Name') if g['Party'].get('PartyType') else None,
                                     "Division":g['Division']['id'],
                                     "DivisionName":g['Division']['Name'],
                                     "CreatedBy":g['CreatedBy'],
