@@ -145,12 +145,26 @@ class T_GRNSerializer(serializers.ModelSerializer):
 
 
 '''Single Record Details Fetch Get Methods Serializer '''
+class PartyStateserializer(serializers.ModelSerializer):
+    class Meta:
+        model = M_States
+        fields = '__all__'
 
+class PartiesAddressserializer(serializers.ModelSerializer):
+    class Meta:
+        model = MC_PartyAddress
+        fields = '__all__'
 
 class Partiesserializer(serializers.ModelSerializer):
+    PartyAddress = PartiesAddressserializer(many=True, read_only=True)
+    PartyState = PartyStateserializer(read_only=True, source='State') 
+
     class Meta:
         model = M_Parties
-        fields = ['id', 'Name', 'PriceList_id','IsSEZ']
+        fields = ['id', 'Name', 'PriceList_id', 'IsSEZ', 'GSTIN','State', 'MobileNo', 'PartyAddress', 'PartyState' ]
+
+        
+
 class InvoiceDateserializer(serializers.ModelSerializer):
     class Meta:
         model = T_Invoices

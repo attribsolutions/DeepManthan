@@ -3036,7 +3036,7 @@ class ItemWiseConsumptionReportView(CreateAPIView):
                     ) AS E ON D.Item_id = E.ItemID2
                     WHERE IFNULL(D.Quantity, 0) != 0 OR IFNULL(E.ProductionQuantity, 0) != 0 ''')  
                 
-
+                # print(query)
                 raw_material_name = ""
                 raw_material_id = 0
                 raw_material_unit = ""
@@ -3067,12 +3067,39 @@ class ItemWiseConsumptionReportView(CreateAPIView):
                 else:
                     ClosingBalance = 0.00
                     
-                RecieveQty = TC_GRNItems.objects.filter(
-                    GRN__GRNDate__range=[FromDate, ToDate],
-                    GRN__Customer_id=Party,
+                # RecieveQty = TC_GRNItems.objects.filter(
+                #     GRN__GRNDate__range=[FromDate, ToDate],
+                #     GRN__Customer_id=Party,
+                #     Item_id=ItemID,GRN__IsGRNType=1
+                # ).aggregate(RecieveQuantity=Sum('Quantity'))
+                # # print(RecieveQty)
+                # RecieveQuantity=RecieveQty['RecieveQuantity'] or 0.00
+                ReceivedQty=T_GRNs.objects.raw(f'''SELECT 
+                T_GRNs.id,T_GRNs.IsGRNType, 
+                SUM(TC_GRNItems.Quantity) AS TotalQuantity
+                FROM TC_GRNItems
+                JOIN T_GRNs ON T_GRNs.id = TC_GRNItems.GRN_id WHERE 
+                T_GRNs.GRNDate BETWEEN '{FromDate}' AND '{ToDate}'
+                AND T_GRNs.Customer_id = {Party}
+                AND TC_GRNItems.Item_id = {ItemID}
+                AND T_GRNs.IsGRNType IN (0, 1)
+                GROUP BY T_GRNs.IsGRNType''')
+                RecieveQuantity = 0.00
+                IBRecieveQuantity=0.00
+                
+                for GRNType in ReceivedQty:
+                    if GRNType.IsGRNType == 1:
+                        RecieveQuantity = GRNType.TotalQuantity
+                    elif GRNType.IsGRNType == 0:
+                        IBRecieveQuantity = GRNType.TotalQuantity
+                
+
+                IBSaleQty = TC_ChallanItems.objects.filter(
+                    Challan__ChallanDate__range=[FromDate, ToDate],
+                    Challan__Party_id=Party,
                     Item_id=ItemID
-                ).aggregate(RecieveQuantity=Sum('Quantity'))
-                RecieveQuantity=RecieveQty['RecieveQuantity'] or 0.00
+                ).aggregate(SaleQty=Sum('Quantity'))['SaleQty'] or 0.00
+
                 for row in query:
                     raw_material_name = row.RawItemName
                     raw_material_id = row.RawItemid
@@ -3088,9 +3115,11 @@ class ItemWiseConsumptionReportView(CreateAPIView):
             "RawMaterial": raw_material_name,
             "RawMaterialID": raw_material_id,
             "RawMaterialUnit": raw_material_unit,
-             "OpeningBalance":OpeningBalance,
+            "OpeningBalance":OpeningBalance,
             "ClosingBalance":ClosingBalance,
             "RecieveQuantity":RecieveQuantity,
+            "IBRecieveQuantity":IBRecieveQuantity,
+            "IBSaleQty":IBSaleQty,
             "FinishproductDetails": finish_products 
             }
                 
