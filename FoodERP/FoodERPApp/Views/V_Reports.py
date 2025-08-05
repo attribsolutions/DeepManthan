@@ -1753,9 +1753,9 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
  left JOIN MC_SubGroup ON MC_SubGroup.id  = MC_ItemGroupDetails.SubGroup_id
  join M_Units on M_Units.id=M_Items.BaseUnitID_id
  left join MC_ItemShelfLife on MC_ItemShelfLife.Item_id=M_Items.id and IsDeleted=0
- JOIN MC_ItemUnits PIB on PIB.Item_id=M_Items.id and PIB.UnitID_id=4 and PIB.IsDeleted=0
- JOIN MC_ItemUnits PIK on PIK.Item_id=M_Items.id and PIK.UnitID_id=2 and PIK.IsDeleted=0
- JOIN MC_ItemUnits PIN on PIN.Item_id=M_Items.id and PIN.UnitID_id=1 and PIN.IsDeleted=0
+ left JOIN MC_ItemUnits PIB on PIB.Item_id=M_Items.id and PIB.UnitID_id=4 and PIB.IsDeleted=0
+ left JOIN MC_ItemUnits PIK on PIK.Item_id=M_Items.id and PIK.UnitID_id=2 and PIK.IsDeleted=0
+ left JOIN MC_ItemUnits PIN on PIN.Item_id=M_Items.id and PIN.UnitID_id=1 and PIN.IsDeleted=0
  
  """
                 q=C_Companies.objects.filter(id=CompanyID).values('IsSCM')
@@ -1810,7 +1810,7 @@ MC_ItemShelfLife.Days ShelfLife,PIB.BaseUnitQuantity PcsInBox , PIK.BaseUnitQuan
                         ItemQuery = M_Items.objects.raw(query, [today, today, today,PartyID,GroupID])
                     
                 ItemsList = list()
-              
+                # print(ItemQuery)
                 if ItemQuery:    
                     for row in ItemQuery:
                         
@@ -2598,7 +2598,7 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                                 FROM SweetPOS.T_SPOSInvoices AS I
                                 JOIN SweetPOS.TC_SPOSInvoiceItems AS aa ON I.id = aa.Invoice_id
                                 join SweetPOS.TC_InvoicesSchemes InS on InS.Invoice_id=I.id
-                                where I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss1}
+                                where I.IsDeleted=0 and  I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss1}
                                 GROUP BY I.InvoiceDate,I.FullInvoiceNumber,I.Party)
                 
                                 select M_Scheme.id,M_Scheme.SchemeName,M_Scheme.FromPeriod,M_Scheme.ToPeriod ,M_Scheme.SchemeValue,M_Parties.Name PartyName,I.VoucherCode,I.InvoiceDate,
@@ -2628,9 +2628,9 @@ class CouponCodeRedemptionReportView(CreateAPIView):
                                     AND SweetPOSDiscount.FullInvoiceNumber = I.FullInvoiceNumber
                                     AND SweetPOSDiscount.Party = I.Party
                                 where UsageType= 'offline' 
-                                and I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss1} ''')
+                                and I.IsDeleted=0 and I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss1} ''')
                 
-                # print(CouponCodeRedemptionQuery)
+                print(CouponCodeRedemptionQuery)
                 
                 i=1
                 for CouponCode in CouponCodeRedemptionQuery:
@@ -2697,7 +2697,7 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                                 FROM SweetPOS.T_SPOSInvoices AS I
                                 JOIN SweetPOS.TC_SPOSInvoiceItems AS aa ON I.id = aa.Invoice_id
                                 join SweetPOS.TC_InvoicesSchemes InS on InS.Invoice_id=I.id
-                                where I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss1}
+                                where I.IsDeleted=0 and I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss1}
                                 GROUP BY InS.scheme,I.Party)
                                                                           
                                 select M_Scheme.id,M_Scheme.SchemeName,M_Scheme.ShortName,M_Scheme.FromPeriod,M_Scheme.ToPeriod ,M_Parties.id PartyID ,M_Parties.Name PartyName,count(*)count,
@@ -2724,7 +2724,7 @@ class MATAVoucherRedeemptionClaimView(CreateAPIView):
                                     ON SweetPOSDiscount.scheme = M_Scheme.id
                                     AND SweetPOSDiscount.Party = I.Party
                                 where UsageType= 'offline' 
-                                and I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss1}
+                                and I.IsDeleted=0 and I.InvoiceDate between '{FromDate}' AND '{ToDate}' {conditions} {ss1}
                                 group by  M_Scheme.id ,M_Parties.id,M_Scheme.SchemeValue)a
                                  order by PartyID ''',)
                 
