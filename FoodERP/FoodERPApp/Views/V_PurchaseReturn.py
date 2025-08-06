@@ -93,7 +93,9 @@ where TC_ReceiptInvoices.Return_id=%s and T_CreditDebitNotes.IsDeleted=0 ''' ,[a
                             Status = "Reject"
                         else:    
                             Status = "Open" 
-
+                        PurchaseReturnUpload_serializer = list()
+                        PurchaseReturnUpload = TC_PurchaseReturnUploads.objects.filter(PurchaseReturn=a["id"])
+                        PurchaseReturnUpload_serializer = PurchaseReturnUploadsSerializer(PurchaseReturnUpload, many=True).data
                         ReturnListData.append({
                             "id": a['id'], 
                             "ReturnDate": a['ReturnDate'],
@@ -115,7 +117,8 @@ where TC_ReceiptInvoices.Return_id=%s and T_CreditDebitNotes.IsDeleted=0 ''' ,[a
                             "Status" :Status,
                             "Mode":a["Mode"],
                             "ASMApprovalImgUpload":a["ASMApprovalImgUpload"],
-                            "IsCreditNoteCreated" : IsCreditNoteCreated
+                            "IsCreditNoteCreated" : IsCreditNoteCreated,
+                            "InvoiceUploads":PurchaseReturnUpload_serializer
                         })
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': ReturnListData})
                 log_entry = create_transaction_logNew(request, Returndata, x, 'Return List Not Found',51,0)
