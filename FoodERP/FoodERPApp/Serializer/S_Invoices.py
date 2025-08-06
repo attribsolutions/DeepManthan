@@ -386,7 +386,7 @@ class InvoiceEditItemSerializer(serializers.Serializer):
     DiscountType = serializers.IntegerField() 
     Discount = serializers.DecimalField(max_digits=20, decimal_places=2)
     DiscountAmount = serializers.DecimalField(max_digits=20, decimal_places=2)
-    
+    BaseUnitID_id=serializers.IntegerField()
     
     
 class UpdateInvoicesReferencesSerializer(serializers.ModelSerializer):
