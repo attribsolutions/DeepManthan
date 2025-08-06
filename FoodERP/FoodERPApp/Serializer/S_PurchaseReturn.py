@@ -340,3 +340,8 @@ class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = T_PurchaseReturn
         fields = ['ASMApprovalImgUpload']
+        
+class PurchaseReturnUploadsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TC_PurchaseReturnUploads
+        fields=['EwayBillNo','EwayBillUrl','EwayBillIsCancel']

@@ -1214,14 +1214,14 @@ class PurchaseReturnUploaded_EwayBill(CreateAPIView):
         try:
             with transaction.atomic():
                 
-                Query=T_PurchaseReturn.objects.filter(id=id).values('Vehicle')
-                
-                  
-                if (Query[0]['Vehicle']) is None:
-                    log_entry = create_transaction_logNew(request,0,0,'Vehicle Number is required',363,0)
+                Query=T_PurchaseReturn.objects.filter(id=id).values('Vehicle__VehicleNumber')                
+                VehicleNumber=Query[0]['Vehicle__VehicleNumber']
+                # print(VehicleNumber)
+                if VehicleNumber is None:
+                    log_entry = create_transaction_logNew(request,0,0,'Vehicle Number is required',488,0)
                     return JsonResponse({'StatusCode': 204, 'Status': True,'Message': 'Vehicle Number is required', 'Data':id })
                 else:
-                   
+                    
                    
                     access_token = generate_Access_Token()
                     aa=access_token.split('!')
@@ -1244,8 +1244,8 @@ left join FoodERP.MC_PartyAddress CA on CA.Party_id=C.id and CA.IsDefault=1
 left join FoodERP.M_States PS on PS.id=P.State_id
 left join FoodERP.M_States CS on CS.id=C.State_id
 left join FoodERP.M_Cities CC on CC.id=C.City_id
-left join FoodERP.M_Vehicles vehic on PR.Vehicle_id=vehic.id = {id}''')
-                        
+left join FoodERP.M_Vehicles vehic on PR.Vehicle_id=vehic.id where PR.id = {id}''')
+                        # print(PurchaseReturnQuery)                      
                         
                         PurchaseReturnData = list()
                         PurchaseReturnItemDetails = list()
@@ -1323,9 +1323,9 @@ left join FoodERP.M_Vehicles vehic on PR.Vehicle_id=vehic.id = {id}''')
                                     'access_token': access_token,
                                     'userGstin': PR.PartyGSTIN,
                                     'supply_type': "outward",
-                                    'sub_supply_type': "Supply",
-                                    'sub_supply_description': " ",
-                                    'document_type': "PurchaseReturn",
+                                    'sub_supply_type': "Others",
+                                    'sub_supply_description': "Sales Return",
+                                    'document_type': "Delivery Challan",
                                     'document_number': PR.FullReturnNumber,
                                     'document_date': str(PR.ReturnDate),
                                     'gstin_of_consignor': PR.PartyGSTIN,
@@ -1356,7 +1356,7 @@ left join FoodERP.M_Vehicles vehic on PR.Vehicle_id=vehic.id = {id}''')
                                     'transporter_document_date': "",
                                     'transportation_mode': "road",
                                     'transportation_distance': 0,
-                                    'vehicle_number': 0,
+                                    'vehicle_number':VehicleNumber,
                                     'transporter_name': "",
                                     'vehicle_type': "Regular",
                                     'data_source': "erp",
@@ -1371,7 +1371,7 @@ left join FoodERP.M_Vehicles vehic on PR.Vehicle_id=vehic.id = {id}''')
                                 
                                
                                 payload = json.dumps(PurchaseReturnData[0])
-                                
+                                # print(payload)
                                 headers = {
                                     'Content-Type': 'application/json',
                                 }
@@ -1379,35 +1379,39 @@ left join FoodERP.M_Vehicles vehic on PR.Vehicle_id=vehic.id = {id}''')
                             
                                 response = requests.request(
                                     "POST", E_Way_Bill_URL, headers=headers, data=payload)
-
+                                # print(response)
                                 data_dict = json.loads(response.text)
-                                
+                                # print(data_dict)
                                 if(data_dict['results']['status']== 'Success' and data_dict['results']['code']== 200):
                                    
                                     Query=TC_PurchaseReturnUploads.objects.filter(PurchaseReturn_id=id)                                    
-                                    
+                                    # print(Query)
                                     if(Query.count() > 0):
+                                        # print("shruti")
                                         StatusUpdates=TC_PurchaseReturnUploads.objects.filter(PurchaseReturn_id=id).update(EwayBillUrl=data_dict['results']['message']['url'],EwayBillNo=data_dict['results']['message']['ewayBillNo'],EwayBillCreatedBy=userID,EwayBillCreatedOn=datetime.now())
-                                        
-                                        log_entry = create_transaction_logNew(request,payload,0,'E-WayBill Upload Successfully',488,0 )
+                                        # print(StatusUpdates)
+                                        log_entry = create_transaction_logNew(request,0,0,'E-WayBill Upload Successfully',488,0 )
                                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-WayBill Upload Successfully', 'Data': PurchaseReturnData[0] })
                                     else:
                                        
-                                        PurchaseReturnID=T_PurchaseReturn.objects.get(id=id)
-                                        Statusinsert=TC_PurchaseReturnUploads.objects.create(PurchaseReturn_id=PurchaseReturnID,user_gstin=user_gstin,EwayBillUrl=data_dict['results']['message']['url'],EwayBillNo=data_dict['results']['message']['ewayBillNo'],EwayBillCreatedBy=userID,EwayBillCreatedOn=datetime.now())        
+                                        # PurchaseReturnID=T_PurchaseReturn.objects.get(id=id)
+                                        Statusinsert=TC_PurchaseReturnUploads.objects.create(PurchaseReturn_id=id,user_gstin=user_gstin,EwayBillUrl=data_dict['results']['message']['url'],EwayBillNo=data_dict['results']['message']['ewayBillNo'],EwayBillCreatedBy=userID,EwayBillCreatedOn=datetime.now())        
                                     
-                                        log_entry = create_transaction_logNew(request,payload,0,f'E-WayBill Upload Successfully  of PurchaseReturnID: {PurchaseReturnID}',488,0 )
+                                        log_entry = create_transaction_logNew(request,0,0,f'E-WayBill Upload Successfully  of PurchaseReturnID: id',488,0 )
                                         return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': 'E-WayBill Upload Successfully', 'Data': PurchaseReturnData[0] })
                                 else:
-                                    # CustomPrint('hhhhhhh')
-                                    log_entry = create_transaction_logNew(request, payload,0, data_dict['results'], 488,0)
+                                    
+                                    log_entry = create_transaction_logNew(request, 0,0, data_dict['results'], 488,0)                                  
+
                                     return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': data_dict['results'], 'Data': PurchaseReturnData[0] })
+                                    
+
                             else:
-                                log_entry = create_transaction_logNew(request, payload,0, distance_dict['results'], 488,0)
+                                log_entry = create_transaction_logNew(request, 0,0, distance_dict['results'], 488,0)
                                 return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': distance_dict['results'], 'Data': [] })     
                             
                     else:
-                        log_entry = create_transaction_logNew(request,payload,0, aa[1],488,0) 
+                        log_entry = create_transaction_logNew(request,0,0, aa[1],488,0) 
                         return JsonResponse({'StatusCode': 400, 'Status': True, 'Message': aa[1], 'Data': []})
         except Exception as e:
             log_entry = create_transaction_logNew(request, 0, 0, 'E-WayBill Upload:'+str((e)),33,0)
