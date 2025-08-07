@@ -380,119 +380,148 @@ class LoadingSheetPrintView(CreateAPIView):
             log_entry = create_transaction_logNew(request, 0, 0,'LoadingSheetPrint:'+str(e),33,0)
             return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
 
-######################################## MultipleInvoice Loading Sheet Print API ##################################################
+# ######################################## MultipleInvoice Loading Sheet Print API ##################################################
 class MultipleInvoicesView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    # authentication__Class = JSONWebTokenAuthentication
 
-    def get(self, request, id=0):
+    def post(self, request, id=0):
+        Data = JSONParser().parse(request)
         try:
             with transaction.atomic():
-                q1 = TC_LoadingSheetDetails.objects.filter(LoadingSheet=id).values('Invoice') 
-                InvoiceIDs = T_Invoices.objects.filter(id__in=q1).values('id')
+                LoadingSheetID = Data['LoadingSheetID']
+                FromDate = Data['FromDate']
+                ToDate = Data['ToDate']
+                Party = Data['Party']
+                Customer = Data['Customer']
+
+                if LoadingSheetID != 0:
+                    invoice_ids = TC_LoadingSheetDetails.objects.filter(LoadingSheet=LoadingSheetID).values_list('Invoice', flat=True)
+                    invoice_queryset = T_Invoices.objects.filter(id__in=invoice_ids)
+                else:
+                    invoice_queryset = T_Invoices.objects.filter(InvoiceDate__range=[datetime.strptime(FromDate, "%Y-%m-%d"), 
+                                                                                     datetime.strptime(ToDate, "%Y-%m-%d")] )
+
+                    # if FromDate and ToDate and FromDate != '' and ToDate != '':
+                    #     invoice_queryset = invoice_queryset.filter(
+                    #         InvoiceDate__range=[
+                    #             datetime.strptime(FromDate, "%Y-%m-%d"),
+                    #             datetime.strptime(ToDate, "%Y-%m-%d")
+                    #         ]
+                    #     )
+
+                    if Party and Party != 0:
+                        invoice_queryset = invoice_queryset.filter(Party__id=Party)
+
+                    if Customer and Customer != 0:
+                        invoice_queryset = invoice_queryset.filter(Customer__id=Customer)
+
+
                 InvoiceList = list()
-                for InvoiceID in InvoiceIDs:
-                    InvoiceQuery = T_Invoices.objects.filter(id=InvoiceID['id'])
-                    if InvoiceQuery.exists():
-                        InvoiceSerializedata = InvoiceSerializerThird(InvoiceQuery, many=True).data
-                        
-                        InvoiceData = list()
-                        for a in InvoiceSerializedata:
-                            
-                            InvoiceItemDetails = list()
-                            for b in a['InvoiceItems']:
-                                aaaa=UnitwiseQuantityConversion(b['Item']['id'],b['Quantity'],b['Unit']['id'],0,0,0,0).GetConvertingBaseUnitQtyBaseUnitName()
-                                if (aaaa == b['Unit']['UnitID']['Name']):
-                                    bb=""
-                                else:
-                                    bb=aaaa
-                                 
-                                InvoiceItemDetails.append({
-                                    "Item": b['Item']['id'],
-                                    "ItemName": b['Item']['Name'],
-                                    "Quantity": b['Quantity'],
-                                    "MRP": b['MRP']['id'],
-                                    "MRPValue": b['MRP']['MRP'],
-                                    "Rate": b['Rate'],
-                                    "TaxType": b['TaxType'],
-                                    "PrimaryUnitName":b['Unit']['UnitID']['Name'],
-                                    "UnitName":bb,
-                                    "BaseUnitQuantity": b['BaseUnitQuantity'],
-                                    "GST": b['GST']['id'],
-                                    "GSTPercentage": b['GSTPercentage'],
-                                    "MarginValue": b['Margin']['Margin'],
-                                    "BasicAmount": b['BasicAmount'],
-                                    "GSTAmount": b['GSTAmount'],
-                                    "CGST": b['CGST'],
-                                    "SGST": b['SGST'],
-                                    "IGST": b['IGST'],
-                                    "CGSTPercentage": b['CGSTPercentage'],
-                                    "SGSTPercentage": b['SGSTPercentage'],
-                                    "IGSTPercentage": b['IGSTPercentage'],
-                                    "Amount": b['Amount'],
-                                    "HSNCode":b['GST']['HSNCode'],
-                                    "BatchCode": b['BatchCode'],
-                                    "BatchDate": b['BatchDate'],
-                                    "DiscountType":b['DiscountType'],
-                                    "Discount":b['Discount'],
-                                    "DiscountAmount":b['DiscountAmount']
-                                })
-                                
-                                InvoiceReferenceDetails = list()
-                            for d in a['InvoicesReferences']:
-                                InvoiceReferenceDetails.append({
-                                    "Invoice": d['Invoice'],
-                                    "Order": d['Order']['id'],
-                                    "FullOrderNumber": d['Order']['FullOrderNumber'],
-                                    "Description":d['Order']['Description']
-                                })
-                            
-                            query= MC_PartyBanks.objects.filter(Party=a['Party']['id'],IsSelfDepositoryBank=1,IsDefault=1).all()
-                            BanksSerializer=PartyBanksSerializer(query, many=True).data
-                            BankData=list()
-                            for e in BanksSerializer:
-                                BankData.append({
-                                    "BankName": e['BankName'],
-                                    "BranchName": e['BranchName'],
-                                    "IFSC": e['IFSC'],
-                                    "AccountNo": e['AccountNo'],
-                                })
-                            
-                            InvoiceData.append({
-                                "id": a['id'],
-                                "InvoiceDate": a['InvoiceDate'],
-                                "InvoiceNumber": a['InvoiceNumber'],
-                                "FullInvoiceNumber": a['FullInvoiceNumber'],
-                                "TCSAmount" : a["TCSAmount"],
-                                "GrandTotal": a['GrandTotal'],
-                                "RoundOffAmount":a['RoundOffAmount'],
-                                "Customer": a['Customer']['id'],
-                                "CustomerName": a['Customer']['Name'],
-                                "CustomerGSTIN": a['Customer']['GSTIN'],
-                                "CustomerMobileNo": a['Customer']['MobileNo'],
-                                "Party": a['Party']['id'],
-                                "PartyName": a['Party']['Name'],
-                                "PartyState": a['Party']['State']['Name'],
-                                "CustomerState": a['Customer']['State']['Name'],
-                                "PartyFSSAINo": a['Party']['PartyAddress'][0]['FSSAINo'],
-                                "CustomerFSSAINo": a['Customer']['PartyAddress'][0]['FSSAINo'],
-                                "PartyAddress": a['Party']['PartyAddress'],
-                                "CustomerAddress": a['Customer']['PartyAddress'],
-                                "PartyGSTIN": a['Party']['GSTIN'],
-                                "PartyMobileNo": a['Party']['MobileNo'],
-                                "CreatedOn" : a['CreatedOn'],
-                                "DriverName":a['Driver']['Name'],
-                                "VehicleNo": a['Vehicle']['VehicleNumber'],
-                                "InvoiceItems": InvoiceItemDetails,
-                                "InvoicesReferences": InvoiceReferenceDetails,
-                                "InvoiceUploads" : a["InvoiceUploads"],
-                                "BankData":BankData
-                                
+                for Invoice in invoice_queryset:
+                    InvoiceSerializedata = InvoiceSerializerThird([Invoice], many=True).data
+                    InvoiceData = list()
+
+                    for a in InvoiceSerializedata:
+                        InvoiceItemDetails = list()
+                        for b in a['InvoiceItems']:
+                            aaaa = UnitwiseQuantityConversion(b['Item']['id'], b['Quantity'], b['Unit']['id'], 0, 0, 0, 0).GetConvertingBaseUnitQtyBaseUnitName()
+
+                            if aaaa == b['Unit']['UnitID']['Name']:
+                                bb = ""
+                            else:
+                                bb = aaaa
+
+                            InvoiceItemDetails.append({
+                                "Item": b['Item']['id'],
+                                "ItemName": b['Item']['Name'],
+                                "Quantity": b['Quantity'],
+                                "MRP": b['MRP']['id'],
+                                "MRPValue": b['MRP']['MRP'],
+                                "Rate": b['Rate'],
+                                "TaxType": b['TaxType'],
+                                "PrimaryUnitName": b['Unit']['UnitID']['Name'],
+                                "UnitName": bb,
+                                "BaseUnitQuantity": b['BaseUnitQuantity'],
+                                "GST": b['GST']['id'],
+                                "GSTPercentage": b['GSTPercentage'],
+                                "MarginValue": b['Margin']['Margin'],
+                                "BasicAmount": b['BasicAmount'],
+                                "GSTAmount": b['GSTAmount'],
+                                "CGST": b['CGST'],
+                                "SGST": b['SGST'],
+                                "IGST": b['IGST'],
+                                "CGSTPercentage": b['CGSTPercentage'],
+                                "SGSTPercentage": b['SGSTPercentage'],
+                                "IGSTPercentage": b['IGSTPercentage'],
+                                "Amount": b['Amount'],
+                                "HSNCode": b['GST']['HSNCode'],
+                                "BatchCode": b['BatchCode'],
+                                "BatchDate": b['BatchDate'],
+                                "DiscountType": b['DiscountType'],
+                                "Discount": b['Discount'],
+                                "DiscountAmount": b['DiscountAmount']
                             })
-                    InvoiceList.append( InvoiceData[0] )  
+
+                        InvoiceReferenceDetails = list()
+                        for d in a['InvoicesReferences']:
+                            InvoiceReferenceDetails.append({
+                                "Invoice": d['Invoice'],
+                                "Order": d['Order']['id'],
+                                "FullOrderNumber": d['Order']['FullOrderNumber'],
+                                "Description": d['Order']['Description']
+                            })
+
+                        query = MC_PartyBanks.objects.filter(Party=a['Party']['id'], IsSelfDepositoryBank=1, IsDefault=1).all()
+                        BanksSerializer = PartyBanksSerializer(query, many=True).data
+
+                        BankData = list()
+                        for e in BanksSerializer:
+                            BankData.append({
+                                "BankName": e['BankName'],
+                                "BranchName": e['BranchName'],
+                                "IFSC": e['IFSC'],
+                                "AccountNo": e['AccountNo'],
+                            })
+
+                        InvoiceData.append({
+                            "id": a['id'],
+                            "InvoiceDate": a['InvoiceDate'],
+                            "InvoiceNumber": a['InvoiceNumber'],
+                            "FullInvoiceNumber": a['FullInvoiceNumber'],
+                            "TCSAmount": a["TCSAmount"],
+                            "GrandTotal": a['GrandTotal'],
+                            "RoundOffAmount": a['RoundOffAmount'],
+                            "Customer": a['Customer']['id'],
+                            "CustomerName": a['Customer']['Name'],
+                            "CustomerGSTIN": a['Customer']['GSTIN'],
+                            "CustomerMobileNo": a['Customer']['MobileNo'],
+                            "Party": a['Party']['id'],
+                            "PartyName": a['Party']['Name'],
+                            "PartyState": a['Party']['State']['Name'],
+                            "CustomerState": a['Customer']['State']['Name'],
+                            "PartyFSSAINo": a['Party']['PartyAddress'][0]['FSSAINo'],
+                            "CustomerFSSAINo": a['Customer']['PartyAddress'][0]['FSSAINo'],
+                            "PartyAddress": a['Party']['PartyAddress'],
+                            "CustomerAddress": a['Customer']['PartyAddress'],
+                            "PartyGSTIN": a['Party']['GSTIN'],
+                            "PartyMobileNo": a['Party']['MobileNo'],
+                            "CreatedOn": a['CreatedOn'],
+                            "DriverName": a['Driver']['Name'],
+                            "VehicleNo": a['Vehicle']['VehicleNumber'],
+                            "InvoiceItems": InvoiceItemDetails,
+                            "InvoicesReferences": InvoiceReferenceDetails,
+                            "InvoiceUploads": a["InvoiceUploads"],
+                            "BankData": BankData
+                        })
+
+                    InvoiceList.append(InvoiceData[0])
                     
-                log_entry = create_transaction_logNew(request, {'LoadingSheetID':id}, a['Party']['id'],'InvoiceDate:'+InvoiceSerializedata[0]['InvoiceDate'],48,0)
-                return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': InvoiceList})        
+                    log_entry = create_transaction_logNew(request, Data, Party, 'MultipleInvoice Details', 48, 0, FromDate, ToDate, 0)
+                    return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceList})
+                else:
+                    log_entry = create_transaction_logNew(request, Data, 0, 'Data Not available', 48, 0)
+                    return JsonResponse({'StatusCode': 204, 'Status': True, 'Message': 'Records Not available ', 'Data': []})
         except Exception as e:
-            log_entry = create_transaction_logNew(request, 0, 0, 'MultipleInvoices:'+str(e),33,0)
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})  
+            log_entry = create_transaction_logNew(request, Data, 0, 'MultipleInvoices:'+str(e), 33, 0)
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})
+
