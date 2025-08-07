@@ -1296,24 +1296,28 @@ class InvoiceViewEditView(CreateAPIView):
                 Customer=query[0]['Customer']
                 InvoiceDate=query[0]['InvoiceDate']
                 Vehicle=query[0]['Vehicle_id']
-                Itemsquery= TC_InvoiceItems.objects.raw('''SELECT TC_InvoiceItems.id,TC_InvoiceItems.Item_id,M_Items.Name ItemName,TC_InvoiceItems.Quantity,TC_InvoiceItems.MRP_id,TC_InvoiceItems.MRPValue,TC_InvoiceItems.Rate,TC_InvoiceItems.Unit_id,MC_ItemUnits.BaseUnitConversion UnitName,MC_ItemUnits.UnitID_id DeletedMCUnitsUnitID,MC_ItemUnits.BaseUnitQuantity ConversionUnit,TC_InvoiceItems.BaseUnitQuantity,TC_InvoiceItems.GST_id,M_GSTHSNCode.HSNCode,TC_InvoiceItems.GSTPercentage,TC_InvoiceItems.BasicAmount,TC_InvoiceItems.GSTAmount,CGST, SGST, IGST, CGSTPercentage,SGSTPercentage, IGSTPercentage,Amount,DiscountType,Discount,DiscountAmount FROM TC_InvoiceItems JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id JOIN MC_ItemUnits ON MC_ItemUnits.id = TC_InvoiceItems.Unit_id JOIN M_GSTHSNCode ON M_GSTHSNCode.id = TC_InvoiceItems.GST_id Where TC_InvoiceItems.Invoice_id=%s ''',([id]))
+                Itemsquery= TC_InvoiceItems.objects.raw('''SELECT TC_InvoiceItems.id,TC_InvoiceItems.Item_id,M_Items.Name ItemName,M_Items.BaseUnitID_id,TC_InvoiceItems.Quantity,TC_InvoiceItems.MRP_id,TC_InvoiceItems.MRPValue,TC_InvoiceItems.Rate,TC_InvoiceItems.Unit_id,MC_ItemUnits.BaseUnitConversion UnitName,MC_ItemUnits.UnitID_id DeletedMCUnitsUnitID,MC_ItemUnits.BaseUnitQuantity ConversionUnit,TC_InvoiceItems.BaseUnitQuantity,TC_InvoiceItems.GST_id,M_GSTHSNCode.HSNCode,TC_InvoiceItems.GSTPercentage,TC_InvoiceItems.BasicAmount,TC_InvoiceItems.GSTAmount,CGST, SGST, IGST, CGSTPercentage,SGSTPercentage, IGSTPercentage,Amount,DiscountType,Discount,DiscountAmount FROM TC_InvoiceItems JOIN M_Items ON M_Items.id = TC_InvoiceItems.Item_id JOIN MC_ItemUnits ON MC_ItemUnits.id = TC_InvoiceItems.Unit_id JOIN M_GSTHSNCode ON M_GSTHSNCode.id = TC_InvoiceItems.GST_id Where TC_InvoiceItems.Invoice_id=%s ''',([id]))
                 if Itemsquery:
                     InvoiceEditSerializer = InvoiceEditItemSerializer(Itemsquery, many=True).data
                     OrderItemDetails=list()
                     seen_item_ids = set()
                     for b in InvoiceEditSerializer:
                         item_id = b['Item_id']
-                      
+                        
                         if item_id in seen_item_ids:
                             continue   # Exit the loop when a repeated Item_id is encountered
                         seen_item_ids.add(item_id)  # Add the current Item_id to the set of seen Item_ids
                         batchquery = TC_InvoiceItems.objects.filter(Item=item_id,Invoice = id).values('LiveBatch_id')
                         LiveBatchIDlist = list(batchquery.values_list('LiveBatch_id', flat=True))
                         # CustomPrint(LiveBatchIDlist)
-                        stockquery=O_LiveBatches.objects.raw('''SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,O_LiveBatches.BatchDate,O_LiveBatches.BatchCode,O_LiveBatches.SystemBatchDate,O_LiveBatches.SystemBatchCode,O_LiveBatches.id As LiveBatchID,TC_InvoiceItems.MRP_id,TC_InvoiceItems.GST_id,TC_InvoiceItems.MRPValue,TC_InvoiceItems.GSTPercentage,MC_ItemUnits.UnitID_id,MC_ItemUnits.BaseUnitConversion,TC_InvoiceItems.BaseUnitQuantity, 
-                                                             FoodERP.RateCalculationFunction1(O_LiveBatches.id, O_BatchWiseLiveStock.Item_id, %s, MC_ItemUnits.UnitID_id, 0, 0, 0, 1) AS Rate
-                                                             FROM O_LiveBatches JOIN O_BatchWiseLiveStock ON O_BatchWiseLiveStock.LiveBatche_id =O_LiveBatches.id JOIN MC_ItemUnits ON MC_ItemUnits.id = O_BatchWiseLiveStock.Unit_id JOIN TC_InvoiceItems ON TC_InvoiceItems.LiveBatch_id = O_LiveBatches.id WHERE  TC_InvoiceItems.Invoice_id=%s AND O_BatchWiseLiveStock.LiveBatche_id IN %s  ''',(Customer,id,LiveBatchIDlist))
-                
+                        stockquery=O_LiveBatches.objects.raw(f'''SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,O_LiveBatches.BatchDate,O_LiveBatches.BatchCode,O_LiveBatches.SystemBatchDate,O_LiveBatches.SystemBatchCode,O_LiveBatches.id As LiveBatchID,TC_InvoiceItems.MRP_id,TC_InvoiceItems.GST_id,TC_InvoiceItems.MRPValue,TC_InvoiceItems.GSTPercentage,MC_ItemUnits.UnitID_id,MC_ItemUnits.BaseUnitConversion,TC_InvoiceItems.BaseUnitQuantity, 
+                                                             FoodERP.RateCalculationFunction1(O_LiveBatches.id, O_BatchWiseLiveStock.Item_id, %s, {b['BaseUnitID_id']}, 0, 0, 0, 2) AS Rate
+                                                             FROM O_LiveBatches 
+                                                             JOIN O_BatchWiseLiveStock ON O_BatchWiseLiveStock.LiveBatche_id =O_LiveBatches.id 
+                                                             JOIN MC_ItemUnits ON MC_ItemUnits.id = O_BatchWiseLiveStock.Unit_id 
+                                                             JOIN TC_InvoiceItems ON TC_InvoiceItems.LiveBatch_id = O_LiveBatches.id 
+                                                             WHERE  TC_InvoiceItems.Invoice_id=%s AND O_BatchWiseLiveStock.LiveBatche_id IN %s  ''',(Customer,id,LiveBatchIDlist))
+                        # print(stockquery)
                         InvocieEditStock=InvoiceEditStockSerializer(stockquery,many=True).data
                         stockDatalist = list()
                         queryset = TC_InvoiceItems.objects.filter(Item_id=item_id,Invoice_id=id,LiveBatch_id__in=LiveBatchIDlist).aggregate(Quantity=Sum('Quantity'))

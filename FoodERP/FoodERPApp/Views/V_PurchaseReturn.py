@@ -709,7 +709,7 @@ class ReturnItemBatchCodeAddView(CreateAPIView):
                         # Rate=RateCalculationFunction(ad['LiveBatche']['id'],ad['Item']['id'],CustomerID,0,1,0,0).RateWithGST()
                         with connection.cursor() as cursor:
                             cursor.execute(f'''
-                                SELECT ROUND(RateCalculationFunction1({ad['LiveBatche']['id']}, {ad['Item']['id']}, {CustomerID}, 0, 1, 0, 0,0), 2) AS RateWithoutGST
+                                SELECT ROUND(RateCalculationFunction1({ad['LiveBatche']['id']}, {ad['Item']['id']}, {CustomerID}, 1, 0, 0, 0,0), 2) AS RateWithoutGST
                             ''')
                             row = cursor.fetchone()
                         Rate = row[0] if row else 0.00

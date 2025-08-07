@@ -636,7 +636,7 @@ from (
     LEFT(FullInvoiceNumber, LENGTH(FullInvoiceNumber) - LENGTH(InvoiceNumber)) AS prefix,
     COUNT(*) AS total, min(InvoiceNumber)minInvoiceNumber,max(InvoiceNumber)maxInvoiceNumber,Party
 FROM SweetPOS.T_SPOSInvoices
-where Party IN ({Party}) and InvoiceDate between '{FromDate}' and '{ToDate}'
+where Party IN ({Party}) and InvoiceDate between '{FromDate}' and '{ToDate}' and IsDeleted =0
 GROUP BY LEFT(FullInvoiceNumber, LENGTH(FullInvoiceNumber) - LENGTH(InvoiceNumber)),Party
 )a
 left join

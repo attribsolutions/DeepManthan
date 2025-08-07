@@ -1619,7 +1619,7 @@ class T_PurchaseReturn(models.Model):
     IsApproved=models.IntegerField(default=0)
     Mode = models.IntegerField() # 1- SalesReturn 2-PurchaseReturn 3- Salesconsoldatedpurchasereturn
     ASMApprovalImgUpload = models.FileField(upload_to="Images\ReturnASMApprovalImgUpload",default="",null=True,blank=True)
-    
+    Vehicle = models.ForeignKey(M_Vehicles, related_name='PurchaseReturnVehicle',on_delete=models.PROTECT,null=True,blank=True)
     class Meta:
         db_table = "T_PurchaseReturn"
         
@@ -2685,3 +2685,16 @@ class MC_CronJobSettings(models.Model):
     
     class Meta:
         db_table="MC_CronJobSettings"
+
+class TC_PurchaseReturnUploads(models.Model): 
+    PurchaseReturn= models.ForeignKey(T_PurchaseReturn,related_name='PurchaseReturnUploads', on_delete=models.CASCADE)   
+    EwayBillNo = models.CharField(max_length=500,null=True)
+    EwayBillUrl = models.CharField(max_length=500,null=True)    
+    EwayBillCreatedBy = models.IntegerField(null=True)
+    EwayBillCreatedOn = models.DateTimeField(null=True)    
+    EwayBillCanceledBy = models.IntegerField(null=True)
+    EwayBillCanceledOn = models.DateTimeField(null=True)   
+    EwayBillIsCancel = models.BooleanField(default=False)  
+    user_gstin = models.CharField(max_length=500)       
+    class Meta:
+        db_table="TC_PurchaseReturnUploads"        
