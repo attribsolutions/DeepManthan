@@ -630,7 +630,7 @@ class GSTR1ExcelDownloadView(CreateAPIView):
 #                             GROUP BY NatureOfDocument, b''', [FromDate, ToDate, FromDate, ToDate, FromDate, ToDate, FromDate, ToDate])
                 Docsquery = T_Invoices.objects.raw(f'''-- =======================================T_SPOSInvoice=======================================================
 select 1 as id, 'Invoices for outward supply' AS NatureOfDocument, concat(a.prefix,a.minInvoiceNumber)Sr_No_From,concat(a.prefix,a.maxInvoiceNumber)Sr_No_To,
-ifnull(a.total-b.total,0)TotalNumber,ifnull(b.total,0)Cancelled  
+ifnull(a.total,0)-ifnull(b.total,0)TotalNumber,ifnull(b.total,0)Cancelled  
 from (
 (SELECT 
     LEFT(FullInvoiceNumber, LENGTH(FullInvoiceNumber) - LENGTH(InvoiceNumber)) AS prefix,
