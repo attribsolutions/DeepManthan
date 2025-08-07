@@ -1311,7 +1311,7 @@ class InvoiceViewEditView(CreateAPIView):
                         LiveBatchIDlist = list(batchquery.values_list('LiveBatch_id', flat=True))
                         # CustomPrint(LiveBatchIDlist)
                         stockquery=O_LiveBatches.objects.raw(f'''SELECT O_BatchWiseLiveStock.id,O_BatchWiseLiveStock.Item_id,O_LiveBatches.BatchDate,O_LiveBatches.BatchCode,O_LiveBatches.SystemBatchDate,O_LiveBatches.SystemBatchCode,O_LiveBatches.id As LiveBatchID,TC_InvoiceItems.MRP_id,TC_InvoiceItems.GST_id,TC_InvoiceItems.MRPValue,TC_InvoiceItems.GSTPercentage,MC_ItemUnits.UnitID_id,MC_ItemUnits.BaseUnitConversion,TC_InvoiceItems.BaseUnitQuantity, 
-                                                             FoodERP.RateCalculationFunction1(O_LiveBatches.id, O_BatchWiseLiveStock.Item_id, %s, {b['BaseUnitID_id']}, 0, 0, 0, 1) AS Rate
+                                                             FoodERP.RateCalculationFunction1(O_LiveBatches.id, O_BatchWiseLiveStock.Item_id, %s, {b['BaseUnitID_id']}, 0, 0, 0, 2) AS Rate
                                                              FROM O_LiveBatches 
                                                              JOIN O_BatchWiseLiveStock ON O_BatchWiseLiveStock.LiveBatche_id =O_LiveBatches.id 
                                                              JOIN MC_ItemUnits ON MC_ItemUnits.id = O_BatchWiseLiveStock.Unit_id 
