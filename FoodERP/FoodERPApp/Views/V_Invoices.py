@@ -1385,7 +1385,7 @@ class InvoiceViewEditView(CreateAPIView):
                         })       
             return JsonResponse({'StatusCode': 200, 'Status': True, 'Data': Orderdata[0]})
         except Exception as e:
-            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  Exception(e), 'Data': []})  
+            return JsonResponse({'StatusCode': 400, 'Status': True, 'Message':  str(e), 'Data': []})  
     
     @transaction.atomic()
     def put(self, request, id=0):
