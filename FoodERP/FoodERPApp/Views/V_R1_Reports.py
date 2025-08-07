@@ -711,7 +711,7 @@ where Party_id IN ({Party}) and CRDRNoteDate between '{FromDate}' and '{ToDate}'
 GROUP BY LEFT(FullNoteNumber, LENGTH(FullNoteNumber) - LENGTH(NoteNo)),Party_id
 )bbb
 on aaa.prefix=bbb.prefix and  aaa.Party_id=bbb.Party_id )''')
-                print(Docsquery)                                         
+                # print(Docsquery)                                         
                 Docs2 = DocsSerializer(Docsquery, many=True).data
             
                 Docsquery2 = T_Invoices.objects.raw(f'''SELECT 1 as id,SUM(A.cnt) AS TotalNumbers, SUM(A.TotalCancelled) AS TotalCancelled
