@@ -516,6 +516,7 @@ class MultipleInvoicesView(CreateAPIView):
 
                     InvoiceList.append(InvoiceData[0])
                     
+                if InvoiceList:
                     log_entry = create_transaction_logNew(request, Data, Party, 'MultipleInvoice Details', 48, 0, FromDate, ToDate, 0)
                     return JsonResponse({'StatusCode': 200, 'Status': True, 'Message': '', 'Data': InvoiceList})
                 else:
